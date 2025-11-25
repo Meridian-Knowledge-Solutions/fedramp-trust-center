@@ -31,7 +31,7 @@ export const CLIModal = ({ data, onClose }) => {
     return str.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
   };
 
-  // --- UNAUTHENTICATED VIEW (High Contrast Dark Theme) ---
+  // --- UNAUTHENTICATED VIEW (Modern Dark Theme) ---
   if (!isAuthenticated) {
     return (
       <BaseModal
@@ -41,34 +41,47 @@ export const CLIModal = ({ data, onClose }) => {
         size="medium"
         variant="dark"
       >
-        <div className="flex flex-col items-center text-center py-10 space-y-8">
-          <div className="p-5 bg-gray-800 rounded-full border border-gray-600 shadow-xl">
-            <Lock size={56} className="text-blue-400" />
+        <div className="flex flex-col items-center text-center py-12 space-y-8">
+          <div className="relative">
+            <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full"></div>
+            <div className="relative p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl">
+              <Lock size={56} className="text-blue-400" />
+            </div>
           </div>
 
-          <div className="space-y-3 max-w-lg">
-            <h3 className="text-2xl font-bold text-white tracking-tight">Federal Access Required</h3>
+          <div className="space-y-4 max-w-lg">
+            <h3 className="text-3xl font-bold text-white tracking-tight">Federal Access Required</h3>
             <p className="text-gray-300 text-base leading-relaxed">
               Detailed technical validation findings, command logs, and remediation plans are restricted to authorized federal personnel.
             </p>
           </div>
 
-          <div className="w-full bg-black/20 border border-gray-600 rounded-xl p-6 text-left max-w-md shadow-inner">
-            <h4 className="text-xs font-bold text-white mb-4 uppercase tracking-widest flex items-center gap-2 border-b border-gray-700 pb-2">
-              <Shield size={14} className="text-blue-400" />
-              With Federal Access You Can:
-            </h4>
-            <ul className="space-y-3">
+          <div className="w-full bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700/50 rounded-xl p-6 text-left max-w-md shadow-xl">
+            <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gray-800">
+              <div className="p-2 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                <Shield size={16} className="text-blue-400" />
+              </div>
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+                With Federal Access
+              </h4>
+            </div>
+            <ul className="space-y-4">
               <li className="flex items-start gap-3 text-sm text-gray-200">
-                <CheckCircle size={18} className="text-green-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-shrink-0 w-6 h-6 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
+                  <CheckCircle size={14} className="text-green-400" />
+                </div>
                 <span>View exact AWS CLI commands executed</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-gray-200">
-                <CheckCircle size={18} className="text-green-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-shrink-0 w-6 h-6 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
+                  <CheckCircle size={14} className="text-green-400" />
+                </div>
                 <span>Analyze raw JSON outputs and exit codes</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-gray-200">
-                <CheckCircle size={18} className="text-green-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-shrink-0 w-6 h-6 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
+                  <CheckCircle size={14} className="text-green-400" />
+                </div>
                 <span>Verify technical validation timestamps</span>
               </li>
             </ul>
@@ -76,9 +89,13 @@ export const CLIModal = ({ data, onClose }) => {
 
           <button
             onClick={() => { closeHandler(); openModal('registration'); }}
-            className="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-sm transition-all shadow-lg shadow-blue-900/30 w-full max-w-md hover:translate-y-[-1px]"
+            className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-900/30 w-full max-w-md overflow-hidden"
           >
-            Request Full Access
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+            <span className="relative flex items-center justify-center gap-2">
+              <Shield size={18} />
+              Request Full Access
+            </span>
           </button>
         </div>
       </BaseModal>
@@ -96,25 +113,31 @@ export const CLIModal = ({ data, onClose }) => {
 
     if (source === 'comprehensive_register') {
       return (
-        <div className="bg-green-950/40 border border-green-500/40 rounded-lg p-4 mb-6 flex items-center gap-3">
-          <div className="bg-green-500/20 p-2.5 rounded-full text-green-400 border border-green-500/30">
-            <Database size={20} />
-          </div>
-          <div>
-            <div className="font-bold text-green-300 text-base">Comprehensive Command Register</div>
-            <div className="text-sm text-green-200/90 mt-0.5">Full audit details matched with validation results.</div>
+        <div className="relative bg-gradient-to-br from-green-950/50 to-emerald-950/30 border border-green-500/30 rounded-xl p-5 mb-6 overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full blur-3xl"></div>
+          <div className="relative flex items-center gap-4">
+            <div className="bg-green-500/20 p-3 rounded-xl text-green-400 border border-green-500/30 shadow-lg shadow-green-500/10">
+              <Database size={24} />
+            </div>
+            <div>
+              <div className="font-bold text-green-300 text-lg mb-1">Comprehensive Command Register</div>
+              <div className="text-sm text-green-200/80">Full audit details matched with validation results</div>
+            </div>
           </div>
         </div>
       );
     } else {
       return (
-        <div className="bg-yellow-950/40 border border-yellow-500/40 rounded-lg p-4 mb-6 flex items-center gap-3">
-          <div className="bg-yellow-500/20 p-2.5 rounded-full text-yellow-400 border border-yellow-500/30">
-            <AlertTriangle size={20} />
-          </div>
-          <div>
-            <div className="font-bold text-yellow-300 text-base">Parsed Validation Summary</div>
-            <div className="text-sm text-yellow-200/90 mt-0.5">Summary information only. Full logs unavailable.</div>
+        <div className="relative bg-gradient-to-br from-yellow-950/50 to-amber-950/30 border border-yellow-500/30 rounded-xl p-5 mb-6 overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full blur-3xl"></div>
+          <div className="relative flex items-center gap-4">
+            <div className="bg-yellow-500/20 p-3 rounded-xl text-yellow-400 border border-yellow-500/30 shadow-lg shadow-yellow-500/10">
+              <AlertTriangle size={24} />
+            </div>
+            <div>
+              <div className="font-bold text-yellow-300 text-lg mb-1">Parsed Validation Summary</div>
+              <div className="text-sm text-yellow-200/80">Summary information only • Full logs unavailable</div>
+            </div>
           </div>
         </div>
       );
@@ -133,17 +156,31 @@ export const CLIModal = ({ data, onClose }) => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-gray-800 rounded-xl p-5 border border-gray-600 text-center">
-          <div className="text-3xl font-bold text-white mb-1">{totalCommands}</div>
-          <div className="text-sm text-gray-300 font-bold uppercase tracking-wider">Total</div>
+        <div className="group relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 border border-gray-700/50 hover:border-gray-600 transition-all overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl"></div>
+          <div className="relative">
+            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Total Commands</div>
+            <div className="text-4xl font-bold text-white mb-1">{totalCommands}</div>
+            <div className="h-1 w-12 bg-gradient-to-r from-blue-500/50 to-transparent rounded-full"></div>
+          </div>
         </div>
-        <div className="bg-green-950/50 rounded-xl p-5 border border-green-500/50 text-center">
-          <div className="text-3xl font-bold text-green-300 mb-1">{successfulCommands}</div>
-          <div className="text-sm text-green-300 font-bold uppercase tracking-wider">Success</div>
+
+        <div className="group relative bg-gradient-to-br from-green-950/80 to-emerald-950/50 rounded-xl p-6 border border-green-500/30 hover:border-green-500/50 transition-all overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full blur-2xl"></div>
+          <div className="relative">
+            <div className="text-xs font-bold text-green-400/80 uppercase tracking-wider mb-2">Successful</div>
+            <div className="text-4xl font-bold text-green-300 mb-1">{successfulCommands}</div>
+            <div className="h-1 w-12 bg-gradient-to-r from-green-500/50 to-transparent rounded-full"></div>
+          </div>
         </div>
-        <div className="bg-blue-950/50 rounded-xl p-5 border border-blue-500/50 text-center">
-          <div className="text-3xl font-bold text-blue-300 mb-1">{successRate}%</div>
-          <div className="text-sm text-blue-300 font-bold uppercase tracking-wider">Rate</div>
+
+        <div className="group relative bg-gradient-to-br from-blue-950/80 to-cyan-950/50 rounded-xl p-6 border border-blue-500/30 hover:border-blue-500/50 transition-all overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl"></div>
+          <div className="relative">
+            <div className="text-xs font-bold text-blue-400/80 uppercase tracking-wider mb-2">Success Rate</div>
+            <div className="text-4xl font-bold text-blue-300 mb-1">{successRate}%</div>
+            <div className="h-1 w-12 bg-gradient-to-r from-blue-500/50 to-transparent rounded-full"></div>
+          </div>
         </div>
       </div>
 
@@ -151,82 +188,115 @@ export const CLIModal = ({ data, onClose }) => {
       {(modalData.register_description || modalData.register_justification) && (
         <div className="space-y-4 mb-8">
           {modalData.register_description && (
-            <div className="bg-gray-800 border border-gray-600 rounded-lg p-5">
-              <h4 className="text-xs font-bold text-gray-200 uppercase mb-3 flex items-center gap-2 tracking-wider">
-                <FileText size={14} /> Validation Description
-              </h4>
-              <p className="text-sm text-gray-100 leading-relaxed">{stripEmojis(modalData.register_description)}</p>
+            <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700/50 rounded-xl p-5 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl"></div>
+              <div className="relative">
+                <div className="flex items-center gap-2 text-xs font-bold text-blue-300 uppercase mb-3 tracking-wider">
+                  <FileText size={14} className="text-blue-400" />
+                  Validation Description
+                </div>
+                <p className="text-sm text-gray-200 leading-relaxed">{stripEmojis(modalData.register_description)}</p>
+              </div>
             </div>
           )}
           {modalData.register_justification && (
-            <div className="bg-gray-800 border border-gray-600 rounded-lg p-5">
-              <h4 className="text-xs font-bold text-gray-200 uppercase mb-3 flex items-center gap-2 tracking-wider">
-                <Info size={14} /> Technical Justification
-              </h4>
-              <p className="text-sm text-gray-100 leading-relaxed">{stripEmojis(modalData.register_justification)}</p>
+            <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700/50 rounded-xl p-5 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl"></div>
+              <div className="relative">
+                <div className="flex items-center gap-2 text-xs font-bold text-purple-300 uppercase mb-3 tracking-wider">
+                  <Info size={14} className="text-purple-400" />
+                  Technical Justification
+                </div>
+                <p className="text-sm text-gray-200 leading-relaxed">{stripEmojis(modalData.register_justification)}</p>
+              </div>
             </div>
           )}
         </div>
       )}
 
       {/* Detailed Command List */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between border-b border-gray-600 pb-3 mb-4">
-          <h4 className="font-bold text-white text-base uppercase tracking-wide">Execution Log</h4>
-          <span className="text-xs text-gray-200 bg-gray-700 px-3 py-1.5 rounded-full border border-gray-600 font-medium">{commandsList.length} entries</span>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between pb-4 border-b border-gray-800">
+          <div>
+            <h4 className="font-bold text-white text-lg tracking-tight mb-1">Execution Log</h4>
+            <p className="text-xs text-gray-400">Command-level validation details</p>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800/50 rounded-lg border border-gray-700/50">
+            <Terminal size={14} className="text-gray-400" />
+            <span className="text-sm text-gray-300 font-medium">{commandsList.length}</span>
+          </div>
         </div>
 
         {commandsList.length > 0 ? (
-          commandsList.map((cmd, index) => {
-            const isSuccess = cmd.status === 'success' || cmd.exit_code === 0;
+          <div className="space-y-3">
+            {commandsList.map((cmd, index) => {
+              const isSuccess = cmd.status === 'success' || cmd.exit_code === 0;
 
-            return (
-              <div key={index} className="border border-gray-600 rounded-lg overflow-hidden bg-gray-800 transition-all hover:border-gray-500 hover:bg-gray-750">
-                <button
-                  onClick={() => toggleCommand(index)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-gray-700/70 transition-colors text-left"
-                >
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <div className={`flex-shrink-0 w-7 h-7 rounded flex items-center justify-center ${isSuccess ? 'bg-green-500/25 text-green-300 border border-green-500/40' : 'bg-red-500/25 text-red-300 border border-red-500/40'}`}>
-                      {isSuccess ? <CheckCircle size={16} /> : <XCircle size={16} />}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold text-white truncate pr-4">
-                        {stripEmojis(cmd.description || cmd.note) || `Command #${index + 1}`}
+              return (
+                <div key={index} className="group relative bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700/50 rounded-xl overflow-hidden hover:border-gray-600 transition-all">
+                  <button
+                    onClick={() => toggleCommand(index)}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-800/50 transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-4 overflow-hidden flex-1">
+                      <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${isSuccess ? 'bg-green-500/20 border border-green-500/30' : 'bg-red-500/20 border border-red-500/30'}`}>
+                        {isSuccess ? <CheckCircle size={18} className="text-green-400" /> : <XCircle size={18} className="text-red-400" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-semibold text-white mb-1 truncate">
+                          {stripEmojis(cmd.description || cmd.note) || `Command #${index + 1}`}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {isSuccess ? 'Execution completed successfully' : 'Execution failed'}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <span className={`text-xs font-bold px-3 py-1 rounded uppercase ${isSuccess ? 'bg-green-900/40 text-green-300 border border-green-500/40' : 'bg-red-900/40 text-red-300 border border-red-500/40'}`}>
-                      {isSuccess ? 'Success' : 'Failed'}
-                    </span>
-                    {expandedCommands[index] ? <ChevronDown size={18} className="text-gray-300" /> : <ChevronRight size={18} className="text-gray-300" />}
-                  </div>
-                </button>
-
-                {expandedCommands[index] && (
-                  <div className="bg-[#0d0e12] p-4 border-t border-gray-700">
-                    <pre className="text-green-300 text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all selection:bg-green-900 selection:text-white">
-                      <span className="text-blue-300 select-none">$ </span>{cmd.command}
-                    </pre>
-                    {cmd.output && (
-                      <div className="mt-3 pt-3 border-t border-gray-800">
-                        <div className="text-[10px] text-gray-300 uppercase mb-2 font-bold tracking-wider">Standard Output</div>
-                        <pre className="text-gray-200 text-xs font-mono overflow-x-auto max-h-40 custom-scrollbar">{cmd.output}</pre>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className={`text-xs font-bold px-3 py-1.5 rounded-lg ${isSuccess ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 'bg-red-500/20 text-red-300 border border-red-500/30'}`}>
+                        {isSuccess ? 'SUCCESS' : 'FAILED'}
+                      </span>
+                      <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-800/50 border border-gray-700/50 group-hover:border-gray-600 transition-colors">
+                        {expandedCommands[index] ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronRight size={16} className="text-gray-400" />}
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })
+                    </div>
+                  </button>
+
+                  {expandedCommands[index] && (
+                    <div className="border-t border-gray-800">
+                      <div className="bg-black/40 p-4">
+                        <div className="mb-3 flex items-center gap-2">
+                          <Terminal size={12} className="text-green-400" />
+                          <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Command</span>
+                        </div>
+                        <pre className="text-green-300 text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all selection:bg-green-900 selection:text-white p-3 bg-black/30 rounded-lg border border-gray-800">
+                          <span className="text-blue-400 select-none">$ </span>{cmd.command}
+                        </pre>
+
+                        {cmd.output && (
+                          <div className="mt-4">
+                            <div className="mb-3 flex items-center gap-2">
+                              <FileText size={12} className="text-gray-400" />
+                              <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Output</span>
+                            </div>
+                            <pre className="text-gray-300 text-xs font-mono overflow-x-auto max-h-40 p-3 bg-black/30 rounded-lg border border-gray-800 custom-scrollbar">{cmd.output}</pre>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         ) : (
-          <div className="text-center py-12 bg-gray-800 rounded-lg border-2 border-dashed border-gray-600">
-            <Terminal size={44} className="mx-auto mb-4 text-gray-500" />
-            <h4 className="text-gray-200 font-semibold text-base mb-1">No Logs Available</h4>
-            <p className="text-sm text-gray-400">
-              Detailed command logs are unavailable for this item.
+          <div className="text-center py-16 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border-2 border-dashed border-gray-700/50">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gray-800 rounded-xl flex items-center justify-center border border-gray-700">
+              <Terminal size={28} className="text-gray-600" />
+            </div>
+            <h4 className="text-gray-300 font-semibold text-base mb-2">No Command Logs Available</h4>
+            <p className="text-sm text-gray-500">
+              Detailed execution logs are unavailable for this validation
             </p>
           </div>
         )}
