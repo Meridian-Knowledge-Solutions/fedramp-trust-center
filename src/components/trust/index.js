@@ -1,0 +1,1 @@
+export { TrustCenterView } from './TrustCenterView';
