@@ -4,7 +4,8 @@ import { Sanitizer } from '../utils/sanitizer';
 const DataContext = createContext();
 
 // PRODUCTION CONFIG: Raw GitHub Content URLs
-const REPO_BASE = 'https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-20x-public/master';
+// Updated to point to NEW fedramp-trust-center repository (files at root)
+const REPO_BASE = 'https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-trust-center/master';
 
 export const DataProvider = ({ children }) => {
   const [ksis, setKsis] = useState([]);
