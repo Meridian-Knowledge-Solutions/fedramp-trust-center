@@ -44,28 +44,33 @@ export const WhyModal = () => {
       // Public View
       return (
         <div className="space-y-6">
-          <div className={`p-4 rounded-lg border ${config.bg} ${config.border} flex items-start gap-4`}>
-            <StatusIcon className={`mt-1 ${config.color}`} size={20} />
-            <div>
-              <h4 className={`font-bold ${config.color} mb-1 uppercase tracking-wide text-sm`}>
-                {data.status === 'passed' ? 'Compliant' : 'Attention Required'}
-              </h4>
-              <p className="text-sm text-gray-300">
-                This security control has been assessed against FedRAMP requirements.
-                {data.status !== 'passed' && ' Remediation or tracking may be required.'}
-              </p>
+          <div className={`relative p-5 rounded-xl border overflow-hidden ${config.bg} ${config.border}`}>
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-20 rounded-full blur-3xl" style={{ backgroundColor: config.color.replace('text-', '') }}></div>
+            <div className="relative flex items-start gap-4">
+              <StatusIcon className={`mt-1 ${config.color}`} size={24} />
+              <div>
+                <h4 className={`font-bold ${config.color} mb-2 uppercase tracking-wide text-base`}>
+                  {data.status === 'passed' ? 'Compliant' : 'Attention Required'}
+                </h4>
+                <p className="text-sm text-gray-200">
+                  This security control has been assessed against FedRAMP requirements.
+                  {data.status !== 'passed' && ' Remediation or tracking may be required.'}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="bg-gray-900 p-8 rounded-lg border border-gray-700 text-center">
-            <Shield size={48} className="mx-auto mb-4 text-gray-600" />
-            <h4 className="font-semibold text-white text-lg mb-2">Federal Access Required</h4>
-            <p className="text-sm text-gray-400 mb-6 max-w-md mx-auto">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-xl border border-gray-700 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gray-800 rounded-2xl flex items-center justify-center border border-gray-700">
+              <Shield size={32} className="text-gray-500" />
+            </div>
+            <h4 className="font-semibold text-white text-xl mb-3">Federal Access Required</h4>
+            <p className="text-sm text-gray-300 mb-6 max-w-md mx-auto leading-relaxed">
               Detailed technical findings, command logs, and remediation plans are restricted to authorized federal personnel.
             </p>
             <button
               onClick={() => { closeModal('why'); openModal('registration'); }}
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-sm transition-colors shadow-lg shadow-blue-900/20"
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-900/30"
             >
               Request Full Access
             </button>
@@ -79,35 +84,44 @@ export const WhyModal = () => {
       <div className="space-y-8">
         {/* Header Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className={`p-4 rounded-lg border ${config.bg} ${config.border}`}>
-            <div className="text-xs font-bold uppercase text-gray-400 mb-1">Status</div>
-            <div className={`font-bold text-lg flex items-center gap-2 ${config.color}`}>
-              <StatusIcon size={18} />
-              {data.status.toUpperCase()}
+          <div className={`relative p-5 rounded-xl border overflow-hidden ${config.bg} ${config.border}`}>
+            <div className="absolute top-0 right-0 w-24 h-24 opacity-20 rounded-full blur-2xl" style={{ backgroundColor: config.color.replace('text-', '') }}></div>
+            <div className="relative">
+              <div className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Status</div>
+              <div className={`font-bold text-xl flex items-center gap-2 ${config.color}`}>
+                <StatusIcon size={20} />
+                {data.status.toUpperCase()}
+              </div>
             </div>
           </div>
-          <div className="p-4 rounded-lg border border-gray-700 bg-gray-900">
-            <div className="text-xs font-bold text-gray-500 uppercase mb-1">Validation Type</div>
-            <div className="font-semibold text-white">Automated CLI</div>
+          <div className="relative p-5 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl"></div>
+            <div className="relative">
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Validation Type</div>
+              <div className="font-semibold text-white text-lg">Automated CLI</div>
+            </div>
           </div>
-          <div className="p-4 rounded-lg border border-gray-700 bg-gray-900">
-            <div className="text-xs font-bold text-gray-500 uppercase mb-1">Checks Run</div>
-            <div className="font-semibold text-white">{data.commands_executed} Commands</div>
+          <div className="relative p-5 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl"></div>
+            <div className="relative">
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Checks Run</div>
+              <div className="font-semibold text-white text-lg">{data.commands_executed} Commands</div>
+            </div>
           </div>
         </div>
 
         {/* Technical Findings List */}
         <div>
-          <h4 className="text-sm font-bold text-white uppercase tracking-wide mb-3 flex items-center gap-2">
-            <FileText size={16} className="text-blue-400" />
+          <h4 className="text-base font-bold text-white uppercase tracking-wide mb-4 flex items-center gap-2">
+            <FileText size={18} className="text-blue-400" />
             Assessment Findings
           </h4>
-          <div className="bg-gray-900 border border-gray-700 rounded-lg overflow-hidden">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl overflow-hidden">
             {findings.length > 0 ? (
               <ul className="divide-y divide-gray-800">
                 {findings.map((item, idx) => (
-                  <li key={idx} className="p-4 text-sm text-gray-300 flex gap-3 hover:bg-gray-800/50 transition-colors">
-                    <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                  <li key={idx} className="p-4 text-sm text-gray-200 flex gap-3 hover:bg-gray-800/70 transition-colors">
+                    <div className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
                     <span className="leading-relaxed">{item}</span>
                   </li>
                 ))}
@@ -121,7 +135,7 @@ export const WhyModal = () => {
         </div>
 
         {/* Action Bar */}
-        <div className="flex justify-end pt-6 border-t border-gray-700">
+        <div className="flex justify-end pt-6 border-t border-gray-800">
           {data.commands && (
             <button
               onClick={() => {
@@ -133,7 +147,7 @@ export const WhyModal = () => {
                   justification: data.reason
                 });
               }}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-bold transition-colors border border-gray-600"
+              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 text-white rounded-xl text-sm font-bold transition-all border border-gray-600 shadow-lg"
             >
               <Terminal size={16} />
               View Execution Log
@@ -150,6 +164,7 @@ export const WhyModal = () => {
       onClose={() => closeModal('why')}
       title={`Assessment Details: ${data.ksiId || 'KSI'}`}
       size="large"
+      variant="dark"
     >
       {renderContent()}
     </BaseModal>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../contexts/ModalContext';
 import { useSystemStatus } from '../../hooks/useSystemStatus';
+import { formatStatus } from '../../utils/formatStatus';
 import { API_CONFIG } from '../../config/api';
 import {
     Shield, Download, FileText, Calendar, ExternalLink,
@@ -14,13 +15,14 @@ export const TrustCenterView = () => {
     const { isAuthenticated, user } = useAuth();
     const { openModal } = useModal();
     const { status } = useSystemStatus();
+    const formattedStatus = formatStatus(status);
     const [nextReportDate, setNextReportDate] = useState(null);
 
     useEffect(() => {
         const fetchSchedule = async () => {
             try {
-                // Fetch schedule from public GitHub repo
-                const res = await fetch('https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-20x-public/master/trust_center/next_report_date.json');
+                // Fetch schedule from local public directory
+                const res = await fetch('/data/next_report_date.json');
                 if (res.ok) {
                     const data = await res.json();
                     if (data.next_ongoing_report) {
@@ -109,8 +111,8 @@ export const TrustCenterView = () => {
         if (!handleAction('View Quarterly Report')) return;
 
         try {
-            // 1. Fetch raw markdown from GitHub
-            const res = await fetch('https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-20x-public/master/quarterly_reports/ongoing_authorization_report_Q4_2025.md');
+            // 1. Fetch raw markdown from local public directory
+            const res = await fetch('/data/ongoing_authorization_report_Q4_2025.md');
             if (!res.ok) throw new Error('Report not found');
             const text = await res.text();
 
@@ -127,8 +129,8 @@ export const TrustCenterView = () => {
 
     const downloadQuarterlyReport = () => {
         if (!handleAction('Download Quarterly Report')) return;
-        // Direct link to the JSON artifact
-        window.open('https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-20x-public/master/quarterly_reports/ongoing_authorization_report_Q4_2025.json', '_blank');
+        // Direct link to the JSON artifact in local public directory
+        window.open('/data/ongoing_authorization_report_Q4_2025.json', '_blank');
     };
 
     const handleFeedback = () => {
@@ -206,11 +208,11 @@ export const TrustCenterView = () => {
                             "Data that does not exceed the Moderate confidentiality, integrity, or availability impact level is authorized."
                         </p>
                         <ul className="space-y-3 text-sm text-gray-300">
-                            <li className="flex gap-3"><span className="text-green-500">✓</span> Standard LMS data (training records, completions, SCORM)</li>
-                            <li className="flex gap-3"><span className="text-green-500">✓</span> User profile data (names, email, org attributes)</li>
-                            <li className="flex gap-3"><span className="text-green-500">✓</span> Corporate training content & Performance metrics</li>
-                            <li className="flex gap-3"><span className="text-green-500">✓</span> Government-furnished but non-sensitive information</li>
-                            <li className="flex gap-3"><span className="text-green-500">✓</span> Proprietary/internal data within Moderate impact thresholds</li>
+                            <li className="flex gap-3"><span className="text-green-500">âœ“</span> Standard LMS data (training records, completions, SCORM)</li>
+                            <li className="flex gap-3"><span className="text-green-500">âœ“</span> User profile data (names, email, org attributes)</li>
+                            <li className="flex gap-3"><span className="text-green-500">âœ“</span> Corporate training content & Performance metrics</li>
+                            <li className="flex gap-3"><span className="text-green-500">âœ“</span> Government-furnished but non-sensitive information</li>
+                            <li className="flex gap-3"><span className="text-green-500">âœ“</span> Proprietary/internal data within Moderate impact thresholds</li>
                         </ul>
                     </div>
                     {/* Not Authorized */}
@@ -222,11 +224,11 @@ export const TrustCenterView = () => {
                             "Any data whose compromise would exceed the Moderate impact outcomes is not authorized."
                         </p>
                         <ul className="space-y-3 text-sm text-gray-300">
-                            <li className="flex gap-3"><span className="text-red-500">✕</span> <strong>CUI High:</strong> CUI requiring High baseline protections</li>
-                            <li className="flex gap-3"><span className="text-red-500">✕</span> <strong>Classified:</strong> Any level (requires cleared environment)</li>
-                            <li className="flex gap-3"><span className="text-red-500">✕</span> <strong>HIPAA:</strong> Protected Health Information (unless BAA)</li>
-                            <li className="flex gap-3"><span className="text-red-500">✕</span> <strong>Financial PII:</strong> High-impact sensitivity (e.g. bank info)</li>
-                            <li className="flex gap-3"><span className="text-red-500">✕</span> <strong>LES Data:</strong> Law Enforcement Sensitive data</li>
+                            <li className="flex gap-3"><span className="text-red-500">âœ•</span> <strong>CUI High:</strong> CUI requiring High baseline protections</li>
+                            <li className="flex gap-3"><span className="text-red-500">âœ•</span> <strong>Classified:</strong> Any level (requires cleared environment)</li>
+                            <li className="flex gap-3"><span className="text-red-500">âœ•</span> <strong>HIPAA:</strong> Protected Health Information (unless BAA)</li>
+                            <li className="flex gap-3"><span className="text-red-500">âœ•</span> <strong>Financial PII:</strong> High-impact sensitivity (e.g. bank info)</li>
+                            <li className="flex gap-3"><span className="text-red-500">âœ•</span> <strong>LES Data:</strong> Law Enforcement Sensitive data</li>
                         </ul>
                     </div>
                 </div>
@@ -456,7 +458,7 @@ export const TrustCenterView = () => {
                     </div>
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-sm text-gray-400">Uptime (30d)</span>
-                        <span className="text-lg font-bold text-green-400">{status?.uptime_percent || '100'}%</span>
+                        <span className="text-lg font-bold text-green-400">{formattedStatus?.uptimePercent || '100'}%</span>
                     </div>
                     <div className={`py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 font-bold text-sm ${status?.['5xx_requests'] > 0 ? 'bg-red-900/20 text-red-400 border border-red-500/20' : 'bg-green-900/20 text-green-400 border border-green-500/20'}`}>
                         {status?.['5xx_requests'] > 0 ? <XCircle size={16} /> : <CheckCircle size={16} />}
@@ -498,7 +500,7 @@ const ServiceCard = ({ title, desc, features, icon: Icon, dataType }) => (
         <div className="space-y-1 flex-1">
             {features.slice(0, 4).map((f, i) => (
                 <div key={i} className="flex gap-2 items-start">
-                    <span className="text-blue-500/70 text-xs mt-0.5">✓</span>
+                    <span className="text-blue-500/70 text-xs mt-0.5">âœ“</span>
                     <span className="text-xs text-gray-300">{f}</span>
                 </div>
             ))}
