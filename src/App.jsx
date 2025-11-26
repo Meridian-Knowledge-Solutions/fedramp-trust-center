@@ -40,10 +40,10 @@ const SidebarHeader = () => (
     <div className="flex items-center font-bold text-xl text-white tracking-tight gap-3">
       {/* Using the uploaded favicon as the logo */}
       <img
-        src="/meridian-favicon.png"
-        alt="Meridian Logo"
-        className="w-8 h-8 rounded"
-        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }} // Fallback if image missing
+       src={`${import.meta.env.BASE_URL}meridian-favicon.png`}
+       alt="Meridian Logo"
+       className="w-8 h-8 rounded"
+       onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }} 
       />
       {/* Fallback Icon if image fails to load */}
       <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center hidden">
