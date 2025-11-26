@@ -3,9 +3,8 @@ import { Sanitizer } from '../utils/sanitizer';
 
 const DataContext = createContext();
 
-// PRODUCTION CONFIG: Raw GitHub Content URLs
-// Updated to point to NEW fedramp-trust-center repository (files at root)
-const REPO_BASE = 'https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-trust-center/master';
+// Files are in public/data/ subdirectory
+const REPO_BASE = 'https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-trust-center/master/public/data';
 
 export const DataProvider = ({ children }) => {
   const [ksis, setKsis] = useState([]);
@@ -54,7 +53,7 @@ export const DataProvider = ({ children }) => {
       try {
         console.log(`🔄 Fetching live data from: ${REPO_BASE}`);
 
-        // 1. Fetch Live Data from GitHub Raw
+        // 1. Fetch Live Data from GitHub Raw (public/data/ path)
         const [valRes, regRes, histRes] = await Promise.all([
           fetch(`${REPO_BASE}/unified_ksi_validations.json`),
           fetch(`${REPO_BASE}/cli_command_register.json`),
@@ -81,6 +80,7 @@ export const DataProvider = ({ children }) => {
             setHistory(sorted);
           }
         } else {
+          console.warn('History file not available, using fallback');
           // Fail-safe history
           setHistory([
             { timestamp: new Date(Date.now() - 86400000).toISOString(), compliance_rate: 0 },
@@ -93,7 +93,9 @@ export const DataProvider = ({ children }) => {
 
         const validationData = await valRes.json();
         let registerData = {};
-        try { if (regRes.ok) registerData = await regRes.json(); } catch (e) { }
+        try { if (regRes.ok) registerData = await regRes.json(); } catch (e) { 
+          console.warn('CLI command register not available');
+        }
 
         if (validationData.metadata) setMetadata(validationData.metadata);
 
