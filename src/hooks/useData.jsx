@@ -4,7 +4,7 @@ import { Sanitizer } from '../utils/sanitizer';
 const DataContext = createContext();
 
 // Files are in public/data/ subdirectory
-const REPO_BASE = 'https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-trust-center/master/public/data';
+const REPO_BASE = `${import.meta.env.BASE_URL}data`;
 
 export const DataProvider = ({ children }) => {
   const [ksis, setKsis] = useState([]);
