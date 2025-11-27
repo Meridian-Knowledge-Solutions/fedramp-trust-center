@@ -19,6 +19,9 @@ export const TrustCenterView = () => {
     const formattedStatus = formatStatus(status);
     const [nextReportDate, setNextReportDate] = useState(null);
     
+    // Base path for GitHub Pages deployment
+    const BASE_URL = import.meta.env.BASE_URL || '/';
+    
     // --- NEW STATE FOR SCN HISTORY ---
     const [scnHistory, setScnHistory] = useState([]);
 
@@ -27,7 +30,7 @@ export const TrustCenterView = () => {
             // 1. Fetch Report Schedule
             try {
                 // Fetch schedule from local public directory
-                const res = await fetch('/data/next_report_date.json');
+                const res = await fetch(`${BASE_URL}data/next_report_date.json`);
                 if (res.ok) {
                     const data = await res.json();
                     if (data.next_ongoing_report) {
@@ -47,7 +50,7 @@ export const TrustCenterView = () => {
 
             // 2. Fetch SCN History (NEW)
             try {
-                const res = await fetch('/data/scn_history.jsonl');
+                const res = await fetch(`${BASE_URL}data/scn_history.jsonl`);
                 if (res.ok) {
                     const text = await res.text();
                     // Parse JSONL: Split by newline, filter empty, parse JSON
@@ -135,7 +138,7 @@ export const TrustCenterView = () => {
 
         try {
             // 1. Fetch raw markdown from local public directory
-            const res = await fetch('/data/ongoing_authorization_report_Q4_2025.md');
+            const res = await fetch(`${BASE_URL}data/ongoing_authorization_report_Q4_2025.md`);
             if (!res.ok) throw new Error('Report not found');
             const text = await res.text();
 
@@ -153,7 +156,7 @@ export const TrustCenterView = () => {
     const downloadQuarterlyReport = () => {
         if (!handleAction('Download Quarterly Report')) return;
         // Direct link to the JSON artifact in local public directory
-        window.open('/data/ongoing_authorization_report_Q4_2025.json', '_blank');
+        window.open(`${BASE_URL}data/ongoing_authorization_report_Q4_2025.json`, '_blank');
     };
 
     const handleFeedback = () => {
