@@ -51,13 +51,36 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        console.log(`🔄 Fetching live data from: ${REPO_BASE}`);
+        // Cache buster to force fresh data
+        const cacheBuster = new Date().getTime();
+        console.log(`🔄 Fetching live data from: ${REPO_BASE} (cache buster: ${cacheBuster})`);
 
-        // 1. Fetch Live Data from GitHub Raw (public/data/ path)
+        // 1. Fetch Live Data from GitHub Raw (public/data/ path) with cache busting
         const [valRes, regRes, histRes] = await Promise.all([
-          fetch(`${REPO_BASE}/unified_ksi_validations.json`),
-          fetch(`${REPO_BASE}/cli_command_register.json`),
-          fetch(`${REPO_BASE}/ksi_history.jsonl`)
+          fetch(`${REPO_BASE}/unified_ksi_validations.json?t=${cacheBuster}`, {
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          }),
+          fetch(`${REPO_BASE}/cli_command_register.json?t=${cacheBuster}`, {
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          }),
+          fetch(`${REPO_BASE}/ksi_history.jsonl?t=${cacheBuster}`, {
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          })
         ]);
 
         // --- PROCESS HISTORY ---
