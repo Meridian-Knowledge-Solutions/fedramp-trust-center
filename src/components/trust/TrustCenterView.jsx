@@ -196,7 +196,7 @@ export const TrustCenterView = () => {
                         <p className="text-blue-200/70 mt-2 text-lg">Authorization Artifacts & Continuous Monitoring</p>
                         {isAuthenticated && (
                             <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold uppercase tracking-wider">
-                                <CheckCircle2 size={14} /> Authorized Access: {user.agency}
+                                <CheckCircle2 size={14} />
                             </div>
                         )}
                     </div>
@@ -228,17 +228,17 @@ export const TrustCenterView = () => {
                     {/* Authorized */}
                     <div className="bg-green-900/10 border border-green-500/20 rounded-xl p-6">
                         <h4 className="text-lg font-bold text-green-400 mb-3 flex items-center gap-2">
-                            <CheckCircle size={20} /> Authorized Data (Moderate Baseline)
+                            <CheckCircle size={20} />
                         </h4>
                         <p className="text-sm text-gray-300 mb-4 italic">
                             "Data that does not exceed the Moderate confidentiality, integrity, or availability impact level is authorized."
                         </p>
                         <ul className="space-y-3 text-sm text-gray-300">
-                            <li className="flex gap-3"><span className="text-green-500">âœ“</span> Standard LMS data (training records, completions, SCORM)</li>
-                            <li className="flex gap-3"><span className="text-green-500">âœ“</span> User profile data (names, email, org attributes)</li>
-                            <li className="flex gap-3"><span className="text-green-500">âœ“</span> Corporate training content & Performance metrics</li>
-                            <li className="flex gap-3"><span className="text-green-500">âœ“</span> Government-furnished but non-sensitive information</li>
-                            <li className="flex gap-3"><span className="text-green-500">âœ“</span> Proprietary/internal data within Moderate impact thresholds</li>
+                            <li className="flex gap-3 items-start"><CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" /> <span>Standard LMS data (training records, completions, SCORM)</span></li>
+                            <li className="flex gap-3 items-start"><CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" /> <span>User profile data (names, email, org attributes)</span></li>
+                            <li className="flex gap-3 items-start"><CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" /> <span>Corporate training content & Performance metrics</span></li>
+                            <li className="flex gap-3 items-start"><CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" /> <span>Government-furnished but non-sensitive information</span></li>
+                            <li className="flex gap-3 items-start"><CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" /> <span>Proprietary/internal data within Moderate impact thresholds</span></li>
                         </ul>
                     </div>
                     {/* Not Authorized */}
@@ -250,11 +250,11 @@ export const TrustCenterView = () => {
                             "Any data whose compromise would exceed the Moderate impact outcomes is not authorized."
                         </p>
                         <ul className="space-y-3 text-sm text-gray-300">
-                            <li className="flex gap-3"><span className="text-red-500">âœ•</span> <strong>CUI High:</strong> CUI requiring High baseline protections</li>
-                            <li className="flex gap-3"><span className="text-red-500">âœ•</span> <strong>Classified:</strong> Any level (requires cleared environment)</li>
-                            <li className="flex gap-3"><span className="text-red-500">âœ•</span> <strong>HIPAA:</strong> Protected Health Information (unless BAA)</li>
-                            <li className="flex gap-3"><span className="text-red-500">âœ•</span> <strong>Financial PII:</strong> High-impact sensitivity (e.g. bank info)</li>
-                            <li className="flex gap-3"><span className="text-red-500">âœ•</span> <strong>LES Data:</strong> Law Enforcement Sensitive data</li>
+                            <li className="flex gap-3 items-start"><XCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" /> <span><strong>CUI High:</strong> CUI requiring High baseline protections</span></li>
+                            <li className="flex gap-3 items-start"><XCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" /> <span><strong>Classified:</strong> Any level (requires cleared environment)</span></li>
+                            <li className="flex gap-3 items-start"><XCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" /> <span><strong>HIPAA:</strong> Protected Health Information (unless BAA)</span></li>
+                            <li className="flex gap-3 items-start"><XCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" /> <span><strong>Financial PII:</strong> High-impact sensitivity (e.g. bank info)</span></li>
+                            <li className="flex gap-3 items-start"><XCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" /> <span><strong>LES Data:</strong> Law Enforcement Sensitive data</span></li>
                         </ul>
                     </div>
                 </div>
@@ -412,7 +412,7 @@ export const TrustCenterView = () => {
                         </div>
                         <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
                             <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase mb-2">
-                                <CheckCircle2 size={12} /> Status
+                                <CheckCircle2 size={12} />
                             </div>
                             <div className="text-green-400 font-bold text-lg">Operational</div>
                         </div>
@@ -506,7 +506,7 @@ export const TrustCenterView = () => {
                                         </td>
                                         <td className="p-4 text-right">
                                             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-green-500/10 text-green-400 border border-green-500/20">
-                                                <CheckCircle2 size={10} /> {entry.status}
+                                                <CheckCircle2 size={10} />
                                             </span>
                                         </td>
                                     </tr>
@@ -558,7 +558,7 @@ export const TrustCenterView = () => {
                         <span className="text-lg font-bold text-green-400">{formattedStatus?.uptimePercent || '100'}%</span>
                     </div>
                     <div className={`py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 font-bold text-sm ${status?.['5xx_requests'] > 0 ? 'bg-red-900/20 text-red-400 border border-red-500/20' : 'bg-green-900/20 text-green-400 border border-green-500/20'}`}>
-                        {status?.['5xx_requests'] > 0 ? <XCircle size={16} /> : <CheckCircle size={16} />}
+                        {status?.['5xx_requests'] > 0 ? <XCircle size={16} /> : <CheckCircle size={16} />
                         {status?.['5xx_requests'] > 0 ? 'Issues Detected' : 'All Systems Operational'}
                     </div>
                 </div>
@@ -597,7 +597,7 @@ const ServiceCard = ({ title, desc, features, icon: Icon, dataType }) => (
         <div className="space-y-1 flex-1">
             {features.slice(0, 4).map((f, i) => (
                 <div key={i} className="flex gap-2 items-start">
-                    <span className="text-blue-500/70 text-xs mt-0.5">âœ“</span>
+                    <CheckCircle size={14} className="text-blue-500 flex-shrink-0 mt-0.5" />
                     <span className="text-xs text-gray-300">{f}</span>
                 </div>
             ))}
