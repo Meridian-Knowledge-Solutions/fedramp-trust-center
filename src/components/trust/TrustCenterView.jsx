@@ -8,7 +8,8 @@ import {
     Shield, Download, FileText, Calendar, ExternalLink,
     Clock, CheckCircle2, Mail, Phone, Globe, Lock, Server, Activity,
     XCircle, CheckCircle, Layers, Database, Users, BarChart, BookOpen,
-    Bell, Code, Settings, Info, Terminal, FileJson, Zap, MessageSquare
+    Bell, Code, Settings, Info, Terminal, FileJson, Zap, MessageSquare,
+    GitCommit, RefreshCw, AlertTriangle // <--- NEW IMPORTS
 } from 'lucide-react';
 
 export const TrustCenterView = () => {
@@ -17,9 +18,13 @@ export const TrustCenterView = () => {
     const { status } = useSystemStatus();
     const formattedStatus = formatStatus(status);
     const [nextReportDate, setNextReportDate] = useState(null);
+    
+    // --- NEW STATE FOR SCN HISTORY ---
+    const [scnHistory, setScnHistory] = useState([]);
 
     useEffect(() => {
-        const fetchSchedule = async () => {
+        const fetchData = async () => {
+            // 1. Fetch Report Schedule
             try {
                 // Fetch schedule from local public directory
                 const res = await fetch('/data/next_report_date.json');
@@ -39,8 +44,26 @@ export const TrustCenterView = () => {
                 const reportYear = quarterEndMonth === 12 ? currentYear + 1 : currentYear;
                 setNextReportDate(new Date(reportYear, reportMonth, 15));
             }
+
+            // 2. Fetch SCN History (NEW)
+            try {
+                const res = await fetch('/data/scn_history.jsonl');
+                if (res.ok) {
+                    const text = await res.text();
+                    // Parse JSONL: Split by newline, filter empty, parse JSON
+                    const parsed = text
+                        .split('\n')
+                        .filter(line => line.trim() !== '')
+                        .map(line => JSON.parse(line))
+                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Newest first
+                        .slice(0, 5); // Show last 5 entries
+                    setScnHistory(parsed);
+                }
+            } catch (e) {
+                console.warn("Could not load SCN history");
+            }
         };
-        fetchSchedule();
+        fetchData();
     }, []);
 
     const handleAction = (actionName) => {
@@ -428,7 +451,78 @@ export const TrustCenterView = () => {
                 </div>
             </div>
 
-            {/* 7. Technical Resources */}
+            {/* 7. NEW SECTION: Infrastructure Change History (SCN) */}
+            <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-md">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            <GitCommit size={24} className="text-purple-400" /> Infrastructure Change Log
+                        </h3>
+                        <div className="text-xs text-gray-400 mt-1">
+                            RFC-0007 Significant Change Notification (SCN) History
+                        </div>
+                    </div>
+                    {scnHistory.length > 0 && (
+                        <div className="flex items-center gap-2 px-3 py-1 bg-green-900/20 border border-green-500/20 rounded-full">
+                            <Activity size={14} className="text-green-400" />
+                            <span className="text-xs font-bold text-green-400 uppercase tracking-wider">Active Monitoring</span>
+                        </div>
+                    )}
+                </div>
+
+                <div className="overflow-hidden rounded-lg border border-gray-700 bg-gray-900/50">
+                    {scnHistory.length === 0 ? (
+                        <div className="p-8 text-center text-gray-500 text-sm">
+                            Waiting for change detection data...
+                        </div>
+                    ) : (
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-gray-700 bg-gray-800/50 text-xs text-gray-400 uppercase tracking-wider">
+                                    <th className="p-4 font-bold">Date</th>
+                                    <th className="p-4 font-bold">Change ID</th>
+                                    <th className="p-4 font-bold">Classification</th>
+                                    <th className="p-4 font-bold">Scope</th>
+                                    <th className="p-4 font-bold text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-700">
+                                {scnHistory.map((entry, index) => (
+                                    <tr key={index} className="hover:bg-gray-800/50 transition-colors">
+                                        <td className="p-4 text-sm text-gray-300 font-mono">
+                                            {new Date(entry.timestamp).toLocaleDateString()}
+                                        </td>
+                                        <td className="p-4 text-xs font-mono text-gray-500">
+                                            {entry.change_id}
+                                        </td>
+                                        <td className="p-4">
+                                            <ClassificationBadge type={entry.classification} label={entry.description} />
+                                        </td>
+                                        <td className="p-4 text-sm text-gray-400">
+                                            {entry.affected_component_count} Components
+                                        </td>
+                                        <td className="p-4 text-right">
+                                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-green-500/10 text-green-400 border border-green-500/20">
+                                                <CheckCircle2 size={10} /> {entry.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+                <div className="mt-4 flex justify-end">
+                    <button 
+                         onClick={() => window.open('/data/scn_history.jsonl', '_blank')}
+                         className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
+                    >
+                        <FileJson size={12} /> View Raw History Log
+                    </button>
+                </div>
+            </div>
+
+            {/* 8. Technical Resources */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 flex flex-col shadow-md hover:border-gray-600 transition-colors">
                     <div className="flex items-center gap-4 mb-4">
@@ -467,7 +561,7 @@ export const TrustCenterView = () => {
                 </div>
             </div>
 
-            {/* 8. Support Channels */}
+            {/* 9. Support Channels */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <SupportCard icon={Mail} title="FedRAMP Inquiries" value="fedramp_20x@meridianks.com" />
                 <SupportCard icon={Shield} title="Security Team" value="security@meridianks.com" />
@@ -524,3 +618,27 @@ const SupportCard = ({ icon: Icon, title, value }) => (
         </div>
     </a>
 );
+
+// New component for SCN classifications
+const ClassificationBadge = ({ type, label }) => {
+    let styles = "bg-gray-700 text-gray-300 border-gray-600";
+    let Icon = GitCommit;
+
+    if (type === 'routine_recurring') {
+        styles = "bg-blue-900/20 text-blue-300 border-blue-500/20";
+        Icon = RefreshCw;
+    } else if (type === 'adaptive') {
+        styles = "bg-purple-900/20 text-purple-300 border-purple-500/20";
+        Icon = Zap;
+    } else if (type === 'transformative') {
+        styles = "bg-orange-900/20 text-orange-300 border-orange-500/20";
+        Icon = AlertTriangle;
+    }
+
+    return (
+        <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-md border text-xs font-medium ${styles}`}>
+            <Icon size={12} />
+            {label || type.replace('_', ' ')}
+        </div>
+    );
+};
