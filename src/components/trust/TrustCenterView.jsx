@@ -558,7 +558,7 @@ export const TrustCenterView = () => {
                         <span className="text-lg font-bold text-green-400">{formattedStatus?.uptimePercent || '100'}%</span>
                     </div>
                     <div className={`py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 font-bold text-sm ${status?.['5xx_requests'] > 0 ? 'bg-red-900/20 text-red-400 border border-red-500/20' : 'bg-green-900/20 text-green-400 border border-green-500/20'}`}>
-                        {status?.['5xx_requests'] > 0 ? <XCircle size={16} /> : <CheckCircle size={16} />
+                        {status?.['5xx_requests'] > 0 ? <XCircle size={16} /> : <CheckCircle size={16} />}
                         {status?.['5xx_requests'] > 0 ? 'Issues Detected' : 'All Systems Operational'}
                     </div>
                 </div>
