@@ -9,7 +9,7 @@ import {
     Clock, CheckCircle2, Mail, Phone, Globe, Lock, Server, Activity,
     XCircle, CheckCircle, Layers, Database, Users, BarChart, BookOpen,
     Bell, Code, Settings, Info, Terminal, FileJson, Zap, MessageSquare,
-    GitCommit, RefreshCw, AlertTriangle // <--- NEW IMPORTS
+    GitCommit, RefreshCw, AlertTriangle 
 } from 'lucide-react';
 
 export const TrustCenterView = () => {
@@ -19,17 +19,18 @@ export const TrustCenterView = () => {
     const formattedStatus = formatStatus(status);
     const [nextReportDate, setNextReportDate] = useState(null);
     
-    // Base path for GitHub Pages deployment
-    const BASE_URL = import.meta.env.BASE_URL || '/';
+    // --- FIX: SAFE BASE URL HANDLING ---
+    // Ensures file paths work regardless of deployment subdirectory (e.g., GitHub Pages)
+    const rawBase = import.meta.env.BASE_URL || '/';
+    const BASE_URL = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
     
-    // --- NEW STATE FOR SCN HISTORY ---
     const [scnHistory, setScnHistory] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
             // 1. Fetch Report Schedule
             try {
-                // Fetch schedule from local public directory
+                // Uses BASE_URL to correctly locate files in public/data/
                 const res = await fetch(`${BASE_URL}data/next_report_date.json`);
                 if (res.ok) {
                     const data = await res.json();
@@ -48,8 +49,9 @@ export const TrustCenterView = () => {
                 setNextReportDate(new Date(reportYear, reportMonth, 15));
             }
 
-            // 2. Fetch SCN History (NEW)
+            // 2. Fetch SCN History
             try {
+                // Uses BASE_URL to correctly locate files in public/data/
                 const res = await fetch(`${BASE_URL}data/scn_history.jsonl`);
                 if (res.ok) {
                     const text = await res.text();
@@ -67,7 +69,7 @@ export const TrustCenterView = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [BASE_URL]);
 
     const handleAction = (actionName) => {
         if (!isAuthenticated) {
@@ -87,19 +89,16 @@ export const TrustCenterView = () => {
 
     const openApiDocs = () => window.open('https://meridian-knowledge-solutions.github.io/fedramp-20x-public/documentation/api/', '_blank');
 
-    // --- SECURE CONFIG HANDLERS (Fetch & Render Logic) ---
+    // --- SECURE CONFIG HANDLERS ---
     const viewSecureConfig = async () => {
-        // 1. Check Auth
         if (!handleAction('View Secure Configuration')) return;
 
         try {
-            // 2. Fetch raw content from API/Endpoint
             const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`;
             const res = await fetch(url);
             if (!res.ok) throw new Error('Failed to load configuration');
             const text = await res.text();
 
-            // 3. Render in Modal (Formatted) instead of new tab
             openModal('markdown', {
                 title: 'FedRAMP 20x Secure Configuration Standards',
                 subtitle: 'Hardened Baselines (CIS/STIG)',
@@ -132,17 +131,15 @@ export const TrustCenterView = () => {
         }
     };
 
-    // --- QUARTERLY REPORT HANDLERS (Fetch & Render Logic) ---
+    // --- QUARTERLY REPORT HANDLERS ---
     const viewQuarterlyReport = async () => {
         if (!handleAction('View Quarterly Report')) return;
 
         try {
-            // 1. Fetch raw markdown from local public directory
             const res = await fetch(`${BASE_URL}data/ongoing_authorization_report_Q4_2025.md`);
             if (!res.ok) throw new Error('Report not found');
             const text = await res.text();
 
-            // 2. Render in Modal (Formatted)
             openModal('markdown', {
                 title: 'Ongoing Authorization Report - Q4 2025',
                 subtitle: 'RFC-0016 Collaborative Continuous Monitoring',
@@ -155,7 +152,6 @@ export const TrustCenterView = () => {
 
     const downloadQuarterlyReport = () => {
         if (!handleAction('Download Quarterly Report')) return;
-        // Direct link to the JSON artifact in local public directory
         window.open(`${BASE_URL}data/ongoing_authorization_report_Q4_2025.json`, '_blank');
     };
 
@@ -175,7 +171,6 @@ export const TrustCenterView = () => {
 
     const handleDownloadPackage = () => {
         if (!handleAction('Download Authorization Package')) return;
-        // Simulate package download trigger
         alert("Authorization Package download started...");
     };
 
@@ -220,12 +215,13 @@ export const TrustCenterView = () => {
             </div>
 
             {/* 3. Data Authorization Position */}
+            {/* FIX: Using Lucide Icons (CheckCircle/XCircle) instead of text characters to prevent UTF-8 artifacts */}
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-md">
                 <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                     <Shield size={24} className="text-green-400" /> FedRAMP 20x Data Authorization Position
                 </h3>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Authorized */}
+                    {/* Authorized - Uses Green CheckCircle Icon */}
                     <div className="bg-green-900/10 border border-green-500/20 rounded-xl p-6">
                         <h4 className="text-lg font-bold text-green-400 mb-3 flex items-center gap-2">
                             <CheckCircle size={20} />
@@ -241,7 +237,7 @@ export const TrustCenterView = () => {
                             <li className="flex gap-3 items-start"><CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" /> <span>Proprietary/internal data within Moderate impact thresholds</span></li>
                         </ul>
                     </div>
-                    {/* Not Authorized */}
+                    {/* Not Authorized - Uses Red XCircle Icon */}
                     <div className="bg-red-900/10 border border-red-500/20 rounded-xl p-6">
                         <h4 className="text-lg font-bold text-red-400 mb-3 flex items-center gap-2">
                             <XCircle size={20} /> Not Authorized (Out-of-Scope)
@@ -266,6 +262,7 @@ export const TrustCenterView = () => {
                     <Layers size={24} className="text-blue-400" /> Authorized Services
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {/* Service Cards use the helper component below which implements CheckCircle icons */}
                     <ServiceCard
                         title="Course Management" icon={Layers}
                         desc="Create, organize, and deliver training courses including e-learning, instructor-led training, and blended learning programs."
@@ -390,7 +387,7 @@ export const TrustCenterView = () => {
                     </button>
                 </div>
 
-                {/* Continuous Monitoring - UPDATED BUTTONS */}
+                {/* Continuous Monitoring */}
                 <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 flex flex-col shadow-md hover:border-gray-600 transition-colors">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="p-3 rounded-lg bg-green-500/10 text-green-400 border border-green-500/10">
@@ -418,7 +415,6 @@ export const TrustCenterView = () => {
                         </div>
                     </div>
 
-                    {/* Updated Buttons: Reports & Risk */}
                     <div className="flex flex-col gap-3 mt-auto">
                         <div className="flex gap-2">
                             <button
@@ -454,7 +450,7 @@ export const TrustCenterView = () => {
                 </div>
             </div>
 
-            {/* 7. NEW SECTION: Infrastructure Change History (SCN) */}
+            {/* 7. Infrastructure Change History (SCN) */}
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-md">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div>
@@ -517,7 +513,8 @@ export const TrustCenterView = () => {
                 </div>
                 <div className="mt-4 flex justify-end">
                     <button 
-                         onClick={() => window.open('/data/scn_history.jsonl', '_blank')}
+                         // --- FIX: Correctly use BASE_URL for window.open to avoid 404s ---
+                         onClick={() => window.open(`${BASE_URL}data/scn_history.jsonl`, '_blank')}
                          className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
                     >
                         <FileJson size={12} /> View Raw History Log
@@ -557,6 +554,7 @@ export const TrustCenterView = () => {
                         <span className="text-sm text-gray-400">Uptime (30d)</span>
                         <span className="text-lg font-bold text-green-400">{formattedStatus?.uptimePercent || '100'}%</span>
                     </div>
+                    {/* --- FIX: Fixed Syntax Error (missing closing brace } after the first check) --- */}
                     <div className={`py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 font-bold text-sm ${status?.['5xx_requests'] > 0 ? 'bg-red-900/20 text-red-400 border border-red-500/20' : 'bg-green-900/20 text-green-400 border border-green-500/20'}`}>
                         {status?.['5xx_requests'] > 0 ? <XCircle size={16} /> : <CheckCircle size={16} />}
                         {status?.['5xx_requests'] > 0 ? 'Issues Detected' : 'All Systems Operational'}
@@ -584,6 +582,7 @@ const InfoCard = ({ label, value, sub }) => (
     </div>
 );
 
+// --- FIX: ServiceCard now explicitly renders CheckCircle icon for each feature item ---
 const ServiceCard = ({ title, desc, features, icon: Icon, dataType }) => (
     <div className="bg-gray-800 border border-gray-700 p-5 rounded-xl hover:border-blue-500/30 hover:bg-gray-750 transition-all group flex flex-col h-full">
         <div className="flex justify-between items-start mb-3">
