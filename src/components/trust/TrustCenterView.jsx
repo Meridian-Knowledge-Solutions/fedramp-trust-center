@@ -9,28 +9,39 @@ import {
     Clock, CheckCircle2, Mail, Phone, Globe, Lock, Server, Activity,
     XCircle, CheckCircle, Layers, Database, Users, BarChart, BookOpen,
     Bell, Code, Settings, Info, Terminal, FileJson, Zap, MessageSquare,
-    GitCommit, RefreshCw, AlertTriangle
+    GitCommit, RefreshCw, AlertTriangle, Landmark
 } from 'lucide-react';
 
 export const TrustCenterView = () => {
     const { isAuthenticated, user } = useAuth();
     const { openModal } = useModal();
     const { status } = useSystemStatus();
-    const formattedStatus = formatStatus(status);
+    // We don't need formatStatus anymore if we are using raw values
     const [nextReportDate, setNextReportDate] = useState(null);
 
     // --- FIX: SAFE BASE URL HANDLING ---
-    // Ensures file paths work regardless of deployment subdirectory (e.g., GitHub Pages)
     const rawBase = import.meta.env.BASE_URL || '/';
     const BASE_URL = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
     const [scnHistory, setScnHistory] = useState([]);
 
+    // --- LIVE METRICS EXTRACTION ---
+    // Safely extract raw values from the API response
+    const uptime = status?.uptime_percent ? `${parseFloat(status.uptime_percent).toFixed(2)}%` : 'Loading...';
+    const latency = status?.avg_latency || '...';
+    const totalRequests = status?.total_requests || '...';
+
+    // Determine health (Green/Red) based on 5xx errors
+    const errorCount = parseInt(status?.['5xx_requests'] || '0');
+    const isHealthy = status && errorCount === 0;
+    const healthLabel = isHealthy ? 'Operational' : (status ? 'Issues Detected' : 'Checking Status...');
+    const healthColor = isHealthy ? 'text-green-400' : (status ? 'text-red-400' : 'text-gray-400');
+    const healthBg = isHealthy ? 'bg-green-400' : (status ? 'bg-red-400' : 'bg-gray-400');
+
     useEffect(() => {
         const fetchData = async () => {
             // 1. Fetch Report Schedule
             try {
-                // Uses BASE_URL to correctly locate files in public/data/
                 const res = await fetch(`${BASE_URL}data/next_report_date.json`);
                 if (res.ok) {
                     const data = await res.json();
@@ -51,17 +62,15 @@ export const TrustCenterView = () => {
 
             // 2. Fetch SCN History
             try {
-                // Uses BASE_URL to correctly locate files in public/data/
                 const res = await fetch(`${BASE_URL}data/scn_history.jsonl`);
                 if (res.ok) {
                     const text = await res.text();
-                    // Parse JSONL: Split by newline, filter empty, parse JSON
                     const parsed = text
                         .split('\n')
                         .filter(line => line.trim() !== '')
                         .map(line => JSON.parse(line))
-                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Newest first
-                        .slice(0, 5); // Show last 5 entries
+                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                        .slice(0, 5);
                     setScnHistory(parsed);
                 }
             } catch (e) {
@@ -89,16 +98,14 @@ export const TrustCenterView = () => {
 
     const openApiDocs = () => window.open('https://meridian-knowledge-solutions.github.io/fedramp-20x-public/documentation/api/', '_blank');
 
-    // --- SECURE CONFIG HANDLERS ---
+    // --- HANDLERS ---
     const viewSecureConfig = async () => {
         if (!handleAction('View Secure Configuration')) return;
-
         try {
             const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`;
             const res = await fetch(url);
             if (!res.ok) throw new Error('Failed to load configuration');
             const text = await res.text();
-
             openModal('markdown', {
                 title: 'FedRAMP 20x Secure Configuration Standards',
                 subtitle: 'Hardened Baselines (CIS/STIG)',
@@ -116,7 +123,6 @@ export const TrustCenterView = () => {
             const res = await fetch(url);
             if (!res.ok) throw new Error('Failed to download configuration');
             const text = await res.text();
-
             const blob = new Blob([text], { type: 'text/markdown' });
             const downloadUrl = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -131,15 +137,12 @@ export const TrustCenterView = () => {
         }
     };
 
-    // --- QUARTERLY REPORT HANDLERS ---
     const viewQuarterlyReport = async () => {
         if (!handleAction('View Quarterly Report')) return;
-
         try {
             const res = await fetch(`${BASE_URL}data/ongoing_authorization_report_Q4_2025.md`);
             if (!res.ok) throw new Error('Report not found');
             const text = await res.text();
-
             openModal('markdown', {
                 title: 'Ongoing Authorization Report - Q4 2025',
                 subtitle: 'RFC-0016 Collaborative Continuous Monitoring',
@@ -169,19 +172,14 @@ export const TrustCenterView = () => {
         window.open(`mailto:fedramp_20x@meridianks.com?subject=${subject}&body=${body}`);
     };
 
-    // --- UPDATED: REAL DOWNLOAD LOGIC (No Alert Placeholder) ---
     const handleDownloadPackage = async () => {
         if (!handleAction('Download Authorization Package')) return;
-
         try {
-            // Retrieve JWT token using key from API_CONFIG
             const token = localStorage.getItem(API_CONFIG.TOKEN_KEY);
             if (!token) {
                 alert("Session expired. Please log in again.");
                 return;
             }
-
-            // Call API Gateway to get Pre-signed URL
             const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PACKAGE_DOWNLOAD}`, {
                 method: 'GET',
                 headers: {
@@ -189,15 +187,11 @@ export const TrustCenterView = () => {
                     'Content-Type': 'application/json'
                 }
             });
-
             if (!response.ok) {
                 if (response.status === 403) throw new Error("Access Denied. Please ensure your account is verified.");
                 throw new Error(`API Error: ${response.status}`);
             }
-
             const data = await response.json();
-
-            // Trigger Browser Download
             if (data.url) {
                 const link = document.createElement('a');
                 link.href = data.url;
@@ -208,7 +202,6 @@ export const TrustCenterView = () => {
             } else {
                 throw new Error("No download URL returned from API.");
             }
-
         } catch (error) {
             console.error("Download failed:", error);
             alert(`Failed to download: ${error.message}. Please check your connection or CORS settings.`);
@@ -218,21 +211,62 @@ export const TrustCenterView = () => {
     return (
         <div className="-m-6 p-8 bg-[#151618] min-h-full rounded-xl space-y-8 text-gray-300">
 
-            {/* 1. Hero Header */}
+            {/* 1. Hero Header & Live Status Bar */}
             <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-950 via-slate-900 to-slate-950 p-8 border border-blue-900/30 shadow-xl">
-                <div className="absolute top-0 right-0 -mt-4 -mr-4 opacity-5">
-                    <Shield size={300} className="text-white" />
+                {/* Background Watermark - Changed to Landmark */}
+                <div className="absolute top-0 right-0 -mt-4 -mr-4 opacity-5 pointer-events-none">
+                    <Landmark size={300} strokeWidth={1} className="text-white" />
                 </div>
-                <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
-                    <div className="p-4 bg-blue-500/10 rounded-2xl border border-blue-400/20 backdrop-blur-sm shadow-inner">
-                        <Shield size={48} className="text-blue-400" />
+
+                <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-8">
+                    {/* Title Section */}
+                    <div className="flex items-center gap-6">
+                        {/* Main Logo - Changed to Landmark with thinner stroke */}
+                        <div className="p-4 bg-blue-500/10 rounded-2xl border border-blue-400/20 backdrop-blur-sm shadow-inner hidden md:block">
+                            <Landmark size={48} strokeWidth={1.5} className="text-blue-400" />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-bold text-white tracking-tight mb-2">FedRAMP Trust Center</h1>
+
+                            {/* LIVE SYSTEM STATUS BAR */}
+                            <div className="flex flex-wrap items-center gap-4 text-sm font-medium bg-black/20 p-2 rounded-lg border border-white/5 backdrop-blur-sm">
+                                {/* Uptime */}
+                                <div className="flex items-center gap-2 px-2" title="System Uptime (30d)">
+                                    <Activity size={14} className="text-green-400" />
+                                    <span className="text-white font-mono">{uptime}</span>
+                                    <span className="opacity-60 text-xs uppercase tracking-wide">Uptime</span>
+                                </div>
+                                {/* Divider */}
+                                <div className="w-px h-4 bg-white/10 hidden sm:block"></div>
+                                {/* Latency */}
+                                <div className="flex items-center gap-2 px-2" title="Average API Latency">
+                                    <Zap size={14} className="text-yellow-400" />
+                                    <span className="text-white font-mono">{latency}</span>
+                                    <span className="opacity-60 text-xs uppercase tracking-wide">Latency</span>
+                                </div>
+                                {/* Divider */}
+                                <div className="w-px h-4 bg-white/10 hidden sm:block"></div>
+                                {/* Requests */}
+                                <div className="flex items-center gap-2 px-2" title="Total Requests (1h)">
+                                    <Globe size={14} className="text-blue-400" />
+                                    <span className="text-white font-mono">{totalRequests}</span>
+                                    <span className="opacity-60 text-xs uppercase tracking-wide">Reqs/Hr</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">FedRAMP Trust Center</h1>
-                        <p className="text-blue-200/70 mt-2 text-lg">Authorization Artifacts & Continuous Monitoring</p>
+
+                    {/* Operational Badge & Auth Status */}
+                    <div className="flex flex-col items-start xl:items-end gap-3">
+                        <div className={`flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-md ${isHealthy ? 'bg-green-500/10 border-green-500/30' : 'bg-gray-800 border-gray-700'}`}>
+                            <div className={`w-2 h-2 rounded-full animate-pulse ${healthBg}`} />
+                            <span className={`text-xs font-bold uppercase tracking-wider ${healthColor}`}>
+                                {healthLabel}
+                            </span>
+                        </div>
                         {isAuthenticated && (
-                            <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold uppercase tracking-wider">
-                                <CheckCircle2 size={14} />
+                            <div className="text-xs text-blue-300/60 flex items-center gap-1.5 px-1">
+                                <CheckCircle2 size={12} /> Verified Federal Access
                             </div>
                         )}
                     </div>
@@ -261,7 +295,7 @@ export const TrustCenterView = () => {
                     <Shield size={24} className="text-green-400" /> FedRAMP 20x Data Authorization Position
                 </h3>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Authorized - Uses Green CheckCircle Icon */}
+                    {/* Authorized */}
                     <div className="bg-green-900/10 border border-green-500/20 rounded-xl p-6">
                         <h4 className="text-lg font-bold text-green-400 mb-3 flex items-center gap-2">
                             <CheckCircle size={20} />
@@ -277,7 +311,7 @@ export const TrustCenterView = () => {
                             <li className="flex gap-3 items-start"><CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0" /> <span>Proprietary/internal data within Moderate impact thresholds</span></li>
                         </ul>
                     </div>
-                    {/* Not Authorized - Uses Red XCircle Icon */}
+                    {/* Not Authorized */}
                     <div className="bg-red-900/10 border border-red-500/20 rounded-xl p-6">
                         <h4 className="text-lg font-bold text-red-400 mb-3 flex items-center gap-2">
                             <XCircle size={20} /> Not Authorized (Out-of-Scope)
@@ -302,73 +336,17 @@ export const TrustCenterView = () => {
                     <Layers size={24} className="text-blue-400" /> Authorized Services
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {/* Service Cards use the helper component below which implements CheckCircle icons */}
-                    <ServiceCard
-                        title="Course Management" icon={Layers}
-                        desc="Create, organize, and deliver training courses including e-learning, instructor-led training, and blended learning programs."
-                        features={["Course catalog management", "SCORM/AICC/xAPI support", "Video/Multimedia delivery", "Mobile-responsive player"]}
-                        dataType="Course materials, training videos, SCORM packages, learner progress"
-                    />
-                    <ServiceCard
-                        title="User Management" icon={Users}
-                        desc="Manage user accounts, roles, and secure access with support for single sign-on and multi-factor authentication."
-                        features={["SSO via SAML 2.0", "MFA Support", "Role-based access (RBAC)", "User hierarchies & profiles"]}
-                        dataType="User profiles, auth credentials, role assignments"
-                    />
-                    <ServiceCard
-                        title="Assessment & Testing" icon={FileText}
-                        desc="Create and deliver assessments, quizzes, exams, and surveys to measure learner competency."
-                        features={["Quiz/Exam creation", "Automated grading", "Question banks", "Competency tracking"]}
-                        dataType="Assessment Q&A, test scores, survey responses"
-                    />
-                    <ServiceCard
-                        title="Compliance Tracking" icon={Shield}
-                        desc="Track training compliance requirements, generate regulatory reports, and monitor workforce readiness."
-                        features={["Automated compliance alerts", "Rules engine assignment", "21 CFR Part 11 support", "Audit trails"]}
-                        dataType="Completion records, compliance status, audit logs"
-                    />
-                    <ServiceCard
-                        title="Reporting & Analytics" icon={BarChart}
-                        desc="Generate comprehensive reports and analyze training data with customizable dashboards and data exports."
-                        features={["Real-time analytics", "Custom templates", "Scheduled delivery", "Trend analysis"]}
-                        dataType="Aggregated training data, performance metrics, reports"
-                    />
-                    <ServiceCard
-                        title="Learning Record Store" icon={Database}
-                        desc="Native xAPI-compliant learning record store for capturing and storing detailed learning activity data."
-                        features={["xAPI statement capture", "Cross-platform tracking", "Statement forwarding", "Learning analytics"]}
-                        dataType="xAPI statements, learning activity records"
-                    />
-                    <ServiceCard
-                        title="Career Development" icon={BookOpen}
-                        desc="Enable employees to explore career paths, track professional development, and plan skill progression."
-                        features={["Career Explorer tool", "Learning path creation", "Skills gap analysis", "IDP tracking"]}
-                        dataType="Career progression data, skill inventories, development plans"
-                    />
-                    <ServiceCard
-                        title="Notifications" icon={Bell}
-                        desc="Automated email notifications, reminders, and in-application messaging to keep learners engaged."
-                        features={["Automated assignments", "Deadline reminders", "Customizable templates", "Manager notifications"]}
-                        dataType="Email addresses, notification content, user preferences"
-                    />
-                    <ServiceCard
-                        title="API & Integrations" icon={Code}
-                        desc="RESTful API access for integrating with HRIS, talent management, and other enterprise systems."
-                        features={["REST API access", "Webhook support", "OAuth 2.0 auth", "HRIS integration"]}
-                        dataType="API requests/responses, integration data, tokens"
-                    />
-                    <ServiceCard
-                        title="Content Authoring" icon={FileText}
-                        desc="Built-in tools for creating training content, assessments, and learning materials without external software."
-                        features={["Web course builder", "Multimedia upload", "Version control", "Content templates"]}
-                        dataType="Authored content, multimedia files, version history"
-                    />
-                    <ServiceCard
-                        title="Administrative Console" icon={Settings}
-                        desc="Comprehensive administrative interface for system configuration, user management, and platform oversight."
-                        features={["System config", "Bulk operations", "System health", "Audit log viewing"]}
-                        dataType="System configuration, admin actions, system logs"
-                    />
+                    <ServiceCard title="Course Management" icon={Layers} desc="Create, organize, and deliver training courses including e-learning, instructor-led training, and blended learning programs." features={["Course catalog management", "SCORM/AICC/xAPI support", "Video/Multimedia delivery", "Mobile-responsive player"]} dataType="Course materials, training videos, SCORM packages, learner progress" />
+                    <ServiceCard title="User Management" icon={Users} desc="Manage user accounts, roles, and secure access with support for single sign-on and multi-factor authentication." features={["SSO via SAML 2.0", "MFA Support", "Role-based access (RBAC)", "User hierarchies & profiles"]} dataType="User profiles, auth credentials, role assignments" />
+                    <ServiceCard title="Assessment & Testing" icon={FileText} desc="Create and deliver assessments, quizzes, exams, and surveys to measure learner competency." features={["Quiz/Exam creation", "Automated grading", "Question banks", "Competency tracking"]} dataType="Assessment Q&A, test scores, survey responses" />
+                    <ServiceCard title="Compliance Tracking" icon={Shield} desc="Track training compliance requirements, generate regulatory reports, and monitor workforce readiness." features={["Automated compliance alerts", "Rules engine assignment", "21 CFR Part 11 support", "Audit trails"]} dataType="Completion records, compliance status, audit logs" />
+                    <ServiceCard title="Reporting & Analytics" icon={BarChart} desc="Generate comprehensive reports and analyze training data with customizable dashboards and data exports." features={["Real-time analytics", "Custom templates", "Scheduled delivery", "Trend analysis"]} dataType="Aggregated training data, performance metrics, reports" />
+                    <ServiceCard title="Learning Record Store" icon={Database} desc="Native xAPI-compliant learning record store for capturing and storing detailed learning activity data." features={["xAPI statement capture", "Cross-platform tracking", "Statement forwarding", "Learning analytics"]} dataType="xAPI statements, learning activity records" />
+                    <ServiceCard title="Career Development" icon={BookOpen} desc="Enable employees to explore career paths, track professional development, and plan skill progression." features={["Career Explorer tool", "Learning path creation", "Skills gap analysis", "IDP tracking"]} dataType="Career progression data, skill inventories, development plans" />
+                    <ServiceCard title="Notifications" icon={Bell} desc="Automated email notifications, reminders, and in-application messaging to keep learners engaged." features={["Automated assignments", "Deadline reminders", "Customizable templates", "Manager notifications"]} dataType="Email addresses, notification content, user preferences" />
+                    <ServiceCard title="API & Integrations" icon={Code} desc="RESTful API access for integrating with HRIS, talent management, and other enterprise systems." features={["REST API access", "Webhook support", "OAuth 2.0 auth", "HRIS integration"]} dataType="API requests/responses, integration data, tokens" />
+                    <ServiceCard title="Content Authoring" icon={FileText} desc="Built-in tools for creating training content, assessments, and learning materials without external software." features={["Web course builder", "Multimedia upload", "Version control", "Content templates"]} dataType="Authored content, multimedia files, version history" />
+                    <ServiceCard title="Administrative Console" icon={Settings} desc="Comprehensive administrative interface for system configuration, user management, and platform oversight." features={["System config", "Bulk operations", "System health", "Audit log viewing"]} dataType="System configuration, admin actions, system logs" />
                 </div>
             </div>
 
@@ -397,7 +375,7 @@ export const TrustCenterView = () => {
 
             {/* 6. Downloads & Monitoring Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Authorization Package */}
+                {/* Authorization Package - UPDATED FOR 20x */}
                 <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 flex flex-col shadow-md hover:border-gray-600 transition-colors">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="p-3 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/10">
@@ -405,22 +383,35 @@ export const TrustCenterView = () => {
                         </div>
                         <div>
                             <h3 className="text-xl font-bold text-white">Authorization Package</h3>
-                            <div className="text-xs text-gray-400">SSP, SAR, POA&M, Evidence</div>
+                            <div className="text-xs text-gray-400">Complete Evidence & Documentation</div>
                         </div>
                     </div>
-                    <div className="space-y-4 mb-8 flex-1">
-                        <div className="flex justify-between items-center py-3 border-b border-gray-700/50">
-                            <span className="text-sm text-gray-400">System Security Plan (SSP)</span>
-                            <span className="text-xs font-mono text-gray-500 bg-gray-900 px-2 py-0.5 rounded">v2.4</span>
+
+                    {/* FedRAMP 20x Compliance Badge (Replaces old SSP text) */}
+                    <div className="bg-gray-900/50 rounded-lg p-4 mb-8 border border-gray-700/50">
+                        <div className="flex items-center gap-3 mb-3">
+                            <Shield size={18} className="text-blue-400" />
+                            <span className="text-sm font-bold text-white uppercase tracking-wider">FedRAMP 20x Compliant</span>
                         </div>
-                        <div className="flex justify-between items-center py-3 border-b border-gray-700/50">
-                            <span className="text-sm text-gray-400">Security Assessment Report</span>
-                            <span className="text-xs font-mono text-gray-500 bg-gray-900 px-2 py-0.5 rounded">Q3 2025</span>
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div className="flex items-center gap-2 text-gray-300">
+                                <CheckCircle2 size={12} className="text-green-500" /> Machine Readable
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-300">
+                                <CheckCircle2 size={12} className="text-green-500" /> Continuous Validation
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-300">
+                                <CheckCircle2 size={12} className="text-green-500" /> Automated Evidence
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-300">
+                                <CheckCircle2 size={12} className="text-green-500" /> OSCAL Ready
+                            </div>
                         </div>
                     </div>
+
                     <button
                         onClick={handleDownloadPackage}
-                        className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-lg shadow-blue-900/20"
+                        className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-lg shadow-blue-900/20 mt-auto"
                     >
                         {isAuthenticated ? <Download size={18} /> : <Lock size={18} />}
                         Download Full Package
@@ -562,7 +553,7 @@ export const TrustCenterView = () => {
             </div>
 
             {/* 8. Technical Resources */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 flex flex-col shadow-md hover:border-gray-600 transition-colors">
                     <div className="flex items-center gap-4 mb-4">
                         <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/10"><Code size={20} /></div>
@@ -581,21 +572,6 @@ export const TrustCenterView = () => {
                     <div className="flex gap-2">
                         <button onClick={viewSecureConfig} className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors border border-gray-600 text-sm">View Standards</button>
                         <button onClick={downloadSecureConfig} className="flex-1 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-orange-900/20 text-sm">Download</button>
-                    </div>
-                </div>
-
-                <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 flex flex-col shadow-md hover:border-gray-600 transition-colors">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/10"><Zap size={20} /></div>
-                        <div><h3 className="text-lg font-bold text-white">System Status</h3><div className="text-xs text-gray-400">Availability</div></div>
-                    </div>
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm text-gray-400">Uptime (30d)</span>
-                        <span className="text-lg font-bold text-green-400">{formattedStatus?.uptimePercent || '100'}%</span>
-                    </div>
-                    <div className={`py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 font-bold text-sm ${status?.['5xx_requests'] > 0 ? 'bg-red-900/20 text-red-400 border border-red-500/20' : 'bg-green-900/20 text-green-400 border border-green-500/20'}`}>
-                        {status?.['5xx_requests'] > 0 ? <XCircle size={16} /> : <CheckCircle size={16} />}
-                        {status?.['5xx_requests'] > 0 ? 'Issues Detected' : 'All Systems Operational'}
                     </div>
                 </div>
             </div>
