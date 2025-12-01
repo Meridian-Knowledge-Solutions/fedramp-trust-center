@@ -40,10 +40,10 @@ const SidebarHeader = () => (
     <div className="flex items-center font-bold text-xl text-white tracking-tight gap-3">
       {/* Using the uploaded favicon as the logo */}
       <img
-       src={`${import.meta.env.BASE_URL}meridian-favicon.png`}
-       alt="Meridian Logo"
-       className="w-8 h-8 rounded"
-       onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }} 
+        src={`${import.meta.env.BASE_URL}meridian-favicon.png`}
+        alt="Meridian Logo"
+        className="w-8 h-8 rounded"
+        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
       />
       {/* Fallback Icon if image fails to load */}
       <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center hidden">
@@ -93,10 +93,39 @@ const StatsCard = ({ title, value, subtext, trend, color, icon: Icon, chartPoint
 const ImpactBanner = () => {
   const { metadata } = useData();
 
+  // Verify we're loading live data
+  React.useEffect(() => {
+    if (metadata) {
+      console.log('📊 DATA VERIFICATION CHECK (Impact Banner):');
+      console.log('  Validation Date:', metadata.validation_date);
+      console.log('  Time Since Validation:', metadata.validation_date
+        ? `${Math.round((Date.now() - new Date(metadata.validation_date).getTime()) / 60000)} minutes ago`
+        : 'N/A'
+      );
+      console.log('  Pass Rate:', metadata.pass_rate);
+      console.log('  Total Validated:', metadata.total_validated);
+      console.log('  Passed:', metadata.passed);
+      console.log('  Failed:', metadata.failed);
+
+      // Alert if data seems stale (older than 48 hours)
+      if (metadata.validation_date) {
+        const ageInHours = (Date.now() - new Date(metadata.validation_date).getTime()) / 3600000;
+        if (ageInHours > 48) {
+          console.warn(`⚠️ WARNING: Validation data is ${Math.round(ageInHours)} hours old - may be stale!`);
+        } else {
+          console.log(`✅ Data freshness: ${Math.round(ageInHours)} hours old (within acceptable range)`);
+        }
+      }
+    }
+  }, [metadata]);
+
   if (!metadata) return null;
 
-  const lastRunDate = new Date(metadata.validation_date);
+  const lastRunDate = metadata.validation_date ? new Date(metadata.validation_date) : new Date(Date.now() - 86400000);
   const nextRunDate = new Date(lastRunDate.getTime() + (6 * 60 * 60 * 1000));
+
+  // Calculate data age for display
+  const dataAgeMinutes = Math.round((Date.now() - lastRunDate.getTime()) / 60000);
 
   const formatDate = (date) => date.toLocaleString('en-US', {
     month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'
@@ -153,6 +182,20 @@ const ImpactBanner = () => {
         <div className="flex items-center gap-2 justify-end">
           Last Run: <span className="text-gray-300 font-mono">{formatDate(lastRunDate)}</span> <Clock size={12} />
         </div>
+        {dataAgeMinutes !== null && (
+          <div className={`flex items-center gap-2 justify-end text-[10px] font-medium ${dataAgeMinutes < 120 ? 'text-green-400' :
+              dataAgeMinutes < 1440 ? 'text-yellow-400' :
+                'text-red-400'
+            }`}>
+            Data Age: {dataAgeMinutes < 60
+              ? `${dataAgeMinutes}m`
+              : dataAgeMinutes < 1440
+                ? `${Math.round(dataAgeMinutes / 60)}h`
+                : `${Math.round(dataAgeMinutes / 1440)}d`
+            }
+            {dataAgeMinutes >= 1440 && ' ⚠️'}
+          </div>
+        )}
         <div className="flex items-center gap-2 justify-end">
           Next Run: <span className="text-gray-300 font-mono">{formatDate(nextRunDate)}</span> <Calendar size={12} />
         </div>

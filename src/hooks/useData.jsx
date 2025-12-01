@@ -3,7 +3,6 @@ import { Sanitizer } from '../utils/sanitizer';
 
 const DataContext = createContext();
 
-// Files are in public/data/ subdirectory
 const REPO_BASE = `${import.meta.env.BASE_URL}data`;
 
 export const DataProvider = ({ children }) => {
@@ -53,7 +52,12 @@ export const DataProvider = ({ children }) => {
       try {
         // Cache buster to force fresh data
         const cacheBuster = new Date().getTime();
-        console.log(`🔄 Fetching live data from: ${REPO_BASE} (cache buster: ${cacheBuster})`);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('🔄 DATA LOAD INITIATED');
+        console.log(`📍 Base URL: ${REPO_BASE}`);
+        console.log(`🕐 Cache Buster: ${cacheBuster}`);
+        console.log(`📅 Request Time: ${new Date().toISOString()}`);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
         // 1. Fetch Live Data from GitHub Raw (public/data/ path) with cache busting
         const [valRes, regRes, histRes] = await Promise.all([
@@ -83,6 +87,11 @@ export const DataProvider = ({ children }) => {
           })
         ]);
 
+        console.log('📥 FETCH RESULTS:');
+        console.log(`  ✓ Validations: ${valRes.ok ? '✅ OK' : '❌ FAILED'} (${valRes.status})`);
+        console.log(`  ✓ Register: ${regRes.ok ? '✅ OK' : '❌ FAILED'} (${regRes.status})`);
+        console.log(`  ✓ History: ${histRes.ok ? '✅ OK' : '❌ FAILED'} (${histRes.status})`);
+
         // --- PROCESS HISTORY ---
         if (histRes.ok) {
           const text = await histRes.text();
@@ -101,9 +110,10 @@ export const DataProvider = ({ children }) => {
           if (Array.isArray(historyData)) {
             const sorted = historyData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             setHistory(sorted);
+            console.log(`📊 History loaded: ${sorted.length} entries`);
           }
         } else {
-          console.warn('History file not available, using fallback');
+          console.warn('⚠️ History file not available, using fallback');
           // Fail-safe history
           setHistory([
             { timestamp: new Date(Date.now() - 86400000).toISOString(), compliance_rate: 0 },
@@ -115,12 +125,42 @@ export const DataProvider = ({ children }) => {
         if (!valRes.ok) throw new Error('Failed to load validations from GitHub');
 
         const validationData = await valRes.json();
-        let registerData = {};
-        try { if (regRes.ok) registerData = await regRes.json(); } catch (e) { 
-          console.warn('CLI command register not available');
+
+        // Log metadata immediately after parsing
+        if (validationData.metadata) {
+          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+          console.log('📋 VALIDATION METADATA:');
+          console.log(`  📅 Validation Date: ${validationData.metadata.validation_date}`);
+          console.log(`  ✅ Passed: ${validationData.metadata.passed}/${validationData.metadata.total_validated}`);
+          console.log(`  ❌ Failed: ${validationData.metadata.failed}`);
+          console.log(`  📊 Pass Rate: ${validationData.metadata.pass_rate}`);
+          console.log(`  🎯 Impact Level: ${validationData.metadata.impact_level}`);
+
+          // Calculate and display data age
+          const validationDate = new Date(validationData.metadata.validation_date);
+          const ageMinutes = Math.round((Date.now() - validationDate.getTime()) / 60000);
+          const ageHours = Math.round(ageMinutes / 60);
+          console.log(`  ⏰ Data Age: ${ageMinutes}m (${ageHours}h)`);
+
+          if (ageHours > 24) {
+            console.warn(`  ⚠️ WARNING: Data is ${ageHours} hours old!`);
+          } else {
+            console.log(`  ✅ Data is fresh (< 24h old)`);
+          }
+          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+          setMetadata(validationData.metadata);
         }
 
-        if (validationData.metadata) setMetadata(validationData.metadata);
+        let registerData = {};
+        try {
+          if (regRes.ok) {
+            registerData = await regRes.json();
+            console.log(`📋 CLI Register loaded: ${Object.keys(registerData).length} entries`);
+          }
+        } catch (e) {
+          console.warn('⚠️ CLI command register not available');
+        }
 
         let rawValidations = [];
         if (validationData.validations) rawValidations = validationData.validations;
