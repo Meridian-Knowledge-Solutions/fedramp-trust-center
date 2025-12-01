@@ -9,7 +9,7 @@ import {
     Clock, CheckCircle2, Mail, Phone, Globe, Lock, Server, Activity,
     XCircle, CheckCircle, Layers, Database, Users, BarChart, BookOpen,
     Bell, Code, Settings, Info, Terminal, FileJson, Zap, MessageSquare,
-    GitCommit, RefreshCw, AlertTriangle 
+    GitCommit, RefreshCw, AlertTriangle
 } from 'lucide-react';
 
 export const TrustCenterView = () => {
@@ -18,12 +18,12 @@ export const TrustCenterView = () => {
     const { status } = useSystemStatus();
     const formattedStatus = formatStatus(status);
     const [nextReportDate, setNextReportDate] = useState(null);
-    
+
     // --- FIX: SAFE BASE URL HANDLING ---
     // Ensures file paths work regardless of deployment subdirectory (e.g., GitHub Pages)
     const rawBase = import.meta.env.BASE_URL || '/';
     const BASE_URL = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
-    
+
     const [scnHistory, setScnHistory] = useState([]);
 
     useEffect(() => {
@@ -169,9 +169,50 @@ export const TrustCenterView = () => {
         window.open(`mailto:fedramp_20x@meridianks.com?subject=${subject}&body=${body}`);
     };
 
-    const handleDownloadPackage = () => {
+    // --- UPDATED: REAL DOWNLOAD LOGIC (No Alert Placeholder) ---
+    const handleDownloadPackage = async () => {
         if (!handleAction('Download Authorization Package')) return;
-        alert("Authorization Package download started...");
+
+        try {
+            // Retrieve JWT token using key from API_CONFIG
+            const token = localStorage.getItem(API_CONFIG.TOKEN_KEY);
+            if (!token) {
+                alert("Session expired. Please log in again.");
+                return;
+            }
+
+            // Call API Gateway to get Pre-signed URL
+            const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PACKAGE_DOWNLOAD}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 403) throw new Error("Access Denied. Please ensure your account is verified.");
+                throw new Error(`API Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Trigger Browser Download
+            if (data.url) {
+                const link = document.createElement('a');
+                link.href = data.url;
+                link.setAttribute('download', 'meridian-fedramp-authorization-package.zip');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                throw new Error("No download URL returned from API.");
+            }
+
+        } catch (error) {
+            console.error("Download failed:", error);
+            alert(`Failed to download: ${error.message}. Please check your connection or CORS settings.`);
+        }
     };
 
     return (
@@ -215,7 +256,6 @@ export const TrustCenterView = () => {
             </div>
 
             {/* 3. Data Authorization Position */}
-            {/* FIX: Using Lucide Icons (CheckCircle/XCircle) instead of text characters to prevent UTF-8 artifacts */}
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-md">
                 <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                     <Shield size={24} className="text-green-400" /> FedRAMP 20x Data Authorization Position
@@ -512,10 +552,9 @@ export const TrustCenterView = () => {
                     )}
                 </div>
                 <div className="mt-4 flex justify-end">
-                    <button 
-                         // --- FIX: Correctly use BASE_URL for window.open to avoid 404s ---
-                         onClick={() => window.open(`${BASE_URL}data/scn_history.jsonl`, '_blank')}
-                         className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
+                    <button
+                        onClick={() => window.open(`${BASE_URL}data/scn_history.jsonl`, '_blank')}
+                        className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
                     >
                         <FileJson size={12} /> View Raw History Log
                     </button>
@@ -554,7 +593,6 @@ export const TrustCenterView = () => {
                         <span className="text-sm text-gray-400">Uptime (30d)</span>
                         <span className="text-lg font-bold text-green-400">{formattedStatus?.uptimePercent || '100'}%</span>
                     </div>
-                    {/* --- FIX: Fixed Syntax Error (missing closing brace } after the first check) --- */}
                     <div className={`py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 font-bold text-sm ${status?.['5xx_requests'] > 0 ? 'bg-red-900/20 text-red-400 border border-red-500/20' : 'bg-green-900/20 text-green-400 border border-green-500/20'}`}>
                         {status?.['5xx_requests'] > 0 ? <XCircle size={16} /> : <CheckCircle size={16} />}
                         {status?.['5xx_requests'] > 0 ? 'Issues Detected' : 'All Systems Operational'}
@@ -582,7 +620,6 @@ const InfoCard = ({ label, value, sub }) => (
     </div>
 );
 
-// --- FIX: ServiceCard now explicitly renders CheckCircle icon for each feature item ---
 const ServiceCard = ({ title, desc, features, icon: Icon, dataType }) => (
     <div className="bg-gray-800 border border-gray-700 p-5 rounded-xl hover:border-blue-500/30 hover:bg-gray-750 transition-all group flex flex-col h-full">
         <div className="flex justify-between items-start mb-3">
