@@ -397,7 +397,6 @@ const AppShell = () => {
               icon={ShieldAlert}
               label="Trust Center"
               isActive={activeView === 'trust'}
-              badge={{ text: "RFC-0016", color: "bg-blue-600 text-white" }}
               onClick={() => setActiveView('trust')}
             />
 
