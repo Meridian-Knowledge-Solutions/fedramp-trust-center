@@ -284,7 +284,7 @@ export const TrustCenterView = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <InfoCard label="Deployment Model" value="Multi-tenant SaaS" sub="Shared Infrastructure" />
                     <InfoCard label="Cloud Provider" value="AWS" sub="US-East-1" />
-                    <InfoCard label="Leveraged Auth" value="AWS FedRAMP High" sub="IaaS/PaaS" />
+                    <InfoCard label="Leveraged Auth" value="AWS FedRAMP Moderate" sub="IaaS/PaaS" />
                     <InfoCard label="Access Method" value="HTTPS" sub="Web Browser (Port 443)" />
                 </div>
             </div>
