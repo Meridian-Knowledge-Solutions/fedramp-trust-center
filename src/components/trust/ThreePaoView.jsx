@@ -13,11 +13,11 @@ import {
 } from 'recharts';
 
 // --- CONFIGURATION ---
-const IS_DEV = import.meta.env.DEV;
-const REPO_OWNER = "Meridian-Knowledge-Solutions";
-const REPO_NAME = "fedramp-20x-submission-final";
-const TAG_NAME = "latest-compliance-data";
-const REMOTE_BASE_URL = `https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/download/${TAG_NAME}/`;
+// With Pipeline Injection, "Remote" files are now served locally 
+// from the /data/ folder in production too.
+const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
+    ? `${import.meta.env.BASE_URL}data/`
+    : `${import.meta.env.BASE_URL}/data/`;
 
 // --- THEME ENGINE ---
 const THEME = {
@@ -58,31 +58,38 @@ export const ThreePaoView = () => {
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
     const [selectedKSI, setSelectedKSI] = useState(null);
-    const [sourceInfo, setSourceInfo] = useState({ remote: 0, local: 0 });
+    const [sourceInfo, setSourceInfo] = useState({ type: 'Checking...' });
 
     useEffect(() => {
         const loadArtifacts = async () => {
             setLoading(true);
 
-            let baseUrl = '';
-            if (IS_DEV) {
-                const rawBase = import.meta.env.BASE_URL || '/';
-                baseUrl = rawBase.endsWith('/') ? `${rawBase}data/` : `${rawBase}/data/`;
-            } else {
-                baseUrl = REMOTE_BASE_URL;
-            }
+            // Source is always "Pipeline Injected" now (Local Fetch)
+            setSourceInfo({ type: 'Secure Pipeline Injection' });
 
             const safeFetch = async (filename, isText = false) => {
-                const url = `${baseUrl}${filename}`;
+                const url = `${BASE_PATH}${filename}`;
                 try {
                     const res = await fetch(url);
-                    if (!res.ok) return null;
+                    if (!res.ok) {
+                        console.warn(`Fetch failed: ${filename} (${res.status})`);
+                        return null;
+                    }
+
                     const text = await res.text();
-                    if (text.trim().toLowerCase().startsWith('<!doctype html')) return null;
+
+                    // Reject HTML (404) responses
+                    if (text.trim().toLowerCase().startsWith('<!doctype html')) {
+                        return null;
+                    }
+
                     if (isText) return text;
                     if (text.trim().startsWith('<')) return null;
+
                     return JSON.parse(text);
-                } catch { return null; }
+                } catch (e) {
+                    return null;
+                }
             };
 
             try {
@@ -93,7 +100,7 @@ export const ThreePaoView = () => {
                     safeFetch('ksi_logic.json'),
                     safeFetch('fingerprint_cache.json'),
                     safeFetch('ksi-command-validation-reference.md', true),
-                    safeFetch('cli_command_register.json')
+                    safeFetch('cli_command_register.json') // Now injected!
                 ]);
 
                 setData({
@@ -115,7 +122,19 @@ export const ThreePaoView = () => {
     }, []);
 
     if (loading) return <div className="min-h-screen bg-[#0b0c10] flex items-center justify-center text-slate-500">Initializing Assessor Console...</div>;
-    if (!data?.report) return <div className="min-h-screen bg-[#0b0c10] flex items-center justify-center text-rose-500">Authorization Package Unavailable</div>;
+
+    // Critical Failure State
+    if (!data?.report) return (
+        <div className="min-h-screen bg-[#0b0c10] flex flex-col items-center justify-center text-slate-500 p-6">
+            <div className="bg-rose-900/20 p-4 rounded-full mb-4 text-rose-500"><AlertTriangle size={48} /></div>
+            <h3 className="text-xl font-bold text-white mb-2">Authorization Package Unavailable</h3>
+            <p className="max-w-md text-center mb-6">
+                The system could not retrieve the assessment artifacts.
+                <br /><span className="text-xs opacity-50">Target: {BASE_PATH}</span>
+            </p>
+            <button onClick={() => window.location.reload()} className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors">Retry Connection</button>
+        </div>
+    );
 
     const handleInspect = (ksiId) => {
         let logic = data.logicDefs?.[ksiId] || data.logicDefs?.[ksiId.replace(/-/g, '_')];
@@ -138,7 +157,21 @@ export const ThreePaoView = () => {
                 <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-indigo-500/10 rounded-lg border border-indigo-500/20 text-indigo-400"><ShieldCheck size={24} /></div>
+                            {/* UPDATED LOGO HANDLING */}
+                            <div className="w-12 h-12 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-2 relative overflow-hidden">
+                                <img
+                                    src={`${BASE_PATH}meridian-favicon.png`}
+                                    alt="Meridian"
+                                    className="w-full h-full object-contain"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.style.display = 'none'; // Hide broken image
+                                        e.target.nextSibling.style.display = 'block'; // Show fallback
+                                    }}
+                                />
+                                <ShieldCheck size={24} className="text-indigo-400 hidden absolute" />
+                            </div>
+
                             <h1 className="text-2xl font-bold text-white tracking-tight">3PAO Assessment Console</h1>
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase tracking-wider">FedRAMP 20x Pilot</span>
                         </div>
@@ -147,7 +180,7 @@ export const ThreePaoView = () => {
                             <span className="w-px h-3 bg-white/10" />
                             <span className="flex items-center gap-1.5"><GitCommit size={14} /> Snapshot: <span className="font-mono text-slate-300">{data.fingerprint?.fingerprint?.substring(0, 8) || 'LATEST'}</span></span>
                             <span className="w-px h-3 bg-white/10" />
-                            <span className="flex items-center gap-1.5"><Server size={14} /> Source: <span className="text-slate-300 text-xs bg-white/5 px-2 py-0.5 rounded">{IS_DEV ? '0 Remote' : '4 Remote'} | {IS_DEV ? '7 Static' : '3 Static'}</span></span>
+                            <span className="flex items-center gap-1.5"><Server size={14} /> Source: <span className="text-slate-300 text-xs bg-white/5 px-2 py-0.5 rounded">{sourceInfo.type}</span></span>
                         </p>
                     </div>
                     <div className="flex bg-[#18181b] p-1 rounded-lg border border-white/10 overflow-x-auto">
@@ -173,42 +206,43 @@ export const ThreePaoView = () => {
     );
 };
 
-// --- TAB 1: DASHBOARD (FIXED & CLEANED) ---
+// --- TABS ---
+
 const DashboardTab = ({ data }) => {
     const summary = data.report?.validation_summary || {};
     const tech = data.report?.technical_validation || {};
     const cliRegister = data.cliRegister || {};
     const logicDefs = data.logicDefs || {};
 
-    // --- FIX 1: MATH LOGIC ---
-    // Only count KSIs that exist in the active Logic Definition set (The 65)
-    // Ignore stray entries in the register json
-    const validKSIs = Object.keys(logicDefs);
-    const ksiCount = validKSIs.length || 65;
+    // Total KSIs (Source of Truth: Audit Report or Fallback 65)
+    const totalKSIs = summary.total_ksis || 65;
 
-    // Count how many of the VALID 65 have commands in the register
-    const automatedCount = validKSIs.filter(id => {
-        // Try exact match or normalized match
-        const regEntry = cliRegister[id] || cliRegister[id.replace(/_/g, '-')];
+    // Automated: Count active logic definitions that have commands in register
+    const automatedCount = Object.keys(logicDefs).filter(ksiId => {
+        const regEntry = cliRegister[ksiId] || cliRegister[ksiId.replace(/_/g, '-')];
         return regEntry?.cli_commands?.length > 0;
     }).length;
 
-    const coveragePct = Math.round((automatedCount / ksiCount) * 100);
+    const coveragePct = Math.round((automatedCount / totalKSIs) * 100);
+
+    // SVG Donut Logic
+    const radius = 70;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (coveragePct / 100) * circumference;
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Top Stats - Cleaned up */}
+            {/* Top Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard label="Pass Rate" value={summary.overall_pass_rate || "0%"} icon={CheckCircle2} color="text-emerald-400" />
-                <StatCard label="Automated Controls" value={`${automatedCount}/${ksiCount}`} icon={Cpu} color="text-indigo-400" />
+                <StatCard label="Automated Controls" value={`${automatedCount}/${totalKSIs}`} icon={Cpu} color="text-indigo-400" />
                 <StatCard label="Failing Controls" value={summary.failing_ksis || 0} icon={XCircle} color="text-rose-400" />
                 <StatCard label="Logic Warnings" value={tech.technical_issues_found || 0} icon={AlertTriangle} color="text-amber-400" />
             </div>
 
-            {/* Split View: Summary + Chart */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                {/* Executive Summary - More Breathing Room */}
+                {/* Executive Summary */}
                 <div className="lg:col-span-2 bg-[#121217] border border-white/5 rounded-xl p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-3 mb-4">
                         <Terminal size={24} className="text-purple-400" />
@@ -224,18 +258,18 @@ const DashboardTab = ({ data }) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-black/20 rounded-lg p-4 border border-white/5">
                             <div className="text-xs text-slate-500 uppercase font-bold mb-1">Consistency Score</div>
-                            <div className="text-2xl font-mono text-blue-400">99.4%</div>
+                            <div className="text-2xl font-mono text-blue-400">{data.report?.consistency_analysis?.average_consistency_score || "N/A"}</div>
                             <div className="text-xs text-slate-400 mt-1">Deterministic execution</div>
                         </div>
                         <div className="bg-black/20 rounded-lg p-4 border border-white/5">
                             <div className="text-xs text-slate-500 uppercase font-bold mb-1">Assessment Scope</div>
-                            <div className="text-2xl font-mono text-white">65 KSIs</div>
+                            <div className="text-2xl font-mono text-white">{totalKSIs} KSIs</div>
                             <div className="text-xs text-slate-400 mt-1">Full Phase 2 Baseline</div>
                         </div>
                     </div>
                 </div>
 
-                {/* --- FIX 2: PROPER SVG DONUT CHART --- */}
+                {/* Automation Donut Chart */}
                 <div className="bg-[#121217] border border-white/5 rounded-xl p-8 flex flex-col items-center justify-center">
                     <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
                         <Cpu size={16} /> Automation Fidelity
@@ -247,7 +281,7 @@ const DashboardTab = ({ data }) => {
                             <circle
                                 cx="80"
                                 cy="80"
-                                r="70"
+                                r={radius}
                                 stroke="rgba(255,255,255,0.05)"
                                 strokeWidth="12"
                                 fill="transparent"
@@ -256,12 +290,12 @@ const DashboardTab = ({ data }) => {
                             <circle
                                 cx="80"
                                 cy="80"
-                                r="70"
+                                r={radius}
                                 stroke="#10b981"
                                 strokeWidth="12"
                                 fill="transparent"
-                                strokeDasharray={440} // 2 * PI * 70
-                                strokeDashoffset={440 - (440 * coveragePct) / 100}
+                                strokeDasharray={circumference}
+                                strokeDashoffset={strokeDashoffset}
                                 strokeLinecap="round"
                                 className="transition-all duration-1000 ease-out"
                             />
@@ -275,7 +309,7 @@ const DashboardTab = ({ data }) => {
 
                     <div className="mt-6 text-center">
                         <p className="text-xs text-slate-500">
-                            {automatedCount} of {ksiCount} controls verified via CLI
+                            {automatedCount} of {totalKSIs} controls verified via CLI
                         </p>
                     </div>
                 </div>
@@ -284,7 +318,7 @@ const DashboardTab = ({ data }) => {
     );
 };
 
-// --- (MethodologyTab, LogicTab, ConsistencyTab, TechnicalTab, InspectorModal below remain largely same) ---
+// --- (MethodologyTab, LogicTab, ConsistencyTab, TechnicalTab, InspectorModal below remain same) ---
 
 const MethodologyTab = ({ markdown }) => {
     if (!markdown) return <div className="flex flex-col items-center justify-center h-64 text-slate-500 border border-white/5 rounded-xl bg-[#121217]"><FileText size={48} className="mb-4 opacity-50" /><p>Methodology reference document not found.</p></div>;
@@ -488,6 +522,4 @@ const InspectorModal = ({ ksi, onClose }) => {
 
 // --- HELPERS ---
 const StatCard = ({ label, value, icon: Icon, color }) => (<div className="bg-[#121217] border border-white/5 p-5 rounded-xl hover:border-white/10 transition-all"><div className="flex justify-between items-start mb-2"><div className={`p-2 rounded-lg bg-white/5 ${color}`.replace('text-', 'bg-').replace('400', '500/10')}><Icon size={20} className={color} /></div></div><div className="text-2xl font-bold text-white mb-1">{value}</div><div className="text-xs text-slate-500 font-bold uppercase tracking-wider">{label}</div></div>);
-const MethodBlock = ({ title, value }) => (<div><div className="text-[10px] text-slate-500 uppercase font-bold mb-1">{title}</div><div className="text-sm text-slate-200">{value || "N/A"}</div></div>);
 const TabButton = ({ id, label, icon: Icon, active, set, count }) => (<button onClick={() => set(id)} className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${active === id ? 'bg-[#27272a] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}><Icon size={16} />{label}{count > 0 && (<span className="ml-1 bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{count}</span>)}</button>);
-const FilterButton = ({ label, active, onClick }) => (<button onClick={onClick} className={`px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${active ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>{label}</button>);

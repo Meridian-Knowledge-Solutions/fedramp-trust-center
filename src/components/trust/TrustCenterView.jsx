@@ -12,6 +12,11 @@ import {
     FileJson, Hash, ArrowRight
 } from 'lucide-react';
 
+// --- CONFIGURATION ---
+const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
+    ? `${import.meta.env.BASE_URL}data/`
+    : `${import.meta.env.BASE_URL}/data/`;
+
 // --- THEME ENGINE ---
 const THEME = {
     bg: 'bg-[#09090b]',
@@ -36,10 +41,6 @@ export const TrustCenterView = () => {
     const [nextReportDate, setNextReportDate] = useState(null);
     const [scnHistory, setScnHistory] = useState([]);
 
-    // --- BASE URL HANDLING ---
-    const rawBase = import.meta.env.BASE_URL || '/';
-    const BASE_URL = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
-
     // --- LIVE METRICS ---
     const uptime = status?.uptime_percent ? `${parseFloat(status.uptime_percent).toFixed(2)}%` : '99.99%';
     const latency = status?.avg_latency || '24ms';
@@ -53,7 +54,7 @@ export const TrustCenterView = () => {
         const fetchData = async () => {
             // 1. Fetch Next Report Date
             try {
-                const res = await fetch(`${BASE_URL}data/next_report_date.json`);
+                const res = await fetch(`${BASE_PATH}next_report_date.json`);
                 if (res.ok) {
                     const data = await res.json();
                     if (data.next_ongoing_report) setNextReportDate(new Date(data.next_ongoing_report));
@@ -68,11 +69,9 @@ export const TrustCenterView = () => {
                 setNextReportDate(new Date(reportYear, quarterEndMonth === 12 ? 0 : quarterEndMonth, 15));
             }
 
-            // 2. Fetch SCN History (Sanitized Local File)
+            // 2. Fetch SCN History (Sanitized Local File from Pipeline Injection)
             try {
-                // We fetch from local /data/ because the build pipeline has already 
-                // downloaded and sanitized this file from the GitHub Release.
-                const res = await fetch(`${BASE_URL}data/scn_history.jsonl`);
+                const res = await fetch(`${BASE_PATH}scn_history.jsonl`);
 
                 if (res.ok) {
                     const text = await res.text();
@@ -104,7 +103,7 @@ export const TrustCenterView = () => {
             }
         };
         fetchData();
-    }, [BASE_URL]);
+    }, []);
 
     // --- ACTIONS ---
     const handleAction = (actionName) => {
@@ -134,7 +133,7 @@ export const TrustCenterView = () => {
     const viewQuarterlyReport = async () => {
         if (!handleAction('View Quarterly Report')) return;
         try {
-            const res = await fetch(`${BASE_URL}data/ongoing_authorization_report_Q4_2025.md`);
+            const res = await fetch(`${BASE_PATH}ongoing_authorization_report_Q4_2025.md`);
             if (!res.ok) throw new Error('Failed');
             const text = await res.text();
             openModal('markdown', { title: 'Ongoing Authorization Report', subtitle: 'Automated Continuous Monitoring', markdown: text });
@@ -143,7 +142,7 @@ export const TrustCenterView = () => {
 
     const downloadQuarterlyReport = () => {
         if (!handleAction('Download Quarterly Report')) return;
-        window.open(`${BASE_URL}data/ongoing_authorization_report_Q4_2025.json`, '_blank');
+        window.open(`${BASE_PATH}ongoing_authorization_report_Q4_2025.json`, '_blank');
     };
 
     const handleDownloadPackage = async () => {
@@ -192,14 +191,25 @@ export const TrustCenterView = () => {
 
                     <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-8">
                         <div className="flex items-center gap-6">
-                            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-white/10 flex items-center justify-center shadow-2xl overflow-hidden group">
-                                <div className="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50" />
-                                <div className="relative z-10 flex items-center justify-center">
-                                    <Shield size={40} className="text-blue-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" strokeWidth={1.5} />
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <Lock size={16} className="text-white" strokeWidth={2.5} />
-                                    </div>
+
+                            {/* UPDATED LOGO CONTAINER */}
+                            <div className="relative w-24 h-24 rounded-2xl bg-[#0f172a] border border-white/10 flex items-center justify-center shadow-2xl overflow-hidden group p-4">
+                                <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                <img
+                                    src={`${BASE_PATH}meridian-favicon.png`}
+                                    alt="Meridian LMS"
+                                    className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        // Show fallback icon if image fails
+                                        e.target.parentElement.querySelector('.fallback-icon').style.display = 'flex';
+                                    }}
+                                />
+
+                                {/* Hidden Fallback Icon */}
+                                <div className="fallback-icon hidden absolute inset-0 items-center justify-center">
+                                    <Shield size={40} className="text-blue-500" />
                                 </div>
                             </div>
 
