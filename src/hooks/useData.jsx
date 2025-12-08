@@ -3,7 +3,12 @@ import { Sanitizer } from '../utils/sanitizer';
 
 const DataContext = createContext();
 
-const REPO_BASE = `${import.meta.env.BASE_URL}data`;
+// --- CONFIGURATION ---
+// Points to the local /data/ folder where the pipeline injects files
+// This ensures we fetch the files served by the app itself, not external GitHub URLs
+const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
+  ? `${import.meta.env.BASE_URL}data`
+  : `${import.meta.env.BASE_URL}/data`;
 
 export const DataProvider = ({ children }) => {
   const [ksis, setKsis] = useState([]);
@@ -50,71 +55,45 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Cache buster to force fresh data
-        const cacheBuster = new Date().getTime();
+        // Cache buster to force fresh data from the latest deployment
+        const cacheBuster = Date.now();
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('🔄 DATA LOAD INITIATED');
-        console.log(`📍 Base URL: ${REPO_BASE}`);
-        console.log(`🕐 Cache Buster: ${cacheBuster}`);
-        console.log(`📅 Request Time: ${new Date().toISOString()}`);
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('🔄 DATA LOAD INITIATED (Pipeline Injected)');
+        console.log(`📍 Base Path: ${BASE_PATH}`);
 
-        // 1. Fetch Live Data from GitHub Raw (public/data/ path) with cache busting
+        // 1. Fetch Data from Local Injection Path
         const [valRes, regRes, histRes] = await Promise.all([
-          fetch(`${REPO_BASE}/unified_ksi_validations.json?t=${cacheBuster}`, {
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache',
-              'Expires': '0'
-            }
-          }),
-          fetch(`${REPO_BASE}/cli_command_register.json?t=${cacheBuster}`, {
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache',
-              'Expires': '0'
-            }
-          }),
-          fetch(`${REPO_BASE}/ksi_history.jsonl?t=${cacheBuster}`, {
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache',
-              'Expires': '0'
-            }
-          })
+          fetch(`${BASE_PATH}/unified_ksi_validations.json?t=${cacheBuster}`),
+          fetch(`${BASE_PATH}/cli_command_register.json?t=${cacheBuster}`),
+          fetch(`${BASE_PATH}/ksi_history.jsonl?t=${cacheBuster}`)
         ]);
-
-        console.log('📥 FETCH RESULTS:');
-        console.log(`  ✓ Validations: ${valRes.ok ? '✅ OK' : '❌ FAILED'} (${valRes.status})`);
-        console.log(`  ✓ Register: ${regRes.ok ? '✅ OK' : '❌ FAILED'} (${regRes.status})`);
-        console.log(`  ✓ History: ${histRes.ok ? '✅ OK' : '❌ FAILED'} (${histRes.status})`);
 
         // --- PROCESS HISTORY ---
         if (histRes.ok) {
           const text = await histRes.text();
           let historyData = [];
-          try {
-            // Strategy: Smart Wrap for JSONL/PrettyJSON mixed content
-            const formatted = '[' + text.trim().replace(/}\s*{/g, '},{') + ']';
-            historyData = JSON.parse(formatted);
-          } catch (e1) {
-            // Strategy: Line-by-line fallback
-            historyData = text.split('\n')
-              .map(l => l.trim()).filter(l => l.startsWith('{'))
-              .map(l => { try { return JSON.parse(l) } catch (e) { return null } })
-              .filter(x => x);
+          if (!text.trim().startsWith('<')) { // Avoid HTML 404s
+            try {
+              // Try line-by-line JSONL parsing first (most robust)
+              historyData = text.split('\n')
+                .map(l => l.trim()).filter(l => l.startsWith('{'))
+                .map(l => { try { return JSON.parse(l) } catch (e) { return null } })
+                .filter(Boolean);
+
+              if (historyData.length === 0) {
+                // Fallback to standard JSON array
+                historyData = JSON.parse(text);
+              }
+            } catch (e) {
+              console.warn("History parse error", e);
+            }
           }
+
           if (Array.isArray(historyData)) {
             const sorted = historyData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             setHistory(sorted);
-            console.log(`📊 History loaded: ${sorted.length} entries`);
           }
         } else {
-          console.warn('⚠️ History file not available, using fallback');
-          // Fail-safe history
           setHistory([
             { timestamp: new Date(Date.now() - 86400000).toISOString(), compliance_rate: 0 },
             { timestamp: new Date().toISOString(), compliance_rate: 0 }
@@ -122,54 +101,35 @@ export const DataProvider = ({ children }) => {
         }
 
         // --- PROCESS VALIDATIONS ---
-        if (!valRes.ok) throw new Error('Failed to load validations from GitHub');
+        if (!valRes.ok) throw new Error(`Failed to load validations (${valRes.status})`);
 
-        const validationData = await valRes.json();
+        const validationText = await valRes.text();
+        if (validationText.trim().startsWith('<')) throw new Error("Validation data returned HTML (404)");
 
-        // Log metadata immediately after parsing
-        if (validationData.metadata) {
-          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-          console.log('📋 VALIDATION METADATA:');
-          console.log(`  📅 Validation Date: ${validationData.metadata.validation_date}`);
-          console.log(`  ✅ Passed: ${validationData.metadata.passed}/${validationData.metadata.total_validated}`);
-          console.log(`  ❌ Failed: ${validationData.metadata.failed}`);
-          console.log(`  📊 Pass Rate: ${validationData.metadata.pass_rate}`);
-          console.log(`  🎯 Impact Level: ${validationData.metadata.impact_level}`);
+        const validationData = JSON.parse(validationText);
+        const rawMeta = validationData.metadata || {};
 
-          // Calculate and display data age
-          const validationDate = new Date(validationData.metadata.validation_date);
-          const ageMinutes = Math.round((Date.now() - validationDate.getTime()) / 60000);
-          const ageHours = Math.round(ageMinutes / 60);
-          console.log(`  ⏰ Data Age: ${ageMinutes}m (${ageHours}h)`);
-
-          if (ageHours > 24) {
-            console.warn(`  ⚠️ WARNING: Data is ${ageHours} hours old!`);
-          } else {
-            console.log(`  ✅ Data is fresh (< 24h old)`);
-          }
-          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-
-          setMetadata(validationData.metadata);
+        // Handle different array keys (results vs validations)
+        let rawValidations = validationData.results || validationData.validations || [];
+        if (!Array.isArray(rawValidations) && typeof rawValidations === 'object') {
+          rawValidations = Object.values(rawValidations);
         }
 
+        // --- REGISTER DATA ---
         let registerData = {};
         try {
           if (regRes.ok) {
-            registerData = await regRes.json();
-            console.log(`📋 CLI Register loaded: ${Object.keys(registerData).length} entries`);
+            const regText = await regRes.text();
+            if (!regText.trim().startsWith('<')) {
+              registerData = JSON.parse(regText);
+            }
           }
-        } catch (e) {
-          console.warn('⚠️ CLI command register not available');
-        }
+        } catch (e) { console.warn('CLI register unavailable'); }
 
-        let rawValidations = [];
-        if (validationData.validations) rawValidations = validationData.validations;
-        else if (Array.isArray(validationData)) rawValidations = validationData;
-        else if (validationData.results) rawValidations = Object.values(validationData.results);
-
+        // --- PROCESS ITEMS ---
         const processed = rawValidations.map(val => {
           const id = val.ksi_id || val.validation_id || val.id;
-          const registerEntry = registerData[id] || {};
+          const registerEntry = registerData[id] || registerData[id.replace(/-/g, '_')] || {};
           const status = Sanitizer.determineStatus(val);
           const successCount = parseInt(val.successful_commands || 0, 10);
 
@@ -212,18 +172,40 @@ export const DataProvider = ({ children }) => {
 
         setKsis(processed);
 
-        // Metrics
-        const total = processed.length;
-        const passed = processed.filter(k => k.assertion === true || k.assertion === "true").length;
-        const failed = total - passed;
+        // --- CALCULATE METRICS (Source of Truth) ---
+        // Calculate directly from the results array to avoid metadata mismatches
+        const totalCount = processed.length;
+        const passedCount = processed.filter(k => k.assertion === true || k.assertion === "true").length;
+        const failedCount = totalCount - passedCount;
+        const score = totalCount > 0 ? Math.round((passedCount / totalCount) * 1000) / 10 : 0;
 
+        // --- DATE DETECTIVE ---
+        // Hunt for the timestamp in multiple possible keys
+        const realDate = rawMeta.timestamp || rawMeta.date || rawMeta.generated_at || rawMeta.validation_date || null;
+
+        // Update Metadata State
+        setMetadata({
+          validation_date: realDate, // This fixes the "Current Time" bug
+          impact_level: rawMeta.impact_level || 'MODERATE',
+          pass_rate: rawMeta.pass_rate || `${Math.round(score)}%`,
+          passed: passedCount,
+          total_validated: totalCount, // This fixes the "undefined" bug
+          failed: failedCount,
+          impact_thresholds: rawMeta.impact_thresholds || { min: '80%' }
+        });
+
+        // Update Metrics State
         setMetrics({
-          score: total > 0 ? Math.round((passed / total) * 1000) / 10 : 0,
-          passed: passed,
-          failed: failed,
+          score: score,
+          passed: passedCount,
+          failed: failedCount,
           warning: processed.filter(k => k.status === 'warning').length,
           info: processed.filter(k => k.status === 'info').length
         });
+
+        console.log('📋 DATA LOADED:');
+        console.log(`  📅 Date: ${realDate}`);
+        console.log(`  📊 Score: ${score}% (${passedCount}/${totalCount})`);
 
       } catch (error) {
         console.error("Data Load Error:", error);
