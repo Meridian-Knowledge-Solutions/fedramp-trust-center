@@ -18,6 +18,10 @@
 
 @layer utilities {
 
+    /* ============================================
+       SCROLLBAR STYLES
+       ============================================ */
+
     /* Hide scrollbar for Chrome, Safari and Opera */
     .no-scrollbar::-webkit-scrollbar {
         display: none;
@@ -48,9 +52,39 @@
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
         @apply bg-slate-300;
     }
+
+    /* Enhanced Thin Scrollbar (for dark mode) */
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        transition: background 0.2s ease;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* For Firefox */
+    .scrollbar-thin {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    }
 }
 
-/* Animation Utilities used in Modals */
+/* ============================================
+   ANIMATION KEYFRAMES
+   ============================================ */
+
+/* Existing Animations */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -59,10 +93,6 @@
     to {
         opacity: 1;
     }
-}
-
-.fade-in {
-    animation: fadeIn 0.2s ease-out forwards;
 }
 
 @keyframes slideIn {
@@ -77,6 +107,491 @@
     }
 }
 
+/* Enhanced Animations */
+
+/**
+ * Slide Up Animation
+ * Used for: Toast notifications
+ */
+@keyframes slide-up {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/**
+ * Fade In Animation (Enhanced version with transform)
+ */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/**
+ * Pulse Slow Animation
+ * Used for: Ambient background effects, status indicators
+ */
+@keyframes pulse-slow {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/**
+ * Spin Smooth Animation
+ * Used for: Loading indicators, refresh buttons
+ */
+@keyframes spin-smooth {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/**
+ * Scale Pop Animation
+ * Used for: Button hover effects, card interactions
+ */
+@keyframes scale-pop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/**
+ * Shimmer Animation
+ * Used for: Loading skeleton screens
+ */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/**
+ * Bounce Subtle Animation
+ * Used for: Notification badges, attention indicators
+ */
+@keyframes bounce-subtle {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+/* ============================================
+   ANIMATION UTILITY CLASSES
+   ============================================ */
+
+/* Existing Utilities */
+.fade-in {
+    animation: fadeIn 0.2s ease-out forwards;
+}
+
 .animate-in {
     animation: slideIn 0.3s ease-out forwards;
 }
+
+/* Enhanced Utilities */
+.animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+}
+
+.animate-spin-smooth {
+    animation: spin-smooth 1s linear infinite;
+}
+
+.animate-scale-pop {
+    animation: scale-pop 0.2s ease-out;
+}
+
+.animate-shimmer {
+    animation: shimmer 2s linear infinite;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 100%);
+    background-size: 200% 100%;
+}
+
+.animate-bounce-subtle {
+    animation: bounce-subtle 0.6s ease-in-out;
+}
+
+/* ============================================
+   FOCUS STYLES
+   ============================================ */
+
+/* Remove default focus outline */
+*:focus {
+    outline: none;
+}
+
+/* Custom focus ring for better visibility */
+.focus-ring:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+}
+
+/* Focus ring for dark backgrounds */
+.focus-ring-dark:focus-visible {
+    outline: 2px solid rgba(147, 197, 253, 0.8);
+    outline-offset: 2px;
+}
+
+/* ============================================
+   TRANSITION UTILITIES
+   ============================================ */
+
+.transition-spring {
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-fast {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   BACKDROP BLUR UTILITIES
+   ============================================ */
+
+.backdrop-blur-xs {
+    backdrop-filter: blur(2px);
+}
+
+.backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+}
+
+.backdrop-blur-md {
+    backdrop-filter: blur(8px);
+}
+
+.backdrop-blur-lg {
+    backdrop-filter: blur(12px);
+}
+
+.backdrop-blur-xl {
+    backdrop-filter: blur(24px);
+}
+
+/* ============================================
+   GLASS MORPHISM EFFECT
+   ============================================ */
+
+.glass {
+    background: rgba(18, 18, 23, 0.7);
+    backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-light {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   GRADIENT UTILITIES
+   ============================================ */
+
+.gradient-fade-t {
+    mask-image: linear-gradient(to top, transparent 0%, black 25%);
+}
+
+.gradient-fade-b {
+    mask-image: linear-gradient(to bottom, transparent 0%, black 25%);
+}
+
+.gradient-fade-tb {
+    mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+/* ============================================
+   TEXT EFFECTS
+   ============================================ */
+
+.text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.text-shadow-md {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.text-glow-blue {
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+.text-glow-green {
+    text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+/* ============================================
+   SKELETON LOADING
+   ============================================ */
+
+.skeleton {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.03) 0%,
+            rgba(255, 255, 255, 0.08) 50%,
+            rgba(255, 255, 255, 0.03) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-text {
+    height: 1rem;
+    border-radius: 0.25rem;
+}
+
+.skeleton-heading {
+    height: 2rem;
+    border-radius: 0.375rem;
+}
+
+.skeleton-circle {
+    border-radius: 50%;
+}
+
+/* ============================================
+   STATUS INDICATORS
+   ============================================ */
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-dot-success {
+    background-color: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.status-dot-warning {
+    background-color: #f59e0b;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+.status-dot-error {
+    background-color: #f43f5e;
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.6);
+}
+
+.status-dot-info {
+    background-color: #3b82f6;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+}
+
+/* Add pulse animation to status dots */
+.status-dot-pulse {
+    animation: pulse-slow 2s ease-in-out infinite;
+}
+
+/* ============================================
+   RESPONSIVE UTILITIES
+   ============================================ */
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+    .mobile-full {
+        width: 100%;
+    }
+
+    .mobile-hidden {
+        display: none;
+    }
+
+    .mobile-stack {
+        flex-direction: column;
+    }
+}
+
+/* Tablet-specific styles */
+@media (min-width: 641px) and (max-width: 1024px) {
+    .tablet-grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop-specific styles */
+@media (min-width: 1025px) {
+    .desktop-grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .print-break-before {
+        break-before: page;
+    }
+
+    .print-break-after {
+        break-after: page;
+    }
+
+    /* Ensure charts and graphs print well */
+    .chart-container {
+        break-inside: avoid;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Reduced motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .border-white\/5 {
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    .text-slate-500 {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+}
+
+/* ============================================
+   DARK MODE UTILITIES
+   ============================================ */
+
+/* Light mode variants (your app uses dark mode by default) */
+.light-mode .bg-dark {
+    background-color: #ffffff;
+    color: #09090b;
+}
+
+.light-mode .text-light {
+    color: #09090b;
+}
+
+.light-mode .border-light {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+/* Enable GPU acceleration for smoother animations */
+.gpu-accelerate {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Optimize will-change for frequently animated elements */
+.will-animate-transform {
+    will-change: transform;
+}
+
+.will-animate-opacity {
+    will-change: opacity;
+}
+
+/* Reset will-change after animation completes */
+.animation-complete {
+    will-change: auto;
+}
+
+/* ============================================
+   SAFE AREA INSETS (for mobile devices)
+   ============================================ */
+
+@supports (padding: max(0px)) {
+    .safe-area-inset-top {
+        padding-top: max(1rem, env(safe-area-inset-top));
+    }
+
+    .safe-area-inset-bottom {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+
+    .safe-area-inset-left {
+        padding-left: max(1rem, env(safe-area-inset-left));
+    }
+
+    .safe-area-inset-right {
+        padding-right: max(1rem, env(safe-area-inset-right));
+    }
+}
+
+/* ============================================
+   END OF STYLES
+   ============================================ */
