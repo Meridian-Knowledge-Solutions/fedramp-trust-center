@@ -415,28 +415,51 @@ const LogicTab = ({ consistency, logicDefs, onInspect }) => {
 
 const ConsistencyTab = ({ data }) => {
     const history = data?.historical_validations || [];
-    const chartData = history.map(h => ({ time: new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), score: h.ksi_count > 0 ? (h.pass_count / h.ksi_count) * 100 : 0 }));
+    const chartData = history.map(h => ({
+        time: new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        score: h.ksi_count > 0 ? (h.pass_count / h.ksi_count) * 100 : 0
+    }));
+
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-[#121217] border border-white/5 rounded-xl p-6 h-80">
-                <h3 className="text-white font-bold mb-4 flex items-center gap-2"><Activity size={18} className="text-indigo-400" /> Validation Consistency Trend</h3>
-                <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData}>
-                        <defs><linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.3} /><stop offset="95%" stopColor="#10b981" stopOpacity={0} /></linearGradient></defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.3} />
-                        <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                        <Tooltip contentStyle={{ backgroundColor: '#09090b', borderColor: '#334155', borderRadius: '8px', color: '#fff' }} itemStyle={{ color: '#10b981' }} formatter={(value) => `${value.toFixed(1)}%`} />
-                        <Area type="monotone" dataKey="score" stroke="#10b981" strokeWidth={2} fill="url(#colorScore)" />
-                    </AreaChart>
-                </ResponsiveContainer>
+            {/* Chart Card */}
+            <div className="bg-[#121217] border border-white/5 rounded-xl p-6 h-80 flex flex-col">
+                <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                    <Activity size={18} className="text-indigo-400" /> Validation Consistency Trend
+                </h3>
+                {/* Wrapper div provides explicit dimensions for Recharts */}
+                <div className="flex-1 w-full min-h-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData}>
+                            <defs>
+                                <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.3} />
+                            <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#09090b', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
+                                itemStyle={{ color: '#10b981' }}
+                                formatter={(value) => [`${value.toFixed(1)}%`, 'Consistency']}
+                            />
+                            <Area type="monotone" dataKey="score" stroke="#10b981" strokeWidth={2} fill="url(#colorScore)" />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
+
+            {/* Recent Checks Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {(data?.consistency_checks || []).slice(-3).reverse().map((check, i) => (
                     <div key={i} className="bg-[#121217] border border-white/5 p-5 rounded-xl">
                         <div className="text-xs text-slate-500 mb-2">{new Date(check.timestamp).toLocaleString()}</div>
                         <div className="flex justify-between items-end">
                             <div className="text-2xl font-bold text-white">{check.consistency_score.toFixed(1)}%</div>
-                            <div className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">{check.infrastructure_fingerprint.substring(0, 8)}</div>
+                            <div className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">
+                                {check.infrastructure_fingerprint.substring(0, 8)}
+                            </div>
                         </div>
                     </div>
                 ))}
