@@ -9,7 +9,7 @@ import {
 
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, BarChart, Bar, Legend
+  LineChart, Line, BarChart, Bar, Legend, ReferenceLine // <--- Added ReferenceLine
 } from 'recharts';
 
 import { AuthProvider, useAuth } from './hooks/useAuth';
@@ -142,8 +142,7 @@ const ImpactBanner = memo(() => {
   if (!metadata) return null;
 
   const lastRunDate = metadata.validation_date ? new Date(metadata.validation_date) : new Date();
-  const nextRunDate = new Date(lastRunDate.getTime() + (6 * 60 * 60 * 1000));
-  const level = metadata.impact_level || 'MODERATE'; // Default to MODERATE if missing
+  const level = metadata.impact_level || 'MODERATE'; // Default to MODERATE
 
   const styles = {
     'HIGH': { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/20', solid: 'bg-rose-500' },
@@ -210,6 +209,33 @@ const ImpactBanner = memo(() => {
   );
 });
 
+// --- NEW: Custom Tooltip Component ---
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    const value = payload[0].value;
+    const isPassing = value >= 90;
+
+    return (
+      <div className="bg-[#18181b]/95 border border-white/10 p-3 rounded-lg shadow-xl backdrop-blur-md">
+        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1.5">{label}</p>
+        <div className="flex items-center gap-3">
+          <div className={`w-1.5 h-8 rounded-full ${isPassing ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-white font-mono font-bold text-xl leading-none">{value}%</span>
+              <span className="text-[10px] text-slate-500">Compliance</span>
+            </div>
+            <div className={`text-[10px] font-bold ${isPassing ? 'text-emerald-400' : 'text-rose-400'}`}>
+              {isPassing ? 'TARGET MET' : 'BELOW TARGET'}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const ComplianceChart = memo(() => {
   const { history } = useData();
   const [chartView, setChartView] = useState('area');
@@ -224,24 +250,28 @@ const ComplianceChart = memo(() => {
           fail: 100 - parseFloat(item.compliance_rate || 0)
         }));
     }
-    return [
-      { time: 'Sep 10', pass: 92, fail: 8 },
-      { time: 'Sep 11', pass: 93, fail: 7 },
-      { time: 'Sep 12', pass: 91, fail: 9 },
-      { time: 'Sep 13', pass: 94, fail: 6 },
-      { time: 'Sep 14', pass: 95, fail: 5 },
-      { time: 'Sep 15', pass: 95, fail: 5 },
-      { time: 'Sep 16', pass: 96, fail: 4 }
-    ];
+    return [];
   }, [history]);
 
   const ChartComponent = chartView === 'bar' ? BarChart : AreaChart;
 
+  if (chartData.length === 0) {
+    return (
+      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6 mb-8 shadow-lg flex items-center justify-center h-72`}>
+        <div className="text-center text-slate-500">
+          <BarChart3 size={48} className="mx-auto mb-3 opacity-20" />
+          <p>Waiting for historical trend data...</p>
+          <p className="text-xs opacity-50 mt-1">First pipeline run pending</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6 mb-8 shadow-lg relative overflow-hidden`}>
+    <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6 mb-8 shadow-lg relative overflow-hidden flex flex-col h-80`}>
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none"></div>
 
-      <div className="flex justify-between items-center mb-6 relative z-10">
+      <div className="flex justify-between items-center mb-6 relative z-10 shrink-0">
         <div>
           <h3 className="text-white font-bold text-lg flex items-center gap-2 mb-1">
             <BarChart3 size={20} className="text-blue-400" />
@@ -266,26 +296,66 @@ const ComplianceChart = memo(() => {
         </div>
       </div>
 
-      <div className="h-72 w-full relative z-10">
+      <div className="flex-1 w-full min-h-0 relative z-10">
         <ResponsiveContainer width="100%" height="100%">
-          <ChartComponent data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+          <ChartComponent data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="passGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
                 <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
               </linearGradient>
             </defs>
+            {/* Dashed Grid for professional look */}
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-            <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }} dy={10} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }} domain={[80, 100]} />
-            <Tooltip
-              contentStyle={{ backgroundColor: '#09090b', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
-              itemStyle={{ color: '#10b981' }}
+
+            <XAxis
+              dataKey="time"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
+              dy={10}
             />
+
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
+              domain={[0, 100]}
+              ticks={[0, 50, 80, 90, 100]} // Explicit professional ticks
+            />
+
+            <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} />
+
+            {/* Reference Line for Target (90%) */}
+            <ReferenceLine
+              y={90}
+              stroke="#f59e0b"
+              strokeDasharray="3 3"
+              label={{
+                value: 'TARGET (90%)',
+                fill: '#f59e0b',
+                fontSize: 9,
+                position: 'insideTopRight',
+                fontWeight: 'bold'
+              }}
+            />
+
             {chartView === 'bar' ? (
-              <Bar dataKey="pass" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="pass"
+                fill="#10b981"
+                radius={[4, 4, 0, 0]}
+                barSize={20} // Thinner, cleaner bars
+              />
             ) : (
-              <Area type="monotone" dataKey="pass" stroke="#10b981" strokeWidth={2} fill="url(#passGradient)" activeDot={{ r: 6, strokeWidth: 0, fill: '#fff' }} />
+              <Area
+                type="monotone"
+                dataKey="pass"
+                stroke="#10b981"
+                strokeWidth={2}
+                fill="url(#passGradient)"
+                activeDot={{ r: 6, strokeWidth: 0, fill: '#fff', stroke: '#10b981' }} // Glowing dot effect
+              />
             )}
           </ChartComponent>
         </ResponsiveContainer>

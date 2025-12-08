@@ -52,9 +52,11 @@ export const TrustCenterView = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+            const timestamp = Date.now(); // Cache Buster
+
             // 1. Fetch Next Report Date
             try {
-                const res = await fetch(`${BASE_PATH}next_report_date.json`);
+                const res = await fetch(`${BASE_PATH}next_report_date.json?t=${timestamp}`);
                 if (res.ok) {
                     const data = await res.json();
                     if (data.next_ongoing_report) setNextReportDate(new Date(data.next_ongoing_report));
@@ -69,9 +71,10 @@ export const TrustCenterView = () => {
                 setNextReportDate(new Date(reportYear, quarterEndMonth === 12 ? 0 : quarterEndMonth, 15));
             }
 
-            // 2. Fetch SCN History (Sanitized Local File from Pipeline Injection)
+            // 2. Fetch SCN History (With Cache Busting)
             try {
-                const res = await fetch(`${BASE_PATH}scn_history.jsonl`);
+                console.log(`🔍 Fetching SCN History: ${BASE_PATH}scn_history.jsonl`);
+                const res = await fetch(`${BASE_PATH}scn_history.jsonl?t=${timestamp}`);
 
                 if (res.ok) {
                     const text = await res.text();
@@ -81,11 +84,11 @@ export const TrustCenterView = () => {
 
                     let parsed = [];
                     try {
-                        // Attempt standard JSON parse (Array or Object)
+                        // Attempt standard JSON parse (Array or Single Object)
                         const json = JSON.parse(text);
                         parsed = Array.isArray(json) ? json : [json];
                     } catch {
-                        // Fallback to JSON Lines (NDJSON)
+                        // Fallback to JSON Lines (NDJSON) - Split by newlines
                         parsed = text.split('\n')
                             .filter(line => line.trim() !== '')
                             .map(line => {
@@ -94,9 +97,13 @@ export const TrustCenterView = () => {
                             .filter(item => item !== null);
                     }
 
+                    console.log("📄 Parsed SCN Data:", parsed);
+
                     // Sort by timestamp descending
                     const sorted = parsed.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 5);
                     setScnHistory(sorted);
+                } else {
+                    console.warn(`SCN Fetch Failed: ${res.status}`);
                 }
             } catch (e) {
                 console.warn("SCN History unavailable (Local fetch failed):", e);
@@ -192,7 +199,7 @@ export const TrustCenterView = () => {
                     <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-8">
                         <div className="flex items-center gap-6">
 
-                            {/* UPDATED LOGO CONTAINER */}
+                            {/* LOGO CONTAINER */}
                             <div className="relative w-24 h-24 rounded-2xl bg-[#0f172a] border border-white/10 flex items-center justify-center shadow-2xl overflow-hidden group p-4">
                                 <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
@@ -345,7 +352,7 @@ export const TrustCenterView = () => {
 
                 {/* --- 6. ACTION DECK --- */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Auth Package */}
+                    {/* Auth Package - REMOVED BASELINES BUTTON */}
                     <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 flex flex-col justify-between shadow-lg relative overflow-hidden group`}>
                         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                             <Shield size={140} />
@@ -372,13 +379,10 @@ export const TrustCenterView = () => {
                             <button onClick={handleDownloadPackage} className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-900/20">
                                 {isAuthenticated ? <Download size={18} /> : <Lock size={18} />} Download JSON
                             </button>
-                            <button onClick={viewSecureConfig} className="px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-all">
-                                Baselines
-                            </button>
                         </div>
                     </div>
 
-                    {/* Continuous Monitoring - WITH RESTORED ACTIONS */}
+                    {/* Continuous Monitoring */}
                     <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 flex flex-col justify-between shadow-lg`}>
                         <div>
                             <div className="flex items-center gap-4 mb-6">
@@ -431,7 +435,7 @@ export const TrustCenterView = () => {
                     </div>
                 </div>
 
-                {/* --- 7. SCN LOG --- */}
+                {/* --- 7. SCN LOG (Fixes applied here) --- */}
                 <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 shadow-md`}>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <div>
