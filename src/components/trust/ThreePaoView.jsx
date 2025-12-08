@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '../../hooks/useAuth'; // <--- NEW IMPORT
+import { useModal } from '../../contexts/ModalContext'; // <--- NEW IMPORT
 import {
     ShieldCheck, AlertTriangle, FileJson, Terminal,
     GitCommit, Activity, CheckCircle2, XCircle,
@@ -13,21 +15,9 @@ import {
 } from 'recharts';
 
 // --- CONFIGURATION ---
-// With Pipeline Injection, "Remote" files are now served locally 
-// from the /data/ folder in production too.
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
     ? `${import.meta.env.BASE_URL}data/`
     : `${import.meta.env.BASE_URL}/data/`;
-
-// --- THEME ENGINE ---
-const THEME = {
-    bg: 'bg-[#09090b]',
-    panel: 'bg-[#121217]',
-    border: 'border-white/5',
-    hover: 'hover:bg-white/5',
-    active: 'bg-indigo-600/10 text-indigo-400 border-indigo-500/50',
-    text: { main: 'text-slate-200', muted: 'text-slate-500' }
-};
 
 // --- SYNTAX HIGHLIGHTER (Helper) ---
 const highlightCode = (code) => {
@@ -54,6 +44,8 @@ const highlightCode = (code) => {
 };
 
 export const ThreePaoView = () => {
+    const { isAuthenticated, login } = useAuth(); // <--- AUTH HOOK
+    const { openModal } = useModal(); // <--- MODAL HOOK
     const [activeTab, setActiveTab] = useState('dashboard');
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
@@ -61,35 +53,27 @@ export const ThreePaoView = () => {
     const [sourceInfo, setSourceInfo] = useState({ type: 'Checking...' });
 
     useEffect(() => {
+        // Only load data if authenticated
+        if (!isAuthenticated) {
+            setLoading(false);
+            return;
+        }
+
         const loadArtifacts = async () => {
             setLoading(true);
-
-            // Source is always "Pipeline Injected" now (Local Fetch)
             setSourceInfo({ type: 'Secure Pipeline Injection' });
 
             const safeFetch = async (filename, isText = false) => {
                 const url = `${BASE_PATH}${filename}`;
                 try {
                     const res = await fetch(url);
-                    if (!res.ok) {
-                        console.warn(`Fetch failed: ${filename} (${res.status})`);
-                        return null;
-                    }
-
+                    if (!res.ok) return null;
                     const text = await res.text();
-
-                    // Reject HTML (404) responses
-                    if (text.trim().toLowerCase().startsWith('<!doctype html')) {
-                        return null;
-                    }
-
+                    if (text.trim().toLowerCase().startsWith('<!doctype html')) return null;
                     if (isText) return text;
                     if (text.trim().startsWith('<')) return null;
-
                     return JSON.parse(text);
-                } catch (e) {
-                    return null;
-                }
+                } catch (e) { return null; }
             };
 
             try {
@@ -100,55 +84,70 @@ export const ThreePaoView = () => {
                     safeFetch('ksi_logic.json'),
                     safeFetch('fingerprint_cache.json'),
                     safeFetch('ksi-command-validation-reference.md', true),
-                    safeFetch('cli_command_register.json') // Now injected!
+                    safeFetch('cli_command_register.json')
                 ]);
 
                 setData({
-                    report,
-                    techLog,
-                    consistency,
+                    report, techLog, consistency,
                     logicDefs: logicDefs || {},
-                    fingerprint,
-                    methodologyMd,
-                    cliRegister
+                    fingerprint, methodologyMd, cliRegister
                 });
-            } catch (e) {
-                console.error("Load error:", e);
-            } finally {
-                setLoading(false);
-            }
+            } catch (e) { console.error("Load error:", e); }
+            finally { setLoading(false); }
         };
         loadArtifacts();
-    }, []);
+    }, [isAuthenticated]);
+
+    // --- ACCESS DENIED SCREEN (Public Gate) ---
+    if (!isAuthenticated) {
+        return (
+            <div className="-m-6 md:-m-8 min-h-screen bg-[#0b0c10] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+                {/* Background Decor */}
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-[120px] pointer-events-none" />
+
+                <div className="bg-[#121217] border border-white/10 p-8 rounded-2xl max-w-md w-full text-center shadow-2xl relative z-10">
+                    <div className="w-16 h-16 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-6">
+                        <Lock size={32} className="text-rose-400" />
+                    </div>
+
+                    <h2 className="text-2xl font-bold text-white mb-2">Restricted Access</h2>
+                    <p className="text-slate-400 mb-8 leading-relaxed text-sm">
+                        The <strong>3PAO Assessment Console</strong> contains sensitive logic definitions, source code, and unredacted audit logs.
+                    </p>
+
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => openModal('login')}
+                            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+                        >
+                            <ShieldCheck size={18} /> Authenticate as Assessor
+                        </button>
+                        <p className="text-xs text-slate-500 mt-4">
+                            Authorized personnel only. Access is logged.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (loading) return <div className="min-h-screen bg-[#0b0c10] flex items-center justify-center text-slate-500">Initializing Assessor Console...</div>;
 
-    // Critical Failure State
+    // Critical Failure State (Data Missing)
     if (!data?.report) return (
         <div className="min-h-screen bg-[#0b0c10] flex flex-col items-center justify-center text-slate-500 p-6">
             <div className="bg-rose-900/20 p-4 rounded-full mb-4 text-rose-500"><AlertTriangle size={48} /></div>
             <h3 className="text-xl font-bold text-white mb-2">Authorization Package Unavailable</h3>
-            <p className="max-w-md text-center mb-6">
-                The system could not retrieve the assessment artifacts.
-                <br /><span className="text-xs opacity-50">Target: {BASE_PATH}</span>
-            </p>
+            <p className="max-w-md text-center mb-6">The system could not retrieve the assessment artifacts.<br /><span className="text-xs opacity-50">Target: {BASE_PATH}</span></p>
             <button onClick={() => window.location.reload()} className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors">Retry Connection</button>
         </div>
     );
 
     const handleInspect = (ksiId) => {
         let logic = data.logicDefs?.[ksiId] || data.logicDefs?.[ksiId.replace(/-/g, '_')];
-        if (logic) {
-            setSelectedKSI({ id: ksiId, ...logic });
-        } else {
-            setSelectedKSI({
-                id: ksiId,
-                title: "Logic Definition Not Found",
-                logic: "No automated logic definition was found.",
-                passing_criteria: "Manual verification required.",
-                source_code: "# Source code not available."
-            });
-        }
+        if (logic) { setSelectedKSI({ id: ksiId, ...logic }); }
+        else { setSelectedKSI({ id: ksiId, title: "Logic Definition Not Found", logic: "No automated logic definition was found.", passing_criteria: "Manual verification required.", source_code: "# Source code not available." }); }
     };
 
     return (
@@ -163,11 +162,7 @@ export const ThreePaoView = () => {
                                     src={`${BASE_PATH}meridian-favicon.png`}
                                     alt="Meridian"
                                     className="w-full h-full object-contain"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.style.display = 'none'; // Hide broken image
-                                        e.target.nextSibling.style.display = 'block'; // Show fallback
-                                    }}
+                                    onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
                                 />
                                 <ShieldCheck size={24} className="text-indigo-400 hidden absolute" />
                             </div>
@@ -427,7 +422,7 @@ const ConsistencyTab = ({ data }) => {
                 <h3 className="text-white font-bold mb-4 flex items-center gap-2">
                     <Activity size={18} className="text-indigo-400" /> Validation Consistency Trend
                 </h3>
-                {/* Wrapper div provides explicit dimensions for Recharts */}
+                {/* --- FIX: Added wrapper to solve width(-1) error --- */}
                 <div className="flex-1 w-full min-h-0">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
