@@ -18,8 +18,13 @@ import { ModalProvider, useModal } from './contexts/ModalContext';
 import { ModalContainer } from './components/modals';
 
 import { TrustCenterView } from './components/trust/TrustCenterView';
-import { ThreePaoView } from './components/trust/ThreePaoView'; // <--- NEW IMPORT
+import { ThreePaoView } from './components/trust/ThreePaoView';
 import { KSIGrid } from './components/findings/KSIGrid';
+
+// --- CONFIGURATION ---
+const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
+  ? `${import.meta.env.BASE_URL}data/`
+  : `${import.meta.env.BASE_URL}/data/`;
 
 // --- THEME ENGINE ---
 const THEME = {
@@ -138,7 +143,7 @@ const ImpactBanner = memo(() => {
 
   const lastRunDate = metadata.validation_date ? new Date(metadata.validation_date) : new Date();
   const nextRunDate = new Date(lastRunDate.getTime() + (6 * 60 * 60 * 1000));
-  const level = metadata.impact_level || 'LOW';
+  const level = metadata.impact_level || 'MODERATE'; // Default to MODERATE if missing
 
   const styles = {
     'HIGH': { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/20', solid: 'bg-rose-500' },
@@ -166,7 +171,7 @@ const ImpactBanner = memo(() => {
               </span>
             </div>
             <p className="text-slate-400 text-sm flex items-center gap-2">
-              Automated testing against {metadata.impact_thresholds?.min || '0%'} baselines
+              Automated testing against {metadata.impact_thresholds?.min || '80%'} baselines
             </p>
           </div>
         </div>
@@ -395,10 +400,20 @@ const AppShell = () => {
           {/* Header */}
           <div className="h-16 flex items-center px-6 border-b border-white/5 mb-2">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-900/20 relative group">
-                <Shield size={16} className="text-white relative z-10" />
-                <div className="absolute inset-0 bg-blue-500 blur-lg opacity-40 group-hover:opacity-60 transition-opacity"></div>
+              {/* UPDATED LOGO: Uses meridian-favicon.png with fallback */}
+              <div className="w-8 h-8 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-1.5 relative overflow-hidden group">
+                <img
+                  src={`${BASE_PATH}meridian-favicon.png`}
+                  alt="Meridian"
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block'; // Show fallback
+                  }}
+                />
+                <Shield size={16} className="text-blue-500 hidden absolute" />
               </div>
+
               <div>
                 <div className="font-bold text-white tracking-tight leading-none text-sm">Meridian</div>
                 <div className="text-[9px] text-slate-500 font-mono mt-0.5 tracking-widest uppercase">Trust Center</div>
