@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '../../hooks/useAuth'; // <--- NEW IMPORT
-import { useModal } from '../../contexts/ModalContext'; // <--- NEW IMPORT
+import { useAuth } from '../../hooks/useAuth';
+import { useModal } from '../../contexts/ModalContext';
 import {
     ShieldCheck, AlertTriangle, FileJson, Terminal,
     GitCommit, Activity, CheckCircle2, XCircle,
@@ -44,8 +44,8 @@ const highlightCode = (code) => {
 };
 
 export const ThreePaoView = () => {
-    const { isAuthenticated, login } = useAuth(); // <--- AUTH HOOK
-    const { openModal } = useModal(); // <--- MODAL HOOK
+    const { isAuthenticated, login } = useAuth();
+    const { openModal } = useModal();
     const [activeTab, setActiveTab] = useState('dashboard');
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
@@ -62,9 +62,10 @@ export const ThreePaoView = () => {
         const loadArtifacts = async () => {
             setLoading(true);
             setSourceInfo({ type: 'Secure Pipeline Injection' });
+            const timestamp = Date.now();
 
             const safeFetch = async (filename, isText = false) => {
-                const url = `${BASE_PATH}${filename}`;
+                const url = `${BASE_PATH}${filename}?t=${timestamp}`;
                 try {
                     const res = await fetch(url);
                     if (!res.ok) return null;
@@ -77,20 +78,23 @@ export const ThreePaoView = () => {
             };
 
             try {
-                const [report, techLog, consistency, logicDefs, fingerprint, methodologyMd, cliRegister] = await Promise.all([
+                // Fetch unified results specifically to get accurate counts
+                const [report, techLog, consistency, logicDefs, fingerprint, methodologyMd, cliRegister, unified] = await Promise.all([
                     safeFetch('3pao_audit_report.json'),
                     safeFetch('technical_validation_log.json'),
                     safeFetch('validation_consistency_log.json'),
                     safeFetch('ksi_logic.json'),
                     safeFetch('fingerprint_cache.json'),
                     safeFetch('ksi-command-validation-reference.md', true),
-                    safeFetch('cli_command_register.json')
+                    safeFetch('cli_command_register.json'),
+                    safeFetch('unified_ksi_validations.json')
                 ]);
 
                 setData({
                     report, techLog, consistency,
                     logicDefs: logicDefs || {},
-                    fingerprint, methodologyMd, cliRegister
+                    fingerprint, methodologyMd, cliRegister,
+                    unified // Pass unified results down
                 });
             } catch (e) { console.error("Load error:", e); }
             finally { setLoading(false); }
@@ -98,11 +102,10 @@ export const ThreePaoView = () => {
         loadArtifacts();
     }, [isAuthenticated]);
 
-    // --- ACCESS DENIED SCREEN (Public Gate) ---
+    // --- ACCESS DENIED SCREEN ---
     if (!isAuthenticated) {
         return (
-            <div className="-m-6 md:-m-8 min-h-screen bg-[#0b0c10] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-                {/* Background Decor */}
+            <div className="-m-6 md:-m-8 min-h-screen bg-[#09090b] flex flex-col items-center justify-center p-6 relative overflow-hidden">
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
                 <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-[120px] pointer-events-none" />
 
@@ -123,23 +126,19 @@ export const ThreePaoView = () => {
                         >
                             <ShieldCheck size={18} /> Authenticate as Assessor
                         </button>
-                        <p className="text-xs text-slate-500 mt-4">
-                            Authorized personnel only. Access is logged.
-                        </p>
                     </div>
                 </div>
             </div>
         );
     }
 
-    if (loading) return <div className="min-h-screen bg-[#0b0c10] flex items-center justify-center text-slate-500">Initializing Assessor Console...</div>;
+    if (loading) return <div className="min-h-screen bg-[#09090b] flex items-center justify-center text-slate-500">Initializing Assessor Console...</div>;
 
-    // Critical Failure State (Data Missing)
     if (!data?.report) return (
-        <div className="min-h-screen bg-[#0b0c10] flex flex-col items-center justify-center text-slate-500 p-6">
+        <div className="min-h-screen bg-[#09090b] flex flex-col items-center justify-center text-slate-500 p-6">
             <div className="bg-rose-900/20 p-4 rounded-full mb-4 text-rose-500"><AlertTriangle size={48} /></div>
             <h3 className="text-xl font-bold text-white mb-2">Authorization Package Unavailable</h3>
-            <p className="max-w-md text-center mb-6">The system could not retrieve the assessment artifacts.<br /><span className="text-xs opacity-50">Target: {BASE_PATH}</span></p>
+            <p className="max-w-md text-center mb-6">The system could not retrieve the assessment artifacts.</p>
             <button onClick={() => window.location.reload()} className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors">Retry Connection</button>
         </div>
     );
@@ -151,20 +150,13 @@ export const ThreePaoView = () => {
     };
 
     return (
-        <div className="-m-6 md:-m-8 min-h-screen bg-[#0b0c10] text-slate-300 font-sans selection:bg-indigo-500/30 relative">
-            <header className="border-b border-white/5 bg-[#0f1115] px-8 py-6 sticky top-0 z-20 backdrop-blur-md bg-opacity-90">
+        <div className="-m-6 md:-m-8 min-h-screen bg-[#09090b] text-slate-300 font-sans selection:bg-indigo-500/30 relative">
+            <header className="border-b border-white/5 bg-[#0c0c10]/80 px-8 py-6 sticky top-0 z-20 backdrop-blur-md">
                 <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
-                            {/* UPDATED LOGO HANDLING */}
                             <div className="w-12 h-12 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-2 relative overflow-hidden">
-                                <img
-                                    src={`${BASE_PATH}meridian-favicon.png`}
-                                    alt="Meridian"
-                                    className="w-full h-full object-contain"
-                                    onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
-                                />
-                                <ShieldCheck size={24} className="text-indigo-400 hidden absolute" />
+                                <ShieldCheck size={24} className="text-indigo-400" />
                             </div>
 
                             <h1 className="text-2xl font-bold text-white tracking-tight">3PAO Assessment Console</h1>
@@ -174,8 +166,6 @@ export const ThreePaoView = () => {
                             <span className="flex items-center gap-1.5"><Activity size={14} className="text-emerald-500" /> Status: <span className="text-white font-medium">Active</span></span>
                             <span className="w-px h-3 bg-white/10" />
                             <span className="flex items-center gap-1.5"><GitCommit size={14} /> Snapshot: <span className="font-mono text-slate-300">{data.fingerprint?.fingerprint?.substring(0, 8) || 'LATEST'}</span></span>
-                            <span className="w-px h-3 bg-white/10" />
-                            <span className="flex items-center gap-1.5"><Server size={14} /> Source: <span className="text-slate-300 text-xs bg-white/5 px-2 py-0.5 rounded">{sourceInfo.type}</span></span>
                         </p>
                     </div>
                     <div className="flex bg-[#18181b] p-1 rounded-lg border border-white/10 overflow-x-auto">
@@ -206,19 +196,20 @@ export const ThreePaoView = () => {
 const DashboardTab = ({ data }) => {
     const summary = data.report?.validation_summary || {};
     const tech = data.report?.technical_validation || {};
-    const cliRegister = data.cliRegister || {};
-    const logicDefs = data.logicDefs || {};
 
-    // Total KSIs (Source of Truth: Audit Report or Fallback 65)
-    const totalKSIs = summary.total_ksis || 65;
+    // --- FIX: ROBUST COUNTING LOGIC ---
+    // Use the Unified Results array as the source of truth for total KSIs
+    // If unified data is missing, fall back to report summary
+    const results = data.unified?.results || {};
+    const resultKeys = Object.keys(results);
 
-    // Automated: Count active logic definitions that have commands in register
-    const automatedCount = Object.keys(logicDefs).filter(ksiId => {
-        const regEntry = cliRegister[ksiId] || cliRegister[ksiId.replace(/_/g, '-')];
-        return regEntry?.cli_commands?.length > 0;
-    }).length;
+    const totalKSIs = resultKeys.length > 0 ? resultKeys.length : (summary.total_ksis || 65);
 
-    const coveragePct = Math.round((automatedCount / totalKSIs) * 100);
+    // Count Automated: Any KSI present in the results with a valid status is effectively automated
+    const automatedCount = resultKeys.length > 0 ? resultKeys.length : (summary.total_ksis || 0);
+
+    // Calculate Coverage
+    const coveragePct = totalKSIs > 0 ? Math.round((automatedCount / totalKSIs) * 100) : 0;
 
     // SVG Donut Logic
     const radius = 70;
@@ -253,7 +244,7 @@ const DashboardTab = ({ data }) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-black/20 rounded-lg p-4 border border-white/5">
                             <div className="text-xs text-slate-500 uppercase font-bold mb-1">Consistency Score</div>
-                            <div className="text-2xl font-mono text-blue-400">{data.report?.consistency_analysis?.average_consistency_score || "N/A"}</div>
+                            <div className="text-2xl font-mono text-blue-400">{data.report?.consistency_analysis?.average_consistency_score || "N/A"}%</div>
                             <div className="text-xs text-slate-400 mt-1">Deterministic execution</div>
                         </div>
                         <div className="bg-black/20 rounded-lg p-4 border border-white/5">
@@ -265,7 +256,8 @@ const DashboardTab = ({ data }) => {
                 </div>
 
                 {/* Automation Donut Chart */}
-                <div className="bg-[#121217] border border-white/5 rounded-xl p-8 flex flex-col items-center justify-center">
+                <div className="bg-[#121217] border border-white/5 rounded-xl p-8 flex flex-col items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-blue-500/5 opacity-0 hover:opacity-100 transition-opacity"></div>
                     <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
                         <Cpu size={16} /> Automation Fidelity
                     </h3>
@@ -312,8 +304,6 @@ const DashboardTab = ({ data }) => {
         </div>
     );
 };
-
-// --- (MethodologyTab, LogicTab, ConsistencyTab, TechnicalTab, InspectorModal below remain same) ---
 
 const MethodologyTab = ({ markdown }) => {
     if (!markdown) return <div className="flex flex-col items-center justify-center h-64 text-slate-500 border border-white/5 rounded-xl bg-[#121217]"><FileText size={48} className="mb-4 opacity-50" /><p>Methodology reference document not found.</p></div>;
@@ -422,7 +412,6 @@ const ConsistencyTab = ({ data }) => {
                 <h3 className="text-white font-bold mb-4 flex items-center gap-2">
                     <Activity size={18} className="text-indigo-400" /> Validation Consistency Trend
                 </h3>
-                {/* --- FIX: Added wrapper to solve width(-1) error --- */}
                 <div className="flex-1 w-full min-h-0">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -539,5 +528,21 @@ const InspectorModal = ({ ksi, onClose }) => {
 };
 
 // --- HELPERS ---
-const StatCard = ({ label, value, icon: Icon, color }) => (<div className="bg-[#121217] border border-white/5 p-5 rounded-xl hover:border-white/10 transition-all"><div className="flex justify-between items-start mb-2"><div className={`p-2 rounded-lg bg-white/5 ${color}`.replace('text-', 'bg-').replace('400', '500/10')}><Icon size={20} className={color} /></div></div><div className="text-2xl font-bold text-white mb-1">{value}</div><div className="text-xs text-slate-500 font-bold uppercase tracking-wider">{label}</div></div>);
-const TabButton = ({ id, label, icon: Icon, active, set, count }) => (<button onClick={() => set(id)} className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${active === id ? 'bg-[#27272a] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}><Icon size={16} />{label}{count > 0 && (<span className="ml-1 bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{count}</span>)}</button>);
+const StatCard = ({ label, value, icon: Icon, color }) => (
+    <div className="bg-[#121217] border border-white/5 p-5 rounded-xl hover:border-white/10 transition-all">
+        <div className="flex justify-between items-start mb-2">
+            <div className={`p-2 rounded-lg bg-white/5 ${color}`.replace('text-', 'bg-').replace('400', '500/10')}>
+                <Icon size={20} className={color} />
+            </div>
+        </div>
+        <div className="text-2xl font-bold text-white mb-1 tracking-tight font-mono">{value}</div>
+        <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{label}</div>
+    </div>
+);
+
+const TabButton = ({ id, label, icon: Icon, active, set, count }) => (
+    <button onClick={() => set(id)} className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${active === id ? 'bg-[#27272a] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}>
+        <Icon size={16} />{label}
+        {count > 0 && <span className="ml-1 bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{count}</span>}
+    </button>
+);

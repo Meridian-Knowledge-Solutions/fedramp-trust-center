@@ -5,7 +5,6 @@ const DataContext = createContext();
 
 // --- CONFIGURATION ---
 // Points to the local /data/ folder where the pipeline injects files
-// This ensures we fetch the files served by the app itself, not external GitHub URLs
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
   ? `${import.meta.env.BASE_URL}data`
   : `${import.meta.env.BASE_URL}/data`;
@@ -68,36 +67,40 @@ export const DataProvider = ({ children }) => {
           fetch(`${BASE_PATH}/ksi_history.jsonl?t=${cacheBuster}`)
         ]);
 
-        // --- PROCESS HISTORY ---
+        // --- BULLETPROOF HISTORY PARSING (FIXED) ---
         if (histRes.ok) {
           const text = await histRes.text();
           let historyData = [];
-          if (!text.trim().startsWith('<')) { // Avoid HTML 404s
-            try {
-              // Try line-by-line JSONL parsing first (most robust)
-              historyData = text.split('\n')
-                .map(l => l.trim()).filter(l => l.startsWith('{'))
-                .map(l => { try { return JSON.parse(l) } catch (e) { return null } })
-                .filter(Boolean);
 
-              if (historyData.length === 0) {
-                // Fallback to standard JSON array
-                historyData = JSON.parse(text);
-              }
-            } catch (e) {
-              console.warn("History parse error", e);
-            }
+          if (!text.trim().startsWith('<')) {
+            // Strict Line-by-Line Parsing
+            const lines = text.split(/\r?\n/); // Handle both \n and \r\n
+
+            historyData = lines
+              .map(line => line.trim())
+              .filter(line => line.length > 0 && line.startsWith('{')) // Ignore empty lines or non-JSON garbage
+              .map(line => {
+                try {
+                  return JSON.parse(line);
+                } catch (e) {
+                  // Silently fail on bad lines (prevents crash)
+                  return null;
+                }
+              })
+              .filter(item => item !== null); // Remove failed parses
           }
 
-          if (Array.isArray(historyData)) {
+          if (historyData.length > 0) {
+            // Sort oldest to newest for charts
             const sorted = historyData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             setHistory(sorted);
+          } else {
+            // Fallback if file is empty
+            setHistory([]);
           }
         } else {
-          setHistory([
-            { timestamp: new Date(Date.now() - 86400000).toISOString(), compliance_rate: 0 },
-            { timestamp: new Date().toISOString(), compliance_rate: 0 }
-          ]);
+          // Default empty state if 404
+          setHistory([]);
         }
 
         // --- PROCESS VALIDATIONS ---
@@ -173,23 +176,21 @@ export const DataProvider = ({ children }) => {
         setKsis(processed);
 
         // --- CALCULATE METRICS (Source of Truth) ---
-        // Calculate directly from the results array to avoid metadata mismatches
         const totalCount = processed.length;
         const passedCount = processed.filter(k => k.assertion === true || k.assertion === "true").length;
         const failedCount = totalCount - passedCount;
         const score = totalCount > 0 ? Math.round((passedCount / totalCount) * 1000) / 10 : 0;
 
         // --- DATE DETECTIVE ---
-        // Hunt for the timestamp in multiple possible keys
         const realDate = rawMeta.timestamp || rawMeta.date || rawMeta.generated_at || rawMeta.validation_date || null;
 
         // Update Metadata State
         setMetadata({
-          validation_date: realDate, // This fixes the "Current Time" bug
+          validation_date: realDate,
           impact_level: rawMeta.impact_level || 'MODERATE',
           pass_rate: rawMeta.pass_rate || `${Math.round(score)}%`,
           passed: passedCount,
-          total_validated: totalCount, // This fixes the "undefined" bug
+          total_validated: totalCount,
           failed: failedCount,
           impact_thresholds: rawMeta.impact_thresholds || { min: '80%' }
         });
