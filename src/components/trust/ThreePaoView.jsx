@@ -2,16 +2,16 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../contexts/ModalContext';
 import {
-    ShieldCheck, AlertTriangle, Terminal,
+    ShieldCheck, AlertTriangle, FileJson, Terminal,
     GitCommit, Activity, CheckCircle2, XCircle,
-    Search, ChevronRight,
-    Cpu, Lock, BarChart3, History,
-    Code, ExternalLink,
-    AlertCircle, BookOpen, FileText, Bug
+    Search, Filter, ChevronDown, ChevronRight,
+    Cpu, Lock, BarChart3, FileCode, History,
+    Play, Eye, Server, Code, ExternalLink, RefreshCw,
+    AlertCircle, BookOpen, FileText, Zap, Bug
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid,
-    Tooltip, ResponsiveContainer
+    Tooltip, ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine // <--- FIXED: Added ReferenceLine
 } from 'recharts';
 
 // --- CONFIGURATION ---
@@ -53,6 +53,7 @@ export const ThreePaoView = () => {
     const [sourceInfo, setSourceInfo] = useState({ type: 'Checking...' });
 
     useEffect(() => {
+        // Only load data if authenticated
         if (!isAuthenticated) {
             setLoading(false);
             return;
@@ -77,6 +78,7 @@ export const ThreePaoView = () => {
             };
 
             try {
+                // Fetch unified results specifically to get accurate counts
                 const [report, techLog, consistency, logicDefs, fingerprint, methodologyMd, cliRegister, unified] = await Promise.all([
                     safeFetch('3pao_audit_report.json'),
                     safeFetch('technical_validation_log.json'),
@@ -92,7 +94,7 @@ export const ThreePaoView = () => {
                     report, techLog, consistency,
                     logicDefs: logicDefs || {},
                     fingerprint, methodologyMd, cliRegister,
-                    unified
+                    unified // Pass unified results down
                 });
             } catch (e) { console.error("Load error:", e); }
             finally { setLoading(false); }
@@ -100,21 +102,28 @@ export const ThreePaoView = () => {
         loadArtifacts();
     }, [isAuthenticated]);
 
+    // --- ACCESS DENIED SCREEN ---
     if (!isAuthenticated) {
         return (
             <div className="-m-6 md:-m-8 min-h-screen bg-[#09090b] flex flex-col items-center justify-center p-6 relative overflow-hidden">
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
                 <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-[120px] pointer-events-none" />
+
                 <div className="bg-[#121217] border border-white/10 p-8 rounded-2xl max-w-md w-full text-center shadow-2xl relative z-10">
                     <div className="w-16 h-16 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-6">
                         <Lock size={32} className="text-rose-400" />
                     </div>
+
                     <h2 className="text-2xl font-bold text-white mb-2">Restricted Access</h2>
                     <p className="text-slate-400 mb-8 leading-relaxed text-sm">
                         The <strong>3PAO Assessment Console</strong> contains sensitive logic definitions, source code, and unredacted audit logs.
                     </p>
+
                     <div className="space-y-3">
-                        <button onClick={() => openModal('login')} className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2">
+                        <button
+                            onClick={() => openModal('login')}
+                            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+                        >
                             <ShieldCheck size={18} /> Authenticate as Assessor
                         </button>
                     </div>
@@ -148,9 +157,10 @@ export const ThreePaoView = () => {
                 {activeTab === 'methodology' && <MethodologyTab markdown={data.methodologyMd} />}
                 {activeTab === 'logic' && <LogicTab consistency={data.consistency} logicDefs={data.logicDefs} onInspect={handleInspect} />}
                 {activeTab === 'consistency' && <ConsistencyTab data={data.consistency} />}
-                {/* --- UPDATE: Passing logicDefs so TechnicalTab can do the lookup --- */}
+                {/* Updated Technical Tab: Passes Unified Results for tracing */}
                 {activeTab === 'health' && <TechnicalTab data={data.techLog} fallback={data.report?.technical_validation} unified={data.unified} logicDefs={data.logicDefs} onInspect={handleInspect} />}
             </main>
+
             {selectedKSI && <InspectorModal ksi={selectedKSI} onClose={() => setSelectedKSI(null)} />}
         </div>
     );
@@ -161,11 +171,14 @@ export const ThreePaoView = () => {
 const DashboardTab = ({ data }) => {
     const summary = data.report?.validation_summary || {};
     const tech = data.report?.technical_validation || {};
+
+    // --- ROBUST COUNTING ---
     const results = data.unified?.results || {};
     const resultKeys = Object.keys(results);
     const totalKSIs = resultKeys.length > 0 ? resultKeys.length : (summary.total_ksis || 65);
     const automatedCount = resultKeys.length > 0 ? resultKeys.length : (summary.total_ksis || 0);
     const coveragePct = totalKSIs > 0 ? Math.round((automatedCount / totalKSIs) * 100) : 0;
+
     const radius = 70;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (coveragePct / 100) * circumference;
@@ -225,10 +238,12 @@ const DashboardTab = ({ data }) => {
 
 const MethodologyTab = ({ markdown }) => {
     if (!markdown) return <div className="flex flex-col items-center justify-center h-64 text-slate-500 border border-white/5 rounded-xl bg-[#121217]"><FileText size={48} className="mb-4 opacity-50" /><p>Methodology reference document not found.</p></div>;
+    // ... (Keep existing renderer - omitted for brevity, copy from original if needed or keep blank logic)
+    // Assuming standard renderer for now
     const renderContent = () => {
         return markdown.split('\n').map((l, i) => {
             if (l.startsWith('## ')) return <h2 key={i} className="text-xl font-bold text-white mt-6 mb-3 border-b border-white/10 pb-2">{l.replace('## ', '')}</h2>;
-            if (l.startsWith('|')) return null;
+            if (l.startsWith('|')) return null; // Simplified
             return <p key={i} className="text-sm text-slate-300 mb-2">{l}</p>;
         });
     };
@@ -287,15 +302,22 @@ const LogicTab = ({ consistency, logicDefs, onInspect }) => {
     );
 };
 
+// --- ENHANCED: CONSISTENCY TAB ---
 const ConsistencyTab = ({ data }) => {
     const history = data?.historical_validations || [];
+
+    // --- UPDATED LOGIC: Use consistency_score if available, else calc pass rate
     const chartData = history.map(h => ({
         time: new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        score: h.consistency_score !== undefined ? h.consistency_score : (h.ksi_count > 0 ? (h.pass_count / h.ksi_count) * 100 : 0)
+        // Prefer explicit consistency score, fallback to pass rate
+        score: h.consistency_score !== undefined ? h.consistency_score : (h.ksi_count > 0 ? (h.pass_count / h.ksi_count) * 100 : 0),
+        rawPass: h.pass_count,
+        rawTotal: h.ksi_count
     }));
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Chart Card */}
             <div className="bg-[#121217] border border-white/5 rounded-xl p-6 h-80 flex flex-col relative overflow-hidden">
                 <div className="flex justify-between items-center mb-4 relative z-10">
                     <div>
@@ -324,7 +346,12 @@ const ConsistencyTab = ({ data }) => {
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.2} />
                             <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} domain={[0, 105]} />
-                            <Tooltip contentStyle={{ backgroundColor: '#09090b', borderColor: '#334155', borderRadius: '8px', color: '#fff' }} itemStyle={{ color: '#818cf8' }} formatter={(value) => [`${value.toFixed(1)}%`, 'Reliability']} />
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#09090b', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
+                                itemStyle={{ color: '#818cf8' }}
+                                formatter={(value) => [`${value.toFixed(1)}%`, 'Reliability']}
+                            />
+                            {/* --- REFERENCE LINE FIX: Included in imports now --- */}
                             <ReferenceLine y={95} stroke="#10b981" strokeDasharray="3 3" label={{ value: "Target (95%)", fill: "#10b981", fontSize: 10 }} />
                             <Area type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={2} fill="url(#colorScore)" activeDot={{ r: 4, strokeWidth: 0, fill: '#fff' }} />
                         </AreaChart>
@@ -332,6 +359,7 @@ const ConsistencyTab = ({ data }) => {
                 </div>
             </div>
 
+            {/* Recent Checks Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {(data?.consistency_checks || []).slice(-3).reverse().map((check, i) => (
                     <div key={i} className="bg-[#121217] border border-white/5 p-5 rounded-xl hover:border-indigo-500/20 transition-all">
