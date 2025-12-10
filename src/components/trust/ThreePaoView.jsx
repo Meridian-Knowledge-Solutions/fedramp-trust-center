@@ -11,13 +11,24 @@ import {
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid,
-    Tooltip, ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine // <--- FIXED: Added ReferenceLine
+    Tooltip, ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine
 } from 'recharts';
 
 // --- CONFIGURATION ---
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
     ? `${import.meta.env.BASE_URL}data/`
     : `${import.meta.env.BASE_URL}/data/`;
+
+// --- HELPER: FORCE UTC TIMEZONE ---
+// Fixes "Future Date" bug by appending 'Z' if missing to force UTC interpretation
+const normalizeDate = (timestamp) => {
+    if (!timestamp) return new Date();
+    // If it looks like ISO (has T) but missing Z and no offset (+), force UTC
+    if (timestamp.includes('T') && !timestamp.endsWith('Z') && !timestamp.includes('+')) {
+        return new Date(timestamp + 'Z');
+    }
+    return new Date(timestamp);
+};
 
 // --- SYNTAX HIGHLIGHTER (Helper) ---
 const highlightCode = (code) => {
@@ -53,7 +64,6 @@ export const ThreePaoView = () => {
     const [sourceInfo, setSourceInfo] = useState({ type: 'Checking...' });
 
     useEffect(() => {
-        // Only load data if authenticated
         if (!isAuthenticated) {
             setLoading(false);
             return;
@@ -78,7 +88,6 @@ export const ThreePaoView = () => {
             };
 
             try {
-                // Fetch unified results specifically to get accurate counts
                 const [report, techLog, consistency, logicDefs, fingerprint, methodologyMd, cliRegister, unified] = await Promise.all([
                     safeFetch('3pao_audit_report.json'),
                     safeFetch('technical_validation_log.json'),
@@ -94,7 +103,7 @@ export const ThreePaoView = () => {
                     report, techLog, consistency,
                     logicDefs: logicDefs || {},
                     fingerprint, methodologyMd, cliRegister,
-                    unified // Pass unified results down
+                    unified
                 });
             } catch (e) { console.error("Load error:", e); }
             finally { setLoading(false); }
@@ -102,7 +111,6 @@ export const ThreePaoView = () => {
         loadArtifacts();
     }, [isAuthenticated]);
 
-    // --- ACCESS DENIED SCREEN ---
     if (!isAuthenticated) {
         return (
             <div className="-m-6 md:-m-8 min-h-screen bg-[#09090b] flex flex-col items-center justify-center p-6 relative overflow-hidden">
@@ -113,17 +121,12 @@ export const ThreePaoView = () => {
                     <div className="w-16 h-16 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-6">
                         <Lock size={32} className="text-rose-400" />
                     </div>
-
                     <h2 className="text-2xl font-bold text-white mb-2">Restricted Access</h2>
                     <p className="text-slate-400 mb-8 leading-relaxed text-sm">
                         The <strong>3PAO Assessment Console</strong> contains sensitive logic definitions, source code, and unredacted audit logs.
                     </p>
-
                     <div className="space-y-3">
-                        <button
-                            onClick={() => openModal('login')}
-                            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
-                        >
+                        <button onClick={() => openModal('login')} className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2">
                             <ShieldCheck size={18} /> Authenticate as Assessor
                         </button>
                     </div>
@@ -157,10 +160,8 @@ export const ThreePaoView = () => {
                 {activeTab === 'methodology' && <MethodologyTab markdown={data.methodologyMd} />}
                 {activeTab === 'logic' && <LogicTab consistency={data.consistency} logicDefs={data.logicDefs} onInspect={handleInspect} />}
                 {activeTab === 'consistency' && <ConsistencyTab data={data.consistency} />}
-                {/* Updated Technical Tab: Passes Unified Results for tracing */}
                 {activeTab === 'health' && <TechnicalTab data={data.techLog} fallback={data.report?.technical_validation} unified={data.unified} logicDefs={data.logicDefs} onInspect={handleInspect} />}
             </main>
-
             {selectedKSI && <InspectorModal ksi={selectedKSI} onClose={() => setSelectedKSI(null)} />}
         </div>
     );
@@ -171,14 +172,11 @@ export const ThreePaoView = () => {
 const DashboardTab = ({ data }) => {
     const summary = data.report?.validation_summary || {};
     const tech = data.report?.technical_validation || {};
-
-    // --- ROBUST COUNTING ---
     const results = data.unified?.results || {};
     const resultKeys = Object.keys(results);
     const totalKSIs = resultKeys.length > 0 ? resultKeys.length : (summary.total_ksis || 65);
     const automatedCount = resultKeys.length > 0 ? resultKeys.length : (summary.total_ksis || 0);
     const coveragePct = totalKSIs > 0 ? Math.round((automatedCount / totalKSIs) * 100) : 0;
-
     const radius = 70;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (coveragePct / 100) * circumference;
@@ -236,24 +234,103 @@ const DashboardTab = ({ data }) => {
     );
 };
 
+// --- FIX: RICH MARKDOWN RENDERER ---
 const MethodologyTab = ({ markdown }) => {
     if (!markdown) return <div className="flex flex-col items-center justify-center h-64 text-slate-500 border border-white/5 rounded-xl bg-[#121217]"><FileText size={48} className="mb-4 opacity-50" /><p>Methodology reference document not found.</p></div>;
-    // ... (Keep existing renderer - omitted for brevity, copy from original if needed or keep blank logic)
-    // Assuming standard renderer for now
+
     const renderContent = () => {
-        return markdown.split('\n').map((l, i) => {
-            if (l.startsWith('## ')) return <h2 key={i} className="text-xl font-bold text-white mt-6 mb-3 border-b border-white/10 pb-2">{l.replace('## ', '')}</h2>;
-            if (l.startsWith('|')) return null; // Simplified
-            return <p key={i} className="text-sm text-slate-300 mb-2">{l}</p>;
+        const lines = markdown.split('\n');
+        const elements = [];
+        let inTable = false;
+        let tableRows = [];
+
+        lines.forEach((line, idx) => {
+            const trimmed = line.trim();
+
+            // Handle Tables
+            if (trimmed.startsWith('|')) {
+                if (!inTable) inTable = true;
+                tableRows.push(trimmed);
+            } else {
+                if (inTable) {
+                    elements.push(renderTable(tableRows, idx));
+                    inTable = false;
+                    tableRows = [];
+                }
+
+                // Handle Headers
+                if (trimmed.startsWith('#### ')) {
+                    elements.push(<h4 key={idx} className="text-base font-bold text-emerald-400 mt-6 mb-3 flex items-center gap-2"><ShieldCheck size={16} /> {trimmed.replace('#### ', '')}</h4>);
+                } else if (trimmed.startsWith('### ')) {
+                    elements.push(<h3 key={idx} className="text-lg font-semibold text-blue-400 mt-8 mb-4">{trimmed.replace('### ', '')}</h3>);
+                } else if (trimmed.startsWith('## ')) {
+                    elements.push(<h2 key={idx} className="text-xl font-bold text-white mt-10 mb-4 border-b border-white/10 pb-2">{trimmed.replace('## ', '')}</h2>);
+                }
+                // Handle Lists
+                else if (trimmed.startsWith('- ')) {
+                    elements.push(<li key={idx} className="text-sm text-slate-300 ml-4 mb-1 list-disc marker:text-slate-500">{formatInline(trimmed.replace('- ', ''))}</li>);
+                }
+                // Handle Paragraphs
+                else if (trimmed) {
+                    elements.push(<p key={idx} className="text-sm text-slate-300 mb-3 leading-relaxed">{formatInline(trimmed)}</p>);
+                }
+            }
+        });
+
+        // Flush remaining table if file ends with one
+        if (inTable) elements.push(renderTable(tableRows, 'end'));
+
+        return elements;
+    };
+
+    // Helper to bold **text** and code `text`
+    const formatInline = (text) => {
+        const parts = text.split(/(\*\*.*?\*\*|`.*?`)/g);
+        return parts.map((part, i) => {
+            if (part.startsWith('**') && part.endsWith('**')) return <strong key={i} className="text-white font-semibold">{part.slice(2, -2)}</strong>;
+            if (part.startsWith('`') && part.endsWith('`')) return <code key={i} className="bg-white/10 px-1 py-0.5 rounded text-indigo-300 font-mono text-xs">{part.slice(1, -1)}</code>;
+            return part;
         });
     };
+
+    const renderTable = (rows, key) => {
+        if (rows.length < 2) return null;
+        // Clean rows by splitting by | and removing empty starts/ends
+        const header = rows[0].split('|').filter(c => c.trim() !== '').map(c => c.trim());
+        const body = rows.slice(2).map(r => r.split('|').filter(c => c.trim() !== '').map(c => c.trim()));
+
+        return (
+            <div key={key} className="my-6 overflow-hidden rounded-lg border border-white/10 bg-[#09090b]">
+                <table className="w-full text-left text-sm">
+                    <thead className="bg-[#18181b] text-white">
+                        <tr>{header.map((h, i) => <th key={i} className="p-3 font-bold border-b border-white/10">{h}</th>)}</tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                        {body.map((row, i) => (
+                            <tr key={i} className="hover:bg-white/5 transition-colors">
+                                {row.map((cell, j) => (
+                                    <td key={j} className="p-3 text-slate-400 text-xs">{formatInline(cell)}</td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    };
+
     return (
         <div className="bg-[#121217] border border-white/5 rounded-xl p-8 max-w-5xl mx-auto">
             <div className="flex items-center gap-4 mb-8 pb-8 border-b border-white/10">
                 <div className="p-4 bg-blue-500/10 rounded-xl border border-blue-500/20"><BookOpen size={32} className="text-blue-400" /></div>
-                <div><h1 className="text-3xl font-bold text-white">Reference Methodology</h1><p className="text-slate-400 mt-1">Command Register & Validation Logic</p></div>
+                <div>
+                    <h1 className="text-3xl font-bold text-white">Reference Methodology</h1>
+                    <p className="text-slate-400 mt-1">Command Register & Validation Logic</p>
+                </div>
             </div>
-            <div className="prose prose-invert max-w-none">{renderContent()}</div>
+            <div className="prose prose-invert max-w-none text-slate-300">
+                {renderContent()}
+            </div>
         </div>
     );
 };
@@ -302,22 +379,18 @@ const LogicTab = ({ consistency, logicDefs, onInspect }) => {
     );
 };
 
-// --- ENHANCED: CONSISTENCY TAB ---
+// --- FIX: CONSISTENCY TAB (With Timezone Fix) ---
 const ConsistencyTab = ({ data }) => {
     const history = data?.historical_validations || [];
 
-    // --- UPDATED LOGIC: Use consistency_score if available, else calc pass rate
+    // Use normalizeDate to fix the "Future Date" bug
     const chartData = history.map(h => ({
-        time: new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        // Prefer explicit consistency score, fallback to pass rate
-        score: h.consistency_score !== undefined ? h.consistency_score : (h.ksi_count > 0 ? (h.pass_count / h.ksi_count) * 100 : 0),
-        rawPass: h.pass_count,
-        rawTotal: h.ksi_count
+        time: normalizeDate(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        score: h.consistency_score !== undefined ? h.consistency_score : (h.ksi_count > 0 ? (h.pass_count / h.ksi_count) * 100 : 0)
     }));
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Chart Card */}
             <div className="bg-[#121217] border border-white/5 rounded-xl p-6 h-80 flex flex-col relative overflow-hidden">
                 <div className="flex justify-between items-center mb-4 relative z-10">
                     <div>
@@ -346,12 +419,7 @@ const ConsistencyTab = ({ data }) => {
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.2} />
                             <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} domain={[0, 105]} />
-                            <Tooltip
-                                contentStyle={{ backgroundColor: '#09090b', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
-                                itemStyle={{ color: '#818cf8' }}
-                                formatter={(value) => [`${value.toFixed(1)}%`, 'Reliability']}
-                            />
-                            {/* --- REFERENCE LINE FIX: Included in imports now --- */}
+                            <Tooltip contentStyle={{ backgroundColor: '#09090b', borderColor: '#334155', borderRadius: '8px', color: '#fff' }} itemStyle={{ color: '#818cf8' }} formatter={(value) => [`${value.toFixed(1)}%`, 'Reliability']} />
                             <ReferenceLine y={95} stroke="#10b981" strokeDasharray="3 3" label={{ value: "Target (95%)", fill: "#10b981", fontSize: 10 }} />
                             <Area type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={2} fill="url(#colorScore)" activeDot={{ r: 4, strokeWidth: 0, fill: '#fff' }} />
                         </AreaChart>
@@ -359,49 +427,46 @@ const ConsistencyTab = ({ data }) => {
                 </div>
             </div>
 
-            {/* Recent Checks Grid */}
+            {/* Enhanced Recent Checks Grid (With Timezone Fix) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {(data?.consistency_checks || []).slice(-3).reverse().map((check, i) => (
-                    <div key={i} className="bg-[#121217] border border-white/5 p-5 rounded-xl hover:border-indigo-500/20 transition-all">
-                        <div className="text-[10px] font-mono text-slate-500 mb-2">{new Date(check.timestamp).toLocaleString()}</div>
-                        <div className="flex justify-between items-end">
-                            <div>
-                                <div className="text-2xl font-bold text-white font-mono">{check.consistency_score.toFixed(1)}%</div>
-                                <div className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider font-bold">Determinism Score</div>
+                {(data?.consistency_checks || []).slice(-3).reverse().map((check, i) => {
+                    const dateObj = normalizeDate(check.timestamp);
+                    return (
+                        <div key={i} className="bg-[#121217] border border-white/5 p-5 rounded-xl hover:border-indigo-500/20 transition-all">
+                            <div className="text-[10px] font-mono text-slate-500 mb-2">
+                                {dateObj.toLocaleDateString()} <span className="mx-1">•</span> {dateObj.toLocaleTimeString()}
                             </div>
-                            <div className="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20">
-                                {check.infrastructure_fingerprint.substring(0, 8)}
+                            <div className="flex justify-between items-end">
+                                <div>
+                                    <div className="text-2xl font-bold text-white font-mono">{check.consistency_score.toFixed(1)}%</div>
+                                    <div className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider font-bold">Determinism Score</div>
+                                </div>
+                                <div className="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20">
+                                    {check.infrastructure_fingerprint.substring(0, 8)}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
 };
 
-// --- UPDATED TECHNICAL TAB WITH INTELLIGENT LOOKUP ---
+// --- TECHNICAL TAB ---
 const TechnicalTab = ({ data, fallback, unified, logicDefs, onInspect }) => {
-    // 1. DATA SOURCES
     const effectiveData = data || { issues: [], technical_issues_found: fallback?.technical_issues_found || 0 };
     const logIssues = effectiveData.issues || [];
-
-    // 2. CHECK EXECUTION FAILURES (From Unified)
     const results = unified?.results || {};
     const failedCommands = Object.values(results).filter(
         item => parseInt(item.exit_code) !== 0 && item.exit_code !== undefined
     );
-
-    // 3. COMBINED STATUS
     const hasIssues = effectiveData.technical_issues_found > 0 || failedCommands.length > 0 || logIssues.length > 0;
 
-    // --- HELPER: FIND COMMAND FOR TEXTUAL ISSUE ---
     const getCommandContext = (issueText) => {
-        // Extract KSI ID (e.g. "KSI-005")
         const match = issueText.match(/(KSI-[A-Z0-9]+)/i);
         if (match && logicDefs) {
             const ksiId = match[1];
-            // Lookup in Logic Inspector definitions
             const def = logicDefs[ksiId] || logicDefs[ksiId.replace('-', '_')];
             if (def && def.cli_commands && def.cli_commands.length > 0) {
                 return { id: ksiId, cmd: def.cli_commands[0] };
@@ -412,105 +477,60 @@ const TechnicalTab = ({ data, fallback, unified, logicDefs, onInspect }) => {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Status Banner */}
             <div className={`rounded-xl p-6 flex items-start gap-4 border ${hasIssues ? 'bg-amber-500/10 border-amber-500/20' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
                 <div className={`p-2 rounded-lg ${hasIssues ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
                     {hasIssues ? <AlertTriangle size={24} /> : <CheckCircle2 size={24} />}
                 </div>
                 <div>
-                    <h3 className={`text-lg font-bold ${hasIssues ? 'text-white' : 'text-white'}`}>
-                        {hasIssues ? 'Automation Integrity Warning' : 'Validation Engine Operational'}
-                    </h3>
-                    <p className="text-sm text-slate-400 mt-1 leading-relaxed">
-                        {hasIssues
-                            ? "Self-validation detected anomalies or command failures in the automation harness."
-                            : `The validation engine successfully performed all internal logic checks with 0 command failures.`}
-                    </p>
+                    <h3 className={`text-lg font-bold ${hasIssues ? 'text-white' : 'text-white'}`}>{hasIssues ? 'Automation Integrity Warning' : 'Validation Engine Operational'}</h3>
+                    <p className="text-sm text-slate-400 mt-1 leading-relaxed">{hasIssues ? "Self-validation detected anomalies or command failures in the automation harness." : `The validation engine successfully performed all internal logic checks with 0 command failures.`}</p>
                 </div>
             </div>
 
-            {/* --- SECTION 1: TEXTUAL VALIDATION ANOMALIES (With Intelligent Lookup) --- */}
             {logIssues.length > 0 && (
                 <div className="space-y-4">
                     <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Validation Anomalies</h4>
                     {logIssues.map((issue, idx) => {
-                        // AUTOMAGICALLY FIND THE COMMAND
                         const context = getCommandContext(issue);
-
                         return (
                             <div key={idx} className="bg-[#121217] border border-white/5 rounded-xl p-5 flex flex-col gap-4 group hover:border-amber-500/30 transition-colors">
                                 <div className="flex items-start gap-4">
-                                    <div className="p-2 bg-[#18181b] rounded-lg border border-white/5 text-slate-500 group-hover:text-amber-400">
-                                        <Terminal size={18} />
-                                    </div>
+                                    <div className="p-2 bg-[#18181b] rounded-lg border border-white/5 text-slate-500 group-hover:text-amber-400"><Terminal size={18} /></div>
                                     <div className="flex-1">
                                         <div className="flex justify-between items-start">
                                             <div className="font-mono text-xs text-amber-400 mb-1">ISSUE #{idx + 1}</div>
-                                            {context && (
-                                                <button onClick={() => onInspect(context.id)} className="text-[10px] flex items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors">
-                                                    <Code size={12} /> Inspect {context.id}
-                                                </button>
-                                            )}
+                                            {context && (<button onClick={() => onInspect(context.id)} className="text-[10px] flex items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"><Code size={12} /> Inspect {context.id}</button>)}
                                         </div>
                                         <div className="text-slate-200 font-medium text-sm">{issue}</div>
                                     </div>
                                 </div>
-
-                                {/* If we found a command in the Logic Inspector, show it here! */}
-                                {context && (
-                                    <div className="ml-14 bg-black/40 p-3 rounded border border-white/5 font-mono text-xs text-slate-400">
-                                        <div className="text-[9px] uppercase font-bold text-slate-600 mb-1">Associated Command Logic:</div>
-                                        <span className="text-rose-400/80 mr-2">$</span>{context.cmd}
-                                    </div>
-                                )}
+                                {context && (<div className="ml-14 bg-black/40 p-3 rounded border border-white/5 font-mono text-xs text-slate-400"><div className="text-[9px] uppercase font-bold text-slate-600 mb-1">Associated Command Logic:</div><span className="text-rose-400/80 mr-2">$</span>{context.cmd}</div>)}
                             </div>
                         );
                     })}
                 </div>
             )}
 
-            {/* --- SECTION 2: COMMAND FAILURE TRACEBACK --- */}
             {failedCommands.length > 0 && (
                 <div className="bg-[#0f1115] border border-rose-500/20 rounded-xl overflow-hidden mt-6">
                     <div className="bg-rose-500/10 px-6 py-4 border-b border-rose-500/10 flex justify-between items-center">
-                        <h3 className="text-rose-400 font-bold text-sm flex items-center gap-2">
-                            <Bug size={16} /> Command Execution Traceback
-                        </h3>
+                        <h3 className="text-rose-400 font-bold text-sm flex items-center gap-2"><Bug size={16} /> Command Execution Traceback</h3>
                         <span className="text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded font-bold">{failedCommands.length} ERRORS</span>
                     </div>
                     <div className="divide-y divide-white/5">
                         {failedCommands.map((fail, idx) => (
                             <div key={idx} className="p-4 hover:bg-white/5 transition-colors group">
                                 <div className="flex justify-between items-start mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs font-mono font-bold text-white bg-white/10 px-2 py-0.5 rounded">{fail.ksi_id}</span>
-                                        <span className="text-[10px] text-rose-400 font-mono">Exit Code: {fail.exit_code}</span>
-                                    </div>
-                                    <button
-                                        onClick={() => onInspect(fail.ksi_id)}
-                                        className="text-[10px] text-indigo-400 hover:text-white flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <Code size={12} /> Inspect Logic
-                                    </button>
+                                    <div className="flex items-center gap-2"><span className="text-xs font-mono font-bold text-white bg-white/10 px-2 py-0.5 rounded">{fail.ksi_id}</span><span className="text-[10px] text-rose-400 font-mono">Exit Code: {fail.exit_code}</span></div>
+                                    <button onClick={() => onInspect(fail.ksi_id)} className="text-[10px] text-indigo-400 hover:text-white flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><Code size={12} /> Inspect Logic</button>
                                 </div>
-                                <div className="bg-black/50 p-3 rounded border border-white/5 font-mono text-xs text-slate-300 overflow-x-auto whitespace-pre-wrap">
-                                    <span className="text-rose-500 mr-2">$</span>
-                                    {fail.cli_command || "Command trace unavailable"}
-                                </div>
+                                <div className="bg-black/50 p-3 rounded border border-white/5 font-mono text-xs text-slate-300 overflow-x-auto whitespace-pre-wrap"><span className="text-rose-500 mr-2">$</span>{fail.cli_command || "Command trace unavailable"}</div>
                             </div>
                         ))}
                     </div>
                 </div>
             )}
-
-            {/* Metric Cards (Only if totally healthy) */}
-            {!hasIssues && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {['Logic Consistency', 'Scoring Mathematics', 'Evidence Alignment', 'Command Execution', 'CLI Success Rate', 'Counting Accuracy'].map(l => (
-                        <HealthCard key={l} label={l} status="PASS" />
-                    ))}
-                </div>
-            )}
+            {!hasIssues && (<div className="grid grid-cols-1 md:grid-cols-3 gap-4">{['Logic Consistency', 'Scoring Mathematics', 'Evidence Alignment', 'Command Execution', 'CLI Success Rate', 'Counting Accuracy'].map(l => <HealthCard key={l} label={l} status="PASS" />)}</div>)}
         </div>
     );
 };
