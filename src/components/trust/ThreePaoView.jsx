@@ -2,16 +2,16 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../contexts/ModalContext';
 import {
-    ShieldCheck, AlertTriangle, FileJson, Terminal,
+    ShieldCheck, AlertTriangle, Terminal,
     GitCommit, Activity, CheckCircle2, XCircle,
-    Search, Filter, ChevronDown, ChevronRight,
-    Cpu, Lock, BarChart3, FileCode, History,
-    Play, Eye, Server, Code, ExternalLink, RefreshCw,
-    AlertCircle, BookOpen, FileText, Zap, Bug
+    Search, ChevronRight,
+    Cpu, Lock, BarChart3, History,
+    Code, ExternalLink,
+    AlertCircle, BookOpen, FileText, Bug
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid,
-    Tooltip, ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine
+    Tooltip, ResponsiveContainer
 } from 'recharts';
 
 // --- CONFIGURATION ---
@@ -53,7 +53,6 @@ export const ThreePaoView = () => {
     const [sourceInfo, setSourceInfo] = useState({ type: 'Checking...' });
 
     useEffect(() => {
-        // Only load data if authenticated
         if (!isAuthenticated) {
             setLoading(false);
             return;
@@ -78,7 +77,6 @@ export const ThreePaoView = () => {
             };
 
             try {
-                // Fetch unified results specifically to get accurate counts
                 const [report, techLog, consistency, logicDefs, fingerprint, methodologyMd, cliRegister, unified] = await Promise.all([
                     safeFetch('3pao_audit_report.json'),
                     safeFetch('technical_validation_log.json'),
@@ -94,7 +92,7 @@ export const ThreePaoView = () => {
                     report, techLog, consistency,
                     logicDefs: logicDefs || {},
                     fingerprint, methodologyMd, cliRegister,
-                    unified // Pass unified results down
+                    unified
                 });
             } catch (e) { console.error("Load error:", e); }
             finally { setLoading(false); }
@@ -102,28 +100,21 @@ export const ThreePaoView = () => {
         loadArtifacts();
     }, [isAuthenticated]);
 
-    // --- ACCESS DENIED SCREEN ---
     if (!isAuthenticated) {
         return (
             <div className="-m-6 md:-m-8 min-h-screen bg-[#09090b] flex flex-col items-center justify-center p-6 relative overflow-hidden">
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
                 <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-[120px] pointer-events-none" />
-
                 <div className="bg-[#121217] border border-white/10 p-8 rounded-2xl max-w-md w-full text-center shadow-2xl relative z-10">
                     <div className="w-16 h-16 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-6">
                         <Lock size={32} className="text-rose-400" />
                     </div>
-
                     <h2 className="text-2xl font-bold text-white mb-2">Restricted Access</h2>
                     <p className="text-slate-400 mb-8 leading-relaxed text-sm">
                         The <strong>3PAO Assessment Console</strong> contains sensitive logic definitions, source code, and unredacted audit logs.
                     </p>
-
                     <div className="space-y-3">
-                        <button
-                            onClick={() => openModal('login')}
-                            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
-                        >
+                        <button onClick={() => openModal('login')} className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2">
                             <ShieldCheck size={18} /> Authenticate as Assessor
                         </button>
                     </div>
@@ -157,10 +148,9 @@ export const ThreePaoView = () => {
                 {activeTab === 'methodology' && <MethodologyTab markdown={data.methodologyMd} />}
                 {activeTab === 'logic' && <LogicTab consistency={data.consistency} logicDefs={data.logicDefs} onInspect={handleInspect} />}
                 {activeTab === 'consistency' && <ConsistencyTab data={data.consistency} />}
-                {/* Updated Technical Tab: Passes Unified Results for tracing */}
-                {activeTab === 'health' && <TechnicalTab data={data.techLog} fallback={data.report?.technical_validation} unified={data.unified} onInspect={handleInspect} />}
+                {/* --- UPDATE: Passing logicDefs so TechnicalTab can do the lookup --- */}
+                {activeTab === 'health' && <TechnicalTab data={data.techLog} fallback={data.report?.technical_validation} unified={data.unified} logicDefs={data.logicDefs} onInspect={handleInspect} />}
             </main>
-
             {selectedKSI && <InspectorModal ksi={selectedKSI} onClose={() => setSelectedKSI(null)} />}
         </div>
     );
@@ -171,14 +161,11 @@ export const ThreePaoView = () => {
 const DashboardTab = ({ data }) => {
     const summary = data.report?.validation_summary || {};
     const tech = data.report?.technical_validation || {};
-
-    // --- ROBUST COUNTING ---
     const results = data.unified?.results || {};
     const resultKeys = Object.keys(results);
     const totalKSIs = resultKeys.length > 0 ? resultKeys.length : (summary.total_ksis || 65);
     const automatedCount = resultKeys.length > 0 ? resultKeys.length : (summary.total_ksis || 0);
     const coveragePct = totalKSIs > 0 ? Math.round((automatedCount / totalKSIs) * 100) : 0;
-
     const radius = 70;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (coveragePct / 100) * circumference;
@@ -238,12 +225,10 @@ const DashboardTab = ({ data }) => {
 
 const MethodologyTab = ({ markdown }) => {
     if (!markdown) return <div className="flex flex-col items-center justify-center h-64 text-slate-500 border border-white/5 rounded-xl bg-[#121217]"><FileText size={48} className="mb-4 opacity-50" /><p>Methodology reference document not found.</p></div>;
-    // ... (Keep existing renderer - omitted for brevity, copy from original if needed or keep blank logic)
-    // Assuming standard renderer for now
     const renderContent = () => {
         return markdown.split('\n').map((l, i) => {
             if (l.startsWith('## ')) return <h2 key={i} className="text-xl font-bold text-white mt-6 mb-3 border-b border-white/10 pb-2">{l.replace('## ', '')}</h2>;
-            if (l.startsWith('|')) return null; // Simplified
+            if (l.startsWith('|')) return null;
             return <p key={i} className="text-sm text-slate-300 mb-2">{l}</p>;
         });
     };
@@ -302,22 +287,15 @@ const LogicTab = ({ consistency, logicDefs, onInspect }) => {
     );
 };
 
-// --- ENHANCED: CONSISTENCY TAB ---
 const ConsistencyTab = ({ data }) => {
     const history = data?.historical_validations || [];
-
-    // --- UPDATED LOGIC: Use consistency_score if available, else calc pass rate
     const chartData = history.map(h => ({
         time: new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        // Prefer explicit consistency score, fallback to pass rate
-        score: h.consistency_score !== undefined ? h.consistency_score : (h.ksi_count > 0 ? (h.pass_count / h.ksi_count) * 100 : 0),
-        rawPass: h.pass_count,
-        rawTotal: h.ksi_count
+        score: h.consistency_score !== undefined ? h.consistency_score : (h.ksi_count > 0 ? (h.pass_count / h.ksi_count) * 100 : 0)
     }));
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Chart Card */}
             <div className="bg-[#121217] border border-white/5 rounded-xl p-6 h-80 flex flex-col relative overflow-hidden">
                 <div className="flex justify-between items-center mb-4 relative z-10">
                     <div>
@@ -346,11 +324,7 @@ const ConsistencyTab = ({ data }) => {
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.2} />
                             <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} domain={[0, 105]} />
-                            <Tooltip
-                                contentStyle={{ backgroundColor: '#09090b', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
-                                itemStyle={{ color: '#818cf8' }}
-                                formatter={(value) => [`${value.toFixed(1)}%`, 'Reliability']}
-                            />
+                            <Tooltip contentStyle={{ backgroundColor: '#09090b', borderColor: '#334155', borderRadius: '8px', color: '#fff' }} itemStyle={{ color: '#818cf8' }} formatter={(value) => [`${value.toFixed(1)}%`, 'Reliability']} />
                             <ReferenceLine y={95} stroke="#10b981" strokeDasharray="3 3" label={{ value: "Target (95%)", fill: "#10b981", fontSize: 10 }} />
                             <Area type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={2} fill="url(#colorScore)" activeDot={{ r: 4, strokeWidth: 0, fill: '#fff' }} />
                         </AreaChart>
@@ -358,7 +332,6 @@ const ConsistencyTab = ({ data }) => {
                 </div>
             </div>
 
-            {/* Recent Checks Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {(data?.consistency_checks || []).slice(-3).reverse().map((check, i) => (
                     <div key={i} className="bg-[#121217] border border-white/5 p-5 rounded-xl hover:border-indigo-500/20 transition-all">
@@ -379,17 +352,35 @@ const ConsistencyTab = ({ data }) => {
     );
 };
 
-// --- ENHANCED: TECHNICAL TAB ---
-const TechnicalTab = ({ data, fallback, unified, onInspect }) => {
-    // Merge logs with unified results to find actual failures
+// --- UPDATED TECHNICAL TAB WITH INTELLIGENT LOOKUP ---
+const TechnicalTab = ({ data, fallback, unified, logicDefs, onInspect }) => {
+    // 1. DATA SOURCES
     const effectiveData = data || { issues: [], technical_issues_found: fallback?.technical_issues_found || 0 };
-    const hasIssues = effectiveData.technical_issues_found > 0;
+    const logIssues = effectiveData.issues || [];
 
-    // --- NEW: EXTRACT FAILED COMMANDS FROM UNIFIED RESULTS ---
+    // 2. CHECK EXECUTION FAILURES (From Unified)
     const results = unified?.results || {};
     const failedCommands = Object.values(results).filter(
-        item => item.exit_code && item.exit_code !== 0
+        item => parseInt(item.exit_code) !== 0 && item.exit_code !== undefined
     );
+
+    // 3. COMBINED STATUS
+    const hasIssues = effectiveData.technical_issues_found > 0 || failedCommands.length > 0 || logIssues.length > 0;
+
+    // --- HELPER: FIND COMMAND FOR TEXTUAL ISSUE ---
+    const getCommandContext = (issueText) => {
+        // Extract KSI ID (e.g. "KSI-005")
+        const match = issueText.match(/(KSI-[A-Z0-9]+)/i);
+        if (match && logicDefs) {
+            const ksiId = match[1];
+            // Lookup in Logic Inspector definitions
+            const def = logicDefs[ksiId] || logicDefs[ksiId.replace('-', '_')];
+            if (def && def.cli_commands && def.cli_commands.length > 0) {
+                return { id: ksiId, cmd: def.cli_commands[0] };
+            }
+        }
+        return null;
+    };
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -410,9 +401,49 @@ const TechnicalTab = ({ data, fallback, unified, onInspect }) => {
                 </div>
             </div>
 
-            {/* --- NEW: COMMAND FAILURE TRACEBACK --- */}
+            {/* --- SECTION 1: TEXTUAL VALIDATION ANOMALIES (With Intelligent Lookup) --- */}
+            {logIssues.length > 0 && (
+                <div className="space-y-4">
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Validation Anomalies</h4>
+                    {logIssues.map((issue, idx) => {
+                        // AUTOMAGICALLY FIND THE COMMAND
+                        const context = getCommandContext(issue);
+
+                        return (
+                            <div key={idx} className="bg-[#121217] border border-white/5 rounded-xl p-5 flex flex-col gap-4 group hover:border-amber-500/30 transition-colors">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-2 bg-[#18181b] rounded-lg border border-white/5 text-slate-500 group-hover:text-amber-400">
+                                        <Terminal size={18} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-start">
+                                            <div className="font-mono text-xs text-amber-400 mb-1">ISSUE #{idx + 1}</div>
+                                            {context && (
+                                                <button onClick={() => onInspect(context.id)} className="text-[10px] flex items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors">
+                                                    <Code size={12} /> Inspect {context.id}
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="text-slate-200 font-medium text-sm">{issue}</div>
+                                    </div>
+                                </div>
+
+                                {/* If we found a command in the Logic Inspector, show it here! */}
+                                {context && (
+                                    <div className="ml-14 bg-black/40 p-3 rounded border border-white/5 font-mono text-xs text-slate-400">
+                                        <div className="text-[9px] uppercase font-bold text-slate-600 mb-1">Associated Command Logic:</div>
+                                        <span className="text-rose-400/80 mr-2">$</span>{context.cmd}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* --- SECTION 2: COMMAND FAILURE TRACEBACK --- */}
             {failedCommands.length > 0 && (
-                <div className="bg-[#0f1115] border border-rose-500/20 rounded-xl overflow-hidden">
+                <div className="bg-[#0f1115] border border-rose-500/20 rounded-xl overflow-hidden mt-6">
                     <div className="bg-rose-500/10 px-6 py-4 border-b border-rose-500/10 flex justify-between items-center">
                         <h3 className="text-rose-400 font-bold text-sm flex items-center gap-2">
                             <Bug size={16} /> Command Execution Traceback
@@ -444,7 +475,7 @@ const TechnicalTab = ({ data, fallback, unified, onInspect }) => {
                 </div>
             )}
 
-            {/* Metric Cards */}
+            {/* Metric Cards (Only if totally healthy) */}
             {!hasIssues && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {['Logic Consistency', 'Scoring Mathematics', 'Evidence Alignment', 'Command Execution', 'CLI Success Rate', 'Counting Accuracy'].map(l => (
@@ -456,12 +487,7 @@ const TechnicalTab = ({ data, fallback, unified, onInspect }) => {
     );
 };
 
-const HealthCard = ({ label, status }) => (
-    <div className="bg-[#121217] border border-white/5 p-4 rounded-lg flex justify-between items-center">
-        <span className="text-sm text-slate-400">{label}</span>
-        <span className="text-xs font-bold bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded border border-emerald-500/20">{status}</span>
-    </div>
-);
+const HealthCard = ({ label, status }) => (<div className="bg-[#121217] border border-white/5 p-4 rounded-lg flex justify-between items-center"><span className="text-sm text-slate-400">{label}</span><span className="text-xs font-bold bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded border border-emerald-500/20">{status}</span></div>);
 
 const InspectorModal = ({ ksi, onClose }) => {
     const [viewMode, setViewMode] = useState('summary');
@@ -504,24 +530,9 @@ const InspectorModal = ({ ksi, onClose }) => {
     );
 };
 
-const StatCard = ({ label, value, icon: Icon, color }) => (
-    <div className="bg-[#121217] border border-white/5 p-5 rounded-xl hover:border-white/10 transition-all">
-        <div className="flex justify-between items-start mb-2">
-            <div className={`p-2 rounded-lg bg-white/5 ${color}`.replace('text-', 'bg-').replace('400', '500/10')}>
-                <Icon size={20} className={color} />
-            </div>
-        </div>
-        <div className="text-2xl font-bold text-white mb-1 tracking-tight font-mono">{value}</div>
-        <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{label}</div>
-    </div>
-);
-
-const TabButton = ({ id, label, icon: Icon, active, set, count }) => (
-    <button onClick={() => set(id)} className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${active === id ? 'bg-[#27272a] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}>
-        <Icon size={16} />{label}
-        {count > 0 && <span className="ml-1 bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{count}</span>}
-    </button>
-);
+// --- HELPERS ---
+const StatCard = ({ label, value, icon: Icon, color }) => (<div className="bg-[#121217] border border-white/5 p-5 rounded-xl hover:border-white/10 transition-all"><div className="flex justify-between items-start mb-2"><div className={`p-2 rounded-lg bg-white/5 ${color}`.replace('text-', 'bg-').replace('400', '500/10')}><Icon size={20} className={color} /></div></div><div className="text-2xl font-bold text-white mb-1">{value}</div><div className="text-xs text-slate-500 font-bold uppercase tracking-wider">{label}</div></div>);
+const TabButton = ({ id, label, icon: Icon, active, set, count }) => (<button onClick={() => set(id)} className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${active === id ? 'bg-[#27272a] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}><Icon size={16} />{label}{count > 0 && (<span className="ml-1 bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{count}</span>)}</button>);
 
 const Header = ({ data, activeTab, setActiveTab }) => (
     <header className="border-b border-white/5 bg-[#0c0c10]/80 px-8 py-6 sticky top-0 z-20 backdrop-blur-md">
