@@ -4,7 +4,6 @@ import { Sanitizer } from '../utils/sanitizer';
 const DataContext = createContext();
 
 // --- CONFIGURATION ---
-// Points to the local /data/ folder where the pipeline injects files
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
   ? `${import.meta.env.BASE_URL}data`
   : `${import.meta.env.BASE_URL}/data`;
@@ -51,55 +50,89 @@ export const DataProvider = ({ children }) => {
     }));
   };
 
+  // --- NEW: Stream Parser for Mixed JSON Formats ---
+  const parseJsonStream = (text) => {
+    const results = [];
+    let buffer = '';
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+
+    // FIX: Properly escaped regex to remove artifacts
+    // The previous error was caused by missing the pattern inside the slashes
+    const cleanText = text.replace(/<\/?[^>]+(>|$)/g, '').trim();
+
+    for (let i = 0; i < cleanText.length; i++) {
+      const char = cleanText[i];
+      buffer += char;
+
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (char === '\\') {
+        escaped = true;
+        continue;
+      }
+      if (char === '"') {
+        inString = !inString;
+        continue;
+      }
+
+      if (!inString) {
+        if (char === '{') {
+          depth++;
+        } else if (char === '}') {
+          depth--;
+          // When depth returns to 0, we have a complete JSON object
+          if (depth === 0) {
+            try {
+              const obj = JSON.parse(buffer.trim());
+              results.push(obj);
+            } catch (e) {
+              console.warn("Skipping malformed JSON chunk");
+            }
+            buffer = ''; // Reset buffer for next object
+          }
+        }
+      }
+    }
+    return results;
+  };
+
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Cache buster to force fresh data from the latest deployment
         const cacheBuster = Date.now();
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log('🔄 DATA LOAD INITIATED (Pipeline Injected)');
         console.log(`📍 Base Path: ${BASE_PATH}`);
 
-        // 1. Fetch Data from Local Injection Path
         const [valRes, regRes, histRes] = await Promise.all([
           fetch(`${BASE_PATH}/unified_ksi_validations.json?t=${cacheBuster}`),
           fetch(`${BASE_PATH}/cli_command_register.json?t=${cacheBuster}`),
           fetch(`${BASE_PATH}/ksi_history.jsonl?t=${cacheBuster}`)
         ]);
 
-        // --- BULLETPROOF HISTORY PARSING (FIXED) ---
+        // --- HISTORY PROCESSING ---
         if (histRes.ok) {
           const text = await histRes.text();
-          let historyData = [];
-
           if (!text.trim().startsWith('<')) {
-            // Strict Line-by-Line Parsing
-            const lines = text.split(/\r?\n/); // Handle both \n and \r\n
+            // Use the new Stream Parser which handles multi-line objects
+            const historyData = parseJsonStream(text);
 
-            historyData = lines
-              .map(line => line.trim())
-              .filter(line => line.length > 0 && line.startsWith('{')) // Ignore empty lines or non-JSON garbage
-              .map(line => {
-                try {
-                  return JSON.parse(line);
-                } catch (e) {
-                  // Silently fail on bad lines (prevents crash)
-                  return null;
-                }
-              })
-              .filter(item => item !== null); // Remove failed parses
-          }
+            if (historyData.length > 0) {
+              // Deduplicate by timestamp to be safe
+              const uniqueHistory = Array.from(new Map(historyData.map(item => [item.timestamp, item])).values());
+              const sorted = uniqueHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-          if (historyData.length > 0) {
-            // Sort oldest to newest for charts
-            const sorted = historyData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            setHistory(sorted);
-          } else {
-            // Fallback if file is empty
-            setHistory([]);
+              setHistory(sorted);
+              console.log(`✅ Loaded ${sorted.length} historical records (Stream Parsed)`);
+            } else {
+              setHistory([]);
+            }
           }
         } else {
-          // Default empty state if 404
           setHistory([]);
         }
 
@@ -112,7 +145,6 @@ export const DataProvider = ({ children }) => {
         const validationData = JSON.parse(validationText);
         const rawMeta = validationData.metadata || {};
 
-        // Handle different array keys (results vs validations)
         let rawValidations = validationData.results || validationData.validations || [];
         if (!Array.isArray(rawValidations) && typeof rawValidations === 'object') {
           rawValidations = Object.values(rawValidations);
@@ -181,10 +213,8 @@ export const DataProvider = ({ children }) => {
         const failedCount = totalCount - passedCount;
         const score = totalCount > 0 ? Math.round((passedCount / totalCount) * 1000) / 10 : 0;
 
-        // --- DATE DETECTIVE ---
-        const realDate = rawMeta.timestamp || rawMeta.date || rawMeta.generated_at || rawMeta.validation_date || null;
+        const realDate = rawMeta.timestamp || rawMeta.date || rawMeta.generated_at || rawMeta.validation_date || new Date().toISOString();
 
-        // Update Metadata State
         setMetadata({
           validation_date: realDate,
           impact_level: rawMeta.impact_level || 'MODERATE',
@@ -195,7 +225,6 @@ export const DataProvider = ({ children }) => {
           impact_thresholds: rawMeta.impact_thresholds || { min: '80%' }
         });
 
-        // Update Metrics State
         setMetrics({
           score: score,
           passed: passedCount,
@@ -203,10 +232,6 @@ export const DataProvider = ({ children }) => {
           warning: processed.filter(k => k.status === 'warning').length,
           info: processed.filter(k => k.status === 'info').length
         });
-
-        console.log('📋 DATA LOADED:');
-        console.log(`  📅 Date: ${realDate}`);
-        console.log(`  📊 Score: ${score}% (${passedCount}/${totalCount})`);
 
       } catch (error) {
         console.error("Data Load Error:", error);
