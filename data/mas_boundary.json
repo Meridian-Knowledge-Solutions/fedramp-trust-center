@@ -1,0 +1,252 @@
+{
+  "meta": {
+    "generated_at": "2025-12-11T09:12:25.313075",
+    "doc_reference": "fedramp_moderate_mas.html",
+    "compliance_ver": "FRR-MAS-02",
+    "vpc_scope": [
+      "vpc-05870f1672795ebd9"
+    ]
+  },
+  "zones": {
+    "1_entry_point": {
+      "policy": {
+        "section": "1_entry_point",
+        "title": "1. Federal User Entry Point",
+        "omb_type": "Federal Collected",
+        "definition": "Information collected by/for federal government (OMB A-130)",
+        "impact": {
+          "C": "Moderate",
+          "I": "High",
+          "A": "Low"
+        },
+        "risk": "Medium",
+        "controls": [
+          "KSI-IAM-01",
+          "KSI-IAM-02",
+          "KSI-CNA-01"
+        ]
+      },
+      "assets": [
+        {
+          "id": "i-09f89c7cc708e0e7d",
+          "name": "SAAS-KI22LBA",
+          "type": "Load Balancer"
+        },
+        {
+          "id": "i-03ad5945f58666447",
+          "name": "MKSFR-PROXY1",
+          "type": "Load Balancer"
+        },
+        {
+          "id": "i-02a6453c4edc62bb1",
+          "name": "MKSFR-PROXY-1-backup-restore",
+          "type": "Load Balancer"
+        },
+        {
+          "id": "f0f8011042dcdd72",
+          "name": "PROD-LB1",
+          "type": "Application Load Balancer"
+        }
+      ]
+    },
+    "2_training_processing": {
+      "policy": {
+        "section": "2_training_processing",
+        "title": "2. Federal Training Activity",
+        "omb_type": "Federal Processed",
+        "definition": "Training progress processed by/for federal agencies",
+        "impact": {
+          "C": "Moderate",
+          "I": "High",
+          "A": "Moderate"
+        },
+        "risk": "Medium",
+        "controls": [
+          "KSI-IAM-04",
+          "KSI-MLA-01",
+          "KSI-SVC-03"
+        ]
+      },
+      "assets": [
+        {
+          "id": "function",
+          "name": "function",
+          "type": "AWS Lambda"
+        }
+      ]
+    },
+    "4_infrastructure": {
+      "policy": {
+        "section": "4_infrastructure",
+        "title": "4. Infrastructure & Data Storage",
+        "omb_type": "Federal Maintained",
+        "definition": "Infrastructure maintaining data by/for federal government",
+        "impact": {
+          "C": "Moderate",
+          "I": "Moderate",
+          "A": "Moderate"
+        },
+        "risk": "Medium",
+        "controls": [
+          "KSI-SVC-03",
+          "KSI-RPL-03",
+          "KSI-CNA-07"
+        ]
+      },
+      "assets": [
+        {
+          "id": "i-05b80194545fc0fa0",
+          "name": "MKSFR-CA",
+          "type": "Infrastructure Support"
+        },
+        {
+          "id": "i-033b43ae5c6521ea6",
+          "name": "MKSFR-UTIL1",
+          "type": "EC2/Compute"
+        },
+        {
+          "id": "i-0c57b4f15098b9d9b",
+          "name": "SAAS-RS22",
+          "type": "EC2/Compute"
+        },
+        {
+          "id": "i-0bde93ace62eb8b67",
+          "name": "i-0bde93ace62eb8b67",
+          "type": "EC2/Compute"
+        },
+        {
+          "id": "i-0ccbbcca5ddc61e4b",
+          "name": "SAAS-RS22-backup-restore",
+          "type": "EC2/Compute"
+        },
+        {
+          "id": "saas",
+          "name": "saas",
+          "type": "RDS/Sqlserver-Se"
+        }
+      ]
+    },
+    "4b_trust_center": {
+      "policy": {
+        "section": "4b_trust_center",
+        "title": "4b. FedRAMP Trust Center (FRR-ADS-TC-01)",
+        "omb_type": "Federal Collected",
+        "definition": "Agency registrations, access logs, authorization packages",
+        "impact": {
+          "C": "Low",
+          "I": "Low",
+          "A": "Low"
+        },
+        "risk": "Low",
+        "controls": [
+          "FRR-ADS-TC-01",
+          "FRR-ADS-TC-06",
+          "KSI-IAM-04"
+        ]
+      },
+      "assets": [
+        {
+          "id": "fedramp-backup-restore",
+          "name": "fedramp-backup-restore",
+          "type": "AWS Lambda"
+        },
+        {
+          "id": "fedramp-agency-registration",
+          "name": "fedramp-agency-registration",
+          "type": "AWS Lambda"
+        },
+        {
+          "id": "compliance_broker_Dev",
+          "name": "compliance_broker_Dev",
+          "type": "AWS Lambda"
+        },
+        {
+          "id": "fedramp-email-verification",
+          "name": "fedramp-email-verification",
+          "type": "AWS Lambda"
+        },
+        {
+          "id": "fedramp-inventory-access",
+          "name": "fedramp-inventory-access",
+          "type": "AWS Lambda"
+        },
+        {
+          "id": "fedramp-20x-submission-final-s3",
+          "name": "fedramp-20x-submission-final-s3",
+          "type": "AWS Lambda"
+        },
+        {
+          "id": "fedramp-package-access",
+          "name": "fedramp-package-access",
+          "type": "AWS Lambda"
+        },
+        {
+          "id": "fedramp-api-status-function",
+          "name": "fedramp-api-status-function",
+          "type": "AWS Lambda"
+        },
+        {
+          "id": "fedramp-api-config-function",
+          "name": "fedramp-api-config-function",
+          "type": "AWS Lambda"
+        }
+      ]
+    }
+  },
+  "integrations": [
+    {
+      "category": "Meeting Platforms",
+      "provider": "Zoom Video Communications",
+      "status": "Commercial",
+      "tier": "Tier 2",
+      "data_flow": "Meeting Titles, Participant Names",
+      "risk": "High"
+    },
+    {
+      "category": "Content Providers",
+      "provider": "OpenSesame",
+      "status": "Commercial (Non-FedRAMP)",
+      "tier": "Tier 1",
+      "data_flow": "Names, GUID (SCORM)",
+      "risk": "High"
+    },
+    {
+      "category": "Meeting Platforms",
+      "provider": "Microsoft Teams (Commercial)",
+      "status": "Commercial",
+      "tier": "Tier 2",
+      "data_flow": "Meeting Titles, Emails",
+      "risk": "High"
+    },
+    {
+      "category": "Agency Integration",
+      "provider": "Agency SFTP/API",
+      "status": "Agency System",
+      "tier": "Tier 2",
+      "data_flow": "Certificates, Progress Reports",
+      "risk": "Medium"
+    },
+    {
+      "category": "External Integration",
+      "provider": "shared-services.gov",
+      "status": "Commercial",
+      "tier": "Tier 2",
+      "data_flow": "API Data Exchange",
+      "risk": "High"
+    }
+  ],
+  "out_of_scope": [
+    {
+      "name": "Meridian Corporate Infrastructure",
+      "reason": "Non-Federal per OMB A-130"
+    },
+    {
+      "name": "GitHub Actions CI/CD",
+      "reason": "Administrative Metadata Only"
+    },
+    {
+      "name": "Test/Development Instances",
+      "reason": "Non-Production Resources"
+    }
+  ]
+}
