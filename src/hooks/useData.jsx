@@ -4,6 +4,7 @@ import { Sanitizer } from '../utils/sanitizer';
 const DataContext = createContext();
 
 // --- CONFIGURATION ---
+// We calculate this once outside the component to ensure consistency
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
   ? `${import.meta.env.BASE_URL}data`
   : `${import.meta.env.BASE_URL}/data`;
@@ -13,15 +14,18 @@ export const DataProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [metadata, setMetadata] = useState(null);
   const [history, setHistory] = useState([]);
+  const [masData, setMasData] = useState(null);
   const [metrics, setMetrics] = useState({
     score: 0, passed: 0, failed: 0, warning: 0, info: 0
   });
 
+  // Helper: Strip emojis for cleaner text
   const stripEmojis = (str) => {
     if (!str) return '';
     return str.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
   };
 
+  // Helper: Parse CLI command strings
   const parseCliCommandString = (cliString, assertion) => {
     if (!cliString) return [];
     const match = cliString.match(/^(\d+)\s+commands?\s+\((\d+)\s+successful\):\s*(.+)$/);
@@ -50,7 +54,7 @@ export const DataProvider = ({ children }) => {
     }));
   };
 
-  // --- NEW: Stream Parser for Mixed JSON Formats ---
+  // --- STREAM PARSER FOR MIXED JSON FORMATS ---
   const parseJsonStream = (text) => {
     const results = [];
     let buffer = '';
@@ -58,41 +62,27 @@ export const DataProvider = ({ children }) => {
     let inString = false;
     let escaped = false;
 
-    // FIX: Properly escaped regex to remove artifacts
-    // The previous error was caused by missing the pattern inside the slashes
-    const cleanText = text.replace(/<\/?[^>]+(>|$)/g, '').trim();
+    const cleanText = text.replace(/<[^>]*>/g, '').trim();
 
     for (let i = 0; i < cleanText.length; i++) {
       const char = cleanText[i];
       buffer += char;
 
-      if (escaped) {
-        escaped = false;
-        continue;
-      }
-      if (char === '\\') {
-        escaped = true;
-        continue;
-      }
-      if (char === '"') {
-        inString = !inString;
-        continue;
-      }
+      if (escaped) { escaped = false; continue; }
+      if (char === '\\') { escaped = true; continue; }
+      if (char === '"') { inString = !inString; continue; }
 
       if (!inString) {
         if (char === '{') {
           depth++;
         } else if (char === '}') {
           depth--;
-          // When depth returns to 0, we have a complete JSON object
           if (depth === 0) {
             try {
               const obj = JSON.parse(buffer.trim());
               results.push(obj);
-            } catch (e) {
-              console.warn("Skipping malformed JSON chunk");
-            }
-            buffer = ''; // Reset buffer for next object
+            } catch (e) { /* Silently skip malformed chunks */ }
+            buffer = '';
           }
         }
       }
@@ -104,30 +94,57 @@ export const DataProvider = ({ children }) => {
     const loadData = async () => {
       try {
         const cacheBuster = Date.now();
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('🔄 DATA LOAD INITIATED (Pipeline Injected)');
-        console.log(`📍 Base Path: ${BASE_PATH}`);
 
-        const [valRes, regRes, histRes] = await Promise.all([
-          fetch(`${BASE_PATH}/unified_ksi_validations.json?t=${cacheBuster}`),
-          fetch(`${BASE_PATH}/cli_command_register.json?t=${cacheBuster}`),
-          fetch(`${BASE_PATH}/ksi_history.jsonl?t=${cacheBuster}`)
+        // --- DEBUGGING LOGS START ---
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('🔄 DATA LOAD INITIATED');
+        console.log(`📂 Base Path Resolved: "${BASE_PATH}"`);
+        // --- DEBUGGING LOGS END ---
+
+        // Prepare URLs
+        const urls = {
+          validations: `${BASE_PATH}/unified_ksi_validations.json?t=${cacheBuster}`,
+          register: `${BASE_PATH}/cli_command_register.json?t=${cacheBuster}`,
+          history: `${BASE_PATH}/ksi_history.jsonl?t=${cacheBuster}`,
+          mas: `${BASE_PATH}/mas_boundary.json?t=${cacheBuster}`
+        };
+
+        // 1. Fetch All Data Sources
+        const [valRes, regRes, histRes, masRes] = await Promise.all([
+          fetch(urls.validations),
+          fetch(urls.register),
+          fetch(urls.history),
+          fetch(urls.mas)
         ]);
+
+        // --- MAS DATA PROCESSING (WITH DEBUGGING) ---
+        if (masRes.ok) {
+          try {
+            const masJson = await masRes.json();
+            setMasData(masJson);
+            console.log("✅ MAS Boundary Data Loaded Successfully");
+          } catch (e) {
+            console.warn("⚠️ Failed to parse MAS Boundary JSON (Syntax Error):", e);
+          }
+        } else {
+          // THIS IS THE NEW DEBUG BLOCK
+          console.error(`❌ MAS Boundary Fetch Failed!`);
+          console.error(`   Status: ${masRes.status} (${masRes.statusText})`);
+          console.error(`   Attempted URL: ${urls.mas}`);
+          if (masRes.status === 404) {
+            console.error(`   TIP: Ensure "mas_boundary.json" is in the "/public/data/" directory.`);
+          }
+        }
 
         // --- HISTORY PROCESSING ---
         if (histRes.ok) {
           const text = await histRes.text();
           if (!text.trim().startsWith('<')) {
-            // Use the new Stream Parser which handles multi-line objects
             const historyData = parseJsonStream(text);
-
             if (historyData.length > 0) {
-              // Deduplicate by timestamp to be safe
               const uniqueHistory = Array.from(new Map(historyData.map(item => [item.timestamp, item])).values());
               const sorted = uniqueHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
               setHistory(sorted);
-              console.log(`✅ Loaded ${sorted.length} historical records (Stream Parsed)`);
             } else {
               setHistory([]);
             }
@@ -137,7 +154,10 @@ export const DataProvider = ({ children }) => {
         }
 
         // --- PROCESS VALIDATIONS ---
-        if (!valRes.ok) throw new Error(`Failed to load validations (${valRes.status})`);
+        if (!valRes.ok) {
+          console.error(`❌ Validation Data Failed: ${valRes.status} at ${urls.validations}`);
+          throw new Error(`Failed to load validations (${valRes.status})`);
+        }
 
         const validationText = await valRes.text();
         if (validationText.trim().startsWith('<')) throw new Error("Validation data returned HTML (404)");
@@ -207,7 +227,7 @@ export const DataProvider = ({ children }) => {
 
         setKsis(processed);
 
-        // --- CALCULATE METRICS (Source of Truth) ---
+        // --- CALCULATE METRICS ---
         const totalCount = processed.length;
         const passedCount = processed.filter(k => k.assertion === true || k.assertion === "true").length;
         const failedCount = totalCount - passedCount;
@@ -244,7 +264,7 @@ export const DataProvider = ({ children }) => {
   }, []);
 
   return (
-    <DataContext.Provider value={{ ksis, metrics, metadata, history, loading }}>
+    <DataContext.Provider value={{ ksis, metrics, metadata, history, masData, loading }}>
       {children}
     </DataContext.Provider>
   );
