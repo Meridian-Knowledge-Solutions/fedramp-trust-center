@@ -10,7 +10,7 @@ import {
     XCircle, CheckCircle, Layers, Database, Users, BarChart, BookOpen,
     Bell, Code, Settings, Info, Zap, MessageSquare,
     TrendingUp, BarChart3, Landmark, Network, Cloud, ArrowDown, ChevronDown, ChevronRight,
-    AlertTriangle, GitCommit, RefreshCw, Hash, FileJson
+    AlertTriangle, GitCommit, RefreshCw, Hash, FileJson, Cpu, Key, Radio, CheckSquare, FileCheck
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -35,80 +35,285 @@ const THEME = {
     }
 };
 
-// --- SUB-COMPONENT: Live MAS Dashboard Components ---
+// --- SUB-COMPONENT: Drift Status Alert ---
+const DriftAlert = ({ drift }) => {
+    if (!drift) return null;
 
-const ZoneCard = ({ zoneId, data, isOpen, onToggle }) => {
-    if (!data) return null;
-
-    const { policy, assets } = data;
-    if (!policy) return null;
-
-    const riskColor = policy.risk === 'High' ? 'text-rose-400' :
-        policy.risk === 'Medium' ? 'text-amber-400' : 'text-emerald-400';
-
-    const borderColor = policy.risk === 'High' ? 'border-rose-500/30' :
-        policy.risk === 'Medium' ? 'border-amber-500/30' : 'border-emerald-500/30';
+    // If no drift or first run, show nothing (healthy state is implicit)
+    if (!drift.detected || drift.is_first_run) return null;
 
     return (
-        <div className={`bg-[#18181b] border ${borderColor} rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-blue-900/10`}>
-            {/* Header */}
+        <div className="mb-6 p-4 rounded-xl border border-rose-500/30 bg-rose-500/5 flex items-start gap-4 animate-in fade-in slide-in-from-top-2">
+            <div className="p-2 bg-rose-500/10 rounded-lg text-rose-400">
+                <AlertTriangle size={20} />
+            </div>
+            <div className="flex-1">
+                <h4 className="text-rose-400 font-bold text-sm">Configuration Drift Detected</h4>
+                <p className="text-rose-300/80 text-xs mt-1">
+                    The live infrastructure has deviated from the authorized FedRAMP baseline.
+                    {drift.changes?.length} unauthorized changes detected.
+                </p>
+                <div className="mt-3 flex gap-2">
+                    {drift.changes?.map((change, i) => (
+                        <span key={i} className="px-2 py-1 bg-rose-950/50 border border-rose-500/20 rounded text-[10px] text-rose-300 font-mono">
+                            {change}
+                        </span>
+                    ))}
+                </div>
+            </div>
+            <button className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-lg transition-colors">
+                Initiate Remediation
+            </button>
+        </div>
+    );
+};
+
+// --- SUB-COMPONENT: Infrastructure Summary Card ---
+const InfrastructureSummary = ({ infra }) => {
+    if (!infra) return null;
+
+    // Aggregate counts from the new JSON structure
+    const computeCount = (infra.compute?.ec2 || 0) + (infra.compute?.lambda_app || 0) + (infra.compute?.lambda_trust_center || 0);
+    const storageCount = (infra.storage?.rds || 0) + (infra.storage?.s3 || 0) + (infra.storage?.elasticache || 0);
+    const networkCount = (infra.network?.alb || 0) + (infra.network?.api_gateway || 0);
+    const kmsCount = infra.kms_keys || 0;
+
+    return (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-[#18181b] p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                <div className="p-2 rounded bg-blue-500/10 text-blue-400"><Cpu size={18} /></div>
+                <div>
+                    <div className="text-xl font-bold text-white">{computeCount}</div>
+                    <div className="text-[10px] text-slate-500 uppercase font-bold">Compute Nodes</div>
+                </div>
+            </div>
+            <div className="bg-[#18181b] p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                <div className="p-2 rounded bg-purple-500/10 text-purple-400"><Database size={18} /></div>
+                <div>
+                    <div className="text-xl font-bold text-white">{storageCount}</div>
+                    <div className="text-[10px] text-slate-500 uppercase font-bold">Storage Units</div>
+                </div>
+            </div>
+            <div className="bg-[#18181b] p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                <div className="p-2 rounded bg-emerald-500/10 text-emerald-400"><Network size={18} /></div>
+                <div>
+                    <div className="text-xl font-bold text-white">{networkCount}</div>
+                    <div className="text-[10px] text-slate-500 uppercase font-bold">Network Gates</div>
+                </div>
+            </div>
+            <div className="bg-[#18181b] p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                <div className="p-2 rounded bg-amber-500/10 text-amber-400"><Key size={18} /></div>
+                <div>
+                    <div className="text-xl font-bold text-white">{kmsCount}</div>
+                    <div className="text-[10px] text-slate-500 uppercase font-bold">Encryption Keys</div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- SUB-COMPONENT: Professional Data Flow Node (Replaces DataFlowCard) ---
+const DataFlowNode = ({ flowKey, data, index, isLast }) => {
+    if (!data) return null;
+
+    // Distinct color themes for each stage to create visual separation
+    const theme = {
+        entry: { color: 'text-emerald-400', border: 'group-hover:border-emerald-500/50', bg: 'group-hover:bg-emerald-500/5', icon: Shield },
+        processing: { color: 'text-blue-400', border: 'group-hover:border-blue-500/50', bg: 'group-hover:bg-blue-500/5', icon: Cpu },
+        storage: { color: 'text-purple-400', border: 'group-hover:border-purple-500/50', bg: 'group-hover:bg-purple-500/5', icon: Database },
+        dissemination: { color: 'text-amber-400', border: 'group-hover:border-amber-500/50', bg: 'group-hover:bg-amber-500/5', icon: Globe }
+    }[flowKey] || { color: 'text-slate-400', border: 'border-white/10', bg: '', icon: Activity };
+
+    const Icon = theme.icon;
+
+    return (
+        <div className="relative group">
+            {/* Connector Line (Hidden on Mobile) */}
+            {!isLast && (
+                <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-[#27272a] z-0">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-transparent w-1/2" />
+                </div>
+            )}
+
+            {/* Main Card */}
+            <div className={`relative z-10 bg-[#18181b] border border-white/5 rounded-xl p-5 transition-all duration-300 ${theme.border} ${theme.bg}`}>
+
+                {/* Header: Step Number & Icon */}
+                <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className={`p-2.5 rounded-lg bg-[#09090b] border border-white/10 shadow-inner ${theme.color}`}>
+                            <Icon size={20} />
+                        </div>
+                        <div>
+                            <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-0.5">Step 0{index + 1}</div>
+                            <h3 className="text-white font-bold text-sm tracking-tight">{data.title}</h3>
+                        </div>
+                    </div>
+                    {data.retention && (
+                        <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400 bg-white/5 px-2 py-1 rounded border border-white/5" title="Data Retention Policy">
+                            <Clock size={10} />
+                            {data.retention}
+                        </div>
+                    )}
+                </div>
+
+                {/* Description */}
+                <div className="mb-5 min-h-[40px]">
+                    <p className="text-xs leading-relaxed text-slate-400 group-hover:text-slate-300 transition-colors">
+                        {data.description}
+                    </p>
+                </div>
+
+                {/* Technical Metadata Footer */}
+                <div className="space-y-3 pt-4 border-t border-white/5">
+
+                    {/* Encryption Status */}
+                    {data.encryption ? (
+                        <div className="flex items-center gap-2">
+                            <div className="p-1 rounded-full bg-emerald-500/10">
+                                <Lock size={10} className="text-emerald-400" />
+                            </div>
+                            <span className="text-[10px] font-mono text-emerald-400/90">{data.encryption}</span>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <div className="p-1 rounded-full bg-blue-500/10">
+                                <Activity size={10} className="text-blue-400" />
+                            </div>
+                            <span className="text-[10px] font-mono text-blue-400/90">Standard Processing</span>
+                        </div>
+                    )}
+
+                    {/* PII Chips */}
+                    {(data.pii_collected?.length > 0 || data.pii_shared?.length > 0) && (
+                        <div>
+                            <div className="text-[9px] uppercase font-bold text-slate-600 mb-1.5">Data Elements</div>
+                            <div className="flex flex-wrap gap-1.5">
+                                {(data.pii_collected || data.pii_shared).slice(0, 4).map((field, i) => (
+                                    <span key={i} className="px-2 py-0.5 bg-[#09090b] border border-white/10 rounded text-[10px] text-slate-400 font-mono hover:border-slate-500/50 transition-colors cursor-default">
+                                        {field}
+                                    </span>
+                                ))}
+                                {(data.pii_collected || data.pii_shared).length > 4 && (
+                                    <span className="px-1.5 py-0.5 text-[10px] text-slate-500">+{(data.pii_collected || data.pii_shared).length - 4}</span>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- SUB-COMPONENT: Expandable Integration Row ---
+const IntegrationRow = ({ item }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const isFedRAMP = item.controls?.fedramp_authorized;
+    const isAgency = item.provider_status === 'agency';
+
+    let statusColor = 'text-slate-400';
+    let statusBg = 'bg-slate-500/10 border-slate-500/20';
+    let Icon = Cloud;
+
+    if (isFedRAMP) {
+        statusColor = 'text-emerald-400';
+        statusBg = 'bg-emerald-500/10 border-emerald-500/20';
+        Icon = Shield;
+    } else if (isAgency) {
+        statusColor = 'text-blue-400';
+        statusBg = 'bg-blue-500/10 border-blue-500/20';
+        Icon = Landmark;
+    }
+
+    return (
+        <div className={`bg-[#18181b] border ${isOpen ? 'border-blue-500/30' : 'border-white/5'} rounded-lg transition-all overflow-hidden`}>
+            {/* Main Row */}
             <div
-                className="p-5 flex items-center justify-between cursor-pointer bg-white/[0.02]"
-                onClick={() => onToggle(zoneId)}
+                className="flex flex-col md:flex-row md:items-center justify-between p-4 hover:bg-white/[0.02] cursor-pointer gap-4"
+                onClick={() => setIsOpen(!isOpen)}
             >
                 <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-lg bg-black/40 border border-white/10 ${riskColor}`}>
-                        {zoneId.includes('entry') ? <Users size={20} /> :
-                            zoneId.includes('training') ? <Globe size={20} /> :
-                                zoneId.includes('infrastructure') ? <Server size={20} /> : <Shield size={20} />}
+                    <div className={`p-2 rounded-lg border ${statusBg} ${statusColor}`}>
+                        <Icon size={16} />
                     </div>
                     <div>
-                        <h3 className="text-white font-bold text-lg">{policy.title}</h3>
-                        <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
-                            <span className="font-mono bg-white/10 px-1.5 py-0.5 rounded">{policy.omb_type}</span>
-                            <span className="hidden sm:inline">•</span>
-                            <span className="hidden sm:inline">{policy.definition}</span>
+                        <div className="flex items-center gap-2">
+                            <div className="text-sm font-bold text-white">{item.provider}</div>
+                            {item.usage && <span className="text-[10px] bg-white/10 px-1.5 rounded text-slate-300">{item.usage}</span>}
+                        </div>
+                        <div className="text-[10px] text-slate-500 uppercase mt-0.5">
+                            {item.category} • {item.provider_status?.replace('_', ' ')}
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <div className="text-right hidden md:block">
-                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Confidentiality</div>
-                        <div className={`text-xs font-bold ${policy.impact?.C === 'High' ? 'text-rose-400' : 'text-blue-400'}`}>
-                            {policy.impact?.C || 'N/A'}
-                        </div>
+                <div className="flex items-center gap-6 text-right">
+                    <div className="hidden md:block">
+                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Transfer</div>
+                        <div className="text-xs text-slate-300 font-mono">{item.connection?.protocols?.join(', ')}</div>
                     </div>
-                    {isOpen ? <ChevronDown className="text-slate-500" /> : <ChevronRight className="text-slate-500" />}
+                    <div className="flex items-center gap-3">
+                        <div className={`px-2 py-1 rounded border text-[10px] font-bold uppercase ${item.risk === 'low' ? 'bg-emerald-900/20 text-emerald-400 border-emerald-500/20' :
+                                'bg-amber-900/20 text-amber-400 border-amber-500/20'
+                            }`}>
+                            {item.risk} Risk
+                        </div>
+                        {isOpen ? <ChevronDown size={16} className="text-slate-500" /> : <ChevronRight size={16} className="text-slate-500" />}
+                    </div>
                 </div>
             </div>
 
-            {/* Expanded Content */}
+            {/* Expanded Details Panel */}
             {isOpen && (
-                <div className="p-5 border-t border-white/5 bg-black/20">
-                    {/* Active Assets Grid */}
-                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <Network size={12} /> Live Assets in Boundary
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-                        {assets && assets.map((asset, idx) => (
-                            <div key={idx} className="bg-[#27272a] p-3 rounded-lg border border-white/5 flex items-center gap-3">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div>
-                                <div>
-                                    <div className="text-sm font-mono text-white">{asset.name}</div>
-                                    <div className="text-[10px] text-slate-500">{asset.type}</div>
+                <div className="px-4 pb-4 pt-0 flex flex-col md:flex-row gap-4 border-t border-white/5 bg-black/20 mt-2 pt-4">
+                    {/* Controls Column */}
+                    <div className="flex-1">
+                        <h5 className="text-[10px] uppercase font-bold text-slate-500 mb-2 flex items-center gap-2">
+                            <Shield size={12} /> Applied Controls
+                        </h5>
+                        <div className="grid grid-cols-2 gap-2">
+                            {Object.entries(item.controls || {}).map(([key, val]) => (
+                                <div key={key} className="flex items-center gap-2">
+                                    {val ? <CheckCircle2 size={12} className="text-emerald-500" /> : <XCircle size={12} className="text-slate-600" />}
+                                    <span className="text-[11px] text-slate-300 capitalize">{key.replace(/_/g, ' ')}</span>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Controls Overlay */}
-                    <div className="flex flex-wrap gap-2">
-                        {policy.controls && policy.controls.map((ctrl, i) => (
-                            <span key={i} className="px-2 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded text-[10px] font-mono font-bold">
-                                {ctrl}
-                            </span>
-                        ))}
+                    {/* Connection Column */}
+                    <div className="flex-1">
+                        <h5 className="text-[10px] uppercase font-bold text-slate-500 mb-2 flex items-center gap-2">
+                            <Network size={12} /> Connectivity
+                        </h5>
+                        <div className="space-y-1">
+                            {item.connection?.endpoint && (
+                                <div className="text-[11px] font-mono text-blue-300 bg-blue-900/10 px-2 py-1 rounded border border-blue-500/10 truncate">
+                                    {item.connection.endpoint}
+                                </div>
+                            )}
+                            <div className="flex flex-wrap gap-1 mt-2">
+                                {item.connection?.protocols?.map(p => (
+                                    <span key={p} className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-white/5">{p}</span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* PII Column */}
+                    <div className="flex-1">
+                        <h5 className="text-[10px] uppercase font-bold text-slate-500 mb-2 flex items-center gap-2">
+                            <FileText size={12} /> Data Elements
+                        </h5>
+                        <div className="flex flex-wrap gap-1.5">
+                            {item.pii?.fields?.map(f => (
+                                <span key={f} className="text-[10px] bg-rose-900/10 text-rose-300/80 px-1.5 py-0.5 rounded border border-rose-500/10 font-mono">
+                                    {f}
+                                </span>
+                            ))}
+                        </div>
                     </div>
                 </div>
             )}
@@ -116,29 +321,8 @@ const ZoneCard = ({ zoneId, data, isOpen, onToggle }) => {
     );
 };
 
-const IntegrationRow = ({ item }) => (
-    <div className="flex items-center justify-between p-4 bg-[#18181b] border border-white/5 rounded-lg hover:border-white/10 transition-colors">
-        <div className="flex items-center gap-4">
-            <div className={`p-2 rounded-lg border ${item.status.includes('FedRAMP') ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
-                <Cloud size={16} />
-            </div>
-            <div>
-                <div className="text-sm font-bold text-white">{item.provider}</div>
-                <div className="text-[10px] text-slate-500 uppercase">{item.category}</div>
-            </div>
-        </div>
-        <div className="text-right">
-            <div className="text-xs text-slate-300">{item.data_flow}</div>
-            <div className={`text-[10px] font-bold ${item.risk.includes('Low') ? 'text-emerald-500' : 'text-amber-500'}`}>
-                {item.risk}
-            </div>
-        </div>
-    </div>
-);
-
 const LiveMasDashboard = () => {
     const { masData } = useData();
-    const [expandedZones, setExpandedZones] = useState(['1_entry_point']);
 
     if (!masData) {
         return (
@@ -147,27 +331,29 @@ const LiveMasDashboard = () => {
                     <div className="h-12 w-12 bg-white/5 rounded-full mb-4"></div>
                     <div className="h-4 w-48 bg-white/5 rounded mb-2"></div>
                     <div className="text-xs text-slate-500">Connecting to live boundary map...</div>
+                    <div className="mt-2 text-[10px] text-slate-600">Checking public/data/mas_boundary.json</div>
                 </div>
             </div>
         );
     }
 
-    const toggleZone = (id) => {
-        setExpandedZones(prev =>
-            prev.includes(id) ? prev.filter(z => z !== id) : [...prev, id]
-        );
-    };
-
-    // Safe access with fallbacks
-    const zones = masData.zones || {};
+    // Parse the new JSON structure
+    const boundary = masData.boundary || {};
+    const infrastructure = boundary.infrastructure || {};
+    const dataFlows = masData.data_flows || {};
     const integrations = masData.integrations || [];
     const meta = masData.meta || {};
+    const trustCenter = masData.trust_center || {};
+    const drift = masData.drift || {};
 
-    // Get all zone IDs dynamically and sort them
-    const zoneIds = Object.keys(zones).sort();
-
-    // Calculate total assets across all zones
-    const totalAssets = Object.values(zones).reduce((sum, zone) => sum + (zone.assets?.length || 0), 0);
+    // Calculate total assets from infrastructure object
+    const totalAssets =
+        (infrastructure.compute?.ec2 || 0) +
+        (infrastructure.compute?.lambda_app || 0) +
+        (infrastructure.compute?.lambda_trust_center || 0) +
+        (infrastructure.storage?.s3 || 0) +
+        (infrastructure.storage?.rds || 0) +
+        (infrastructure.network?.alb || 0);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
@@ -178,11 +364,16 @@ const LiveMasDashboard = () => {
                     <div>
                         <h2 className="text-white font-bold text-sm">Live Boundary Authorization</h2>
                         <div className="text-xs text-blue-300 font-mono mt-0.5">
-                            Ver: {meta.compliance_ver || 'N/A'} • Updated: {meta.generated_at ? new Date(meta.generated_at).toLocaleString() : 'N/A'}
+                            Ver: {meta.compliance_ver || 'N/A'} • {meta.baseline} Baseline
                         </div>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
+                    <div className="text-right hidden sm:block">
+                        <div className="text-[10px] text-slate-400 font-mono">Fingerprint</div>
+                        <div className="text-xs text-white font-mono">{infrastructure.fingerprint || 'N/A'}</div>
+                    </div>
+                    <div className="w-px h-8 bg-white/10 hidden sm:block"></div>
                     <div className="text-center px-3 py-1 bg-white/5 rounded border border-white/10">
                         <div className="text-xs text-slate-500 font-bold uppercase">Assets</div>
                         <div className="text-lg font-bold text-white">{totalAssets}</div>
@@ -192,42 +383,104 @@ const LiveMasDashboard = () => {
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
-                        LIVE
+                        {boundary.validated ? 'VALIDATED' : 'LIVE'}
                     </div>
                 </div>
             </div>
 
-            {/* Zones Flow - Dynamic */}
-            <div className="relative">
-                {/* Connecting Line Background */}
-                <div className="absolute left-9 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500/50 to-transparent -z-10 hidden md:block"></div>
+            {/* 1. DRIFT ALERT */}
+            <DriftAlert drift={drift} />
 
-                <div className="space-y-2">
-                    {zoneIds.map((zoneId, index) => (
-                        <React.Fragment key={zoneId}>
-                            <ZoneCard
-                                zoneId={zoneId}
-                                data={zones[zoneId]}
-                                isOpen={expandedZones.includes(zoneId)}
-                                onToggle={toggleZone}
-                            />
-                            {/* Add arrow between zones, but not after the last one */}
-                            {index < zoneIds.length - 1 && (
-                                <div className="flex justify-center py-1">
-                                    <ArrowDown className="text-slate-700" size={20} />
-                                </div>
-                            )}
-                        </React.Fragment>
+            {/* 2. Infrastructure Summary */}
+            <InfrastructureSummary infra={infrastructure} />
+
+            {/* 3. Professional Data Flows */}
+            <div>
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-white font-bold flex items-center gap-2">
+                        <Activity size={18} className="text-blue-400" />
+                        Digital Data Lifecycle
+                    </h3>
+                    <span className="text-[10px] font-mono text-slate-500 uppercase bg-white/5 px-2 py-1 rounded border border-white/5">
+                        End-to-End Validation
+                    </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+                    {['entry', 'processing', 'storage', 'dissemination'].map((key, idx) => (
+                        <DataFlowNode
+                            key={key}
+                            flowKey={key}
+                            data={dataFlows[key]}
+                            index={idx}
+                            isLast={idx === 3}
+                        />
                     ))}
                 </div>
             </div>
 
-            {/* Integrations Table */}
+            {/* 4. Trust Center Specifics */}
+            {trustCenter.compliance_ref && (
+                <div className="bg-[#121217] border border-white/10 rounded-xl p-6 mt-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-white font-bold flex items-center gap-2">
+                            <Landmark size={18} className="text-purple-400" />
+                            FedRAMP Trust Center Infrastructure
+                        </h3>
+                        <span className="text-xs font-mono bg-purple-900/20 text-purple-300 px-2 py-1 rounded border border-purple-500/20">
+                            {trustCenter.compliance_ref}
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-black/20 p-4 rounded border border-white/5">
+                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">Auth & Retention</div>
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-xs text-slate-300">
+                                    <Key size={12} className="text-slate-500" /> {trustCenter.auth}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-slate-300">
+                                    <Clock size={12} className="text-slate-500" /> {trustCenter.retention} Retention
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bg-black/20 p-4 rounded border border-white/5">
+                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">Approved Domains</div>
+                            <div className="flex flex-wrap gap-2">
+                                {trustCenter.email_domains?.map(d => (
+                                    <span key={d} className="text-xs bg-white/5 px-2 py-1 rounded text-slate-300 font-mono">{d}</span>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="bg-black/20 p-4 rounded border border-white/5">
+                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">Controls Applied</div>
+                            <div className="flex flex-wrap gap-1">
+                                {trustCenter.frr_controls?.map(c => (
+                                    <span key={c} className="text-[10px] bg-purple-500/10 text-purple-300 px-1.5 py-0.5 rounded border border-purple-500/20">{c}</span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 5. Integrations Table */}
             {integrations.length > 0 && (
-                <div className="bg-[#121217] border border-white/10 rounded-xl p-6">
-                    <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                        <Globe size={18} className="text-indigo-400" /> Third-Party Data Integrations
-                    </h3>
+                <div className="bg-[#121217] border border-white/10 rounded-xl p-6 mt-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-white font-bold flex items-center gap-2">
+                            <Globe size={18} className="text-indigo-400" /> Third-Party Interconnections
+                        </h3>
+                        {masData.risk_summary && (
+                            <div className="flex gap-2">
+                                <span className="text-[10px] bg-emerald-900/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">
+                                    Low: {masData.risk_summary.low?.length || 0}
+                                </span>
+                                <span className="text-[10px] bg-amber-900/20 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20">
+                                    Med: {masData.risk_summary.medium?.length || 0}
+                                </span>
+                            </div>
+                        )}
+                    </div>
                     <div className="space-y-3">
                         {integrations.map((integration, idx) => (
                             <IntegrationRow key={idx} item={integration} />
