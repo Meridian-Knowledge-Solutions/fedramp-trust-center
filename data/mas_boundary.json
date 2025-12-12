@@ -1,242 +1,360 @@
 {
   "meta": {
-    "generated_at": "2025-12-12T04:42:27.416331",
-    "doc_reference": "fedramp_moderate_mas.html",
+    "generated_at": "2025-12-12T09:31:28.939615",
+    "schema_version": "4.0.0",
     "compliance_ver": "FRR-MAS-02",
-    "discovery_scope": "1 production VPC(s)"
+    "baseline": "Moderate"
   },
-  "zones": {
-    "1_entry_point": {
-      "policy": {
-        "section": "1_entry_point",
-        "title": "1. Federal User Entry Point",
-        "omb_type": "Federal Collected",
-        "definition": "Information collected by/for federal government (OMB A-130)",
-        "impact": {
-          "C": "Moderate",
-          "I": "High",
-          "A": "Low"
-        },
-        "risk": "Medium",
-        "controls": [
-          "KSI-IAM-01",
-          "KSI-IAM-02",
-          "KSI-CNA-01"
-        ],
-        "story": {
-          "narrative": "Federal employees initiate direct access via Application Load Balancer. Traffic is encrypted (TLS 1.2+) and authenticated via PIV/CAC or SAML assertions.",
-          "data_types": [
-            "Access Logs",
-            "Session Initiation",
-            "Source IP Addresses",
-            "SAML Assertions"
-          ],
-          "security_badges": [
-            "TLS 1.2+",
-            "PIV/CAC",
-            "WAF Protection"
-          ]
-        }
+  "boundary": {
+    "validated": true,
+    "infrastructure": {
+      "timestamp": "2025-12-12T09:31:27.348303",
+      "vpc_count": 1,
+      "compute": {
+        "ec2": 6,
+        "lambda_app": 1,
+        "lambda_trust_center": 9
       },
-      "asset_summary": [
-        {
-          "type": "Application Load Balancer",
-          "count": 1
-        },
-        {
-          "type": "Load Balancer",
-          "count": 3
-        }
+      "storage": {
+        "rds": 1,
+        "s3": 2,
+        "elasticache": 0
+      },
+      "network": {
+        "alb": 1,
+        "nlb": 0,
+        "api_gateway": 2,
+        "api_gateway_tc": 1
+      },
+      "kms_keys": 17,
+      "validated": true,
+      "fingerprint": "f86c9184306d"
+    }
+  },
+  "data_flows": {
+    "entry": {
+      "id": "entry",
+      "title": "Authentication",
+      "icon": "\ud83d\udd10",
+      "description": "PIV/CAC \u2192 Okta Federal Gov \u2192 SAML assertion",
+      "pii_collected": [
+        "UPN",
+        "email",
+        "firstName",
+        "lastName",
+        "groups"
       ],
-      "total_assets": 4
+      "retention": "Session + 7yr audit"
     },
-    "2_training_processing": {
-      "policy": {
-        "section": "2_training_processing",
-        "title": "2. Federal Training Activity",
-        "omb_type": "Federal Processed",
-        "definition": "Training progress processed by/for federal agencies",
-        "impact": {
-          "C": "Moderate",
-          "I": "High",
-          "A": "Moderate"
-        },
-        "risk": "Medium",
-        "controls": [
-          "KSI-IAM-04",
-          "KSI-MLA-01",
-          "KSI-SVC-03"
-        ],
-        "story": {
-          "narrative": "Federal training information, including course progress and assessment scores, is processed within an isolated application tier using encrypted compute resources.",
-          "data_types": [
-            "Course Enrollment",
-            "Progress Tracking",
-            "Assessment Scores",
-            "Completion Certificates"
-          ],
-          "security_badges": [
-            "AES-256",
-            "RBAC",
-            "Session Isolation"
-          ]
-        }
-      },
-      "asset_summary": [
-        {
-          "type": "AWS Lambda",
-          "count": 1
-        }
-      ],
-      "total_assets": 1
+    "processing": {
+      "id": "processing",
+      "title": "Training Activity",
+      "icon": "\ud83d\udcda",
+      "description": "Enrollment \u2192 Progress \u2192 Assessment \u2192 Certification",
+      "pii_collected": [],
+      "retention": "Active + 7yr"
     },
-    "4_infrastructure": {
-      "policy": {
-        "section": "4_infrastructure",
-        "title": "4. Infrastructure & Data Storage",
-        "omb_type": "Federal Maintained",
-        "definition": "Infrastructure maintaining data by/for federal government",
-        "impact": {
-          "C": "Moderate",
-          "I": "Moderate",
-          "A": "Moderate"
-        },
-        "risk": "Medium",
-        "controls": [
-          "KSI-SVC-03",
-          "KSI-RPL-03",
-          "KSI-CNA-07"
-        ],
-        "story": {
-          "narrative": "Core infrastructure maintaining federal data across multi-AZ RDS, encrypted S3 buckets, and FSx storage with strict network isolation.",
-          "data_types": [
-            "User Profiles",
-            "System Audit Logs",
-            "Database Records",
-            "Backup Archives"
-          ],
-          "security_badges": [
-            "FedRAMP Authorized",
-            "FIPS 140-2",
-            "24/7 Monitoring"
-          ]
-        }
-      },
-      "asset_summary": [
-        {
-          "type": "EC2/Compute",
-          "count": 4
-        },
-        {
-          "type": "Infrastructure Support",
-          "count": 1
-        },
-        {
-          "type": "RDS/Sqlserver-Se",
-          "count": 1
-        }
-      ],
-      "total_assets": 6
+    "storage": {
+      "id": "storage",
+      "title": "Data Storage",
+      "icon": "\ud83d\udcbe",
+      "description": "RDS (records) + S3 (documents) + ElastiCache (sessions)",
+      "encryption": "AES-256 (KMS)",
+      "retention": "7 years"
     },
-    "4b_trust_center": {
-      "policy": {
-        "section": "4b_trust_center",
-        "title": "4b. FedRAMP Trust Center (FRR-ADS-TC-01)",
-        "omb_type": "Federal Collected",
-        "definition": "Agency registrations, access logs, authorization packages",
-        "impact": {
-          "C": "Low",
-          "I": "Low",
-          "A": "Low"
-        },
-        "risk": "Low",
-        "controls": [
-          "FRR-ADS-TC-01",
-          "FRR-ADS-TC-06",
-          "KSI-IAM-04"
-        ],
-        "story": {
-          "narrative": "A dedicated, FedRAMP-compatible environment for collecting agency registration metadata and distributing authorization packages securely.",
-          "data_types": [
-            "Agency Contact Info",
-            "Download Logs",
-            "Access Requests",
-            "Email Verification"
-          ],
-          "security_badges": [
-            "TLS 1.3",
-            "JWT Auth",
-            "ADS Compliance"
-          ]
-        }
-      },
-      "asset_summary": [
-        {
-          "type": "API Gateway",
-          "count": 0
-        },
-        {
-          "type": "AWS Lambda",
-          "count": 9
-        }
+    "dissemination": {
+      "id": "dissemination",
+      "title": "External Sharing",
+      "icon": "\ud83d\udd04",
+      "description": "PII shared via SAML/xAPI/SCORM to content providers",
+      "pii_shared": [
+        "firstName",
+        "lastName",
+        "email"
       ],
-      "total_assets": 9
+      "note": "See integrations for per-provider details"
     }
   },
   "integrations": [
     {
-      "category": "Meeting Platforms",
-      "provider": "Zoom Video Communications",
-      "status": "Commercial",
-      "tier": "Tier 2",
-      "data_flow": "Meeting Titles, Participant Names",
-      "risk": "High"
+      "id": "domainknow",
+      "provider": "DomainKnow",
+      "category": "Content Provider",
+      "icon": "\ud83c\udfae",
+      "enabled": false,
+      "provider_status": "commercial_dpa",
+      "fedramp_level": null,
+      "usage": "5%",
+      "pii": {
+        "sensitivity": "standard",
+        "fields": [
+          "firstName",
+          "lastName",
+          "userGUID"
+        ],
+        "transfer_method": "SCORM 2004"
+      },
+      "connection": {
+        "protocols": [
+          "SCORM 2004"
+        ]
+      },
+      "controls": {
+        "fedramp_authorized": false,
+        "dpa_signed": true,
+        "data_retention": "30 days"
+      },
+      "risk": "medium"
     },
     {
-      "category": "Content Providers",
+      "id": "linkedin_learning",
+      "provider": "LinkedIn Learning",
+      "category": "Content Provider",
+      "icon": "\ud83d\udcda",
+      "enabled": false,
+      "provider_status": "commercial_dpa",
+      "fedramp_level": null,
+      "usage": "25%",
+      "pii": {
+        "sensitivity": "standard",
+        "fields": [
+          "firstName",
+          "lastName",
+          "email"
+        ],
+        "transfer_method": "SAML SSO + xAPI"
+      },
+      "connection": {
+        "protocols": [
+          "SAML 2.0",
+          "xAPI v1.0.3"
+        ],
+        "endpoint": "https://api.linkedin.com/v2/learning"
+      },
+      "controls": {
+        "fedramp_authorized": false,
+        "dpa_signed": true,
+        "data_retention": "30 days",
+        "audit_logging": true,
+        "annual_review": true
+      },
+      "risk": "medium"
+    },
+    {
+      "id": "microsoft_teams",
+      "provider": "Microsoft Teams",
+      "category": "Meeting Platform",
+      "icon": "\ud83d\udcf9",
+      "enabled": true,
+      "provider_status": "commercial_dpa",
+      "fedramp_level": null,
+      "usage": null,
+      "pii": {
+        "sensitivity": "standard",
+        "fields": [
+          "displayName",
+          "email"
+        ],
+        "transfer_method": "Graph API"
+      },
+      "connection": {
+        "protocols": [
+          "Microsoft Graph API"
+        ],
+        "endpoint": "https://graph.microsoft.com/v1.0/"
+      },
+      "controls": {
+        "fedramp_authorized": false,
+        "dpa_signed": true
+      },
+      "risk": "medium"
+    },
+    {
+      "id": "opensesame",
       "provider": "OpenSesame",
-      "status": "Commercial (Non-FedRAMP)",
-      "tier": "Tier 1",
-      "data_flow": "Names, GUID (SCORM)",
-      "risk": "High"
+      "category": "Content Provider",
+      "icon": "\ud83d\udcda",
+      "enabled": true,
+      "provider_status": "commercial_dpa",
+      "fedramp_level": null,
+      "usage": "15%",
+      "pii": {
+        "sensitivity": "standard",
+        "fields": [
+          "firstName",
+          "lastName",
+          "userGUID"
+        ],
+        "transfer_method": "SCORM 1.2"
+      },
+      "connection": {
+        "protocols": [
+          "SCORM 1.2"
+        ],
+        "endpoint": "https://api.opensesame.com/v1/"
+      },
+      "controls": {
+        "fedramp_authorized": false,
+        "dpa_signed": true,
+        "data_retention": "30 days",
+        "audit_logging": true
+      },
+      "risk": "medium"
     },
     {
-      "category": "Meeting Platforms",
-      "provider": "Microsoft Teams (Commercial)",
-      "status": "Commercial",
-      "tier": "Tier 2",
-      "data_flow": "Meeting Titles, Emails",
-      "risk": "High"
+      "id": "zoom",
+      "provider": "Zoom Video Communications",
+      "category": "Meeting Platform",
+      "icon": "\ud83d\udcf9",
+      "enabled": true,
+      "provider_status": "commercial_dpa",
+      "fedramp_level": null,
+      "usage": null,
+      "pii": {
+        "sensitivity": "standard",
+        "fields": [
+          "displayName",
+          "email"
+        ],
+        "transfer_method": "REST API"
+      },
+      "connection": {
+        "protocols": [
+          "REST API",
+          "Webhooks"
+        ],
+        "endpoint": "https://api.zoom.us/v2/"
+      },
+      "controls": {
+        "fedramp_authorized": false,
+        "dpa_signed": true,
+        "audit_logging": true
+      },
+      "risk": "medium"
     },
     {
-      "category": "Agency Integration",
+      "id": "agency_sftp",
       "provider": "Agency SFTP/API",
-      "status": "Agency System",
-      "tier": "Tier 2",
-      "data_flow": "Certificates, Progress Reports",
-      "risk": "Medium"
+      "category": "Agency Integration",
+      "icon": "\ud83c\udfdb\ufe0f",
+      "enabled": false,
+      "provider_status": "agency",
+      "fedramp_level": "Federal System",
+      "usage": null,
+      "pii": {
+        "sensitivity": "standard",
+        "fields": [
+          "employeeName",
+          "email",
+          "agencyEmployeeId"
+        ],
+        "transfer_method": "SFTP + REST API"
+      },
+      "connection": {
+        "protocols": [
+          "SFTP",
+          "REST API",
+          "Webhooks"
+        ]
+      },
+      "controls": {
+        "fedramp_authorized": true,
+        "mutual_tls": true,
+        "agency_specific_keys": true,
+        "audit_logging": true
+      },
+      "risk": "low"
     },
     {
-      "category": "External Integration",
-      "provider": "shared-services.gov",
-      "status": "Commercial",
-      "tier": "Tier 2",
-      "data_flow": "API Data Exchange",
-      "risk": "High"
+      "id": "skillsoft_percipio",
+      "provider": "Skillsoft Percipio",
+      "category": "Content Provider",
+      "icon": "\ud83c\udfc6",
+      "enabled": false,
+      "provider_status": "fedramp",
+      "fedramp_level": "Moderate",
+      "usage": "60%",
+      "pii": {
+        "sensitivity": "standard",
+        "fields": [
+          "firstName",
+          "lastName",
+          "email"
+        ],
+        "transfer_method": "SAML SSO + xAPI"
+      },
+      "connection": {
+        "protocols": [
+          "SAML 2.0",
+          "xAPI v1.0.3"
+        ],
+        "endpoint": "https://percipio.api.skillsoft.com/xapi/"
+      },
+      "controls": {
+        "fedramp_authorized": true,
+        "dpa_signed": true,
+        "data_retention": "Per FedRAMP",
+        "audit_logging": true
+      },
+      "risk": "low"
     }
   ],
-  "out_of_scope": [
-    {
-      "name": "Meridian Corporate Infrastructure",
-      "reason": "Non-Federal per OMB A-130"
-    },
-    {
-      "name": "GitHub Actions CI/CD",
-      "reason": "Administrative Metadata Only"
-    },
-    {
-      "name": "Test/Development Instances",
-      "reason": "Non-Production Resources"
-    }
-  ]
+  "trust_center": {
+    "compliance_ref": "FRR-ADS-TC-01",
+    "endpoints": [
+      "/register",
+      "/verify",
+      "/status",
+      "/packages",
+      "/compliance"
+    ],
+    "auth": "JWT (1yr expiry)",
+    "email_domains": [
+      ".gov",
+      ".mil",
+      ".fed.us"
+    ],
+    "retention": "7 years",
+    "frr_controls": [
+      "FRR-ADS-TC-01",
+      "FRR-ADS-TC-03",
+      "FRR-ADS-TC-04",
+      "FRR-ADS-TC-05",
+      "FRR-ADS-TC-06"
+    ]
+  },
+  "drift": {
+    "detected": false,
+    "is_first_run": true,
+    "changes": [],
+    "baseline_age": null
+  },
+  "risk_summary": {
+    "low": [
+      "Agency SFTP/API",
+      "Skillsoft Percipio"
+    ],
+    "medium": [
+      "DomainKnow",
+      "LinkedIn Learning",
+      "Microsoft Teams",
+      "OpenSesame",
+      "Zoom Video Communications"
+    ],
+    "high": [],
+    "critical": []
+  },
+  "pii_inventory": {
+    "fields_shared_externally": [
+      "displayName",
+      "email",
+      "firstName",
+      "lastName",
+      "userGUID",
+      "employeeName",
+      "agencyEmployeeId"
+    ],
+    "sensitivity": "standard",
+    "note": "Names and emails only - no SSN, health, or financial data"
+  }
 }
