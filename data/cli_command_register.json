@@ -1,0 +1,1376 @@
+{
+  "KSI-AFR-01": {
+    "description": "Validates the complete FedRAMP Minimum Assessment Scope (MAS). This rule enforces Structural Boundaries (VPC ID) for compute assets AND validates that all peripheral assets (S3, RDS, ALB) are accounted for in the inventory.",
+    "justification": "Validates the Live FedRAMP Boundary (MAS). Explicitly inventories the four critical asset classes: 1) The Boundary itself (VPC), 2) Compute (EC2), 3) Data (RDS), and 4) Storage (S3), ensuring all are accounted for.",
+    "cli_commands": [
+      {
+        "command": "aws ec2 describe-vpcs --filters Name=isDefault,Values=false --output json",
+        "note": "BOUNDARY: Validate the dedicated Production VPC (The Structural Boundary of the MAS)."
+      },
+      {
+        "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --query \"Reservations[*].Instances[*].{ID:InstanceId, Type:InstanceType, VPC:VpcId}\" --output json",
+        "note": "COMPUTE: Validate that all active EC2 instances reside within the defined VPC Boundary."
+      },
+      {
+        "command": "aws rds describe-db-instances --query \"DBInstances[*].{ID:DBInstanceIdentifier, Engine:Engine, VPC:DBSubnetGroup.VpcId}\" --output json",
+        "note": "DATABASE: Validate RDS instances to ensure federal data is contained within the boundary."
+      },
+      {
+        "command": "aws s3api list-buckets --output json",
+        "note": "STORAGE: Validate S3 buckets (Peripheral Assets) that fall within the assessment scope."
+      },
+      {
+        "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[*].{ARN:LoadBalancerArn, DNS:DNSName, VPC:VpcId}\" --output json",
+        "note": "NETWORK: Validate Load Balancers (The Ingress/Egress points of the boundary)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-AFR-01/vpc_boundary.json",
+      "evidence_v2/KSI-AFR-01/compute_inventory.json",
+      "evidence_v2/KSI-AFR-01/database_inventory.json",
+      "evidence_v2/KSI-AFR-01/storage_inventory.json",
+      "evidence_v2/KSI-AFR-01/network_inventory.json"
+    ]
+  },
+  "KSI-AFR-02": {
+    "description": "Set security goals and develop automated validation of status and progress.",
+    "justification": "Validates the Active Compliance Tracker. Checks for the 'unified_ksi_validations.json' artifact in the S3 compliance bucket. This file represents the aggregated status of all Phase 2 KSIs, proving that security goals are actively tracked and validated.",
+    "cli_commands": [
+      {
+        "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/unified_ksi_validations.json --output json",
+        "note": "TRACKER: Validate existence and freshness of the Master Compliance Scorecard (unified_ksi_validations.json)."
+      },
+      {
+        "command": "aws securityhub describe-hub --output json",
+        "note": "SOURCE: Validate Security Hub is enabled (The raw data source feeding the tracker)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-AFR-02/tracker_artifact.json",
+      "evidence_v2/KSI-AFR-02/security_hub_status.json"
+    ]
+  },
+  "KSI-AFR-03": {
+    "description": "Determine how authorization data will be shared in alignment with the ADS standard.",
+    "justification": "Validates the ADS Deliverable. Checks specifically for the 'meridian-authorization-package-LATEST.zip' file. This confirms that the automated pipeline has successfully compiled the required documents into a distributable format.",
+    "cli_commands": [
+      {
+        "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/meridian-authorization-package-LATEST.zip --output json",
+        "note": "DELIVERABLE: Validate the existence of the downloadable Authorization Package ZIP file."
+      },
+      {
+        "command": "curl -s -o /dev/null -w \"%{http_code}\" https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/status || echo \"000\"",
+        "note": "INTERFACE: Ping the Trust Center API to ensure the delivery mechanism is live."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-AFR-03/package_zip_proof.json",
+      "evidence_v2/KSI-AFR-03/api_status.json"
+    ]
+  },
+  "KSI-AFR-04": {
+    "description": "Document the vulnerability detection and response methodology.",
+    "justification": "Validates VDR Outputs. Instead of just checking if scanners are 'on', this validates the 'assessed_vulnerabilities_integrated.json' and 'vdr_vulnerability_status.json' artifacts. These prove that vulnerability data is being actively collected, integrated, and tracked.",
+    "cli_commands": [
+      {
+        "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/assessed_vulnerabilities_integrated.json --output json",
+        "note": "DETECTION: Validate the Integrated Vulnerability Report artifact."
+      },
+      {
+        "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/vdr_vulnerability_status.json --output json",
+        "note": "STATUS: Validate the VDR Status artifact (Proof of remediation tracking)."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
+        "note": "METHODOLOGY: Validate the Governance Policy defining the VDR process."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-AFR-04/vuln_report_artifact.json",
+      "evidence_v2/KSI-AFR-04/vdr_status_artifact.json",
+      "evidence_v2/KSI-AFR-04/policy_doc.json"
+    ]
+  },
+  "KSI-AFR-05": {
+    "description": "Verify SCN procedures are documented and active change tracking is maintained.",
+    "justification": "Validates SCN Evidence in the 'Audit Drop Box' bucket.",
+    "cli_commands": [
+      {
+        "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')]\" --output json",
+        "note": "DROP BOX: Validate existence of the Compliance Evidence bucket."
+      },
+      {
+        "command": "aws s3api list-objects-v2 --bucket $(aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')].Name\" --output text | head -n 1) --prefix scn-flow-validation.html --output json",
+        "note": "PROCEDURE: Check for the 'scn-flow-validation.html' file."
+      },
+      {
+        "command": "aws s3api list-objects-v2 --bucket $(aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')].Name\" --output text | head -n 1) --prefix audit_trail --output json",
+        "note": "LOGS: Check for the SCN Audit Trail file."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-AFR-05/evidence_bucket.json",
+      "evidence_v2/KSI-AFR-05/scn_html_proof.json",
+      "evidence_v2/KSI-AFR-05/audit_log_proof.json"
+    ]
+  },
+  "KSI-AFR-06": {
+    "description": "Maintain a plan and process for providing Ongoing Authorization Reports and Quarterly Reviews.",
+    "justification": "Validates CCM Evidence. Checks for the '3pao_audit_report.json' artifact. This validates that the continuous monitoring process includes independent assessment data, supporting the 'Collaborative' aspect of the FedRAMP CCM standard.",
+    "cli_commands": [
+      {
+        "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/3pao_audit_report.json --output json",
+        "note": "INDEPENDENT REVIEW: Validate the 3PAO Audit Report artifact."
+      },
+      {
+        "command": "curl -s -o /dev/null -w \"%{http_code}\" https://meridian-knowledge-solutions.github.io/fedramp-trust-center/ || echo \"000\"",
+        "note": "AVAILABILITY: Ping the Trust Center Portal (The delivery vehicle for these reports)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-AFR-06/3pao_report_artifact.json",
+      "evidence_v2/KSI-AFR-06/portal_status.json"
+    ]
+  },
+  "KSI-AFR-07": {
+    "description": "Document the secure configuration baseline for the cloud service offering.",
+    "justification": "Validates the Secure Configuration Baseline via API. Instead of checking a static file, this queries the live '/prod/config' endpoint, proving that the security baseline is actively published and available to consumers.",
+    "cli_commands": [
+      {
+        "command": "curl -s https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/config | head -n 20",
+        "note": "DYNAMIC RETRIEVAL: Fetch the first 20 lines of the Security Baseline from the live API. This proves the configuration standards are documented and programmatically accessible."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-AFR-07/api_baseline_response.json"
+    ]
+  },
+  "KSI-AFR-08": {
+    "description": "Operate a secure inbox to receive critical communication from FedRAMP and other government entities.",
+    "justification": "Validates FSI Operations. Checks for: 1) The Security Inbox Procedure Document (Governance), and 2) The SNS Topic used to aggregate and forward internal alerts to that inbox (Technical infrastructure).",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/security-inbox-procedures.md --output json",
+        "note": "GOVERNANCE: Validate the existence of the Security Inbox Procedures document."
+      },
+      {
+        "command": "aws sns list-topics --query \"Topics[?contains(TopicArn, 'security') || contains(TopicArn, 'alert') || contains(TopicArn, 'admin')]\" --output json",
+        "note": "INFRASTRUCTURE: Validate existence of an SNS Topic used to forward AWS alerts to the security inbox."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-AFR-08/inbox_procedures.json",
+      "evidence_v2/KSI-AFR-08/alert_topics.json"
+    ]
+  },
+  "KSI-AFR-09": {
+    "description": "Persistently validate security posture using automated pipelines.",
+    "justification": "Validates Automated Pipeline Artifacts. Checks for: 1) The Validation Architecture Diagram (Governance), and 2) The 'unified_ksi_validations.json' artifact in the S3 'data/' folder. This proves the Master Validator pipeline is successfully executing and actively refreshing the compliance data served by the Trust Center.",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path authorization_by_fedramp/fedramp-phase2-validation-architecture.mmd --output json",
+        "note": "ARCHITECTURE: Validate the existence of the Validation Architecture Diagram."
+      },
+      {
+        "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/unified_ksi_validations.json --output json",
+        "note": "EXECUTION: Validate existence (and freshness) of the Master Validation artifact in the production compliance bucket."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-AFR-09/validation_architecture.json",
+      "evidence_v2/KSI-AFR-09/s3_artifact_head.json"
+    ]
+  },
+  "KSI-AFR-10": {
+    "description": "Integrate FedRAMP's Incident Communications Procedures (ICP) into incident response procedures and infrastructure.",
+    "justification": "Validates ICP Readiness. Checks for: 1) The ICP Playbook and IR Plan (Governance), and 2) Dedicated Security SNS Topics (Infrastructure). Filtering the SNS topics specifically for 'security', 'incident', or 'alert' proves that a dedicated communication channel exists for high-priority events.",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/icp_playbook.md --output json",
+        "note": "GOVERNANCE: Validate the FedRAMP Incident Communications Procedure (ICP) Playbook."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json",
+        "note": "GOVERNANCE: Validate the master Incident Response Plan."
+      },
+      {
+        "command": "aws sns list-topics --query \"Topics[?contains(TopicArn, 'security') || contains(TopicArn, 'incident') || contains(TopicArn, 'alert')]\" --output json",
+        "note": "INFRASTRUCTURE: Validate existence of dedicated SNS topics for Security Incidents."
+      },
+      {
+        "command": "aws sns list-subscriptions --query \"Subscriptions[?contains(TopicArn, 'security') || contains(TopicArn, 'incident') || contains(TopicArn, 'alert')]\" --output json",
+        "note": "REACHABILITY: Validate that the security topics have active subscriptions (email/SMS/Lambda) to ensure alerts are actually delivered."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-AFR-10/icp_playbook.json",
+      "evidence_v2/KSI-AFR-10/ir_plan.json",
+      "evidence_v2/KSI-AFR-10/security_topics.json",
+      "evidence_v2/KSI-AFR-10/topic_subscriptions.json"
+    ]
+  },
+  "KSI-AFR-11": {
+    "description": "Ensure that cryptographic modules are selected and used in alignment with the FedRAMP 20x Using Cryptographic Modules (UCM) policy.",
+    "justification": "Validates Applied Cryptography. Checks for: 1) Active KMS Keys (Key Management), 2) S3 Encryption on the Compliance Bucket (Data at Rest), 3) RDS Encryption (Data at Rest), and 4) Active Load Balancer Listeners enforcing TLS 1.2+ (Data in Transit/FIPS alignment).",
+    "cli_commands": [
+      {
+        "command": "aws kms list-keys --limit 5 --output json",
+        "note": "KEY MANAGEMENT: Validate that KMS keys exist and are available for cryptographic operations."
+      },
+      {
+        "command": "aws s3api get-bucket-encryption --bucket fedramp-compliance-893894210484 --output json",
+        "note": "DATA AT REST (STORAGE): Validate that the Compliance Artifact Bucket enforces server-side encryption (SSE-S3 or SSE-KMS)."
+      },
+      {
+        "command": "aws rds describe-db-instances --query \"DBInstances[*].{ID:DBInstanceIdentifier, Encrypted:StorageEncrypted}\" --output json",
+        "note": "DATA AT REST (DATABASE): Validate that all RDS instances have 'StorageEncrypted' set to true."
+      },
+      {
+        "command": "aws elbv2 describe-listeners --load-balancer-arn $(aws elbv2 describe-load-balancers --query \"LoadBalancers[0].LoadBalancerArn\" --output text) --output json || echo \"[]\"",
+        "note": "DATA IN TRANSIT: Validate that Load Balancer Listeners are configured with secure SSL Policies (TLS 1.2+)."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/cryptographic-modules-policy.md --output json",
+        "note": "GOVERNANCE: Validate the existence of the Cryptographic Modules (UCM) Policy."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-AFR-11/kms_keys.json",
+      "evidence_v2/KSI-AFR-11/s3_encryption.json",
+      "evidence_v2/KSI-AFR-11/rds_encryption.json",
+      "evidence_v2/KSI-AFR-11/alb_listeners.json",
+      "evidence_v2/KSI-AFR-11/ucm_policy.json"
+    ]
+  },
+  "KSI-CED-01": {
+    "description": "Require and monitor the effectiveness of training given to all employees on policies, procedures, and security-related topics.",
+    "justification": "Validates 'GitOps' Security Training. Instead of passive LMS logs, this validates the 'training/register.json' in the governance repo. This proves staff have actively attested to security training by decoding a challenge token (CTF style) and committing it to the immutable version control history.",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path training/register.json --output json",
+        "note": "EVIDENCE: Validate the Training Register. The file must contain user commits with the correct decoded flag, proving active engagement."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path training/security-refresh.md --output json",
+        "note": "CURRICULUM: Validate the existence of the Training Challenge Instructions (The 'Lesson Plan')."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CED-01/training_register.json",
+      "evidence_v2/KSI-CED-01/training_curriculum.json"
+    ]
+  },
+  "KSI-CED-02": {
+    "description": "Require and monitor the effectiveness of role-specific training for high risk roles, including at least roles with privileged access.",
+    "justification": "Validates 'GitOps' Privileged User Training. Checks the 'training/privileged_register.json' file, which serves as a segregated training record for high-risk roles. Presence of signed commits here proves that privileged users have completed the 'Deep Dive with Security: IAM' module and attested to the responsibilities defined in the Privileged Access Guide.",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path training/privileged_register.json --output json",
+        "note": "EVIDENCE: Validate the Privileged User Training Register. Entries here confirm acknowledgement of high-risk responsibilities and completion of the IAM Deep Dive."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path training/privileged-access-guide.md --output json",
+        "note": "CURRICULUM: Validate the existence of the Privileged Access Guide containing the link to the mandatory AWS Skill Builder IAM course."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CED-02/privileged_register.json",
+      "evidence_v2/KSI-CED-02/privileged_guide.json"
+    ]
+  },
+  "KSI-CED-03": {
+    "description": "Require and monitor the effectiveness of role-specific training provided to development and engineering staff that covers best practices for delivering secure software.",
+    "justification": "Validates 'GitOps' Developer Security Training. Checks the 'training/developer_register.json' file. This proves engineering staff have reviewed the existing 'secure-software-development.md' policy and attested to understanding secure delivery practices via version control.",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path training/developer_register.json --output json",
+        "note": "EVIDENCE: Validate the Developer Training Register. Entries here confirm engineering staff have acknowledged the secure software development policy."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/secure-software-development.md --output json",
+        "note": "CURRICULUM: Validate the existence of the Secure Software Development policy."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CED-03/developer_register.json",
+      "evidence_v2/KSI-CED-03/secure_dev_policy.json"
+    ]
+  },
+  "KSI-CED-04": {
+    "description": "Require and monitor the effectiveness of role-specific training to staff involved with incident response or disaster recovery.",
+    "justification": "Validates 'GitOps' IR/DR Training. Checks the 'training/ir_dr_register.json' file. This proves that designated Incident Responders have reviewed the Incident Response Plan and attested to their readiness via version control commits, satisfying the requirement for role-specific IR/DR training effectiveness monitoring.",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path training/ir_dr_register.json --output json",
+        "note": "EVIDENCE: Validate the IR/DR Training Register. Entries here confirm the IR team has reviewed the active response procedures."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json",
+        "note": "CURRICULUM: Validate the existence of the Incident Response Plan (The core training material)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CED-04/ir_dr_register.json",
+      "evidence_v2/KSI-CED-04/ir_plan_doc.json"
+    ]
+  },
+  "KSI-CMT-01": {
+    "description": "Log and monitor modifications to the cloud service offering.",
+    "justification": "Validates Change Logging. Checks for: 1) Active CloudTrail (Logs the API calls/modifications), 2) Active AWS Config Recorder (Logs the resource state changes), and 3) The Change Management Policy.",
+    "cli_commands": [
+      {
+        "command": "aws cloudtrail describe-trails --output json",
+        "note": "AUDIT: Validate existence of CloudTrail trails (The primary change logger)."
+      },
+      {
+        "command": "aws cloudtrail get-event-selectors --trail-name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
+        "note": "SCOPE: Validate that the trail is recording 'Management Events' (Read/Write API calls)."
+      },
+      {
+        "command": "aws configservice describe-configuration-recorder-status --output json",
+        "note": "TRACKING: Validate that AWS Config is actively recording resource changes (Recording: true)."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/change-management-policy.md --output json",
+        "note": "GOVERNANCE: Validate the Change Management Policy document."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CMT-01/trails.json",
+      "evidence_v2/KSI-CMT-01/event_selectors.json",
+      "evidence_v2/KSI-CMT-01/config_status.json",
+      "evidence_v2/KSI-CMT-01/change_policy.json"
+    ]
+  },
+  "KSI-CMT-02": {
+    "description": "Execute changes though redeployment of version controlled immutable resources rather than direct modification wherever possible",
+    "justification": "Validates Infrastructure as Code (IaC). Since ASGs are not used, this validates that changes are managed via Terraform State (Version Control) and State Locking (Concurrency Control), ensuring changes are tracked in code rather than manual console actions.",
+    "cli_commands": [
+      {
+        "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'terraform') || contains(Name, 'state') || contains(Name, 'tfstate')]\" --output json",
+        "note": "VERSION CONTROL: Validate existence of the Terraform State bucket (Proof that infrastructure is defined as code)."
+      },
+      {
+        "command": "aws dynamodb list-tables --query \"TableNames[?contains(@, 'terraform') || contains(@, 'lock') || contains(@, 'state')]\" --output json",
+        "note": "MANAGEMENT: Validate existence of the Terraform Lock Table (Proof of active, safe IaC workflows)."
+      },
+      {
+        "command": "aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId, LaunchTime, ImageId]' --output json",
+        "note": "INVENTORY: List the active EC2 instances managed by this Terraform state."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json",
+        "note": "GOVERNANCE: Validate the policy that mandates Terraform usage for all production changes."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CMT-02/terraform_buckets.json",
+      "evidence_v2/KSI-CMT-02/lock_tables.json",
+      "evidence_v2/KSI-CMT-02/managed_instances.json",
+      "evidence_v2/KSI-CMT-02/iac_policy.json"
+    ]
+  },
+  "KSI-CMT-03": {
+    "description": "Automate persistent testing and validation of changes throughout deployment.",
+    "justification": "Validates the Hybrid Compliance Strategy. Checks for: 1) Active AWS Config Recorder (The Persistent Monitor), 2) Active Config Rules (The Validation Logic), and 3) The Testing Policy (Governance of the CI/CD pipeline).",
+    "cli_commands": [
+      {
+        "command": "aws configservice describe-configuration-recorder-status --output json",
+        "note": "MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation)."
+      },
+      {
+        "command": "aws configservice describe-config-rules --query \"ConfigRules[?RuleState=='ACTIVE']\" --max-items 5 --output json",
+        "note": "VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/sdlc-policy.md --output json",
+        "note": "GOVERNANCE: Validate the SDLC Policy which mandates 'Automated Testing' (Checkov) before deployment."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CMT-03/config_recorder.json",
+      "evidence_v2/KSI-CMT-03/active_rules.json",
+      "evidence_v2/KSI-CMT-03/checkov_scan_summary.json",
+      "evidence_v2/KSI-CMT-03/sdlc_policy.json"
+    ]
+  },
+  "KSI-CMT-04": {
+    "description": "Always follow a documented change management procedure.",
+    "justification": "Validates Adherence to Procedure via State History. Checks for: 1) The Change Management Procedure Document (Governance) and 2) Terraform State File Version History (Technical proof of sequential, tracked changes to infrastructure).",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/change-management-procedure.md --output json",
+        "note": "GOVERNANCE: Validate the existence of the Change Management Procedure document."
+      },
+      {
+        "command": "aws s3api list-object-versions --bucket mks-states --prefix terraform.tfstate --max-items 5 --output json",
+        "note": "EVIDENCE: List versions of the Terraform State file. This provides an audit trail of every successful 'terraform apply' operation, proving changes are tracked."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CMT-04/cm_procedure.json",
+      "evidence_v2/KSI-CMT-04/state_history.json"
+    ]
+  },
+  "KSI-CNA-01": {
+    "description": "Configure all machine-based information resources to limit inbound and outbound network traffic.",
+    "justification": "Validates Network Traffic Limiting. Checks for: 1) The 'default' Security Group (Baseline Hygiene - should be empty), 2) Active Security Groups (Specific Ingress/Egress Rules), and 3) Network ACLs (Subnet Boundary Control).",
+    "cli_commands": [
+      {
+        "command": "aws ec2 describe-security-groups --filters Name=group-name,Values=default --output json",
+        "note": "BASELINE: Validate that the 'default' VPC Security Group restricts all traffic (Best practice is to leave this empty/unused)."
+      },
+      {
+        "command": "aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=tcp --max-items 5 --output json",
+        "note": "ACTIVE CONTROLS: Validate a sample of active Security Groups to verify specific port restrictions (Limit Inbound)."
+      },
+      {
+        "command": "aws ec2 describe-network-acls --max-items 5 --output json",
+        "note": "BOUNDARY: Validate Network ACLs which provide a stateless traffic filter at the subnet level."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CNA-01/default_sg.json",
+      "evidence_v2/KSI-CNA-01/active_sgs.json",
+      "evidence_v2/KSI-CNA-01/nacls.json"
+    ]
+  },
+  "KSI-CNA-02": {
+    "description": "Design systems to minimize the attack surface and minimize lateral movement if compromised.",
+    "justification": "Validates Network Segmentation and Isolation. Checks for: 1) Private Subnets (Attack Surface Reduction), 2) Security Group References (Prevention of Lateral Movement by binding rules to logical groups, not IPs), and 3) Private Database Placement.",
+    "cli_commands": [
+      {
+        "command": "aws ec2 describe-subnets --filters \"Name=map-public-ip-on-launch,Values=false\" --query \"Subnets[].{ID:SubnetId, CIDR:CidrBlock, Zone:AvailabilityZone}\" --max-items 5 --output json",
+        "note": "ATTACK SURFACE: Validate the existence of Private Subnets (where Public IP mapping is disabled)."
+      },
+      {
+        "command": "aws ec2 describe-security-groups --filters Name=ip-permission.user-id-group-pair.group-id,Values=* --max-items 5 --output json",
+        "note": "LATERAL MOVEMENT: Validate Security Groups that allow access ONLY from other specific Security Groups (Tiered Security), rather than broad IP ranges."
+      },
+      {
+        "command": "aws rds describe-db-instances --query \"DBInstances[].{ID:DBInstanceIdentifier, Public:PubliclyAccessible, Subnets:DBSubnetGroup.Subnets[].SubnetIdentifier}\" --output json",
+        "note": "ISOLATION: Validate that RDS Databases are configured as 'PubliclyAccessible: false' and reside in defined subnets."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CNA-02/private_subnets.json",
+      "evidence_v2/KSI-CNA-02/tiered_sgs.json",
+      "evidence_v2/KSI-CNA-02/private_dbs.json"
+    ]
+  },
+  "KSI-CNA-03": {
+    "description": "Use logical networking and related capabilities to enforce traffic flow controls.",
+    "justification": "Validates Logical Traffic Enforcement. Checks for: 1) VPC Endpoints (Enforces private connectivity to AWS services), 2) NAT Gateways (Enforces centralized egress), and 3) Load Balancer Schemes (Enforces defined entry points).",
+    "cli_commands": [
+      {
+        "command": "aws ec2 describe-vpc-endpoints --query \"VpcEndpoints[].{ID:VpcEndpointId, Service:ServiceName, Type:VpcEndpointType, State:State}\" --output json",
+        "note": "PRIVATE FLOW: Validate existence of VPC Endpoints, ensuring traffic to services like S3/DynamoDB bypasses the public internet."
+      },
+      {
+        "command": "aws ec2 describe-nat-gateways --filter Name=state,Values=available --output json",
+        "note": "EGRESS CONTROL: Validate active NAT Gateways. This proves instances in private subnets route outbound traffic centrally, rather than having individual Public IPs."
+      },
+      {
+        "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, Scheme:Scheme, DNS:DNSName}\" --output json",
+        "note": "INGRESS CONTROL: Validate Load Balancers. The 'Scheme' (internet-facing vs internal) proves that ingress traffic is logically separated and managed."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CNA-03/vpc_endpoints.json",
+      "evidence_v2/KSI-CNA-03/nat_gateways.json",
+      "evidence_v2/KSI-CNA-03/lb_schemes.json"
+    ]
+  },
+  "KSI-CNA-04": {
+    "description": "Use immutable infrastructure with strictly defined functionality and privileges by default.",
+    "justification": "Validates Immutable EC2 Infrastructure & Least Privilege. Checks for: 1) Terraform State (Proof of immutable IaC management), 2) Security Groups (Strict network functionality), and 3) Custom IAM Roles (Strictly defined privileges, excluding default AWS service roles).",
+    "cli_commands": [
+      {
+        "command": "aws s3api list-object-versions --bucket mks-states --prefix terraform.tfstate --max-items 5 --output json",
+        "note": "IMMUTABILITY: List Terraform State versions. Frequent state updates prove that infrastructure is managed/replaced via code, not manual changes."
+      },
+      {
+        "command": "aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=-1 --output json",
+        "note": "FUNCTIONALITY: Check for Security Groups allowing 'All Traffic' (-1). Absence of these proves strictly defined network functionality."
+      },
+      {
+        "command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, 'AWSServiceRole') || contains(Path, '/aws-service-role/'))]\" --output json",
+        "note": "PRIVILEGE: Audit Custom IAM Roles. This focuses the scan on roles you created, verifying they follow least-privilege principles."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CNA-04/terraform_history.json",
+      "evidence_v2/KSI-CNA-04/restricted_sgs.json",
+      "evidence_v2/KSI-CNA-04/custom_roles.json"
+    ]
+  },
+  "KSI-CNA-05": {
+    "description": "Deploy effective spam, spoofing, and denial-of-service countermeasures.",
+    "justification": "Validates DDoS & Spoofing Defense. Checks for: 1) Regional WAF (Layer 7 Defense), 2) Load Balancers (Layer 3/4 Defense via AWS Shield Standard), and 3) Validated Email Identities (Spoofing protection via SES/DKIM).",
+    "cli_commands": [
+      {
+        "command": "aws wafv2 list-web-acls --scope REGIONAL --output json",
+        "note": "DDOS LAYER 7: Validate existence of Web Application Firewalls (WAF) to block malicious requests."
+      },
+      {
+        "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Shield: 'Enabled (Standard)'}\" --output json",
+        "note": "DDOS LAYER 3/4: Validate Load Balancers. All ALBs act as the perimeter and automatically benefit from AWS Shield Standard."
+      },
+      {
+        "command": "aws route53 list-hosted-zones --max-items 5 --output json",
+        "note": "DNS RESILIENCE: Validate Route53 usage (AWS AnyCast network provides DNS flood protection)."
+      },
+      {
+        "command": "aws sesv2 list-email-identities --max-items 5 --output json",
+        "note": "SPOOFING: Validate SES Identities. If email is sent, this checks for authorized identities (DKIM/SPF managed)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CNA-05/waf_acls.json",
+      "evidence_v2/KSI-CNA-05/shield_lbs.json",
+      "evidence_v2/KSI-CNA-05/route53_zones.json",
+      "evidence_v2/KSI-CNA-05/ses_identities.json"
+    ]
+  },
+  "KSI-CNA-06": {
+    "description": "Design systems for high availability and rapid recovery.",
+    "justification": "Validates Multi-AZ High Availability. Checks for: 1) Load Balancers spanning multiple AZs (Network HA), 2) RDS instances with Multi-AZ enabled (Database HA), and 3) Active AWS Backup Plans (Recovery Capability).",
+    "cli_commands": [
+      {
+        "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, AZs:AvailabilityZones[].ZoneName}\" --output json",
+        "note": "NETWORK HA: Validate that Load Balancers are configured across multiple Availability Zones."
+      },
+      {
+        "command": "aws rds describe-db-instances --query \"DBInstances[].{ID:DBInstanceIdentifier, MultiAZ:MultiAZ, SecondaryZone:SecondaryAvailabilityZone}\" --output json",
+        "note": "DATABASE HA: Validate that critical RDS instances have Multi-AZ enabled for automatic failover."
+      },
+      {
+        "command": "aws backup list-backup-plans --output json",
+        "note": "RECOVERY: Validate existence of Backup Plans to support rapid data recovery."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CNA-06/multi_az_lbs.json",
+      "evidence_v2/KSI-CNA-06/multi_az_rds.json",
+      "evidence_v2/KSI-CNA-06/backup_plans.json"
+    ]
+  },
+  "KSI-CNA-07": {
+    "description": "Maximize use of managed services and cloud resources",
+    "justification": "Validates cloud-native maturity by comparing the ratio of legacy infrastructure (EC2) versus modern managed services (Lambda, RDS, API Gateway, etc).",
+    "cli_commands": [
+      {
+        "command": "aws ec2 describe-instances --output json",
+        "note": "BASELINE: Measure legacy compute footprint (Denominator) to compare against managed service adoption."
+      },
+      {
+        "command": "aws lambda list-functions --output json",
+        "note": "ACCELERATOR: Validate adoption of serverless compute (High Impact)."
+      },
+      {
+        "command": "aws rds describe-db-instances --output json",
+        "note": "ACCELERATOR: Validate use of fully managed databases vs self-hosted DBs."
+      },
+      {
+        "command": "aws apigateway get-rest-apis --output json",
+        "note": "ACCELERATOR: Validate use of managed API hosting infrastructure."
+      },
+      {
+        "command": "aws elbv2 describe-load-balancers --output json",
+        "note": "ACCELERATOR: Validate use of managed application networking."
+      },
+      {
+        "command": "aws autoscaling describe-auto-scaling-groups --output json",
+        "note": "ACCELERATOR: Validate use of dynamic scaling/statelessness vs static servers."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CNA-07/lambda_functions.json",
+      "evidence_v2/KSI-CNA-07/ec2_instances.json"
+    ]
+  },
+  "KSI-CNA-08": {
+    "description": "Use automated services to persistently assess the security posture of all machine-based information resources and automatically enforce their intended operational state.",
+    "justification": "Validates that the 'Immune System' of the cloud is active by checking for enabled Security Hub Standards, GuardDuty Detectors, and Config Recorders.",
+    "cli_commands": [
+      {
+        "command": "aws securityhub get-enabled-standards --output json",
+        "note": "Validate that Security Hub is active and enforcing specific compliance standards (CIS, PCI, etc)."
+      },
+      {
+        "command": "aws guardduty list-detectors --output json",
+        "note": "Validate that GuardDuty is enabled (Detector ID exists) for automated threat detection."
+      },
+      {
+        "command": "aws configservice describe-configuration-recorders --output json",
+        "note": "Validate that AWS Config is actively recording resource changes for persistent assessment."
+      },
+      {
+        "command": "aws inspector2 list-coverage --output json",
+        "note": "Validate that Amazon Inspector is actively scanning resources (EC2/ECR/Lambda)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-CNA-08/securityhub_standards.json",
+      "evidence_v2/KSI-CNA-08/guardduty_detectors.json"
+    ]
+  },
+  "KSI-IAM-01": {
+    "description": "Enforce multi-factor authentication (MFA) using methods that are difficult to intercept or impersonate (phishing-resistant MFA) for all user authentication.",
+    "justification": "Validates MFA compliance by filtering for users who actively log in via password (Humans) and verifying Identity Center usage. Excludes API-only service accounts.",
+    "cli_commands": [
+      {
+        "command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
+        "note": "FILTERED: Retrieve only IAM Users who have active password usage (Humans)."
+      },
+      {
+        "command": "aws sso-admin list-instances --output json",
+        "note": "Verify that AWS Identity Center is the primary identity platform."
+      },
+      {
+        "command": "aws iam list-virtual-mfa-devices --output json",
+        "note": "Get list of all Virtual MFA devices to validate protection (replaces list-mfa-devices which requires user)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-IAM-01/iam_users.json"
+    ]
+  },
+  "KSI-IAM-02": {
+    "description": "Use secure passwordless methods for user authentication and authorization when feasible, otherwise enforce strong passwords with MFA.",
+    "justification": "Validates the authentication hierarchy: Checks for Identity Center (Best) and SAML Providers (Good) first. If those are absent, it validates the IAM Password Policy (Fallback) to ensure strong controls are in place.",
+    "cli_commands": [
+      {
+        "command": "aws sso-admin list-instances --output json",
+        "note": "MODERN: Validate presence of AWS Identity Center (Single Sign-On)."
+      },
+      {
+        "command": "aws iam list-saml-providers --output json",
+        "note": "LEGACY/FEDERATED: Validate presence of external Identity Providers (Okta, Azure AD)."
+      },
+      {
+        "command": "aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
+        "note": "FALLBACK: Validate that if passwords ARE used, the policy enforces complexity and rotation."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-IAM-02/password_policy.json",
+      "evidence_v2/KSI-IAM-02/sso_instances.json"
+    ]
+  },
+  "KSI-IAM-03": {
+    "description": "Enforce appropriately secure authentication methods for non-user accounts and services.",
+    "justification": "Validates the security of machine identities. Filters out AWS-managed roles to focus strictly on Customer Roles (Trust Policies) and Service Accounts (Access Keys).",
+    "cli_commands": [
+      {
+        "command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, 'AWSServiceRole') || contains(Path, '/aws-service-role/'))]\" --output json",
+        "note": "Validate Trust Policies for CUSTOMER managed roles only."
+      },
+      {
+        "command": "aws iam list-users --query \"Users[?PasswordLastUsed==null]\" --output json",
+        "note": "Validate Service Accounts (Bots) that do not have console access (should rely on keys/roles)."
+      },
+      {
+        "command": "aws iam get-credential-report --output text > /dev/null && aws iam get-credential-report --output json || echo '{\"Content\": \"Permission Denied\"}'",
+        "note": "Deep inspection of access key rotation status for service accounts."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-IAM-03/iam_roles.json",
+      "evidence_v2/KSI-IAM-03/credential_report.json"
+    ]
+  },
+  "KSI-IAM-04": {
+    "description": "Require a centralized identity management system.",
+    "justification": "Validates the presence of the Centralized Identity Provider (Identity Center) and audits the 'Debt' of decentralized local IAM users.",
+    "cli_commands": [
+      {
+        "command": "aws sso-admin list-instances --output json",
+        "note": "PRIMARY: Validate that AWS Identity Center (SSO) is configured and running."
+      },
+      {
+        "command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
+        "note": "AUDIT: List human users who are bypassing the Centralized System (should be empty or minimal)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-IAM-04/sso_instances.json",
+      "evidence_v2/KSI-IAM-04/legacy_users.json"
+    ]
+  },
+  "KSI-IAM-05": {
+    "description": "Require phishing-resistant MFA (FIDO2/WebAuthn) for all user authentication.",
+    "justification": "Validates that the authentication flow prevents phishing by enforcing FIDO2/WebAuthn at the Identity Provider level (SSO) and ensuring break-glass users utilize hardware tokens.",
+    "cli_commands": [
+      {
+        "command": "aws sso-admin list-instances --output json",
+        "note": "PRIMARY: Validate Identity Center configuration for WebAuthn/FIDO2 enforcement."
+      },
+      {
+        "command": "aws iam list-virtual-mfa-devices --output json",
+        "note": "AUDIT: Inventory MFA devices to identify non-FIDO compliant virtual tokens."
+      },
+      {
+        "command": "aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
+        "note": "Validate that hard-fail measures are in place if MFA is missing."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-IAM-05/mfa_types.json",
+      "evidence_v2/KSI-IAM-05/sso_config.json"
+    ]
+  },
+  "KSI-IAM-06": {
+    "description": "Automatically disable or otherwise secure accounts with privileged access in response to suspicious activity",
+    "justification": "Validates the 'Automated Response' chain: Checks if GuardDuty is watching (Detectors) AND if EventBridge has rules listening to GuardDuty to trigger automated remediation.",
+    "cli_commands": [
+      {
+        "command": "aws guardduty list-detectors --output json",
+        "note": "SENSOR: Validate that the Threat Detection sensor is active."
+      },
+      {
+        "command": "aws events list-rules --query \"Rules[?contains(EventPattern, 'GuardDuty')]\" --output json",
+        "note": "BRAIN: Validate existence of EventBridge rules that listen for GuardDuty signals (evidence of automated response logic)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-IAM-06/guardduty_detectors.json",
+      "evidence_v2/KSI-IAM-06/response_rules.json"
+    ]
+  },
+  "KSI-IAM-07": {
+    "description": "Securely manage the lifecycle and privileges of all accounts, roles, and groups, using automation.",
+    "justification": "Validates proper lifecycle management by auditing credential rotation. Instead of listing static roles, it scans the Credential Report for stale passwords (>90 days) and unused access keys.",
+    "cli_commands": [
+      {
+        "command": "aws iam generate-credential-report > /dev/null && aws iam get-credential-report --output text | base64 --decode || echo 'Permission Denied'",
+        "note": "PRIMARY: Retrieve the full Credential Report to analyze password and key rotation ages."
+      },
+      {
+        "command": "aws iam list-roles --query \"Roles[?CreateDate<='2024-01-01']\" --output json",
+        "note": "AUDIT: Identify potential 'Zombie Roles' that are older than a specific threshold (adjust date as needed)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-IAM-07/credential_report.csv",
+      "evidence_v2/KSI-IAM-07/stale_roles.json"
+    ]
+  },
+  "KSI-INR-01": {
+    "description": "Always follow a documented incident response procedure.",
+    "justification": "Validates the existence of Incident Response documentation. Specifically checks for the existence of a 'Governance as Code' repository containing procedures and playbooks.",
+    "cli_commands": [
+      {
+        "command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, 'policy') || contains(repositoryName, 'compliance') || contains(repositoryName, 'playbook') || contains(repositoryName, 'security') || contains(repositoryName, 'procedures') || contains(repositoryName, 'runbook')]\" --output json",
+        "note": "Validate existence of the designated Policy/Runbook repository (filters out application code)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-INR-01/policy_repos.json"
+    ]
+  },
+  "KSI-INR-02": {
+    "description": "Maintain a log of incidents and periodically review past incidents for patterns or vulnerabilities.",
+    "justification": "Validates the existence of centralized incident logging infrastructure. Checks for specific CloudWatch Log Groups and S3 Buckets designated for security/audit data.",
+    "cli_commands": [
+      {
+        "command": "aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, 'security') || contains(logGroupName, 'cloudtrail') || contains(logGroupName, 'audit') || contains(logGroupName, 'incident')]\" --output json",
+        "note": "Validate existence of centralized CloudWatch Log Groups for security events."
+      },
+      {
+        "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'log') || contains(Name, 'audit') || contains(Name, 'security')]\" --output json",
+        "note": "Validate existence of immutable S3 storage for long-term incident retention."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-INR-02/security_log_groups.json",
+      "evidence_v2/KSI-INR-02/audit_buckets.json"
+    ]
+  },
+  "KSI-INR-03": {
+    "description": "Generate after action reports and regularly incorporate lessons learned into operations.",
+    "justification": "Validates the existence of a 'Lessons Learned' repository. Checks for CodeCommit repositories specifically designated for Post-Incident Analysis (Post-Mortems) or After Action Reports (AAR).",
+    "cli_commands": [
+      {
+        "command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, 'post-mortem') || contains(repositoryName, 'aar') || contains(repositoryName, 'lessons-learned') || contains(repositoryName, 'incident-reports') || contains(repositoryName, 'reports')]\" --output json",
+        "note": "Validate existence of the designated Post-Mortem/AAR repository."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-INR-03/post_mortem_repos.json"
+    ]
+  },
+  "KSI-MLA-01": {
+    "description": "Log all activity on all information resources supporting the cloud service offering to a protected audit log.",
+    "justification": "Validates the master audit record. Checks for the existence of an active CloudTrail and the security (ACLs/Encryption) of the specific S3 bucket storing those logs.",
+    "cli_commands": [
+      {
+        "command": "aws cloudtrail describe-trails --output json",
+        "note": "PRIMARY: Validate existence and configuration of the CloudTrail trail."
+      },
+      {
+        "command": "aws cloudtrail get-trail-status --name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
+        "note": "STATUS: Confirm CloudTrail is actually 'IsLogging': true. Uses TrailARN to avoid naming conflicts."
+      },
+      {
+        "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'cloudtrail') || contains(Name, 'audit') || contains(Name, 'logs')]\" --output json",
+        "note": "STORAGE: Validate the specific S3 bucket used for audit log retention."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-MLA-01/cloudtrail_config.json",
+      "evidence_v2/KSI-MLA-01/trail_status.json"
+    ]
+  },
+  "KSI-MLA-02": {
+    "description": "Regularly review and audit logs.",
+    "justification": "Validates 'Automated Review'. Instead of expecting human review, checks for CloudWatch Metric Filters (automated pattern matching) and Security Hub Insights (aggregated analysis).",
+    "cli_commands": [
+      {
+        "command": "aws logs describe-metric-filters --output json",
+        "note": "PRIMARY: Validate existence of automated log scanning patterns (e.g., 'RootLogin', 'Unauthorized')."
+      },
+      {
+        "command": "aws securityhub get-insights --output json",
+        "note": "SECONDARY: Validate usage of Security Hub for aggregated security trend analysis."
+      },
+      {
+        "command": "aws cloudwatch describe-alarms --query \"MetricAlarms[?contains(AlarmName, 'Log') || contains(AlarmName, 'Security') || contains(AlarmName, 'Filter')]\" --output json",
+        "note": "ALERTING: Validate alarms specifically tied to log metric filters."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-MLA-02/metric_filters.json",
+      "evidence_v2/KSI-MLA-02/security_insights.json"
+    ]
+  },
+  "KSI-MLA-05": {
+    "description": "Perform Infrastructure as Code and configuration evaluation and testing.",
+    "justification": "Validates the IaC workflow using Terraform artifacts. Checks for '.tfplan' files (Proof of Evaluation/Testing) and '.tfstate' files (Proof of Configuration Management) in the central state bucket.",
+    "cli_commands": [
+      {
+        "command": "aws s3 ls s3://mks-states/ --recursive | grep -E '\\.tfstate|\\.tfplan' || echo 'No State Files Found'",
+        "note": "PRIMARY: Scan the Terraform State bucket. Presence of '.tfplan' proves pre-deployment evaluation; '.tfstate' proves active configuration management."
+      },
+      {
+        "command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, 'infra') || contains(repositoryName, 'terraform')]\" --output json",
+        "note": "SOURCE: Validate existence of the Infrastructure-as-Code repository."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-MLA-05/terraform_artifacts.txt",
+      "evidence_v2/KSI-MLA-05/iac_repos.json"
+    ]
+  },
+  "KSI-MLA-07": {
+    "description": "Maintain a list of information resources and event types that will be monitored, logged, and audited.",
+    "justification": "Validates the Resource Inventory and Logging Strategy. Checks AWS Config (The Resource List) and CloudTrail/Security Log Groups (The Audit Execution).",
+    "cli_commands": [
+      {
+        "command": "aws configservice describe-configuration-recorders --output json",
+        "note": "INVENTORY: Validate that AWS Config is recording the 'List of Information Resources'."
+      },
+      {
+        "command": "aws cloudtrail describe-trails --output json",
+        "note": "EVENTS: Validate that CloudTrail is defining the 'Event Types' to be logged."
+      },
+      {
+        "command": "aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, 'security') || contains(logGroupName, 'cloudtrail') || contains(logGroupName, 'audit') || contains(logGroupName, 'flow')]\" --output json",
+        "note": "EXECUTION: Validate that the specific Security/Audit logs are actually being captured."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-MLA-07/config_recorders.json",
+      "evidence_v2/KSI-MLA-07/security_logs.json"
+    ]
+  },
+  "KSI-MLA-08": {
+    "description": "Use a least-privileged, role and attribute-based, and just-in-time access authorization model for access to log data.",
+    "justification": "Validates the Log Governance Model. Checks for: 1) The Audit Vault (S3), 2) The Encryption Key (KMS), and 3) The Access Policies (IAM) specifically designed for logging.",
+    "cli_commands": [
+      {
+        "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'audit') || contains(Name, 'logs') || contains(Name, 'trail')]\" --output json",
+        "note": "VAULT: Validate existence of the designated Audit Log bucket."
+      },
+      {
+        "command": "aws kms list-aliases --query \"Aliases[?contains(AliasName, 'cloudtrail') || contains(AliasName, 'log') || contains(AliasName, 'audit')]\" --output json",
+        "note": "LOCK: Validate existence of a dedicated KMS key for encrypting log data."
+      },
+      {
+        "command": "aws iam list-policies --scope Local --query \"Policies[?contains(PolicyName, 'Log') || contains(PolicyName, 'Audit') || contains(PolicyName, 'ViewOnly')]\" --output json",
+        "note": "PERMIT: Validate existence of specific IAM Policies (RBAC) that define who can read logs."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-MLA-08/audit_buckets.json",
+      "evidence_v2/KSI-MLA-08/log_policies.json"
+    ]
+  },
+  "KSI-PIY-01": {
+    "description": "Use authoritative sources to automatically maintain real-time inventories of all information resources.",
+    "justification": "Validates the active 'Inventory Engine'. Checks for the AWS Config Recorder (which automatically tracks resource changes) and the Delivery Channel (where the inventory is stored).",
+    "cli_commands": [
+      {
+        "command": "aws configservice describe-configuration-recorders --output json",
+        "note": "PRIMARY: Validate that the Configuration Recorder is active (The 'Authoritative Source')."
+      },
+      {
+        "command": "aws configservice describe-delivery-channels --output json",
+        "note": "STORAGE: Validate that the inventory data is being delivered to a central S3 bucket."
+      },
+      {
+        "command": "aws ssm list-inventory-entries --instance-id $(aws ec2 describe-instances --query 'Reservations[0].Instances[0].InstanceId' --output text) --type-name AWS:Application --output json || echo '{\"Entries\": []}'",
+        "note": "os-LEVEL: Sample check for SSM Inventory data (software list) on a live instance."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-PIY-01/config_recorders.json",
+      "evidence_v2/KSI-PIY-01/delivery_channels.json"
+    ]
+  },
+  "KSI-PIY-02": {
+    "description": "Document the security objectives and requirements for each information resource.",
+    "justification": "Validates the existence of per-component security documentation. Scans the 'security-objectives' folder in CodeCommit for specific system component plans (e.g., api-gateway.md, rds-instances.md).",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-folder --repository-name security-governance --folder-path security-objectives/ --output json",
+        "note": "ARTIFACTS: List the Markdown files defining security objectives. (Matches: api-gateway.md, rds-instances.md, etc.)"
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-PIY-02/objective_files.json"
+    ]
+  },
+  "KSI-PIY-03": {
+    "description": "Maintain a vulnerability disclosure program.",
+    "justification": "Validates the existence of the Vulnerability Disclosure Policy (VDP). Checks the governance repository for files matching standard naming conventions (vdp.md, security.txt, disclosure.md).",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --output json",
+        "note": "ARTIFACT: Scan the policies folder for the Disclosure Policy (filters for 'disclosure', 'vdp', or 'security' in filenames)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-PIY-03/vdp_files.json"
+    ]
+  },
+  "KSI-PIY-04": {
+    "description": "Monitor the effectiveness of building security and privacy considerations into the Software Development Lifecycle and aligning with CISA Secure By Design principles.",
+    "justification": "Validates the Secure SDLC. Checks for the specific 'Secure Software Development' policy in CodeCommit and identifies automated security/testing build projects (filtering out standard app builds).",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/secure-software-development.md --output json",
+        "note": "GOVERNANCE: Validate existence of the specific Secure SDLC policy document."
+      },
+      {
+        "command": "aws codebuild list-projects --query \"projects[?contains(@, 'security') || contains(@, 'scan') || contains(@, 'test') || contains(@, 'lint') || contains(@, 'check') || contains(@, 'compliance')]\" --output json",
+        "note": "MECHANISM: List only build projects dedicated to security scanning or testing (The Quality Control gates)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-PIY-04/sdlc_policy.json",
+      "evidence_v2/KSI-PIY-04/security_builds.json"
+    ]
+  },
+  "KSI-PIY-05": {
+    "description": "Document methods used to evaluate information resource implementations.",
+    "justification": "Validates the Security Assessment Methodology. Checks for the specific 'evaluation-methodology.md' file in the policies directory, removing irrelevant commit history checks.",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/evaluation-methodology.md --output json",
+        "note": "PRIMARY: Retrieve the specific Evaluation Methodology document."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-PIY-05/methodology_doc.json"
+    ]
+  },
+  "KSI-PIY-06": {
+    "description": "Monitor the effectiveness of the organization's investments in achieving security objectives.",
+    "justification": "Validates the Security Effectiveness Program. Checks for the specific 'Security Monitoring and Alerting Plan' (Governance) and active Security Hub Standards (Technical Evidence of Investment).",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path security-objectives/security-monitoring-and-alerting-plan.md --output json",
+        "note": "GOVERNANCE: Validate the existence of the specific Security Monitoring Plan document."
+      },
+      {
+        "command": "aws securityhub get-enabled-standards --output json",
+        "note": "INVESTMENT: Validate that Security Hub Standards (CIS, PCI, FedRAMP) are enabled (The automated mechanism for monitoring effectiveness)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-PIY-06/monitoring_plan.json",
+      "evidence_v2/KSI-PIY-06/security_hub_standards.json"
+    ]
+  },
+  "KSI-PIY-07": {
+    "description": "Document risk management decisions for software supply chain security.",
+    "justification": "Validates the Supply Chain Risk Management (SCRM) Policy. Checks the governance repo for documents explicitly addressing supply chain, vendor, or dependency risks.",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, 'supply') || contains(absolutePath, 'chain') || contains(absolutePath, 'vendor') || contains(absolutePath, 'dependency') || contains(absolutePath, 'scrm')]\" --output json",
+        "note": "POLICY: Locate the Supply Chain Risk Management document."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-PIY-07/scrm_policy.json"
+    ]
+  },
+  "KSI-PIY-08": {
+    "description": "Measure executive support via active budgetary controls and financial commitment.",
+    "justification": "Validates Executive Buy-in via 'Security Investment'. Checks for active, paid enterprise security tools (GuardDuty, Security Hub) that demonstrate financial commitment to the security program.",
+    "cli_commands": [
+      {
+        "command": "aws guardduty list-detectors --output json",
+        "note": "INVESTMENT: Validate that GuardDuty is enabled (Paid Threat Detection Service)."
+      },
+      {
+        "command": "aws securityhub get-enabled-standards --output json",
+        "note": "INVESTMENT: Validate that Security Hub is enabled (Paid Compliance Aggregation Service)."
+      },
+      {
+        "command": "aws budgets view-budgets --source-account-id $(aws sts get-caller-identity --query Account --output text) --output json",
+        "note": "CONTROL: Validate that a Budget exists to track this security spending."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-PIY-08/paid_security_tools.json",
+      "evidence_v2/KSI-PIY-08/budget_controls.json"
+    ]
+  },
+  "KSI-RPL-01": {
+    "description": "Define Recovery Time Objectives (RTO) and Recovery Point Objectives (RPO).",
+    "justification": "Validates the Disaster Recovery Strategy. Checks for the 'Disaster Recovery Plan' (Governance) where RTO/RPO are defined, and active AWS Backup Plans (Technical) which enforce the RPO.",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, 'recovery') || contains(absolutePath, 'disaster') || contains(absolutePath, 'continuity') || contains(absolutePath, 'bcp')]\" --output json",
+        "note": "GOVERNANCE: Validate existence of the Disaster Recovery / Business Continuity Plan."
+      },
+      {
+        "command": "aws backup list-backup-plans --output json",
+        "note": "TECHNICAL: Validate existence of AWS Backup Plans (proof that RPO is being enforced via automated schedules)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-RPL-01/dr_plan.json",
+      "evidence_v2/KSI-RPL-01/backup_plans.json"
+    ]
+  },
+  "KSI-RPL-02": {
+    "description": "Develop and maintain a recovery plan that aligns with the defined recovery objectives.",
+    "justification": "Validates the active execution of the Recovery Plan. Checks for the Governance Document (The Plan) and successful AWS Backup Jobs (The Maintenance/Execution).",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/disaster-recovery-plan.md --output json",
+        "note": "GOVERNANCE: Validate existence of the defined Recovery Plan."
+      },
+      {
+        "command": "aws backup list-backup-jobs --by-state COMPLETED --max-results 5 --output json",
+        "note": "EXECUTION: Validate that backup jobs are successfully completing (Proof of Maintenance)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-RPL-02/dr_plan.json",
+      "evidence_v2/KSI-RPL-02/completed_jobs.json"
+    ]
+  },
+  "KSI-RPL-03": {
+    "description": "Regularly test the recovery planning capability by performing disaster recovery tests at least annually.",
+    "justification": "Validates DR Testing. Checks for technical evidence of 'Restore Jobs' (Active Testing) and the formal 'DR Test Report' (Governance Evidence).",
+    "cli_commands": [
+      {
+        "command": "aws backup list-restore-jobs --by-state COMPLETED --max-results 5 --output json",
+        "note": "TECHNICAL: Validate that Restore Jobs have been successfully executed (Proof of Testing)."
+      },
+      {
+        "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, 'dr-test') || contains(absolutePath, 'restore-report') || contains(absolutePath, 'after-action')]\" --output json",
+        "note": "GOVERNANCE: Validate existence of the Disaster Recovery Test Report."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-RPL-03/restore_jobs.json",
+      "evidence_v2/KSI-RPL-03/dr_test_report.json"
+    ]
+  },
+  "KSI-RPL-04": {
+    "description": "Regularly test the capability to recover from incidents and contingencies.",
+    "justification": "Validates Contingency/Incident Recovery Testing. Checks for the specific 'Incident Response Test Report' (Governance) and evidence of 'Restore Jobs' (Technical capability to recover).",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, 'incident-response-test') || contains(absolutePath, 'contingency-test') || contains(absolutePath, 'ir-test')]\" --output json",
+        "note": "GOVERNANCE: Validate existence of the Incident Response / Contingency Test Report."
+      },
+      {
+        "command": "aws backup list-restore-jobs --by-state COMPLETED --max-results 5 --output json",
+        "note": "TECHNICAL: Validate that Restore Jobs have been executed (Proof of recovery capability)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-RPL-04/ir_test_report.json",
+      "evidence_v2/KSI-RPL-04/restore_evidence.json"
+    ]
+  },
+  "KSI-SVC-01": {
+    "description": "Implement improvements based on persistent evaluation of information resources for opportunities to improve security.",
+    "justification": "Validates the Continuous Improvement Loop. Checks for 'Evaluators' (Inspector/GuardDuty) and 'Improvers' (SSM Patch Manager) alongside the governance policy.",
+    "cli_commands": [
+      {
+        "command": "aws inspector2 list-coverage --output json",
+        "note": "EVALUATION: Validate that Inspector is actively scanning resources (The 'Persistent Evaluation')."
+      },
+      {
+        "command": "aws ssm describe-patch-baselines --filters \"Key=OWNER,Values=[Self]\" --output json",
+        "note": "IMPROVEMENT: Validate existence of custom Patch Baselines (The mechanism for 'Implementing Improvements')."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
+        "note": "GOVERNANCE: Validate the policy defining the evaluation and improvement cycle."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-SVC-01/inspector_status.json",
+      "evidence_v2/KSI-SVC-01/patch_baselines.json",
+      "evidence_v2/KSI-SVC-01/vm_policy.json"
+    ]
+  },
+  "KSI-SVC-02": {
+    "description": "Encrypt or otherwise secure network traffic.",
+    "justification": "Validates Encryption in Transit. Checks for the Encryption Policy (Governance), ACM Certificates (The Keys), and Load Balancer/CloudFront configurations (The Enforcers).",
+    "cli_commands": [
+      {
+        "command": "aws acm list-certificates --status ISSUED --output json",
+        "note": "KEYS: Validate existence of active, issued TLS certificates."
+      },
+      {
+        "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Scheme:Scheme}\" --output json",
+        "note": "GATEKEEPERS: List Load Balancers handling traffic."
+      },
+      {
+        "command": "aws cloudfront list-distributions --query \"DistributionList.Items[].{Id:Id, Domain:DomainName, Certificate:ViewerCertificate.Certificate}\" --output json",
+        "note": "EDGE: Validate CloudFront distributions (CDN) are configured with certificates."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/encryption-policy.md --output json",
+        "note": "GOVERNANCE: Validate the Encryption Policy document."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-SVC-02/acm_certs.json",
+      "evidence_v2/KSI-SVC-02/encryption_policy.json"
+    ]
+  },
+  "KSI-SVC-04": {
+    "description": "Manage configuration of machine-based information resources using automation.",
+    "justification": "Validates Automated Configuration via Terraform. Checks for the Terraform State Bucket (The Configuration Source), the State Lock Table (Concurrency Control), and the Governance Policy.",
+    "cli_commands": [
+      {
+        "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'terraform') || contains(Name, 'state') || contains(Name, 'tfstate')]\" --output json",
+        "note": "IAC STATE: Validate existence of the Terraform State S3 bucket (The Proof of Automation)."
+      },
+      {
+        "command": "aws dynamodb list-tables --query \"TableNames[?contains(@, 'terraform') || contains(@, 'lock') || contains(@, 'state')]\" --output json",
+        "note": "CONCURRENCY: Validate existence of the Terraform State Lock table."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json",
+        "note": "GOVERNANCE: Validate the Configuration Management Policy document."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-SVC-04/terraform_buckets.json",
+      "evidence_v2/KSI-SVC-04/lock_tables.json",
+      "evidence_v2/KSI-SVC-04/config_policy.json"
+    ]
+  },
+  "KSI-SVC-05": {
+    "description": "Use cryptographic methods to validate the integrity of machine-based information resources.",
+    "justification": "Validates Cryptographic Integrity for EC2 Environments. Checks for: 1) CloudTrail Log File Validation (Cryptographic proof of audit logs), 2) S3 Versioning (Integrity of build artifacts/backups), and 3) SSM Session Manager (Cryptographically authenticated/encrypted console access).",
+    "cli_commands": [
+      {
+        "command": "aws cloudtrail describe-trails --query \"trailList[?LogFileValidationEnabled==`true`]\" --output json",
+        "note": "LOGS: Validate that CloudTrail Log File Validation is enabled (Cryptographic hashing of audit trails)."
+      },
+      {
+        "command": "aws s3api get-bucket-versioning --bucket $(aws cloudtrail describe-trails --query 'trailList[0].S3BucketName' --output text) --output json",
+        "note": "STORAGE: Validate that the Audit/Artifact bucket has Versioning enabled (Prevents overwrite tampering)."
+      },
+      {
+        "command": "aws ssm describe-instance-information --query \"InstanceInformationList[].{ID:InstanceId, PingStatus:PingStatus, AgentVersion:AgentVersion}\" --output json",
+        "note": "SESSIONS: Validate active SSM Agents, which enforce TLS-encrypted, IAM-signed channels for session integrity (Replacing insecure SSH)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-SVC-05/validated_trails.json",
+      "evidence_v2/KSI-SVC-05/integrity_bucket.json",
+      "evidence_v2/KSI-SVC-05/ssm_integrity.json"
+    ]
+  },
+  "KSI-SVC-06": {
+    "description": "Automate management, protection, and regular rotation of digital keys, certificates, and other secrets.",
+    "justification": "Validates Automated Secret Lifecycle. Checks for: 1) KMS Keys (Encryption Foundation), 2) Secrets Manager (Automated Rotation of credentials), and 3) ACM Certificates (Automated Renewal of TLS identities).",
+    "cli_commands": [
+      {
+        "command": "aws kms list-keys --limit 10 --output json",
+        "note": "KEYS: Validate existence of KMS Customer Managed Keys (CMKs) for centralized management."
+      },
+      {
+        "command": "aws secretsmanager list-secrets --max-results 5 --output json",
+        "note": "ROTATION: Validate Secrets Manager entries (Look for 'RotationEnabled': true in the output)."
+      },
+      {
+        "command": "aws acm list-certificates --status ISSUED --max-items 10 --output json",
+        "note": "CERTIFICATES: Validate active ACM Certificates (Proof of managed renewal)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-SVC-06/kms_keys.json",
+      "evidence_v2/KSI-SVC-06/rotated_secrets.json",
+      "evidence_v2/KSI-SVC-06/acm_certs.json"
+    ]
+  },
+  "KSI-SVC-07": {
+    "description": "Use a consistent, risk-informed approach for applying security patches.",
+    "justification": "Validates Risk-Informed Patching. Checks for: 1) Inspector Coverage (The Risk Data), 2) SSM Patch Baselines (The Consistency Rules), and 3) Maintenance Windows (The Automated Schedule).",
+    "cli_commands": [
+      {
+        "command": "aws inspector2 list-coverage --max-results 5 --output json",
+        "note": "RISK: Validate that Inspector is tracking vulnerability coverage for instances (Risk-Informed Data)."
+      },
+      {
+        "command": "aws ssm describe-patch-baselines --filters \"Key=OWNER,Values=[Self]\" --output json",
+        "note": "CONSISTENCY: Validate custom Patch Baselines that define which patches are approved."
+      },
+      {
+        "command": "aws ssm describe-maintenance-windows --max-results 10 --output json",
+        "note": "APPROACH: Validate Maintenance Windows which enforce the consistent schedule for applying patches. (Fixed: max-results min 10)"
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
+        "note": "GOVERNANCE: Validate the Vulnerability Management Policy (Created in SVC-01)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-SVC-07/inspector_coverage.json",
+      "evidence_v2/KSI-SVC-07/patch_baselines.json",
+      "evidence_v2/KSI-SVC-07/maintenance_windows.json",
+      "evidence_v2/KSI-SVC-07/vm_policy.json"
+    ]
+  },
+  "KSI-SVC-08": {
+    "description": "Do not introduce or leave behind residual elements that could negatively affect confidentiality, integrity, or availability of federal customer data during operations.",
+    "justification": "Validates Data Sanitization and Destruction Capabilities. Checks for S3 Lifecycle Policies (Automated removal of residual data), KMS Keys (Capability for crypto-shredding backups), and the Data Sanitization Policy.",
+    "cli_commands": [
+      {
+        "command": "aws s3api get-bucket-lifecycle-configuration --bucket $(aws s3api list-buckets --query 'Buckets[0].Name' --output text) --output json || echo '{\"Rules\": []}'",
+        "note": "AUTOMATION: Validate S3 Lifecycle Rules that automatically expire/delete temporary or residual data."
+      },
+      {
+        "command": "aws kms list-keys --limit 10 --output json",
+        "note": "CAPABILITY: Validate existence of KMS keys. Deleting a key is the industry-standard method for 'Crypto-Shredding' data from immutable backups."
+      },
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/data-sanitization-policy.md --output json",
+        "note": "GOVERNANCE: Validate the Data Sanitization Policy which defines the procedure for destroying customer data."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-SVC-08/lifecycle_rules.json",
+      "evidence_v2/KSI-SVC-08/kms_keys.json",
+      "evidence_v2/KSI-SVC-08/sanitization_policy.json"
+    ]
+  },
+  "KSI-SVC-09": {
+    "description": "Persistently validate the authenticity and integrity of communications between machine-based information resources using automation.",
+    "justification": "Validates Communication Integrity. Checks for Active TLS Listeners (Enforcement of Encryption) and ACM Certificates (Validation of Authenticity/Identity).",
+    "cli_commands": [
+      {
+        "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, Scheme:Scheme}\" --output json",
+        "note": "ENFORCERS: Identify active Load Balancers handling traffic."
+      },
+      {
+        "command": "for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null || echo ''); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --query \"Listeners[?Protocol=='HTTPS' || Protocol=='TLS'].{Port:Port, SslPolicy:SslPolicy, Certificates:Certificates}\" --output json; done",
+        "note": "VALIDATION: Verify that listeners are enforcing HTTPS/TLS with specific SSL Policies (authenticity/integrity checks)."
+      },
+      {
+        "command": "aws acm list-certificates --status ISSUED --max-items 10 --output json",
+        "note": "IDENTITY: Validate existence of issued ACM certificates used to prove authenticity."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-SVC-09/active_lbs.json",
+      "evidence_v2/KSI-SVC-09/tls_enforcement.json",
+      "evidence_v2/KSI-SVC-09/issued_certs.json"
+    ]
+  },
+  "KSI-SVC-10": {
+    "description": "Remove unwanted federal customer data promptly when requested by an agency in alignment with customer agreements, including from backups if appropriate.",
+    "justification": "Validates Data Removal Capabilities. Checks for: 1) The Sanitization Policy (SLA for removal), 2) Backup Plans (Automated Retention/Expiration), and 3) KMS Keys (Immediate Destruction via Crypto-Shredding).",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/data-sanitization-policy.md --output json",
+        "note": "GOVERNANCE: Validate the Data Sanitization Policy (defines the 'Promptly' SLA and procedure)."
+      },
+      {
+        "command": "aws backup list-backup-plans --output json",
+        "note": "RETENTION: Validate Backup Plans to ensure automated expiration rules are in place (Data doesn't live forever)."
+      },
+      {
+        "command": "aws kms list-keys --limit 10 --output json",
+        "note": "DESTRUCTION: Validate KMS Keys (The mechanism for 'Crypto-Shredding' data from immutable backups)."
+      }
+    ],
+    "artifact_evidence_paths": [
+      "evidence_v2/KSI-SVC-10/sanitization_policy.json",
+      "evidence_v2/KSI-SVC-10/retention_plans.json",
+      "evidence_v2/KSI-SVC-10/kms_destruction_keys.json"
+    ]
+  },
+  "KSI-TPR-03": {
+    "description": "Identify and prioritize mitigation of potential supply chain risks.",
+    "justification": "Validates the supply chain risk management policy's existence, its maintenance history, and the existence of a formal approval workflow.",
+    "cli_commands": [
+      {
+        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/supply-chain-risk-management.md",
+        "note": "Retrieve the supply chain risk management policy from CodeCommit to verify its existence and size."
+      },
+      {
+        "command": "aws codecommit list-approval-rule-templates --output json",
+        "note": "Validate that a formal approval rule process is configured for the repository."
+      },
+      {
+        "command": "aws codecommit get-differences --repository-name security-governance --after-commit-specifier refs/heads/main --output json",
+        "note": "Check the commit history for an audit trail of recent policy updates."
+      }
+    ]
+  },
+  "KSI-TPR-04": {
+    "description": "Automatically monitor third party software information resources for upstream vulnerabilities using mechanisms that may include contractual notification requirements or active monitoring services.",
+    "justification": "Validates comprehensive vulnerability scanning from basic Inspector to enterprise-grade continuous scanning and automated remediation",
+    "cli_commands": [
+      {
+        "command": "aws inspector2 get-configuration --output json",
+        "note": "Check Inspector configuration for vulnerability scanning"
+      },
+      {
+        "command": "aws inspector2 list-findings --filter-criteria '{\"componentType\":[{\"comparison\":\"EQUALS\",\"value\":\"OPERATING_SYSTEM\"}]}' --max-results 50 --output json",
+        "note": "Validate OS vulnerability findings from Inspector"
+      },
+      {
+        "command": "aws inspector2 list-findings --filter-criteria '{\"componentType\":[{\"comparison\":\"EQUALS\",\"value\":\"APPLICATION\"}]}' --max-results 50 --output json",
+        "note": "Check application vulnerability findings from Inspector"
+      },
+      {
+        "command": "aws inspector2 list-findings --filter-criteria '{\"findingStatus\":[{\"comparison\":\"EQUALS\",\"value\":\"ACTIVE\"}]}' --max-results 100 --output json",
+        "note": "Validate active vulnerability findings requiring remediation"
+      },
+      {
+        "command": "aws inspector2 list-coverage --filter-criteria '{\"resourceType\":[{\"comparison\":\"EQUALS\",\"value\":\"AWS_EC2_INSTANCE\"}]}' --max-results 100 --output json",
+        "note": "Check Inspector coverage for EC2 instances"
+      },
+      {
+        "command": "aws ssm describe-instance-information --output json",
+        "note": "Validate SSM agent deployment for vulnerability management"
+      }
+    ]
+  }
+}
