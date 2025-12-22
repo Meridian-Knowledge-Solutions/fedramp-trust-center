@@ -444,7 +444,7 @@
         "note": "ATTACK SURFACE: Validate the existence of Private Subnets (where Public IP mapping is disabled)."
       },
       {
-        "command": "aws ec2 describe-security-groups --filters Name=ip-permission.user-id-group-pair.group-id,Values=* --max-items 5 --output json",
+        "command": "aws ec2 describe-security-groups --max-items 20 --output json",
         "note": "LATERAL MOVEMENT: Validate Security Groups that allow access ONLY from other specific Security Groups (Tiered Security), rather than broad IP ranges."
       },
       {
@@ -521,7 +521,7 @@
         "note": "DNS RESILIENCE: Validate Route53 usage (AWS AnyCast network provides DNS flood protection)."
       },
       {
-        "command": "aws sesv2 list-email-identities --max-items 5 --output json",
+        "command": "aws ses list-identities --max-items 5 --output json",
         "note": "SPOOFING: Validate SES Identities. If email is sent, this checks for authorized identities (DKIM/SPF managed)."
       }
     ],
@@ -729,7 +729,7 @@
         "note": "SENSOR: Validate that the Threat Detection sensor is active."
       },
       {
-        "command": "aws events list-rules --query \"Rules[?contains(EventPattern, 'GuardDuty')]\" --output json",
+        "command": "aws events list-rules --name-prefix GuardDuty --output json",
         "note": "BRAIN: Validate existence of EventBridge rules that listen for GuardDuty signals (evidence of automated response logic)."
       }
     ],
@@ -1029,7 +1029,7 @@
         "note": "INVESTMENT: Validate that Security Hub is enabled (Paid Compliance Aggregation Service)."
       },
       {
-        "command": "aws budgets view-budgets --source-account-id $(aws sts get-caller-identity --query Account --output text) --output json",
+        "command": "aws budgets describe-budgets --account-id $(aws sts get-caller-identity --query Account --output text) --output json",
         "note": "CONTROL: Validate that a Budget exists to track this security spending."
       }
     ],
@@ -1079,7 +1079,7 @@
     "justification": "Validates DR Testing. Checks for technical evidence of 'Restore Jobs' (Active Testing) and the formal 'DR Test Report' (Governance Evidence).",
     "cli_commands": [
       {
-        "command": "aws backup list-restore-jobs --by-state COMPLETED --max-results 5 --output json",
+        "command": "aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json",
         "note": "TECHNICAL: Validate that Restore Jobs have been successfully executed (Proof of Testing)."
       },
       {
@@ -1101,7 +1101,7 @@
         "note": "GOVERNANCE: Validate existence of the Incident Response / Contingency Test Report."
       },
       {
-        "command": "aws backup list-restore-jobs --by-state COMPLETED --max-results 5 --output json",
+        "command": "aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json",
         "note": "TECHNICAL: Validate that Restore Jobs have been executed (Proof of recovery capability)."
       }
     ],
@@ -1138,7 +1138,7 @@
     "justification": "Validates Encryption in Transit. Checks for the Encryption Policy (Governance), ACM Certificates (The Keys), and Load Balancer/CloudFront configurations (The Enforcers).",
     "cli_commands": [
       {
-        "command": "aws acm list-certificates --status ISSUED --output json",
+        "command": "aws acm list-certificates --certificate-statuses ISSUED --output json",
         "note": "KEYS: Validate existence of active, issued TLS certificates."
       },
       {
@@ -1187,7 +1187,7 @@
     "justification": "Validates Cryptographic Integrity for EC2 Environments. Checks for: 1) CloudTrail Log File Validation (Cryptographic proof of audit logs), 2) S3 Versioning (Integrity of build artifacts/backups), and 3) SSM Session Manager (Cryptographically authenticated/encrypted console access).",
     "cli_commands": [
       {
-        "command": "aws cloudtrail describe-trails --query \"trailList[?LogFileValidationEnabled==`true`]\" --output json",
+        "command": "aws cloudtrail describe-trails --query \"trailList[?LogFileValidationEnabled==true]\" --output json",
         "note": "LOGS: Validate that CloudTrail Log File Validation is enabled (Cryptographic hashing of audit trails)."
       },
       {
@@ -1218,7 +1218,7 @@
         "note": "ROTATION: Validate Secrets Manager entries (Look for 'RotationEnabled': true in the output)."
       },
       {
-        "command": "aws acm list-certificates --status ISSUED --max-items 10 --output json",
+        "command": "aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json",
         "note": "CERTIFICATES: Validate active ACM Certificates (Proof of managed renewal)."
       }
     ],
@@ -1292,7 +1292,7 @@
         "note": "VALIDATION: Verify that listeners are enforcing HTTPS/TLS with specific SSL Policies (authenticity/integrity checks)."
       },
       {
-        "command": "aws acm list-certificates --status ISSUED --max-items 10 --output json",
+        "command": "aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json",
         "note": "IDENTITY: Validate existence of issued ACM certificates used to prove authenticity."
       }
     ],
