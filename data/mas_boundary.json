@@ -1,9 +1,9 @@
 {
   "meta": {
-    "generated_at": "2025-12-23T16:23:10.438231Z",
+    "generated_at": "2025-12-23T20:21:37.500008Z",
     "compliance_ver": "FedRAMP Rev 5",
     "scope": "PUBLIC_SAFE",
-    "drift_fingerprint": "N/A"
+    "source": "generate_live_mas.py"
   },
   "zones": {
     "1_entry_point": {
@@ -225,7 +225,7 @@
   "data_flows": {
     "entry": {
       "title": "Ingress & Authentication",
-      "description": "Traffic enters via ALB (LMS) or API Gateway (Trust Center).",
+      "description": "Traffic enters via ALB (LMS) or API Gateway (Trust Center). Authenticated via Okta (LMS) or JWT (Trust Center).",
       "encryption": "TLS 1.2+ (FIPS 140-2)",
       "pii_collected": [
         "PIV/CAC Credentials",
@@ -242,11 +242,12 @@
     },
     "processing": {
       "title": "Processing & Logic",
-      "description": "LMS logic processes on EC2; Trust Center logic on Lambda.",
+      "description": "LMS logic processes on EC2 instances; Trust Center logic executes on ephemeral Lambda functions.",
       "encryption": "In-transit (TLS 1.3)",
       "pii_collected": [
         "Session Tokens",
-        "Training Progress"
+        "Training Progress",
+        "Assessment Scores"
       ],
       "protocols": [
         "gRPC",
@@ -256,10 +257,11 @@
     },
     "storage": {
       "title": "Persisted Storage",
-      "description": "LMS uses RDS/FSx. Trust Center uses S3.",
+      "description": "LMS uses RDS/FSx for relational/file data. Trust Center uses S3 for artifacts. All encrypted at rest.",
       "encryption": "AES-256 (AWS KMS)",
       "pii_collected": [
         "Full User Profile",
+        "Training History",
         "Employee ID"
       ],
       "retention": "7 Years (NARA GRS 6.1)",
@@ -267,11 +269,12 @@
     },
     "dissemination": {
       "title": "Reporting & Egress",
-      "description": "Data leaves via secure reports or downloads.",
+      "description": "Data leaves via secure reports (LMS) or pre-signed artifact downloads (Trust Center).",
       "encryption": "PGP (SFTP) / TLS (Stream)",
       "pii_shared": [
-        "Certificates",
-        "Audit Logs"
+        "Completion Certificates",
+        "Audit Logs",
+        "Compliance Reports"
       ],
       "protocols": [
         "SFTP",
@@ -285,28 +288,95 @@
       "provider": "Skillsoft Percipio",
       "category": "Content Library",
       "status": "FedRAMP Authorized",
-      "risk": "Low",
-      "data_flow": "Ingress (xAPI)"
+      "connection_type": "xAPI",
+      "risk": "low",
+      "pii_shared": [
+        "Email",
+        "First Name",
+        "Last Name"
+      ],
+      "auth_method": "SAML 2.0 (SSO)"
     },
     {
-      "provider": "Zoom / Teams",
+      "provider": "LinkedIn Learning",
+      "category": "Content Library",
+      "status": "Commercial",
+      "connection_type": "xAPI",
+      "risk": "high",
+      "pii_shared": [
+        "Email",
+        "First Name",
+        "Last Name"
+      ],
+      "auth_method": "SAML 2.0 (SSO)"
+    },
+    {
+      "provider": "OpenSesame",
+      "category": "Content Library",
+      "status": "Commercial",
+      "connection_type": "SCORM 1.2",
+      "risk": "high",
+      "pii_shared": [
+        "First Name",
+        "Last Name",
+        "User GUID"
+      ],
+      "auth_method": "Direct Launch"
+    },
+    {
+      "provider": "DominKnow",
+      "category": "Authoring Tool",
+      "status": "Commercial",
+      "connection_type": "SCORM (Ingress)",
+      "risk": "high",
+      "pii_shared": [
+        "First Name",
+        "Last Name",
+        "User GUID"
+      ],
+      "auth_method": "Direct Launch"
+    },
+    {
+      "provider": "Microsoft Teams",
       "category": "Virtual Meeting",
       "status": "Commercial",
-      "risk": "Medium",
-      "data_flow": "Bi-Directional"
+      "connection_type": "Graph API",
+      "risk": "medium",
+      "pii_shared": [
+        "Email",
+        "Display Name"
+      ],
+      "auth_method": "OAuth 2.0"
+    },
+    {
+      "provider": "Zoom",
+      "category": "Virtual Meeting",
+      "status": "Commercial",
+      "connection_type": "REST API",
+      "risk": "medium",
+      "pii_shared": [
+        "Email",
+        "Display Name"
+      ],
+      "auth_method": "JWT / OAuth"
     },
     {
       "provider": "FedRAMP Trust Center",
-      "category": "Compliance Reporting",
+      "category": "Compliance Data",
       "status": "FRR-ADS-TC-01",
-      "risk": "Low",
-      "data_flow": "Egress (API)"
+      "connection_type": "REST API",
+      "risk": "low",
+      "pii_shared": [
+        "Agency Contact Name",
+        "Agency Email"
+      ],
+      "auth_method": "JWT Token"
     }
   ],
   "risk_profile": {
     "low": 2,
-    "medium": 1,
-    "high": 0
+    "medium": 2,
+    "high": 3
   },
   "pii_inventory": [
     "Session Tokens",
