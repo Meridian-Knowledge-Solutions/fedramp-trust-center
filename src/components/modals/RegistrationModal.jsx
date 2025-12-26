@@ -8,7 +8,7 @@ export const RegistrationModal = () => {
   const { modals, closeModal } = useModal();
   const { login } = useAuth();
   const { isOpen } = modals.registration;
-  
+
   const [formData, setFormData] = useState({
     email: '',
     agency: '',
@@ -36,7 +36,7 @@ export const RegistrationModal = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     const newErrors = {};
     if (!formData.email) {
@@ -62,10 +62,10 @@ export const RegistrationModal = () => {
     try {
       // Simulate API call (replace with actual registration API)
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       // For demo: auto-login
       login(formData.email, formData.agency);
-      
+
       setSubmitStatus({
         type: 'success',
         message: `Registration successful! Welcome, ${formData.agency}.`
@@ -100,16 +100,19 @@ export const RegistrationModal = () => {
       onClose={handleClose}
       title="🇺🇸 Request Federal Agency Access"
       size="large"
+      variant="dark"
     >
       <div className="mb-6">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-          <Shield className="text-blue-600 flex-shrink-0 mt-1" size={20} />
+        <div className="bg-gradient-to-br from-blue-900/30 to-blue-800/30 border border-blue-500/30 rounded-xl p-5 flex items-start gap-3 shadow-lg">
+          <div className="p-2 bg-blue-500/20 rounded-lg border border-blue-500/30 flex-shrink-0">
+            <Shield className="text-blue-400" size={20} />
+          </div>
           <div className="text-sm">
-            <p className="text-blue-900 font-medium mb-1">
+            <p className="text-white font-bold mb-2">
               Federal Agency Personnel Only
             </p>
-            <p className="text-blue-700">
-              Access to detailed technical validation findings and authorization package materials 
+            <p className="text-gray-300 leading-relaxed">
+              Access to detailed technical validation findings and authorization package materials
               is restricted to authorized federal personnel with valid .gov or .mil email addresses.
             </p>
           </div>
@@ -119,8 +122,8 @@ export const RegistrationModal = () => {
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Email */}
         <div>
-          <label htmlFor="email" className="block text-sm font-bold text-slate-700 mb-2">
-            <Mail size={14} className="inline mr-1" />
+          <label htmlFor="email" className="block text-sm font-bold text-white mb-2">
+            <Mail size={14} className="inline mr-1 text-blue-400" />
             Official Email Address *
           </label>
           <input
@@ -130,22 +133,23 @@ export const RegistrationModal = () => {
             value={formData.email}
             onChange={handleChange}
             placeholder="e.g., john.smith@agency.gov"
-            className={`w-full px-4 py-2 border ${errors.email ? 'border-red-300' : 'border-slate-300'} rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+            className={`w-full px-4 py-3 bg-gray-900 border ${errors.email ? 'border-red-500/50' : 'border-gray-700'
+              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all`}
             required
           />
           {errors.email && (
-            <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+            <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
               <AlertCircle size={12} />
               {errors.email}
             </p>
           )}
-          <p className="text-xs text-slate-500 mt-1">Must be a .gov or .mil email address</p>
+          <p className="text-xs text-gray-500 mt-1.5">Must be a .gov or .mil email address</p>
         </div>
 
         {/* Agency */}
         <div>
-          <label htmlFor="agency" className="block text-sm font-bold text-slate-700 mb-2">
-            <Shield size={14} className="inline mr-1" />
+          <label htmlFor="agency" className="block text-sm font-bold text-white mb-2">
+            <Shield size={14} className="inline mr-1 text-blue-400" />
             Agency/Organization Name *
           </label>
           <input
@@ -155,11 +159,12 @@ export const RegistrationModal = () => {
             value={formData.agency}
             onChange={handleChange}
             placeholder="e.g., Department of Defense"
-            className={`w-full px-4 py-2 border ${errors.agency ? 'border-red-300' : 'border-slate-300'} rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+            className={`w-full px-4 py-3 bg-gray-900 border ${errors.agency ? 'border-red-500/50' : 'border-gray-700'
+              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all`}
             required
           />
           {errors.agency && (
-            <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+            <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
               <AlertCircle size={12} />
               {errors.agency}
             </p>
@@ -168,8 +173,8 @@ export const RegistrationModal = () => {
 
         {/* Contact Name */}
         <div>
-          <label htmlFor="contact" className="block text-sm font-bold text-slate-700 mb-2">
-            <User size={14} className="inline mr-1" />
+          <label htmlFor="contact" className="block text-sm font-bold text-white mb-2">
+            <User size={14} className="inline mr-1 text-blue-400" />
             Contact Name *
           </label>
           <input
@@ -179,11 +184,12 @@ export const RegistrationModal = () => {
             value={formData.contact}
             onChange={handleChange}
             placeholder="e.g., John Smith"
-            className={`w-full px-4 py-2 border ${errors.contact ? 'border-red-300' : 'border-slate-300'} rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+            className={`w-full px-4 py-3 bg-gray-900 border ${errors.contact ? 'border-red-500/50' : 'border-gray-700'
+              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all`}
             required
           />
           {errors.contact && (
-            <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+            <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
               <AlertCircle size={12} />
               {errors.contact}
             </p>
@@ -192,8 +198,8 @@ export const RegistrationModal = () => {
 
         {/* System Name (Optional) */}
         <div>
-          <label htmlFor="system" className="block text-sm font-bold text-slate-700 mb-2">
-            <FileText size={14} className="inline mr-1" />
+          <label htmlFor="system" className="block text-sm font-bold text-white mb-2">
+            <FileText size={14} className="inline mr-1 text-blue-400" />
             System/Project Name
           </label>
           <input
@@ -203,14 +209,14 @@ export const RegistrationModal = () => {
             value={formData.system}
             onChange={handleChange}
             placeholder="e.g., Agency Training Platform"
-            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all"
           />
-          <p className="text-xs text-slate-500 mt-1">Optional</p>
+          <p className="text-xs text-gray-500 mt-1.5">Optional</p>
         </div>
 
         {/* Purpose (Optional) */}
         <div>
-          <label htmlFor="purpose" className="block text-sm font-bold text-slate-700 mb-2">
+          <label htmlFor="purpose" className="block text-sm font-bold text-white mb-2">
             Access Purpose
           </label>
           <textarea
@@ -220,19 +226,18 @@ export const RegistrationModal = () => {
             onChange={handleChange}
             placeholder="e.g., Authorization review for new system deployment"
             rows={3}
-            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+            className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 resize-none transition-all"
           />
-          <p className="text-xs text-slate-500 mt-1">Optional</p>
+          <p className="text-xs text-gray-500 mt-1.5">Optional</p>
         </div>
 
         {/* Submit Status */}
         {submitStatus && (
-          <div className={`p-4 rounded-lg ${
-            submitStatus.type === 'success' 
-              ? 'bg-green-50 border border-green-200 text-green-700' 
-              : 'bg-red-50 border border-red-200 text-red-700'
-          }`}>
-            {submitStatus.message}
+          <div className={`p-4 rounded-lg border ${submitStatus.type === 'success'
+              ? 'bg-green-500/10 border-green-500/30 text-green-400'
+              : 'bg-red-500/10 border-red-500/30 text-red-400'
+            }`}>
+            <p className="font-medium">{submitStatus.message}</p>
           </div>
         )}
 
@@ -241,23 +246,27 @@ export const RegistrationModal = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors font-medium"
+            className="group relative flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 disabled:from-gray-700 disabled:to-gray-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-900/30 disabled:shadow-none disabled:cursor-not-allowed overflow-hidden"
           >
-            {isSubmitting ? 'Submitting...' : 'Register for Access'}
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+            <span className="relative flex items-center justify-center gap-2">
+              <Shield size={18} />
+              {isSubmitting ? 'Submitting...' : 'Register for Access'}
+            </span>
           </button>
           <button
             type="button"
             onClick={handleClose}
-            className="px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium"
+            className="px-6 py-4 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl font-medium transition-colors border border-gray-700"
           >
             Cancel
           </button>
         </div>
       </form>
 
-      <div className="mt-6 pt-6 border-t border-slate-200">
-        <p className="text-xs text-slate-500 text-center">
-          By registering, you acknowledge that access is restricted to federal personnel 
+      <div className="mt-6 pt-6 border-t border-gray-800">
+        <p className="text-xs text-gray-500 text-center leading-relaxed">
+          By registering, you acknowledge that access is restricted to federal personnel
           for official government use only.
         </p>
       </div>
