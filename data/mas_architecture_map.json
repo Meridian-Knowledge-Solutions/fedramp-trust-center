@@ -3,8 +3,7 @@
     "generated_at": "2025-12-26T18:08:07.798134+00:00Z",
     "compliance_ver": "FedRAMP Rev 5",
     "scope": "PUBLIC_SAFE",
-    "source": "generate_live_mas.py",
-    "note": "Sanitized for public consumption - no infrastructure identifiers"
+    "source": "generate_live_mas.py"
   },
   "zones": {
     "1_entry_point": {
@@ -290,37 +289,226 @@
       }
     ]
   },
+  "trust_center_stats": {
+    "api_count": 2,
+    "compute_count": 9,
+    "storage_count": 1
+  },
+  "system_profile": {
+    "system_name": "Meridian LMS for Government",
+    "authorization_boundary": "FedRAMP Moderate",
+    "description": "Hybrid architecture combining IaaS Core LMS with Serverless Trust Center.",
+    "lms_core": {
+      "presentation": {
+        "component": "Presentation Tier",
+        "tech": "EC2 (ASP.NET) + ALB",
+        "details": "Web UI, TLS 1.2+ Termination"
+      },
+      "logic": {
+        "component": "Logic Tier",
+        "tech": "EC2 Auto Scaling",
+        "details": "Business Rules, Messaging"
+      },
+      "data": {
+        "component": "Data Tier",
+        "tech": "RDS SQL Server + FSx",
+        "details": "Structured Data & Content"
+      },
+      "security": {
+        "component": "Security Tier",
+        "tech": "WAF + Shield + SG",
+        "details": "Traffic Inspection"
+      }
+    },
+    "trust_center": {
+      "frontend": {
+        "component": "Frontend (SPA)",
+        "tech": "React + GitHub Pages",
+        "details": "JWT Session Management"
+      },
+      "api": {
+        "component": "API Gateway",
+        "tech": "AWS REST API",
+        "details": "Throttling & CORS"
+      },
+      "compute": {
+        "component": "Compute",
+        "tech": "AWS Lambda (9 functions)",
+        "details": "Auth & Inventory Logic"
+      },
+      "storage": {
+        "component": "Storage",
+        "tech": "Amazon S3 (1 buckets)",
+        "details": "Artifacts & Access Logs"
+      }
+    },
+    "compliance_refs": [
+      "FRR-ADS-TC-01",
+      "NIST 800-53 Rev5",
+      "FIPS 140-2",
+      "OMB A-130"
+    ]
+  },
+  "data_flows": {
+    "entry": {
+      "title": "Ingress & Authentication",
+      "description": "Traffic enters via ALB (LMS) or API Gateway (Trust Center). Authenticated via Okta (LMS) or JWT (Trust Center).",
+      "encryption": "TLS 1.2+ (FIPS 140-2)",
+      "pii_collected": [
+        "PIV/CAC Credentials",
+        "SAML Assertions",
+        "UPN",
+        "Source IP"
+      ],
+      "protocols": [
+        "HTTPS",
+        "SAML 2.0",
+        "OIDC"
+      ],
+      "step": 1
+    },
+    "processing": {
+      "title": "Processing & Logic",
+      "description": "LMS logic processes on EC2 instances; Trust Center logic executes on ephemeral Lambda functions.",
+      "encryption": "In-transit (TLS 1.3)",
+      "pii_collected": [
+        "Session Tokens",
+        "Training Progress",
+        "Assessment Scores"
+      ],
+      "protocols": [
+        "gRPC",
+        "HTTPS"
+      ],
+      "step": 2
+    },
+    "storage": {
+      "title": "Persisted Storage",
+      "description": "LMS uses RDS/FSx for relational/file data. Trust Center uses S3 for artifacts. All encrypted at rest.",
+      "encryption": "AES-256 (AWS KMS)",
+      "pii_collected": [
+        "Full User Profile",
+        "Training History",
+        "Employee ID"
+      ],
+      "retention": "7 Years (NARA GRS 6.1)",
+      "step": 3
+    },
+    "dissemination": {
+      "title": "Reporting & Egress",
+      "description": "Data leaves via secure reports (LMS) or pre-signed artifact downloads (Trust Center).",
+      "encryption": "PGP (SFTP) / TLS (Stream)",
+      "pii_shared": [
+        "Completion Certificates",
+        "Audit Logs",
+        "Compliance Reports"
+      ],
+      "protocols": [
+        "SFTP",
+        "REST API"
+      ],
+      "step": 4
+    }
+  },
   "integrations": [
     {
-      "provider": "Trust Center Compliance Dashboard",
-      "status": "FedRAMP Ready",
-      "components": [
-        "S3",
-        "Lambda",
-        "API Gateway"
-      ]
+      "provider": "Skillsoft Percipio",
+      "category": "Content Library",
+      "status": "FedRAMP Authorized",
+      "connection_type": "xAPI",
+      "risk": "low",
+      "pii_shared": [
+        "Email",
+        "First Name",
+        "Last Name"
+      ],
+      "auth_method": "SAML 2.0 (SSO)"
+    },
+    {
+      "provider": "LinkedIn Learning",
+      "category": "Content Library",
+      "status": "Commercial",
+      "connection_type": "xAPI",
+      "risk": "high",
+      "pii_shared": [
+        "Email",
+        "First Name",
+        "Last Name"
+      ],
+      "auth_method": "SAML 2.0 (SSO)"
+    },
+    {
+      "provider": "OpenSesame",
+      "category": "Content Library",
+      "status": "Commercial",
+      "connection_type": "SCORM 1.2",
+      "risk": "high",
+      "pii_shared": [
+        "First Name",
+        "Last Name",
+        "User GUID"
+      ],
+      "auth_method": "Direct Launch"
+    },
+    {
+      "provider": "DominKnow",
+      "category": "Authoring Tool",
+      "status": "Commercial",
+      "connection_type": "SCORM (Ingress)",
+      "risk": "high",
+      "pii_shared": [
+        "First Name",
+        "Last Name",
+        "User GUID"
+      ],
+      "auth_method": "Direct Launch"
+    },
+    {
+      "provider": "Microsoft Teams",
+      "category": "Virtual Meeting",
+      "status": "Commercial",
+      "connection_type": "Graph API",
+      "risk": "medium",
+      "pii_shared": [
+        "Email",
+        "Display Name"
+      ],
+      "auth_method": "OAuth 2.0"
+    },
+    {
+      "provider": "Zoom",
+      "category": "Virtual Meeting",
+      "status": "Commercial",
+      "connection_type": "REST API",
+      "risk": "medium",
+      "pii_shared": [
+        "Email",
+        "Display Name"
+      ],
+      "auth_method": "JWT / OAuth"
+    },
+    {
+      "provider": "FedRAMP Trust Center",
+      "category": "Compliance Data",
+      "status": "FRR-ADS-TC-01",
+      "connection_type": "REST API",
+      "risk": "low",
+      "pii_shared": [
+        "Agency Contact Name",
+        "Agency Email"
+      ],
+      "auth_method": "JWT Token"
     }
   ],
-  "aws_actual": {
-    "vpc": 1,
-    "subnets": 0,
-    "ec2": 6,
-    "rds": 1,
-    "s3": 1,
-    "fsx": 0,
-    "alb": 1,
-    "api_endpoints": 1,
-    "api_endpoints_tc": 2,
-    "security_groups": 15,
-    "route53": 0,
-    "backup": 0,
-    "lambda": 11,
-    "lambda_tc": 9,
-    "s3_tc": 1,
-    "waf": 1,
-    "shield": 1,
-    "shield_tier": "Standard",
-    "network_firewall": 1
+  "risk_profile": {
+    "low": 2,
+    "medium": 2,
+    "high": 3
   },
-  "fingerprint": "adaa43dbf1c0"
+  "pii_inventory": [
+    "Session Tokens",
+    "Audit Logs",
+    "PIV/CAC Credentials",
+    "Assessment Scores"
+  ]
 }
