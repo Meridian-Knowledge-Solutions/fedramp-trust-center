@@ -740,7 +740,7 @@ export const TrustCenterView = () => {
                     <div className="flex flex-col lg:flex-row gap-8">
                         <div className="flex-1">
                             <p className="text-slate-400 leading-relaxed mb-6 font-medium text-sm">
-                                <strong className="text-white">Meridian Learning Management System (LMS) for Government</strong> is a FedRAMP Authorized SaaS hosted on AWS GovCloud (US). The system leverages automated 20x validation for continuous authorization.
+                                <strong className="text-white">Meridian Learning Management System (LMS) for Government</strong> is a FedRAMP Authorized SaaS hosted on AWS Commercial (US-east). The system leverages automated 20x validation for continuous authorization.
                             </p>
                             <div className="flex gap-2">
                                 {['LMS', 'SaaS', 'GovCloud'].map(tag => (
@@ -752,7 +752,7 @@ export const TrustCenterView = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-4 lg:w-[500px]">
                             <InfoCard label="Deployment" value="Multi-tenant SaaS" sub="Shared Infrastructure" />
-                            <InfoCard label="Cloud Provider" value="AWS" sub="GovCloud (US)" />
+                            <InfoCard label="Cloud Provider" value="AWS" sub="AWS Commericial (US-east)" />
                             <InfoCard label="Auth Level" value="FedRAMP Moderate" sub="NIST 800-53 Rev5" />
                             <InfoCard label="Access" value="HTTPS" sub="Port 443" />
                         </div>
