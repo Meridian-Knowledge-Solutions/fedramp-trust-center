@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2025-12-24T08:23:08.716050Z",
+    "generated_at": "2025-12-26T07:02:24.314577+00:00Z",
     "compliance_ver": "FedRAMP Rev 5",
     "scope": "PUBLIC_SAFE",
     "source": "generate_live_mas.py"
@@ -30,8 +30,13 @@
           "id": "Authorized"
         },
         {
-          "name": "Load Balancer-02",
-          "type": "Load Balancer",
+          "name": "Web Firewall-01",
+          "type": "Web Firewall",
+          "id": "Authorized"
+        },
+        {
+          "name": "Network Firewall-01",
+          "type": "Network Firewall",
           "id": "Authorized"
         }
       ]
@@ -71,6 +76,16 @@
         },
         {
           "name": "Compute Node-04",
+          "type": "Compute Node",
+          "id": "Authorized"
+        },
+        {
+          "name": "Compute Node-05",
+          "type": "Compute Node",
+          "id": "Authorized"
+        },
+        {
+          "name": "Compute Node-06",
           "type": "Compute Node",
           "id": "Authorized"
         },
@@ -118,6 +133,61 @@
           "name": "Serverless Fn-09",
           "type": "Serverless Fn",
           "id": "Authorized"
+        },
+        {
+          "name": "Serverless Fn-10",
+          "type": "Serverless Fn",
+          "id": "Authorized"
+        },
+        {
+          "name": "Serverless Fn-11",
+          "type": "Serverless Fn",
+          "id": "Authorized"
+        },
+        {
+          "name": "Lambda_TC-01",
+          "type": "Lambda_TC",
+          "id": "Authorized"
+        },
+        {
+          "name": "Lambda_TC-02",
+          "type": "Lambda_TC",
+          "id": "Authorized"
+        },
+        {
+          "name": "Lambda_TC-03",
+          "type": "Lambda_TC",
+          "id": "Authorized"
+        },
+        {
+          "name": "Lambda_TC-04",
+          "type": "Lambda_TC",
+          "id": "Authorized"
+        },
+        {
+          "name": "Lambda_TC-05",
+          "type": "Lambda_TC",
+          "id": "Authorized"
+        },
+        {
+          "name": "Lambda_TC-06",
+          "type": "Lambda_TC",
+          "id": "Authorized"
+        },
+        {
+          "name": "Lambda_TC-07",
+          "type": "Lambda_TC",
+          "id": "Authorized"
+        },
+        {
+          "name": "Lambda_TC-08",
+          "type": "Lambda_TC",
+          "id": "Authorized"
+        },
+        {
+          "name": "Lambda_TC-09",
+          "type": "Lambda_TC",
+          "id": "Authorized"
         }
       ]
     },
@@ -150,22 +220,79 @@
           "id": "Authorized"
         },
         {
-          "name": "Storage Bucket-02",
-          "type": "Storage Bucket",
+          "name": "S3_TC-01",
+          "type": "S3_TC",
           "id": "Authorized"
         }
       ]
     }
   },
   "drift": {
-    "detected": false,
-    "count": 0,
-    "items": []
+    "detected": true,
+    "count": 7,
+    "items": [
+      {
+        "resource_type": "api_endpoints",
+        "expected": 0,
+        "actual": 1,
+        "delta": 1,
+        "severity": "warning",
+        "ids": []
+      },
+      {
+        "resource_type": "backup",
+        "expected": 1,
+        "actual": 0,
+        "delta": -1,
+        "severity": "critical",
+        "ids": []
+      },
+      {
+        "resource_type": "ec2",
+        "expected": 4,
+        "actual": 6,
+        "delta": 2,
+        "severity": "warning",
+        "ids": []
+      },
+      {
+        "resource_type": "network_firewall",
+        "expected": 1,
+        "actual": 1,
+        "delta": 0,
+        "severity": "critical",
+        "ids": []
+      },
+      {
+        "resource_type": "route53",
+        "expected": 1,
+        "actual": 0,
+        "delta": -1,
+        "severity": "critical",
+        "ids": []
+      },
+      {
+        "resource_type": "security_groups",
+        "expected": 8,
+        "actual": 15,
+        "delta": 7,
+        "severity": "warning",
+        "ids": []
+      },
+      {
+        "resource_type": "waf",
+        "expected": 1,
+        "actual": 1,
+        "delta": 0,
+        "severity": "critical",
+        "ids": []
+      }
+    ]
   },
   "trust_center_stats": {
-    "api_count": 0,
+    "api_count": 2,
     "compute_count": 9,
-    "storage_count": 0
+    "storage_count": 1
   },
   "system_profile": {
     "system_name": "Meridian LMS for Government",
@@ -206,12 +333,12 @@
       },
       "compute": {
         "component": "Compute",
-        "tech": "AWS Lambda (Node.js)",
+        "tech": "AWS Lambda (9 functions)",
         "details": "Auth & Inventory Logic"
       },
       "storage": {
         "component": "Storage",
-        "tech": "Amazon S3 (Private)",
+        "tech": "Amazon S3 (1 buckets)",
         "details": "Artifacts & Access Logs"
       }
     },
