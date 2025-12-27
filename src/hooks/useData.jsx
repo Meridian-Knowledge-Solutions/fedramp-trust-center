@@ -202,14 +202,42 @@ export const DataProvider = ({ children }) => {
           const id = val.ksi_id || val.validation_id || val.id;
           const registerEntry = registerData[id] || registerData[id.replace(/-/g, '_')] || {};
           const status = Sanitizer.determineStatus(val);
-          const successCount = parseInt(val.successful_commands || 0, 10);
 
+          let actualSuccessCount;
           let commands = [];
           let source = 'unknown';
 
-          if (registerEntry.cli_commands && registerEntry.cli_commands.length > 0) {
+          // PRIORITY 1: Use actual command execution data if available (NEW!)
+          if (val.command_executions && Array.isArray(val.command_executions) && val.command_executions.length > 0) {
+            commands = val.command_executions.map((exec) => ({
+              command: exec.command,
+              description: exec.description || `Command #${exec.index + 1}`,
+              status: exec.status,  // Actual execution status from engine
+              exit_code: exec.exit_code,
+              execution_time: exec.execution_time,
+              error_message: exec.error_message,
+              output: exec.error_message || 'Command executed successfully',
+              source: 'execution_log'
+            }));
+            actualSuccessCount = val.successful_commands || 0;
+            source = 'execution_log';
+          }
+          // PRIORITY 2: Use command register if no execution data
+          else if (registerEntry.cli_commands && registerEntry.cli_commands.length > 0) {
+            const totalCommands = registerEntry.cli_commands.length;
+            const isPassing = val.assertion === true || val.assertion === "true";
+
+            if (isPassing) {
+              // All commands must have succeeded for KSI to pass
+              actualSuccessCount = totalCommands;
+            } else {
+              // For failing KSIs, estimate based on score
+              const score = parseInt(val.score || 0, 10);
+              actualSuccessCount = Math.round((score / 100) * totalCommands);
+            }
+
             commands = registerEntry.cli_commands.map((cmd, idx) => {
-              const isSuccess = idx < successCount;
+              const isSuccess = idx < actualSuccessCount;
               return {
                 ...cmd,
                 description: cmd.note || cmd.description || `Command #${idx + 1}`,
@@ -219,9 +247,17 @@ export const DataProvider = ({ children }) => {
               };
             });
             source = 'comprehensive_register';
-          } else if (val.cli_command) {
+          }
+          // PRIORITY 3: Fallback to parsing cli_command string
+          else if (val.cli_command) {
             commands = parseCliCommandString(val.cli_command, val.assertion);
             source = commands.length > 0 ? 'validation_summary' : 'unknown';
+            const isPassing = val.assertion === true || val.assertion === "true";
+            actualSuccessCount = isPassing
+              ? commands.length
+              : Math.round(((val.score || 0) / 100) * commands.length);
+          } else {
+            actualSuccessCount = 0;
           }
 
           return {
@@ -236,8 +272,8 @@ export const DataProvider = ({ children }) => {
             command_source: source,
             register_description: stripEmojis(registerEntry.description),
             register_justification: stripEmojis(registerEntry.justification),
-            commands_executed: val.commands_executed || commands.length || 0,
-            successful_commands: successCount
+            commands_executed: commands.length || 0,  // Actual command count
+            successful_commands: actualSuccessCount
           };
         });
 
