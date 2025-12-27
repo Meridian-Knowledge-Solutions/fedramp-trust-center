@@ -149,7 +149,7 @@ export const LiveMasDashboard = () => {
           <div>
             <h2 className="text-white font-bold text-sm">Authorization Boundary</h2>
             <div className="text-xs text-blue-300/80">
-              {masData.meta?.compliance_ver || 'FedRAMP Rev 5'} • {masData.meta?.scope || 'MODERATE'}
+              {masData.meta?.compliance_ver || 'FedRAMP 20x'} • {masData.meta?.scope || 'MODERATE'}
             </div>
           </div>
         </div>

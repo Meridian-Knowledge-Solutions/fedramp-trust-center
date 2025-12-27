@@ -9,6 +9,10 @@ const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
   ? `${import.meta.env.BASE_URL}data`
   : `${import.meta.env.BASE_URL}/data`;
 
+// Private repository URL for CLI Command Register
+const PRIVATE_REPO_BASE = 'https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/main';
+const CLI_COMMAND_REGISTER_URL = `${PRIVATE_REPO_BASE}/config/cli_command_register.json`;
+
 export const DataProvider = ({ children }) => {
   const [ksis, setKsis] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,16 +99,22 @@ export const DataProvider = ({ children }) => {
       try {
         const cacheBuster = Date.now();
 
+        // --- DATA SOURCES ---
+        // PUBLIC (from /public/data/): validations, history, mas_boundary
+        // PRIVATE (from GitHub repo): cli_command_register.json
+        // This ensures command details remain in private repo while compliance data is public
+
         // --- DEBUGGING LOGS START ---
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log('🔄 DATA LOAD INITIATED');
         console.log(`📂 Base Path Resolved: "${BASE_PATH}"`);
+        console.log(`🔒 Private Repo: "${PRIVATE_REPO_BASE}"`);
         // --- DEBUGGING LOGS END ---
 
         // Prepare URLs
         const urls = {
           validations: `${BASE_PATH}/unified_ksi_validations.json?t=${cacheBuster}`,
-          register: `${BASE_PATH}/cli_command_register.json?t=${cacheBuster}`,
+          register: CLI_COMMAND_REGISTER_URL, // Fetch from private repo (no cache buster needed for external URLs)
           history: `${BASE_PATH}/ksi_history.jsonl?t=${cacheBuster}`,
           mas: `${BASE_PATH}/mas_boundary.json?t=${cacheBuster}`
         };
@@ -170,16 +180,27 @@ export const DataProvider = ({ children }) => {
           rawValidations = Object.values(rawValidations);
         }
 
-        // --- REGISTER DATA ---
+        // --- REGISTER DATA (FROM PRIVATE REPO) ---
         let registerData = {};
         try {
           if (regRes.ok) {
             const regText = await regRes.text();
             if (!regText.trim().startsWith('<')) {
               registerData = JSON.parse(regText);
+              console.log("✅ CLI Command Register Loaded from Private Repo");
+              console.log(`   Commands Available: ${Object.keys(registerData).length}`);
+            } else {
+              console.warn("⚠️ CLI Command Register returned HTML (likely 404)");
             }
+          } else {
+            console.error(`❌ CLI Command Register Fetch Failed!`);
+            console.error(`   Status: ${regRes.status} (${regRes.statusText})`);
+            console.error(`   URL: ${CLI_COMMAND_REGISTER_URL}`);
+            console.error(`   TIP: Ensure the private repo is accessible and the file exists at config/cli_command_register.json`);
           }
-        } catch (e) { console.warn('CLI register unavailable'); }
+        } catch (e) {
+          console.warn('⚠️ CLI register parse error:', e.message);
+        }
 
         // --- PROCESS ITEMS ---
         const processed = rawValidations.map(val => {

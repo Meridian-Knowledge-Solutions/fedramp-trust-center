@@ -743,7 +743,7 @@ export const TrustCenterView = () => {
                                 <strong className="text-white">Meridian Learning Management System (LMS) for Government</strong> is a FedRAMP Authorized SaaS hosted on AWS Commercial (US-east). The system leverages automated 20x validation for continuous authorization.
                             </p>
                             <div className="flex gap-2">
-                                {['LMS', 'SaaS', 'GovCloud'].map(tag => (
+                                {['LMS', 'SaaS'].map(tag => (
                                     <span key={tag} className="text-[10px] bg-white/5 text-slate-300 border border-white/10 px-2 py-1 rounded font-mono uppercase">
                                         {tag}
                                     </span>
@@ -753,7 +753,7 @@ export const TrustCenterView = () => {
                         <div className="grid grid-cols-2 gap-4 lg:w-[500px]">
                             <InfoCard label="Deployment" value="Multi-tenant SaaS" sub="Shared Infrastructure" />
                             <InfoCard label="Cloud Provider" value="AWS" sub="AWS Commericial (US-east)" />
-                            <InfoCard label="Auth Level" value="FedRAMP Moderate" sub="NIST 800-53 Rev5" />
+                            <InfoCard label="Auth Level" value="FedRAMP Moderate" sub="20X" />
                             <InfoCard label="Access" value="HTTPS" sub="Port 443" />
                         </div>
                     </div>
@@ -819,7 +819,7 @@ export const TrustCenterView = () => {
                                 <ArtifactBadge label="Machine Readable" /><ArtifactBadge label="OSCAL Ready" /><ArtifactBadge label="Continuous Validation" />
                             </div>
                         </div>
-                        <button onClick={handleDownloadPackage} className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg">
+                        <button onClick={handleDownloadPackage} className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg">
                             {isAuthenticated ? <Download size={18} /> : <Lock size={18} />} Download JSON
                         </button>
                     </div>

@@ -2,14 +2,14 @@ import React, { useState, useMemo, useCallback, memo, useEffect } from 'react';
 import {
   LayoutDashboard, ShieldAlert, User, Settings, LogOut,
   Menu, Bell, CheckCircle2, XCircle, AlertTriangle,
-  Activity, TrendingUp, TrendingDown, Download, Calendar, Clock,
+  Activity, Download, Calendar, Clock,
   Shield, Target, FileText, ChevronRight, Zap,
   Filter, RefreshCw, BarChart3, FileCheck, Eye
 } from 'lucide-react';
 
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, BarChart, Bar, Legend, ReferenceLine
+  LineChart, Line, BarChart, Bar, Legend, ReferenceLine, Cell
 } from 'recharts';
 
 import { AuthProvider, useAuth } from './hooks/useAuth';
@@ -55,6 +55,25 @@ const useScrollPosition = () => {
   return scrollY;
 };
 
+// Helper function to calculate time elapsed
+const getTimeElapsed = (date) => {
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 0) {
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  } else if (diffHours > 0) {
+    return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  } else if (diffMins > 0) {
+    return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+  } else {
+    return 'Just now';
+  }
+};
+
 // --- MICRO COMPONENTS ---
 
 const SidebarItem = memo(({ icon: Icon, label, badge, isActive, onClick }) => (
@@ -91,23 +110,8 @@ const Sparkline = memo(({ data, color }) => (
   </div>
 ));
 
-// --- STATS CARD (With Real Trend Calculation) ---
-const StatsCard = memo(({ title, value, subtext, trend, colorClass, icon: Icon, chartData }) => {
-  // 1. Calculate Real Percentage Change
-  let diffPercent = 0;
-  if (chartData && chartData.length >= 2) {
-    const last = chartData[chartData.length - 1].val;
-    const prev = chartData[chartData.length - 2].val;
-    // Avoid division by zero
-    if (prev !== 0) {
-      diffPercent = ((last - prev) / prev) * 100;
-    }
-  }
-
-  // Format to 1 decimal place (e.g., "2.5")
-  const diffDisplay = Math.abs(diffPercent).toFixed(1);
-  const isUp = trend === 'up';
-
+// --- STATS CARD (Redesigned with Status Indicator) ---
+const StatsCard = memo(({ title, value, contextMetric, statusLabel, statusColor, colorClass, icon: Icon, chartData }) => {
   // Fallback for sparkline if empty
   const sparkData = chartData && chartData.length > 0 ? chartData : [{ val: 0 }, { val: 0 }];
   const hexColor = colorClass.includes('emerald') ? '#10b981' : colorClass.includes('rose') ? '#f43f5e' : colorClass.includes('amber') ? '#f59e0b' : '#3b82f6';
@@ -126,13 +130,13 @@ const StatsCard = memo(({ title, value, subtext, trend, colorClass, icon: Icon, 
 
       <div className="relative z-10">
         <div className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">{title}</div>
-        <div className="text-2xl font-bold text-white mb-1 tracking-tight font-mono tabular-nums">{value}</div>
-        <div className="flex items-center text-[10px] font-medium text-slate-400">
-          <span className={`flex items-center ${isUp ? 'text-emerald-400' : 'text-rose-400'} mr-2 bg-white/5 px-1.5 py-0.5 rounded border border-white/5`}>
-            {isUp ? <TrendingUp size={10} className="mr-1" /> : <TrendingDown size={10} className="mr-1" />}
-            {diffDisplay}%
+        <div className="text-2xl font-bold text-white mb-2 tracking-tight font-mono tabular-nums">{value}</div>
+        <div className="flex items-center justify-between text-[10px]">
+          <span className={`flex items-center gap-1 font-medium ${statusColor}`}>
+            <div className={`w-1.5 h-1.5 rounded-full ${statusColor.replace('text-', 'bg-')}`}></div>
+            {statusLabel}
           </span>
-          {subtext}
+          <span className="text-slate-400 font-mono tabular-nums">{contextMetric}</span>
         </div>
       </div>
     </div>
@@ -156,6 +160,7 @@ const ImpactBanner = memo(() => {
 
   const lastRunDate = metadata.validation_date ? new Date(metadata.validation_date) : new Date();
   const level = metadata.impact_level || 'MODERATE';
+  const timeElapsed = getTimeElapsed(lastRunDate);
 
   const styles = {
     'HIGH': { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/20', solid: 'bg-rose-500' },
@@ -201,9 +206,28 @@ const ImpactBanner = memo(() => {
         </div>
 
         <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-2 text-[10px] text-slate-400 bg-white/5 px-2 py-1 rounded border border-white/5">
-            <Clock size={10} />
-            Last Scan: <span className="text-slate-300 font-mono tabular-nums">{lastRunDate.toLocaleTimeString()}</span>
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-2 text-[10px] text-slate-400 bg-white/5 px-2 py-1 rounded border border-white/5">
+              <Calendar size={10} />
+              <span className="text-slate-300 font-mono tabular-nums">
+                {lastRunDate.toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </span>
+              <Clock size={10} className="ml-1" />
+              <span className="text-slate-300 font-mono tabular-nums">
+                {lastRunDate.toLocaleTimeString(undefined, {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit'
+                })}
+              </span>
+            </div>
+            <div className="text-[9px] text-slate-500 font-mono">
+              Last validated {timeElapsed}
+            </div>
           </div>
           <button
             onClick={handleRefresh}
@@ -409,7 +433,7 @@ const ComplianceChart = memo(() => {
 });
 
 const DashboardContent = memo(() => {
-  const { metrics, ksis, history } = useData();
+  const { metrics, ksis, history, metadata } = useData();
 
   // --- DYNAMIC SPARKLINE LOGIC ---
   const sparklines = useMemo(() => {
@@ -425,17 +449,47 @@ const DashboardContent = memo(() => {
     };
   }, [history]);
 
-  // --- DYNAMIC TREND LOGIC ---
-  const getTrend = (key) => {
-    if (!history || history.length < 2) return 'up';
-    const last = history[history.length - 1];
-    const prev = history[history.length - 2];
+  // --- CALCULATE CONTEXTUAL METRICS ---
+  const totalControls = ksis?.length || 0;
+  const targetThreshold = parseFloat(metadata?.impact_thresholds?.min || 90);
 
-    if (key === 'failed') {
-      return last[key] > prev[key] ? 'up' : 'down';
-    }
-    return last[key] >= prev[key] ? 'up' : 'down';
-  };
+  // For Compliance Score: show target
+  const complianceTarget = `Target: ${targetThreshold}%`;
+
+  // For counts: calculate percentage of total
+  const passingPercent = totalControls > 0
+    ? ((parseInt(metrics.passed) / totalControls) * 100).toFixed(1)
+    : '0.0';
+
+  const failingPercent = totalControls > 0
+    ? ((parseInt(metrics.failed) / totalControls) * 100).toFixed(1)
+    : '0.0';
+
+  const warningsPercent = totalControls > 0
+    ? ((parseInt(metrics.warning) / totalControls) * 100).toFixed(1)
+    : '0.0';
+
+  // --- CALCULATE STATUS INDICATORS ---
+  const complianceScore = parseFloat(metrics.score);
+  const complianceStatus = complianceScore >= targetThreshold
+    ? { label: 'On Target', color: 'text-emerald-400' }
+    : complianceScore >= (targetThreshold - 5)
+      ? { label: 'Near Target', color: 'text-amber-400' }
+      : { label: 'Below Target', color: 'text-rose-400' };
+
+  const passingStatus = parseInt(metrics.passed) > 0
+    ? { label: 'Active', color: 'text-emerald-400' }
+    : { label: 'No Data', color: 'text-slate-400' };
+
+  const failingStatus = parseInt(metrics.failed) === 0
+    ? { label: 'All Clear', color: 'text-emerald-400' }
+    : parseInt(metrics.failed) <= 5
+      ? { label: 'Minor Issues', color: 'text-amber-400' }
+      : { label: 'Needs Attention', color: 'text-rose-400' };
+
+  const warningStatus = parseInt(metrics.warning) === 0
+    ? { label: 'All Clear', color: 'text-emerald-400' }
+    : { label: 'Active', color: 'text-amber-400' };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4">
@@ -445,8 +499,9 @@ const DashboardContent = memo(() => {
         <StatsCard
           title="Compliance Score"
           value={`${metrics.score}%`}
-          subtext="Target"
-          trend={getTrend('compliance_rate')}
+          contextMetric={complianceTarget}
+          statusLabel={complianceStatus.label}
+          statusColor={complianceStatus.color}
           colorClass="text-blue-400"
           icon={Activity}
           chartData={sparklines.score}
@@ -454,8 +509,9 @@ const DashboardContent = memo(() => {
         <StatsCard
           title="Passing Controls"
           value={metrics.passed}
-          subtext="Active"
-          trend={getTrend('passed')}
+          contextMetric={`${passingPercent}% of ${totalControls}`}
+          statusLabel={passingStatus.label}
+          statusColor={passingStatus.color}
           colorClass="text-emerald-400"
           icon={CheckCircle2}
           chartData={sparklines.passed}
@@ -463,8 +519,9 @@ const DashboardContent = memo(() => {
         <StatsCard
           title="Failing Controls"
           value={metrics.failed}
-          subtext="Remediation"
-          trend={getTrend('failed')}
+          contextMetric={`${failingPercent}% of ${totalControls}`}
+          statusLabel={failingStatus.label}
+          statusColor={failingStatus.color}
           colorClass="text-rose-400"
           icon={XCircle}
           chartData={sparklines.failed}
@@ -472,8 +529,9 @@ const DashboardContent = memo(() => {
         <StatsCard
           title="Warnings"
           value={metrics.warning}
-          subtext="Low Severity"
-          trend="down"
+          contextMetric={`${warningsPercent}% of ${totalControls}`}
+          statusLabel={warningStatus.label}
+          statusColor={warningStatus.color}
           colorClass="text-amber-400"
           icon={AlertTriangle}
           chartData={[{ val: metrics.warning }]}
