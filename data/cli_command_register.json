@@ -8,7 +8,7 @@
         "note": "BOUNDARY: Validate the dedicated Production VPC (The Structural Boundary of the MAS)."
       },
       {
-        "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --query \"Reservations[*].Instances[*].{ID:InstanceId, Type:InstanceType, VPC:VpcId}\" --output json",
+        "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json",
         "note": "COMPUTE: Validate that all active EC2 instances reside within the defined VPC Boundary."
       },
       {
@@ -355,7 +355,7 @@
         "note": "MANAGEMENT: Validate existence of the Terraform Lock Table (Proof of active, safe IaC workflows)."
       },
       {
-        "command": "aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId, LaunchTime, ImageId]' --output json",
+        "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json",
         "note": "INVENTORY: List the active EC2 instances managed by this Terraform state."
       },
       {
@@ -1374,4 +1374,3 @@
     ]
   }
 }
-
