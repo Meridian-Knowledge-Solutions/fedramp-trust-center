@@ -929,18 +929,18 @@
     ]
   },
   "KSI-PIY-02": {
-    "description": "Document the security objectives and requirements for each information resource.",
-    "justification": "Validates the existence of per-component security documentation. Scans the 'security-objectives' folder in CodeCommit for specific system component plans (e.g., api-gateway.md, rds-instances.md).",
-    "cli_commands": [
-      {
-        "command": "aws codecommit get-folder --repository-name security-governance --folder-path security-objectives/ --output json",
-        "note": "ARTIFACTS: List the Markdown files defining security objectives. (Matches: api-gateway.md, rds-instances.md, etc.)"
-      }
-    ],
-    "artifact_evidence_paths": [
-      "evidence_v2/KSI-PIY-02/objective_files.json"
-    ]
-  },
+  "description": "Document the security objectives and requirements for each information resource.",
+  "justification": "Validates the existence of per-component security documentation. Scans the 'policies/security-objectives' folder in CodeCommit for specific system component plans (e.g., api-gateway.md, rds-instances.md).",
+  "cli_commands": [
+    {
+      "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/security-objectives/ --output json",
+      "note": "ARTIFACTS: List the Markdown files defining security objectives. (Matches: api-gateway.md, rds-instances.md, etc.)"
+    }
+  ],
+  "artifact_evidence_paths": [
+    "evidence_v2/KSI-PIY-02/objective_files.json"
+  ]
+},
   "KSI-PIY-03": {
     "description": "Maintain a vulnerability disclosure program.",
     "justification": "Validates the existence of the Vulnerability Disclosure Policy (VDP). Checks the governance repository for files matching standard naming conventions (vdp.md, security.txt, disclosure.md).",
@@ -986,23 +986,23 @@
     ]
   },
   "KSI-PIY-06": {
-    "description": "Monitor the effectiveness of the organization's investments in achieving security objectives.",
-    "justification": "Validates the Security Effectiveness Program. Checks for the specific 'Security Monitoring and Alerting Plan' (Governance) and active Security Hub Standards (Technical Evidence of Investment).",
-    "cli_commands": [
-      {
-        "command": "aws codecommit get-file --repository-name security-governance --file-path security-objectives/security-monitoring-and-alerting-plan.md --output json",
-        "note": "GOVERNANCE: Validate the existence of the specific Security Monitoring Plan document."
-      },
-      {
-        "command": "aws securityhub get-enabled-standards --output json",
-        "note": "INVESTMENT: Validate that Security Hub Standards (CIS, PCI, FedRAMP) are enabled (The automated mechanism for monitoring effectiveness)."
-      }
-    ],
-    "artifact_evidence_paths": [
-      "evidence_v2/KSI-PIY-06/monitoring_plan.json",
-      "evidence_v2/KSI-PIY-06/security_hub_standards.json"
-    ]
-  },
+  "description": "Monitor the effectiveness of the organization's investments in achieving security objectives.",
+  "justification": "Validates the Security Effectiveness Program. Checks for the specific 'Security Monitoring and Alerting Plan' (Governance) and active Security Hub Standards (Technical Evidence of Investment).",
+  "cli_commands": [
+    {
+      "command": "aws codecommit get-file --repository-name security-governance --file-path policies/security-objectives/security-monitoring-and-alerting-plan.md --output json",
+      "note": "GOVERNANCE: Validate the existence of the specific Security Monitoring Plan document."
+    },
+    {
+      "command": "aws securityhub get-enabled-standards --output json",
+      "note": "INVESTMENT: Validate that Security Hub Standards (CIS, PCI, FedRAMP) are enabled (The automated mechanism for monitoring effectiveness)."
+    }
+  ],
+  "artifact_evidence_paths": [
+    "evidence_v2/KSI-PIY-06/monitoring_plan.json",
+    "evidence_v2/KSI-PIY-06/security_hub_standards.json"
+  ]
+},
   "KSI-PIY-07": {
     "description": "Document risk management decisions for software supply chain security.",
     "justification": "Validates the Supply Chain Risk Management (SCRM) Policy. Checks the governance repo for documents explicitly addressing supply chain, vendor, or dependency risks.",
@@ -1374,3 +1374,4 @@
     ]
   }
 }
+
