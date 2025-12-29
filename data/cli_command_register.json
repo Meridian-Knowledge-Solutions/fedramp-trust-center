@@ -133,18 +133,18 @@
     ]
   },
   "KSI-AFR-07": {
-    "description": "Document the secure configuration baseline for the cloud service offering.",
-    "justification": "Validates the Secure Configuration Baseline via API. Instead of checking a static file, this queries the live '/prod/config' endpoint, proving that the security baseline is actively published and available to consumers.",
-    "cli_commands": [
-      {
-        "command": "curl -s https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/config | head -n 20",
-        "note": "DYNAMIC RETRIEVAL: Fetch the first 20 lines of the Security Baseline from the live API. This proves the configuration standards are documented and programmatically accessible."
-      }
-    ],
-    "artifact_evidence_paths": [
-      "evidence_v2/KSI-AFR-07/api_baseline_response.json"
-    ]
-  },
+  "description": "Document the secure configuration baseline for the cloud service offering.",
+  "justification": "Validates the Secure Configuration Baseline via API. Instead of checking a static file, this queries the live '/prod/config' endpoint, proving that the security baseline is actively published and available to consumers.",
+  "cli_commands": [
+    {
+      "command": "curl -s https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/config",
+      "note": "DYNAMIC RETRIEVAL: Fetch the Security Baseline from the live API. This proves the configuration standards are documented and programmatically accessible."
+    }
+  ],
+  "artifact_evidence_paths": [
+    "evidence_v2/KSI-AFR-07/api_baseline_response.json"
+  ]
+},
   "KSI-AFR-08": {
     "description": "Operate a secure inbox to receive critical communication from FedRAMP and other government entities.",
     "justification": "Validates FSI Operations. Checks for: 1) The Security Inbox Procedure Document (Governance), and 2) The SNS Topic used to aggregate and forward internal alerts to that inbox (Technical infrastructure).",
@@ -210,38 +210,38 @@
     ]
   },
   "KSI-AFR-11": {
-    "description": "Ensure that cryptographic modules are selected and used in alignment with the FedRAMP 20x Using Cryptographic Modules (UCM) policy.",
-    "justification": "Validates Applied Cryptography. Checks for: 1) Active KMS Keys (Key Management), 2) S3 Encryption on the Compliance Bucket (Data at Rest), 3) RDS Encryption (Data at Rest), and 4) Active Load Balancer Listeners enforcing TLS 1.2+ (Data in Transit/FIPS alignment).",
-    "cli_commands": [
-      {
-        "command": "aws kms list-keys --limit 5 --output json",
-        "note": "KEY MANAGEMENT: Validate that KMS keys exist and are available for cryptographic operations."
-      },
-      {
-        "command": "aws s3api get-bucket-encryption --bucket fedramp-compliance-893894210484 --output json",
-        "note": "DATA AT REST (STORAGE): Validate that the Compliance Artifact Bucket enforces server-side encryption (SSE-S3 or SSE-KMS)."
-      },
-      {
-        "command": "aws rds describe-db-instances --query \"DBInstances[*].{ID:DBInstanceIdentifier, Encrypted:StorageEncrypted}\" --output json",
-        "note": "DATA AT REST (DATABASE): Validate that all RDS instances have 'StorageEncrypted' set to true."
-      },
-      {
-        "command": "aws elbv2 describe-listeners --load-balancer-arn $(aws elbv2 describe-load-balancers --query \"LoadBalancers[0].LoadBalancerArn\" --output text) --output json || echo \"[]\"",
-        "note": "DATA IN TRANSIT: Validate that Load Balancer Listeners are configured with secure SSL Policies (TLS 1.2+)."
-      },
-      {
-        "command": "aws codecommit get-file --repository-name security-governance --file-path policies/cryptographic-modules-policy.md --output json",
-        "note": "GOVERNANCE: Validate the existence of the Cryptographic Modules (UCM) Policy."
-      }
-    ],
-    "artifact_evidence_paths": [
-      "evidence_v2/KSI-AFR-11/kms_keys.json",
-      "evidence_v2/KSI-AFR-11/s3_encryption.json",
-      "evidence_v2/KSI-AFR-11/rds_encryption.json",
-      "evidence_v2/KSI-AFR-11/alb_listeners.json",
-      "evidence_v2/KSI-AFR-11/ucm_policy.json"
-    ]
-  },
+  "description": "Ensure that cryptographic modules are selected and used in alignment with the FedRAMP 20x Using Cryptographic Modules (UCM) policy.",
+  "justification": "Validates Applied Cryptography. Checks for: 1) Active KMS Keys (Key Management), 2) S3 Encryption on the Compliance Bucket (Data at Rest), 3) RDS Encryption (Data at Rest), and 4) Active Load Balancer Listeners enforcing TLS 1.2+ (Data in Transit/FIPS alignment).",
+  "cli_commands": [
+    {
+      "command": "aws kms list-keys --limit 5 --output json",
+      "note": "KEY MANAGEMENT: Validate that KMS keys exist and are available for cryptographic operations."
+    },
+    {
+      "command": "aws s3api get-bucket-encryption --bucket fedramp-compliance-893894210484 --output json",
+      "note": "DATA AT REST (STORAGE): Validate that the Compliance Artifact Bucket enforces server-side encryption (SSE-S3 or SSE-KMS)."
+    },
+    {
+      "command": "aws rds describe-db-instances --output json",
+      "note": "DATA AT REST (DATABASE): Validate that all RDS instances have 'StorageEncrypted' set to true."
+    },
+    {
+      "command": "aws elbv2 describe-listeners --load-balancer-arn $(aws elbv2 describe-load-balancers --query \"LoadBalancers[0].LoadBalancerArn\" --output text) --output json || echo \"[]\"",
+      "note": "DATA IN TRANSIT: Validate that Load Balancer Listeners are configured with secure SSL Policies (TLS 1.2+)."
+    },
+    {
+      "command": "aws codecommit get-file --repository-name security-governance --file-path policies/cryptographic-modules-policy.md --output json",
+      "note": "GOVERNANCE: Validate the existence of the Cryptographic Modules (UCM) Policy."
+    }
+  ],
+  "artifact_evidence_paths": [
+    "evidence_v2/KSI-AFR-11/kms_keys.json",
+    "evidence_v2/KSI-AFR-11/s3_encryption.json",
+    "evidence_v2/KSI-AFR-11/rds_encryption.json",
+    "evidence_v2/KSI-AFR-11/lb_listeners.json",
+    "evidence_v2/KSI-AFR-11/crypto_policy.json"
+  ]
+},
   "KSI-CED-01": {
     "description": "Require and monitor the effectiveness of training given to all employees on policies, procedures, and security-related topics.",
     "justification": "Validates 'GitOps' Security Training. Instead of passive LMS logs, this validates the 'training/register.json' in the governance repo. This proves staff have actively attested to security training by decoding a challenge token (CTF style) and committing it to the immutable version control history.",
@@ -801,27 +801,28 @@
     ]
   },
   "KSI-MLA-01": {
-    "description": "Log all activity on all information resources supporting the cloud service offering to a protected audit log.",
-    "justification": "Validates the master audit record. Checks for the existence of an active CloudTrail and the security (ACLs/Encryption) of the specific S3 bucket storing those logs.",
-    "cli_commands": [
-      {
-        "command": "aws cloudtrail describe-trails --output json",
-        "note": "PRIMARY: Validate existence and configuration of the CloudTrail trail."
-      },
-      {
-        "command": "aws cloudtrail get-trail-status --name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
-        "note": "STATUS: Confirm CloudTrail is actually 'IsLogging': true. Uses TrailARN to avoid naming conflicts."
-      },
-      {
-        "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'cloudtrail') || contains(Name, 'audit') || contains(Name, 'logs')]\" --output json",
-        "note": "STORAGE: Validate the specific S3 bucket used for audit log retention."
-      }
-    ],
-    "artifact_evidence_paths": [
-      "evidence_v2/KSI-MLA-01/cloudtrail_config.json",
-      "evidence_v2/KSI-MLA-01/trail_status.json"
-    ]
-  },
+  "description": "Log all activity on all information resources supporting the cloud service offering to a protected audit log.",
+  "justification": "Validates the master audit record. Checks for the existence of an active CloudTrail and the security (ACLs/Encryption) of the specific S3 bucket storing those logs.",
+  "cli_commands": [
+    {
+      "command": "aws cloudtrail describe-trails --output json",
+      "note": "PRIMARY: Validate existence and configuration of the CloudTrail trail."
+    },
+    {
+      "command": "aws cloudtrail get-trail-status --name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
+      "note": "STATUS: Confirm CloudTrail is actually 'IsLogging': true. Uses TrailARN to avoid naming conflicts."
+    },
+    {
+      "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'cloudtrail') || contains(Name, 'audit') || contains(Name, 'logs')]\" --output json",
+      "note": "STORAGE: Validate the specific S3 bucket used for audit log retention."
+    }
+  ],
+  "artifact_evidence_paths": [
+    "evidence_v2/KSI-MLA-01/cloudtrail_config.json",
+    "evidence_v2/KSI-MLA-01/trail_status.json",
+    "evidence_v2/KSI-MLA-01/audit_bucket.json"
+  ]
+},
   "KSI-MLA-02": {
     "description": "Regularly review and audit logs.",
     "justification": "Validates 'Automated Review'. Instead of expecting human review, checks for CloudWatch Metric Filters (automated pattern matching) and Security Hub Insights (aggregated analysis).",
@@ -1374,5 +1375,6 @@
     ]
   }
 }
+
 
 
