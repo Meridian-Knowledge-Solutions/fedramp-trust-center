@@ -436,51 +436,51 @@
     ]
   },
   "KSI-CNA-02": {
-    "description": "Design systems to minimize the attack surface and minimize lateral movement if compromised.",
-    "justification": "Validates Network Segmentation and Isolation. Checks for: 1) Private Subnets (Attack Surface Reduction), 2) Security Group References (Prevention of Lateral Movement by binding rules to logical groups, not IPs), and 3) Private Database Placement.",
-    "cli_commands": [
-      {
-        "command": "aws ec2 describe-subnets --filters \"Name=map-public-ip-on-launch,Values=false\" --query \"Subnets[].{ID:SubnetId, CIDR:CidrBlock, Zone:AvailabilityZone}\" --max-items 5 --output json",
-        "note": "ATTACK SURFACE: Validate the existence of Private Subnets (where Public IP mapping is disabled)."
-      },
-      {
-        "command": "aws ec2 describe-security-groups --max-items 20 --output json",
-        "note": "LATERAL MOVEMENT: Validate Security Groups that allow access ONLY from other specific Security Groups (Tiered Security), rather than broad IP ranges."
-      },
-      {
-        "command": "aws rds describe-db-instances --query \"DBInstances[].{ID:DBInstanceIdentifier, Public:PubliclyAccessible, Subnets:DBSubnetGroup.Subnets[].SubnetIdentifier}\" --output json",
-        "note": "ISOLATION: Validate that RDS Databases are configured as 'PubliclyAccessible: false' and reside in defined subnets."
-      }
-    ],
-    "artifact_evidence_paths": [
-      "evidence_v2/KSI-CNA-02/private_subnets.json",
-      "evidence_v2/KSI-CNA-02/tiered_sgs.json",
-      "evidence_v2/KSI-CNA-02/private_dbs.json"
-    ]
-  },
+  "description": "Design systems to minimize the attack surface and minimize lateral movement if compromised.",
+  "justification": "Validates Network Segmentation and Isolation. Checks for: 1) Private Subnets (Attack Surface Reduction), 2) Security Group References (Prevention of Lateral Movement by binding rules to logical groups, not IPs), and 3) Private Database Placement.",
+  "cli_commands": [
+    {
+      "command": "aws ec2 describe-subnets --filters \"Name=map-public-ip-on-launch,Values=false\" --max-items 5 --output json",
+      "note": "ATTACK SURFACE: Validate the existence of Private Subnets (where Public IP mapping is disabled)."
+    },
+    {
+      "command": "aws ec2 describe-security-groups --max-items 20 --output json",
+      "note": "LATERAL MOVEMENT: Validate Security Groups that allow access ONLY from other specific Security Groups (Tiered Security), rather than broad IP ranges."
+    },
+    {
+      "command": "aws rds describe-db-instances --output json",
+      "note": "ISOLATION: Validate that RDS Databases are configured as 'PubliclyAccessible: false' and reside in defined subnets."
+    }
+  ],
+  "artifact_evidence_paths": [
+    "evidence_v2/KSI-CNA-02/private_subnets.json",
+    "evidence_v2/KSI-CNA-02/tiered_sgs.json",
+    "evidence_v2/KSI-CNA-02/private_dbs.json"
+  ]
+},
   "KSI-CNA-03": {
-    "description": "Use logical networking and related capabilities to enforce traffic flow controls.",
-    "justification": "Validates Logical Traffic Enforcement. Checks for: 1) VPC Endpoints (Enforces private connectivity to AWS services), 2) NAT Gateways (Enforces centralized egress), and 3) Load Balancer Schemes (Enforces defined entry points).",
-    "cli_commands": [
-      {
-        "command": "aws ec2 describe-vpc-endpoints --query \"VpcEndpoints[].{ID:VpcEndpointId, Service:ServiceName, Type:VpcEndpointType, State:State}\" --output json",
-        "note": "PRIVATE FLOW: Validate existence of VPC Endpoints, ensuring traffic to services like S3/DynamoDB bypasses the public internet."
-      },
-      {
-        "command": "aws ec2 describe-nat-gateways --filter Name=state,Values=available --output json",
-        "note": "EGRESS CONTROL: Validate active NAT Gateways. This proves instances in private subnets route outbound traffic centrally, rather than having individual Public IPs."
-      },
-      {
-        "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, Scheme:Scheme, DNS:DNSName}\" --output json",
-        "note": "INGRESS CONTROL: Validate Load Balancers. The 'Scheme' (internet-facing vs internal) proves that ingress traffic is logically separated and managed."
-      }
-    ],
-    "artifact_evidence_paths": [
-      "evidence_v2/KSI-CNA-03/vpc_endpoints.json",
-      "evidence_v2/KSI-CNA-03/nat_gateways.json",
-      "evidence_v2/KSI-CNA-03/lb_schemes.json"
-    ]
-  },
+  "description": "Use logical networking and related capabilities to enforce traffic flow controls.",
+  "justification": "Validates Logical Traffic Enforcement. Checks for: 1) VPC Endpoints (Enforces private connectivity to AWS services), 2) NAT Gateways (Enforces centralized egress), and 3) Load Balancer Schemes (Enforces defined entry points).",
+  "cli_commands": [
+    {
+      "command": "aws ec2 describe-vpc-endpoints --output json",
+      "note": "PRIVATE FLOW: Validate existence of VPC Endpoints, ensuring traffic to services like S3/DynamoDB bypasses the public internet."
+    },
+    {
+      "command": "aws ec2 describe-nat-gateways --filter Name=state,Values=available --output json",
+      "note": "EGRESS CONTROL: Validate active NAT Gateways. This proves instances in private subnets route outbound traffic centrally, rather than having individual Public IPs."
+    },
+    {
+      "command": "aws elbv2 describe-load-balancers --output json",
+      "note": "INGRESS CONTROL: Validate Load Balancers. The 'Scheme' (internet-facing vs internal) proves that ingress traffic is logically separated and managed."
+    }
+  ],
+  "artifact_evidence_paths": [
+    "evidence_v2/KSI-CNA-03/vpc_endpoints.json",
+    "evidence_v2/KSI-CNA-03/nat_gateways.json",
+    "evidence_v2/KSI-CNA-03/lb_schemes.json"
+  ]
+},
   "KSI-CNA-04": {
     "description": "Use immutable infrastructure with strictly defined functionality and privileges by default.",
     "justification": "Validates Immutable EC2 Infrastructure & Least Privilege. Checks for: 1) Terraform State (Proof of immutable IaC management), 2) Security Groups (Strict network functionality), and 3) Custom IAM Roles (Strictly defined privileges, excluding default AWS service roles).",
@@ -533,28 +533,28 @@
     ]
   },
   "KSI-CNA-06": {
-    "description": "Design systems for high availability and rapid recovery.",
-    "justification": "Validates Multi-AZ High Availability. Checks for: 1) Load Balancers spanning multiple AZs (Network HA), 2) RDS instances with Multi-AZ enabled (Database HA), and 3) Active AWS Backup Plans (Recovery Capability).",
-    "cli_commands": [
-      {
-        "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, AZs:AvailabilityZones[].ZoneName}\" --output json",
-        "note": "NETWORK HA: Validate that Load Balancers are configured across multiple Availability Zones."
-      },
-      {
-        "command": "aws rds describe-db-instances --query \"DBInstances[].{ID:DBInstanceIdentifier, MultiAZ:MultiAZ, SecondaryZone:SecondaryAvailabilityZone}\" --output json",
-        "note": "DATABASE HA: Validate that critical RDS instances have Multi-AZ enabled for automatic failover."
-      },
-      {
-        "command": "aws backup list-backup-plans --output json",
-        "note": "RECOVERY: Validate existence of Backup Plans to support rapid data recovery."
-      }
-    ],
-    "artifact_evidence_paths": [
-      "evidence_v2/KSI-CNA-06/multi_az_lbs.json",
-      "evidence_v2/KSI-CNA-06/multi_az_rds.json",
-      "evidence_v2/KSI-CNA-06/backup_plans.json"
-    ]
-  },
+  "description": "Design systems for high availability and rapid recovery.",
+  "justification": "Validates Multi-AZ High Availability. Checks for: 1) Load Balancers spanning multiple AZs (Network HA), 2) RDS instances with Multi-AZ enabled (Database HA), and 3) Active AWS Backup Plans (Recovery Capability).",
+  "cli_commands": [
+    {
+      "command": "aws elbv2 describe-load-balancers --output json",
+      "note": "NETWORK HA: Validate that Load Balancers are configured across multiple Availability Zones."
+    },
+    {
+      "command": "aws rds describe-db-instances --output json",
+      "note": "DATABASE HA: Validate that critical RDS instances have Multi-AZ enabled for automatic failover."
+    },
+    {
+      "command": "aws backup list-backup-plans --output json",
+      "note": "RECOVERY: Validate existence of Backup Plans to support rapid data recovery."
+    }
+  ],
+  "artifact_evidence_paths": [
+    "evidence_v2/KSI-CNA-06/multi_az_lbs.json",
+    "evidence_v2/KSI-CNA-06/multi_az_rds.json",
+    "evidence_v2/KSI-CNA-06/backup_plans.json"
+  ]
+},
   "KSI-CNA-07": {
     "description": "Maximize use of managed services and cloud resources",
     "justification": "Validates cloud-native maturity by comparing the ratio of legacy infrastructure (EC2) versus modern managed services (Lambda, RDS, API Gateway, etc).",
@@ -1374,3 +1374,5 @@
     ]
   }
 }
+
+
