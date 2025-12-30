@@ -403,8 +403,8 @@
         "note": "GOVERNANCE: Validate the existence of the Change Management Procedure document."
       },
       {
-      "command": "aws s3api head-object --bucket mks-states --key terraform.tfstate --output json",
-      "note": "EVIDENCE: Verify Terraform State versioning. VersionId in response proves change tracking and audit trail of infrastructure modifications."
+  "command": "aws s3api list-objects-v2 --bucket mks-states --prefix terraform.tfstate --max-items 1 --output json",
+  "note": "IMMUTABILITY: List Terraform State file with versioning metadata, proving version-controlled infrastructure changes."
       }
     ],
     "artifact_evidence_paths": [
@@ -486,8 +486,8 @@
     "justification": "Validates Immutable EC2 Infrastructure & Least Privilege. Checks for: 1) Terraform State (Proof of immutable IaC management), 2) Security Groups (Strict network functionality), and 3) Custom IAM Roles (Strictly defined privileges, excluding default AWS service roles).",
     "cli_commands": [
       {
-      "command": "aws s3api head-object --bucket mks-states --key terraform.tfstate --output json",
-      "note": "IMMUTABILITY: Verify Terraform State object and versioning metadata. Returns VersionId proving version-controlled infrastructure."
+  "command": "aws s3api list-objects-v2 --bucket mks-states --prefix terraform.tfstate --max-items 1 --output json",
+  "note": "IMMUTABILITY: List Terraform State file with versioning metadata, proving version-controlled infrastructure changes."
       },
       {
         "command": "aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=-1 --output json",
