@@ -1,0 +1,42 @@
+name: 'Push to code commit'
+
+on:
+ push:
+  branches:
+    - main
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  codecommit:
+    name: 'codecommit-push'
+    runs-on: ubuntu-latest
+    environment: production
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::893894210484:role/githubactions_role
+        role-session-name: Github_to_AWS_Federated
+        aws-region: 'us-east-1'
+
+    - name: Configure Git
+      run : |
+        git config --global credential.helper '!aws codecommit credential-helper $@'
+        git config --global credential.UseHttpPath true
+        git remote add sync https://git-codecommit.us-east-1.amazonaws.com/v1/repos/fedramp-trust-center
+        git push sync --mirror
