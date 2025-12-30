@@ -692,9 +692,28 @@ export const TrustCenterView = () => {
         } catch (e) { alert('Load failed.'); }
     };
 
+    const viewQuarterlyReport = async () => {
+        if (!handleAction('View Quarterly Report')) return;
+        try {
+            const res = await fetch(`${BASE_PATH}ongoing_authorization_report_Q4_2025.md`);
+            if (!res.ok) throw new Error('Failed');
+            const text = await res.text();
+            openModal('markdown', { title: 'Ongoing Authorization Report', subtitle: 'Automated Continuous Monitoring', markdown: text });
+        } catch (e) { alert('Failed to load report.'); }
+    };
+
+    const downloadQuarterlyReport = () => { if (!handleAction('Download Quarterly Report')) return; window.open(`${BASE_PATH}ongoing_authorization_report_Q4_2025.json`, '_blank'); };
+
     const handleDownloadPackage = async () => {
         if (!handleAction('Download Authorization Package')) return;
-        window.open(`${BASE_PATH}mas_boundary.json`, '_blank');
+        try {
+            const token = localStorage.getItem(API_CONFIG.TOKEN_KEY);
+            if (!token) { alert("Session expired."); return; }
+            const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PACKAGE_DOWNLOAD}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!response.ok) throw new Error("Access Denied");
+            const data = await response.json();
+            if (data.url) window.location.href = data.url;
+        } catch (error) { alert(`Download failed: ${error.message}`); }
     };
 
     if (loading) return (
@@ -820,7 +839,7 @@ export const TrustCenterView = () => {
                             </div>
                         </div>
                         <button onClick={handleDownloadPackage} className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg">
-                            {isAuthenticated ? <Download size={18} /> : <Lock size={18} />} Download JSON
+                            {isAuthenticated ? <Download size={18} /> : <Lock size={18} />} Download Package
                         </button>
                     </div>
 
@@ -842,8 +861,8 @@ export const TrustCenterView = () => {
                             </div>
                         </div>
                         <div className="flex gap-3">
-                            <button onClick={() => handleAction('View Report')} className="flex-1 py-3.5 bg-[#18181b] hover:bg-[#202025] text-slate-200 font-bold rounded-xl border border-white/5 transition-all flex items-center justify-center gap-2 text-sm"><FileText size={16} /> View Report</button>
-                            <button onClick={() => handleAction('Download report')} className="px-5 py-3.5 bg-[#18181b] hover:bg-[#202025] text-slate-200 rounded-xl border border-white/5 transition-all"><Download size={18} /></button>
+                            <button onClick={viewQuarterlyReport} className="flex-1 py-3.5 bg-[#18181b] hover:bg-[#202025] text-slate-200 font-bold rounded-xl border border-white/5 transition-all flex items-center justify-center gap-2 text-sm"><FileText size={16} /> View Report</button>
+                            <button onClick={downloadQuarterlyReport} className="px-5 py-3.5 bg-[#18181b] hover:bg-[#202025] text-slate-200 rounded-xl border border-white/5 transition-all"><Download size={18} /></button>
                         </div>
                     </div>
                 </div>
