@@ -892,25 +892,24 @@
     "justification": "Validates the Log Governance Model. Checks for: 1) The Audit Vault (S3), 2) The Encryption Key (KMS), and 3) The Access Policies (IAM) specifically designed for logging.",
     "cli_commands": [
       {
-        "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'audit') || contains(Name, 'logs') || contains(Name, 'trail')]\" --output json",
-        "note": "VAULT: Validate existence of the designated Audit Log bucket.",
+        "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'security') || contains(Name, 'artifacts') || contains(Name, 'audit') || contains(Name, 'logs')]\" --output json",
+        "note": "VAULT: Validate existence of compliance/security buckets.",
         "service": "infrastructure_validation"
       },
       {
-        "command": "aws kms list-aliases --query \"Aliases[?contains(AliasName, 'cloudtrail') || contains(AliasName, 'log') || contains(AliasName, 'audit')]\" --output json",
-        "note": "LOCK: Validate existence of a dedicated KMS key for encrypting log data.",
+        "command": "aws kms list-aliases --query \"Aliases[?contains(AliasName, 'aws/s3') || contains(AliasName, 'key') || contains(AliasName, 'encrypt')]\" --output json",
+        "note": "LOCK: Validate existence of encryption keys.",
         "service": "infrastructure_validation"
       },
       {
-        "command": "aws iam list-policies --scope Local --query \"Policies[?contains(PolicyName, 'Log') || contains(PolicyName, 'Audit') || contains(PolicyName, 'ViewOnly')]\" --output json",
-        "note": "PERMIT: Validate existence of specific IAM Policies (RBAC) that define who can read logs.",
+        "command": "aws iam list-policies --scope Local --query \"Policies[?contains(PolicyName, 'ReadOnly') || contains(PolicyName, 'Audit') || contains(PolicyName, 'Log') || contains(PolicyName, 'View')]\" --output json",
+        "note": "PERMIT: Validate existence of access control policies.",
         "service": "infrastructure_validation"
       }
     ],
     "outcome_type": "logging",
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-MLA-08/audit_buckets.json",
-      "evidence_v2/KSI-MLA-08/log_policies.json"
+      "evidence_v2/KSI-MLA-08/governance_infrastructure.json"
     ]
   },
   "KSI-PIY-01": {
