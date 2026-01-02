@@ -16,11 +16,13 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 import { DataProvider, useData } from './hooks/useData';
 import { ModalProvider, useModal } from './contexts/ModalContext';
 import { ModalContainer } from './components/modals';
+import SettingsModal from './components/modals/SettingsModal';
 
 import { TrustCenterView } from './components/trust/TrustCenterView';
 // FIX: Imported the correct named export
 import { TransparencyConsole } from './components/trust/TransparencyConsole';
 import { KSIGrid } from './components/findings/KSIGrid';
+import MetricsDashboard from './components/trust/MetricsDashboard';
 
 // --- CONFIGURATION ---
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
@@ -573,6 +575,7 @@ const AppShell = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const scrollY = useScrollPosition();
 
   const { user, isAuthenticated, logout } = useAuth();
@@ -626,7 +629,7 @@ const AppShell = () => {
               label="Trust Center"
               isActive={activeView === 'trust'}
               onClick={() => { setActiveView('trust'); setMobileMenuOpen(false); }}
-              badge={{ text: 'LIVE', color: 'bg-emerald-500/10 text-emerald-400' }}
+
             />
 
             {/* FIX: Renamed Label and switched logic to 'transparency' */}
@@ -635,7 +638,15 @@ const AppShell = () => {
               label="Transparency Console"
               isActive={activeView === 'transparency'}
               onClick={() => { setActiveView('transparency'); setMobileMenuOpen(false); }}
-              badge={{ text: 'AUDIT', color: 'bg-purple-500/10 text-purple-400' }}
+
+            />
+
+            <SidebarItem
+              icon={BarChart3}
+              label="Pipeline Metrics"
+              isActive={activeView === 'metrics'}
+              onClick={() => { setActiveView('metrics'); setMobileMenuOpen(false); }}
+
             />
 
             <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
@@ -651,7 +662,10 @@ const AppShell = () => {
           </nav>
 
           <div className="p-4 border-t border-white/5 bg-[#09090b]">
-            <button className="w-full py-2 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase">
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="w-full py-2 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase"
+            >
               <Settings size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> System Settings
             </button>
           </div>
@@ -677,6 +691,7 @@ const AppShell = () => {
                 {activeView === 'dashboard' && 'Platform / Overview'}
                 {activeView === 'trust' && 'Platform / Trust Center'}
                 {activeView === 'transparency' && 'Platform / Transparency Console'}
+                {activeView === 'metrics' && 'Platform / Pipeline Metrics'}
               </span>
             </div>
           </div>
@@ -707,11 +722,14 @@ const AppShell = () => {
           <div className="p-6 lg:p-8 max-w-[1600px] mx-auto relative z-10">
             {activeView === 'dashboard' ? <DashboardContent /> :
               activeView === 'trust' ? <TrustCenterView /> :
-                activeView === 'transparency' ? <TransparencyConsole /> : null}
+                activeView === 'transparency' ? <TransparencyConsole /> :
+                  activeView === 'metrics' ? <MetricsDashboard /> : null}
           </div>
         </main>
 
       </div>
+
+      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 };
