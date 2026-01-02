@@ -45,16 +45,16 @@ const THEME = {
     }
 };
 
+const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
+    ? `${import.meta.env.BASE_URL}data`
+    : `${import.meta.env.BASE_URL}/data`;
+
 export default function MetricsDashboard() {
     const [history, setHistory] = useState<WeeklyMetrics[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // ✅ Environment Detection for Fetching 
-    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const DATA_URL = isDev
-        ? '/data/metrics_history.jsonl'
-        : 'https://github.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/releases/download/latest-metrics/metrics_history.jsonl';
+    const DATA_URL = `${BASE_PATH}/metrics_history.jsonl`;
 
     useEffect(() => {
         fetch(DATA_URL)
@@ -143,25 +143,24 @@ export default function MetricsDashboard() {
             <div className="max-w-md w-full bg-[#18181b] border border-red-500/30 p-8 rounded-xl shadow-2xl">
                 <AlertCircle className="text-red-500 mx-auto mb-4" size={48} />
                 <h2 className="text-white font-black uppercase tracking-tight">Stream Failure</h2>
-                <p className="text-slate-500 text-xs mt-2 font-mono truncate">{error}</p>
+                <p className="text-slate-400 text-sm mt-4 font-mono">{error || "Unable to retrieve metrics archive."}</p>
             </div>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-[#050505] text-slate-300 p-6 lg:p-10 font-sans selection:bg-blue-500/30">
+        <div className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0a0a0d] to-[#050505] p-8">
             <div className="max-w-7xl mx-auto space-y-8">
-
                 {/* --- HEADER ---  */}
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-white/5 pb-10">
-                    <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center shadow-xl shadow-blue-500/5">
-                            <TrendingUp className="text-blue-500" size={28} />
+                <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-white/5">
+                    <div className="flex items-center gap-4">
+                        <div className="bg-gradient-to-br from-blue-600/20 to-indigo-700/20 p-3 rounded-xl border border-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.15)]">
+                            <TrendingUp size={24} className="text-blue-400" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-black text-white uppercase tracking-tighter">Automated Compliance Activity</h1>
+                            <h1 className="text-3xl font-black text-white uppercase tracking-tighter">Compliance Pipeline Effectiveness</h1>
                             <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-1">
-                                {isDev ? 'Automation Engineering Metrics' : 'Live Release'} 
+                                Pipeline Development Activity • KSI-PIY-06
                             </p>
                         </div>
                     </div>

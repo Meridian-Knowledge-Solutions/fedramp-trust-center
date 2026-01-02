@@ -26,6 +26,7 @@ export const DataProvider = ({ children }) => {
   const [metadata, setMetadata] = useState(null);
   const [history, setHistory] = useState([]);
   const [masData, setMasData] = useState(null);
+  const [metricsData, setMetricsData] = useState(null);
   const [metrics, setMetrics] = useState({
     score: 0, passed: 0, failed: 0, warning: 0, info: 0
   });
@@ -109,7 +110,7 @@ export const DataProvider = ({ children }) => {
       const cacheBuster = Date.now();
 
       // --- DATA SOURCES ---
-      // PUBLIC (from /public/data/): validations, history, mas_boundary, cli_command_register
+      // PUBLIC (from /public/data/): validations, history, mas_boundary, cli_command_register, summary
       // NOTE: cli_command_register.json is synced from private repo via GitHub Actions pipeline
       // This ensures command details stay in private repo but are accessible in public app
 
@@ -124,15 +125,17 @@ export const DataProvider = ({ children }) => {
         validations: `${BASE_PATH}/unified_ksi_validations.json?t=${cacheBuster}`,
         register: `${BASE_PATH}/cli_command_register.json?t=${cacheBuster}`, // Synced from private repo via pipeline
         history: `${BASE_PATH}/ksi_history.jsonl?t=${cacheBuster}`,
-        mas: `${BASE_PATH}/mas_boundary.json?t=${cacheBuster}`
+        mas: `${BASE_PATH}/mas_boundary.json?t=${cacheBuster}`,
+        metricsHistory: `${BASE_PATH}/metrics_history.jsonl?t=${cacheBuster}`
       };
 
       // 1. Fetch All Data Sources
-      const [valRes, regRes, histRes, masRes] = await Promise.all([
+      const [valRes, regRes, histRes, masRes, metricsRes] = await Promise.all([
         fetch(urls.validations),
         fetch(urls.register),
         fetch(urls.history),
-        fetch(urls.mas)
+        fetch(urls.mas),
+        fetch(urls.metricsHistory)
       ]);
 
       // --- MAS DATA PROCESSING (WITH DEBUGGING) ---
@@ -151,6 +154,44 @@ export const DataProvider = ({ children }) => {
         console.error(`   Attempted URL: ${urls.mas}`);
         if (masRes.status === 404) {
           console.error(`   TIP: Ensure "mas_boundary.json" is in the "/public/data/" directory.`);
+        }
+      }
+
+      // --- METRICS DATA PROCESSING ---
+      if (metricsRes.ok) {
+        try {
+          const metricsText = await metricsRes.text();
+          if (!metricsText.trim().startsWith('<')) {
+            const rawLines = metricsText.split('\n')
+              .map(line => line.trim())
+              .filter(line => line.startsWith('{'))
+              .map(line => {
+                try { return JSON.parse(line); } catch { return null; }
+              })
+              .filter(Boolean);
+
+            const deduplicated = Object.values(
+              rawLines.reduce((acc, curr) => {
+                acc[curr.week] = curr;
+                return acc;
+              }, {})
+            );
+
+            setMetricsData({ weeks: deduplicated });
+            console.log("✅ Metrics History Loaded Successfully");
+            console.log(`   Weeks Available: ${deduplicated.length}`);
+          } else {
+            console.warn("⚠️ Metrics History returned HTML (likely 404)");
+          }
+        } catch (e) {
+          console.warn("⚠️ Failed to parse Metrics History:", e);
+        }
+      } else {
+        console.error(`❌ Metrics History Fetch Failed!`);
+        console.error(`   Status: ${metricsRes.status} (${metricsRes.statusText})`);
+        console.error(`   Attempted URL: ${urls.metricsHistory}`);
+        if (metricsRes.status === 404) {
+          console.error(`   TIP: Ensure "metrics_history.jsonl" is in the "/public/data/" directory.`);
         }
       }
 
@@ -365,7 +406,7 @@ export const DataProvider = ({ children }) => {
   }, [loadData]);
 
   return (
-    <DataContext.Provider value={{ ksis, metrics, metadata, history, masData, loading, reload: loadData }}>
+    <DataContext.Provider value={{ ksis, metrics, metadata, history, masData, metricsData, loading, reload: loadData }}>
       {children}
     </DataContext.Provider>
   );
