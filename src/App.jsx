@@ -604,7 +604,12 @@ const AppShell = () => {
           <div className="h-16 flex items-center px-5 border-b border-white/5 mb-2">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-1 relative overflow-hidden">
-                <Shield size={16} className="text-blue-500" />
+                {/* Custom Logo Implementation */}
+                <img 
+                  src={`${import.meta.env.BASE_URL}meridian-favicon.png`} 
+                  alt="Meridian Logo" 
+                  className="w-full h-full object-contain relative z-10"
+                />
                 <div className="absolute inset-0 bg-blue-500/10 blur-xl"></div>
               </div>
 
