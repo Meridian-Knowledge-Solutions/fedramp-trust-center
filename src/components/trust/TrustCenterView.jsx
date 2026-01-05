@@ -629,13 +629,18 @@ export const TrustCenterView = () => {
         const fetchData = async () => {
             const ts = Date.now();
             try {
-                const [boundRes, archRes, histRes, scnRes, dateRes] = await Promise.all([
+                const [boundRes, archRes, histRes, dateRes] = await Promise.all([
                     fetch(`${BASE_PATH}mas_boundary.json?t=${ts}`),
                     fetch(`${BASE_PATH}mas_architecture_map.json?t=${ts}`),
                     fetch(`${BASE_PATH}mas_history.jsonl?t=${ts}`),
-                    fetch(`${BASE_PATH}scn_history.jsonl?t=${ts}`),
                     fetch(`${BASE_PATH}next_report_date.json?t=${ts}`)
                 ]);
+
+                // Try public_scn_history.jsonl first, fallback to scn_history.jsonl
+                let scnRes = await fetch(`${BASE_PATH}public_scn_history.jsonl?t=${ts}`);
+                if (!scnRes.ok) {
+                    scnRes = await fetch(`${BASE_PATH}scn_history.jsonl?t=${ts}`);
+                }
 
                 if (boundRes.ok) setMasBoundary(await boundRes.json());
                 if (archRes.ok) setMasArch(await archRes.json());
@@ -652,8 +657,10 @@ export const TrustCenterView = () => {
                     const text = await scnRes.text();
                     const lines = text.trim().split('\n')
                         .map(line => { try { return JSON.parse(line); } catch { return null; } })
-                        .filter(Boolean);
-                    setScnHistory(lines.slice(0, 5));
+                        .filter(Boolean)
+                        .filter(entry => entry.change_id && entry.change_id !== 'SYS-INIT') // Filter out placeholder entries
+                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort newest first
+                    setScnHistory(lines.slice(0, 10)); // Show last 10 entries
                 }
 
                 if (dateRes.ok) {
@@ -876,29 +883,64 @@ export const TrustCenterView = () => {
                             </h3>
                             <div className="text-xs text-slate-500 mt-1 font-mono">SCN History (Significant Change Notifications)</div>
                         </div>
+                        <div className="flex gap-2">
+                            <span className="text-[9px] bg-blue-500/10 text-blue-400 px-2 py-1 rounded border border-blue-500/20 font-mono">
+                                {scnHistory.length} Changes
+                            </span>
+                        </div>
                     </div>
                     <div className="overflow-hidden rounded-xl border border-white/5 bg-[#09090b]">
                         {scnHistory.length === 0 ? (
-                            <div className="p-8 text-center text-slate-600 text-sm italic">Waiting for change detection data...</div>
+                            <div className="p-8 text-center text-slate-600 text-sm italic">No significant changes detected yet...</div>
                         ) : (
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="border-b border-white/5 bg-white/[0.02] text-[10px] text-slate-500 uppercase font-mono">
                                         <th className="p-4 font-bold">Date</th>
                                         <th className="p-4 font-bold">Change ID</th>
-                                        <th className="p-4 font-bold">Class</th>
-                                        <th className="p-4 font-bold text-right">Status</th>
+                                        <th className="p-4 font-bold">Classification</th>
+                                        <th className="p-4 font-bold text-center">Components</th>
+                                        <th className="p-4 font-bold text-right">Impact</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5 text-sm font-mono">
-                                    {scnHistory.map((entry, index) => (
-                                        <tr key={index} className="hover:bg-white/[0.02] transition-colors">
-                                            <td className="p-4 text-slate-300">{new Date(entry.timestamp).toLocaleDateString()}</td>
-                                            <td className="p-4 text-xs text-blue-400">{entry.change_id}</td>
-                                            <td className="p-4"><ClassificationBadge type={entry.classification} label={entry.description} /></td>
-                                            <td className="p-4 text-right"><span className="text-[10px] text-emerald-500 font-bold border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 rounded">APPLIED</span></td>
-                                        </tr>
-                                    ))}
+                                    {scnHistory.map((entry, index) => {
+                                        // Determine impact badge styling
+                                        const impact = entry.infrastructure_impact || 'low';
+                                        const impactStyles = {
+                                            high: 'text-rose-500 bg-rose-500/10 border-rose-500/20',
+                                            medium: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
+                                            low: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
+                                        }[impact] || 'text-slate-500 bg-slate-500/10 border-slate-500/20';
+
+                                        return (
+                                            <tr key={entry.change_id || index} className="hover:bg-white/[0.02] transition-colors">
+                                                <td className="p-4 text-slate-300">
+                                                    <div>{new Date(entry.timestamp).toLocaleDateString()}</div>
+                                                    <div className="text-[10px] text-slate-500">{new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                                </td>
+                                                <td className="p-4">
+                                                    <span className="text-xs text-blue-400 font-mono">{entry.change_id}</span>
+                                                </td>
+                                                <td className="p-4">
+                                                    <ClassificationBadge type={entry.classification} />
+                                                    {entry.description && (
+                                                        <div className="text-[10px] text-slate-500 mt-1 max-w-[200px] truncate" title={entry.description}>
+                                                            {entry.description}
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <span className="text-slate-300 font-bold">{entry.affected_component_count || 0}</span>
+                                                </td>
+                                                <td className="p-4 text-right">
+                                                    <span className={`text-[10px] font-bold border px-2 py-0.5 rounded uppercase ${impactStyles}`}>
+                                                        {impact}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         )}
@@ -966,11 +1008,24 @@ const ArtifactBadge = ({ label }) => (
 const ClassificationBadge = ({ type, label }) => {
     let styles = "bg-slate-800 text-slate-300 border-slate-700";
     let Icon = GitCommit;
-    if (type === 'routine_recurring') { styles = "bg-blue-500/10 text-blue-400 border-blue-500/20"; Icon = RefreshCw; }
-    else if (type === 'adaptive') { styles = "bg-purple-500/10 text-purple-400 border-purple-500/20"; Icon = Zap; }
+
+    if (type === 'routine_recurring' || type === 'routine') {
+        styles = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+        Icon = RefreshCw;
+    } else if (type === 'adaptive') {
+        styles = "bg-purple-500/10 text-purple-400 border-purple-500/20";
+        Icon = Zap;
+    } else if (type === 'transformative') {
+        styles = "bg-rose-500/10 text-rose-400 border-rose-500/20";
+        Icon = AlertTriangle;
+    }
+
+    // Format label for display
+    const displayLabel = label || type?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
     return (
         <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${styles}`}>
-            <Icon size={10} /> {label || type?.replace('_', ' ')}
+            <Icon size={10} /> {displayLabel}
         </div>
     );
 };
