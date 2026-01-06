@@ -300,7 +300,8 @@ const ComplianceChart = memo(() => {
       .map(item => ({
         ...item,
         displayDate: new Date(item.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
-        rate: parseFloat(item.compliance_rate || 0),
+        // FIX: Mapping 'score' from JSONL history to the 'rate' property
+        rate: parseFloat(item.score || 0),
         passCount: parseInt(item.passed || 0),
         failCount: parseInt(item.failed || 0)
       }));
@@ -445,7 +446,8 @@ const DashboardContent = memo(() => {
     const sorted = [...history].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
     return {
-      score: sorted.map(h => ({ val: parseFloat(h.compliance_rate || 0) })),
+      // FIX: Mapping 'score' from history instead of compliance_rate
+      score: sorted.map(h => ({ val: parseFloat(h.score || 0) })),
       passed: sorted.map(h => ({ val: parseInt(h.passed || 0) })),
       failed: sorted.map(h => ({ val: parseInt(h.failed || 0) }))
     };
@@ -604,7 +606,12 @@ const AppShell = () => {
           <div className="h-16 flex items-center px-5 border-b border-white/5 mb-2">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-1 relative overflow-hidden">
-                <Shield size={16} className="text-blue-500" />
+                {/* Logo implementation from previous fix */}
+                <img 
+                  src={`${import.meta.env.BASE_URL}meridian-favicon.png`} 
+                  alt="Meridian Logo" 
+                  className="w-full h-full object-contain relative z-10"
+                />
                 <div className="absolute inset-0 bg-blue-500/10 blur-xl"></div>
               </div>
 

@@ -5,7 +5,8 @@ import {
 } from 'recharts';
 import {
     GitCommit, Shield, Zap, Activity, Clock, Download,
-    TrendingUp, Cpu, Layout, AlertCircle
+    TrendingUp, Cpu, Layout, AlertCircle, Users, GitPullRequest, 
+    GitMerge, AlertOctagon, FileText
 } from 'lucide-react';
 
 // --- TYPES & INTERFACES ---
@@ -18,15 +19,33 @@ interface CommitBreakdown {
     tests: number;
     infrastructure: number;
     other: number;
+    authors?: number;
+    additions?: number;
+    deletions?: number;
+    changed_files?: number;
+}
+
+interface PullRequests {
+    merged: number;
+    open: number;
+    created: number;
+}
+
+interface Issues {
+    closed: number;
+    open: number;
+    created: number;
 }
 
 interface WeeklyMetrics {
     week: string;
     timestamp: string;
-    commits: number | CommitBreakdown; // Supports legacy flat number or new categorized object
+    commits: number | CommitBreakdown;
+    pull_requests?: PullRequests;
+    issues?: Issues;
     dependabot?: { total: number; merged: number; open: number; };
-    dependabot_merged?: number; // Legacy field support
-    security_prs?: number;      // Legacy field support
+    dependabot_merged?: number;
+    security_prs?: number;
     ci_success_rate: number;
     releases: number;
 }
@@ -35,13 +54,13 @@ const THEME = {
     card: "bg-[#18181b] border border-white/5 hover:border-blue-500/30 transition-all duration-500 shadow-2xl rounded-xl overflow-hidden",
     statLabel: "text-[10px] uppercase tracking-[0.2em] font-black text-slate-500",
     chartColors: {
-        features: '#3b82f6',     // Blue
-        security: '#10b981',     // Emerald
-        infra: '#8b5cf6',        // Violet
-        fixes: '#f59e0b',        // Amber
-        tests: '#ef4444',        // Red
-        docs: '#06b6d4',         // Cyan
-        other: '#3f3f46'         // Zinc-600 (Used for base volume & legacy data)
+        features: '#3b82f6',
+        security: '#10b981',
+        infra: '#8b5cf6',
+        fixes: '#f59e0b',
+        tests: '#ef4444',
+        docs: '#06b6d4',
+        other: '#3f3f46'
     }
 };
 
@@ -63,7 +82,6 @@ export default function MetricsDashboard() {
                 return res.text();
             })
             .then(text => {
-                // ✅ Robust JSONL Parsing & Deduplication
                 const rawLines = text.split('\n')
                     .map(line => line.trim())
                     .filter(line => line.startsWith('{'))
@@ -72,7 +90,6 @@ export default function MetricsDashboard() {
                     })
                     .filter(Boolean);
 
-                // Keeps only the latest entry found for each week (categorized data overwrites legacy)
                 const deduplicated = Object.values(
                     rawLines.reduce((acc: any, curr: any) => {
                         acc[curr.week] = curr;
@@ -89,7 +106,6 @@ export default function MetricsDashboard() {
             });
     }, [DATA_URL]);
 
-    // ✅ DATA NORMALIZATION 
     const stats = useMemo(() => {
         if (!history.length) return null;
 
@@ -97,7 +113,6 @@ export default function MetricsDashboard() {
             const c = entry.commits;
             const isObj = typeof c === 'object';
 
-            // Map legacy flat commit numbers to "Other" so they render in the stack
             return {
                 week: entry.week,
                 total: isObj ? (c as CommitBreakdown).total : c as number,
@@ -106,14 +121,17 @@ export default function MetricsDashboard() {
                 infra: isObj ? (c as CommitBreakdown).infrastructure : 0,
                 fixes: isObj ? (c as CommitBreakdown).fixes : 0,
                 other: isObj ? (c as CommitBreakdown).other : (c as number),
-                merged: entry.dependabot ? entry.dependabot.merged : (entry.dependabot_merged || 0)
+                merged: entry.dependabot ? entry.dependabot.merged : (entry.dependabot_merged || 0),
+                authors: isObj ? (c as CommitBreakdown).authors || 0 : 0,
+                prsMerged: entry.pull_requests?.merged || 0,
+                issuesClosed: entry.issues?.closed || 0
             };
         });
 
         const current = normalized[normalized.length - 1];
         const latestRaw = history[history.length - 1];
+        const latestCommits = typeof latestRaw.commits === 'object' ? latestRaw.commits as CommitBreakdown : null;
 
-        // Distribution for Pie Chart 
         const distribution = [
             { name: 'Features', value: current.features, color: THEME.chartColors.features },
             { name: 'Security', value: current.security, color: THEME.chartColors.security },
@@ -128,7 +146,13 @@ export default function MetricsDashboard() {
             totalCommits: normalized.reduce((sum, w) => sum + w.total, 0),
             avgCI: history.reduce((sum, w) => sum + w.ci_success_rate, 0) / history.length,
             distribution,
-            latestReleases: latestRaw.releases
+            latestReleases: latestRaw.releases,
+            latestAuthors: latestCommits?.authors || 0,
+            latestAdditions: latestCommits?.additions || 0,
+            latestDeletions: latestCommits?.deletions || 0,
+            latestChangedFiles: latestCommits?.changed_files || 0,
+            latestPRs: latestRaw.pull_requests,
+            latestIssues: latestRaw.issues
         };
     }, [history]);
 
@@ -170,11 +194,48 @@ export default function MetricsDashboard() {
                     </div>
                 </header>
 
-                {/* --- KPI SECTION ---  */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <StatCard label="Aggregate Commitments" value={stats.totalCommits} icon={GitCommit} color="text-blue-500" />
-                    <StatCard label="Stability Threshold" value={`${stats.avgCI.toFixed(1)}%`} icon={Zap} color="text-purple-500" />
-                    <StatCard label="Latest Cycle Volume" value={stats.current.total} icon={Activity} color="text-emerald-500" />
+                {/* --- PULSE OVERVIEW ---  */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <PulseCard label="Contributors" value={stats.latestAuthors} icon={Users} color="text-purple-500" />
+                    <PulseCard label="Commits" value={stats.current.total} icon={GitCommit} color="text-blue-500" />
+                    <PulseCard label="PRs Merged" value={stats.latestPRs?.merged || 0} icon={GitMerge} color="text-emerald-500" />
+                    <PulseCard label="Issues Closed" value={stats.latestIssues?.closed || 0} icon={AlertOctagon} color="text-amber-500" />
+                    <PulseCard label="Files Changed" value={stats.latestChangedFiles} icon={FileText} color="text-cyan-500" />
+                </div>
+
+                {/* --- CODE CHANGES STATS ---  */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className={THEME.card + " p-6"}>
+                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <TrendingUp size={14} className="text-emerald-400" /> Code Changes (This Week)
+                        </h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-black/20 p-4 rounded-lg border border-white/5">
+                                <div className={THEME.statLabel + " text-emerald-400"}>Additions</div>
+                                <div className="text-2xl font-bold text-white mt-1">+{stats.latestAdditions.toLocaleString()}</div>
+                            </div>
+                            <div className="bg-black/20 p-4 rounded-lg border border-white/5">
+                                <div className={THEME.statLabel + " text-rose-400"}>Deletions</div>
+                                <div className="text-2xl font-bold text-white mt-1">-{stats.latestDeletions.toLocaleString()}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={THEME.card + " p-6"}>
+                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <GitPullRequest size={14} className="text-blue-400" /> Pull Requests & Issues
+                        </h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-black/20 p-4 rounded-lg border border-white/5">
+                                <div className={THEME.statLabel}>PRs Open</div>
+                                <div className="text-2xl font-bold text-white mt-1">{stats.latestPRs?.open || 0}</div>
+                            </div>
+                            <div className="bg-black/20 p-4 rounded-lg border border-white/5">
+                                <div className={THEME.statLabel}>Issues Open</div>
+                                <div className="text-2xl font-bold text-white mt-1">{stats.latestIssues?.open || 0}</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* --- STACKED AREA CHART (DEVELOPMENT FLOW) ---  */}
@@ -256,6 +317,7 @@ export default function MetricsDashboard() {
                     <div className="flex gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
                         <div>Archive node: <span className="text-white ml-2">metrics_history.jsonl</span></div>
                         <div>Status: <span className="text-emerald-500 ml-2">Authenticated</span></div>
+                        <div>Privacy: <span className="text-blue-400 ml-2">Aggregate Only</span></div>
                     </div>
                     <a href={DATA_URL} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-2 bg-zinc-950 hover:bg-zinc-900 border border-white/5 text-slate-400 hover:text-white rounded-lg text-[10px] font-black uppercase transition-all shadow-lg">
                         <Download size={12} /> Raw Sequence Archive
@@ -267,6 +329,18 @@ export default function MetricsDashboard() {
 }
 
 // --- HELPER COMPONENTS ---
+function PulseCard({ label, value, icon: Icon, color }: any) {
+    return (
+        <div className={THEME.card + " p-4 flex flex-col items-center justify-center text-center group"}>
+            <div className={`mb-2 ${color}`}>
+                <Icon size={20} />
+            </div>
+            <div className="text-2xl font-black text-white tracking-tighter">{value}</div>
+            <span className={THEME.statLabel + " mt-1"}>{label}</span>
+        </div>
+    );
+}
+
 function StatCard({ label, value, icon: Icon, color }: any) {
     return (
         <div className={THEME.card + " p-6 flex justify-between items-center group shadow-xl"}>
