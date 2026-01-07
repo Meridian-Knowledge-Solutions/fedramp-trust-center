@@ -4,7 +4,7 @@ import {
   Menu, Bell, CheckCircle2, XCircle, AlertTriangle,
   Activity, Download, Calendar, Clock,
   Shield, Target, FileText, ChevronRight, Zap,
-  Filter, RefreshCw, BarChart3, FileCheck, Eye
+  Filter, RefreshCw, BarChart3, FileCheck, Eye, X
 } from 'lucide-react';
 
 import {
@@ -19,7 +19,6 @@ import { ModalContainer } from './components/modals';
 import SettingsModal from './components/modals/SettingsModal';
 
 import { TrustCenterView } from './components/trust/TrustCenterView';
-// FIX: Imported the correct named export
 import { TransparencyConsole } from './components/trust/TransparencyConsole';
 import { KSIGrid } from './components/findings/KSIGrid';
 import MetricsDashboard from './components/trust/MetricsDashboard';
@@ -57,7 +56,6 @@ const useScrollPosition = () => {
   return scrollY;
 };
 
-// Helper function to calculate time elapsed
 const getTimeElapsed = (date) => {
   const now = new Date();
   const diffMs = now - date;
@@ -65,15 +63,10 @@ const getTimeElapsed = (date) => {
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffDays > 0) {
-    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-  } else if (diffHours > 0) {
-    return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-  } else if (diffMins > 0) {
-    return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-  } else {
-    return 'Just now';
-  }
+  if (diffDays > 0) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  if (diffHours > 0) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  if (diffMins > 0) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+  return 'Just now';
 };
 
 // --- MICRO COMPONENTS ---
@@ -112,9 +105,7 @@ const Sparkline = memo(({ data, color }) => (
   </div>
 ));
 
-// --- STATS CARD (Redesigned with Status Indicator) ---
 const StatsCard = memo(({ title, value, contextMetric, statusLabel, statusColor, colorClass, icon: Icon, chartData }) => {
-  // Fallback for sparkline if empty
   const sparkData = chartData && chartData.length > 0 ? chartData : [{ val: 0 }, { val: 0 }];
   const hexColor = colorClass.includes('emerald') ? '#10b981' : colorClass.includes('rose') ? '#f43f5e' : colorClass.includes('amber') ? '#f59e0b' : '#3b82f6';
 
@@ -245,7 +236,6 @@ const ImpactBanner = memo(() => {
   );
 });
 
-// --- TOOLTIP COMPONENT ---
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
@@ -306,6 +296,9 @@ const ComplianceChart = memo(() => {
       }));
   }, [history]);
 
+  // ADDED: Calculate the total number of validation runs
+  const totalRuns = chartData.length;
+
   const ChartComponent = chartView === 'bar' ? BarChart : AreaChart;
 
   if (chartData.length === 0) {
@@ -335,6 +328,9 @@ const ComplianceChart = memo(() => {
           <p className="text-slate-500 text-[11px] uppercase tracking-wider font-bold flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
             Real-time Compliance Trend
+            {/* UPDATED: Added run counter with styling to match the dashboard */}
+            <span className="text-slate-700 mx-1">•</span>
+            <span className="text-blue-400 font-mono tracking-normal">{totalRuns} Historical Runs</span>
           </p>
         </div>
 
@@ -437,13 +433,9 @@ const ComplianceChart = memo(() => {
 const DashboardContent = memo(() => {
   const { metrics, ksis, history, metadata } = useData();
 
-  // --- DYNAMIC SPARKLINE LOGIC ---
   const sparklines = useMemo(() => {
     if (!history || history.length === 0) return { score: [], passed: [], failed: [] };
-
-    // Sort by date 
     const sorted = [...history].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
     return {
       score: sorted.map(h => ({ val: parseFloat(h.compliance_rate || 0) })),
       passed: sorted.map(h => ({ val: parseInt(h.passed || 0) })),
@@ -451,27 +443,14 @@ const DashboardContent = memo(() => {
     };
   }, [history]);
 
-  // --- CALCULATE CONTEXTUAL METRICS ---
   const totalControls = ksis?.length || 0;
   const targetThreshold = parseFloat(metadata?.impact_thresholds?.min || 90);
-
-  // For Compliance Score: show target
   const complianceTarget = `Target: ${targetThreshold}%`;
 
-  // For counts: calculate percentage of total
-  const passingPercent = totalControls > 0
-    ? ((parseInt(metrics.passed) / totalControls) * 100).toFixed(1)
-    : '0.0';
+  const passingPercent = totalControls > 0 ? ((parseInt(metrics.passed) / totalControls) * 100).toFixed(1) : '0.0';
+  const failingPercent = totalControls > 0 ? ((parseInt(metrics.failed) / totalControls) * 100).toFixed(1) : '0.0';
+  const warningsPercent = totalControls > 0 ? ((parseInt(metrics.warning) / totalControls) * 100).toFixed(1) : '0.0';
 
-  const failingPercent = totalControls > 0
-    ? ((parseInt(metrics.failed) / totalControls) * 100).toFixed(1)
-    : '0.0';
-
-  const warningsPercent = totalControls > 0
-    ? ((parseInt(metrics.warning) / totalControls) * 100).toFixed(1)
-    : '0.0';
-
-  // --- CALCULATE STATUS INDICATORS ---
   const complianceScore = parseFloat(metrics.score);
   const complianceStatus = complianceScore >= targetThreshold
     ? { label: 'On Target', color: 'text-emerald-400' }
@@ -479,9 +458,7 @@ const DashboardContent = memo(() => {
       ? { label: 'Near Target', color: 'text-amber-400' }
       : { label: 'Below Target', color: 'text-rose-400' };
 
-  const passingStatus = parseInt(metrics.passed) > 0
-    ? { label: 'Active', color: 'text-emerald-400' }
-    : { label: 'No Data', color: 'text-slate-400' };
+  const passingStatus = parseInt(metrics.passed) > 0 ? { label: 'Active', color: 'text-emerald-400' } : { label: 'No Data', color: 'text-slate-400' };
 
   const failingStatus = parseInt(metrics.failed) === 0
     ? { label: 'All Clear', color: 'text-emerald-400' }
@@ -489,14 +466,11 @@ const DashboardContent = memo(() => {
       ? { label: 'Minor Issues', color: 'text-amber-400' }
       : { label: 'Needs Attention', color: 'text-rose-400' };
 
-  const warningStatus = parseInt(metrics.warning) === 0
-    ? { label: 'All Clear', color: 'text-emerald-400' }
-    : { label: 'Active', color: 'text-amber-400' };
+  const warningStatus = parseInt(metrics.warning) === 0 ? { label: 'All Clear', color: 'text-emerald-400' } : { label: 'Active', color: 'text-amber-400' };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4">
       <ImpactBanner />
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
           title="Compliance Score"
@@ -539,9 +513,7 @@ const DashboardContent = memo(() => {
           chartData={[{ val: metrics.warning }]}
         />
       </div>
-
       <ComplianceChart />
-
       <div className={`${THEME.panel} rounded-xl border ${THEME.border} overflow-hidden shadow-sm`}>
         <div className="p-5 border-b border-white/5 flex justify-between items-center bg-[#09090b]">
           <div>
@@ -552,7 +524,6 @@ const DashboardContent = memo(() => {
               Real-time validation of {ksis.length} security controls
             </p>
           </div>
-
           <div className="flex items-center gap-2">
             <div className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-bold border border-emerald-500/20 flex items-center gap-2 tracking-wider">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
@@ -560,7 +531,6 @@ const DashboardContent = memo(() => {
             </div>
           </div>
         </div>
-
         <div className="p-0 bg-[#09090b]">
           <KSIGrid />
         </div>
@@ -584,43 +554,52 @@ const AppShell = () => {
   return (
     <div className={`flex h-screen ${THEME.bg} text-slate-300 font-sans overflow-hidden selection:bg-blue-500/30`}>
 
-      {/* Mobile Backdrop */}
+      {/* Mobile Backdrop - Optimization: Darkens background and traps clicks to close menu */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-30 lg:hidden"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] lg:hidden animate-in fade-in duration-300"
           onClick={() => setMobileMenuOpen(false)}
         ></div>
       )}
 
-      {/* Sidebar */}
+      {/* Optimized Sidebar: Drawer on Mobile, Persistent on Desktop */}
       <aside
-        className={`fixed lg:relative z-40 flex-shrink-0 w-64 h-full bg-[#0c0c10] border-r border-white/5 transition-all duration-300 transform 
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-64 lg:w-0 lg:-translate-x-0 lg:overflow-hidden'}
-          ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        className={`fixed lg:relative z-[70] flex-shrink-0 h-full bg-[#0c0c10] border-r border-white/5 transition-all duration-300 transform 
+          /* Mobile: Off-screen left by default, width 80% to show sliver of content */
+          w-[280px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+          
+          /* Desktop: Persistent or Collapsible width based on sidebarOpen state */
+          lg:translate-x-0 ${sidebarOpen ? 'lg:w-64' : 'lg:w-0 lg:overflow-hidden'}
         `}
       >
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="h-16 flex items-center px-5 border-b border-white/5 mb-2">
+          {/* Header with Close Button for Mobile */}
+          <div className="h-16 flex items-center justify-between px-5 border-b border-white/5 mb-2">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-1 relative overflow-hidden">
-                {/* Custom Logo Implementation */}
-                <img 
-                  src={`${import.meta.env.BASE_URL}meridian-favicon.png`} 
-                  alt="Meridian Logo" 
+                <img
+                  src={`${import.meta.env.BASE_URL}meridian-favicon.png`}
+                  alt="Meridian Logo"
                   className="w-full h-full object-contain relative z-10"
                 />
                 <div className="absolute inset-0 bg-blue-500/10 blur-xl"></div>
               </div>
-
               <div>
                 <div className="font-bold text-white tracking-tight leading-none text-sm">Meridian</div>
                 <div className="text-[9px] text-slate-500 font-mono mt-0.5 tracking-widest uppercase">Trust Center</div>
               </div>
             </div>
+
+            {/* Mobile Only: Explicit Close Button */}
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="lg:hidden p-2 text-slate-500 hover:text-white transition-colors"
+            >
+              <X size={20} />
+            </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto py-6 scrollbar-none">
+          <nav className="flex-1 overflow-y-auto py-6 scrollbar-none pb-[env(safe-area-inset-bottom)]">
             <div className="px-5 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Platform</div>
 
             <SidebarItem
@@ -634,24 +613,18 @@ const AppShell = () => {
               label="Trust Center"
               isActive={activeView === 'trust'}
               onClick={() => { setActiveView('trust'); setMobileMenuOpen(false); }}
-
             />
-
-            {/* FIX: Renamed Label and switched logic to 'transparency' */}
             <SidebarItem
               icon={Eye}
               label="Transparency Console"
               isActive={activeView === 'transparency'}
               onClick={() => { setActiveView('transparency'); setMobileMenuOpen(false); }}
-
             />
-
             <SidebarItem
               icon={BarChart3}
               label="Pipeline Metrics"
               isActive={activeView === 'metrics'}
               onClick={() => { setActiveView('metrics'); setMobileMenuOpen(false); }}
-
             />
 
             <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
@@ -668,8 +641,8 @@ const AppShell = () => {
 
           <div className="p-4 border-t border-white/5 bg-[#09090b]">
             <button
-              onClick={() => setSettingsOpen(true)}
-              className="w-full py-2 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase"
+              onClick={() => { setSettingsOpen(true); setMobileMenuOpen(false); }}
+              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase"
             >
               <Settings size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> System Settings
             </button>
@@ -677,22 +650,26 @@ const AppShell = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content Area: Now responds to sidebar width on Desktop */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
 
-        {/* Top Header */}
-        <header className={`h-16 bg-[#0c0c10]/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-6 z-20 sticky top-0 ${scrollY > 0 ? 'shadow-lg shadow-black/20' : ''}`}>
-          <div className="flex items-center gap-4">
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden text-slate-400 hover:text-white transition-colors">
-              <Menu size={20} />
+        {/* Global Responsive Header */}
+        <header className={`h-16 bg-[#0c0c10]/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 lg:px-6 z-50 sticky top-0 ${scrollY > 0 ? 'shadow-lg shadow-black/20' : ''}`}>
+          <div className="flex items-center gap-3">
+            {/* Mobile Hamburger: More prominent trigger */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-white transition-colors"
+            >
+              <Menu size={22} />
             </button>
+
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="hidden lg:block text-slate-400 hover:text-white transition-colors">
               <Menu size={18} />
             </button>
 
-            {/* Breadcrumb - FIX: Updated text match */}
-            <div className="hidden md:flex items-center px-3 py-1">
-              <span className="text-slate-500 text-xs font-mono">
+            <div className="hidden sm:flex items-center px-2 py-1">
+              <span className="text-slate-500 text-[10px] uppercase font-bold tracking-widest font-mono">
                 {activeView === 'dashboard' && 'Platform / Overview'}
                 {activeView === 'trust' && 'Platform / Trust Center'}
                 {activeView === 'transparency' && 'Platform / Transparency Console'}
@@ -701,7 +678,7 @@ const AppShell = () => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-3 lg:space-x-6">
             <button className="relative cursor-pointer group p-2 rounded-full hover:bg-white/5 transition-colors">
               <Bell size={16} className="text-slate-400 group-hover:text-white transition-colors" />
               <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e] animate-pulse"></span>
@@ -719,19 +696,18 @@ const AppShell = () => {
           </div>
         </header>
 
-        {/* Scrollable Canvas */}
-        <main className="flex-1 overflow-y-auto bg-[#09090b] relative">
+        {/* Scrollable Dashboard Canvas */}
+        <main className="flex-1 overflow-y-auto bg-[#09090b] relative scrollbar-thin scrollbar-thumb-white/10">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow" />
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow" style={{ animationDelay: '1s' }} />
 
-          <div className="p-6 lg:p-8 max-w-[1600px] mx-auto relative z-10">
+          <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto relative z-10">
             {activeView === 'dashboard' ? <DashboardContent /> :
               activeView === 'trust' ? <TrustCenterView /> :
                 activeView === 'transparency' ? <TransparencyConsole /> :
                   activeView === 'metrics' ? <MetricsDashboard /> : null}
           </div>
         </main>
-
       </div>
 
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />

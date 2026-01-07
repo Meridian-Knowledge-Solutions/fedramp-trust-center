@@ -133,9 +133,18 @@ export default {
     },
   },
   plugins: [
-    // Optional: Add custom utilities
     function ({ addUtilities }) {
       const newUtilities = {
+        '.grid-responsive': {
+          display: 'grid',
+          'grid-template-columns': 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
+          'gap': '1.5rem',
+        },
+        '.scroll-safe': {
+          'overflow-x': 'auto',
+          'max-width': '100%',
+          '-webkit-overflow-scrolling': 'touch',
+        },
         '.text-shadow': {
           textShadow: '0 2px 4px rgba(0,0,0,0.5)',
         },

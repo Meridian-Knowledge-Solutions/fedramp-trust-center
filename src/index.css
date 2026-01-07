@@ -11,8 +11,9 @@
     }
 
     body {
-        @apply bg-[#F8F9FB] text-slate-900 antialiased;
+        @apply bg-[#09090b] text-slate-200 antialiased;
         font-feature-settings: "rlig" 1, "calt" 1;
+        overflow-x: hidden;
     }
 }
 
@@ -84,7 +85,6 @@
    ANIMATION KEYFRAMES
    ============================================ */
 
-/* Existing Animations */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -107,12 +107,6 @@
     }
 }
 
-/* Enhanced Animations */
-
-/**
- * Slide Up Animation
- * Used for: Toast notifications
- */
 @keyframes slide-up {
     from {
         transform: translateY(100%);
@@ -125,9 +119,6 @@
     }
 }
 
-/**
- * Fade In Animation (Enhanced version with transform)
- */
 @keyframes fade-in {
     from {
         opacity: 0;
@@ -138,10 +129,6 @@
     }
 }
 
-/**
- * Pulse Slow Animation
- * Used for: Ambient background effects, status indicators
- */
 @keyframes pulse-slow {
 
     0%,
@@ -154,10 +141,6 @@
     }
 }
 
-/**
- * Spin Smooth Animation
- * Used for: Loading indicators, refresh buttons
- */
 @keyframes spin-smooth {
     from {
         transform: rotate(0deg);
@@ -168,10 +151,6 @@
     }
 }
 
-/**
- * Scale Pop Animation
- * Used for: Button hover effects, card interactions
- */
 @keyframes scale-pop {
     0% {
         transform: scale(1);
@@ -186,10 +165,6 @@
     }
 }
 
-/**
- * Shimmer Animation
- * Used for: Loading skeleton screens
- */
 @keyframes shimmer {
     0% {
         background-position: -200% 0;
@@ -200,10 +175,6 @@
     }
 }
 
-/**
- * Bounce Subtle Animation
- * Used for: Notification badges, attention indicators
- */
 @keyframes bounce-subtle {
 
     0%,
@@ -220,7 +191,6 @@
    ANIMATION UTILITY CLASSES
    ============================================ */
 
-/* Existing Utilities */
 .fade-in {
     animation: fadeIn 0.2s ease-out forwards;
 }
@@ -229,7 +199,6 @@
     animation: slideIn 0.3s ease-out forwards;
 }
 
-/* Enhanced Utilities */
 .animate-slide-up {
     animation: slide-up 0.3s ease-out;
 }
@@ -267,18 +236,15 @@
    FOCUS STYLES
    ============================================ */
 
-/* Remove default focus outline */
 *:focus {
     outline: none;
 }
 
-/* Custom focus ring for better visibility */
 .focus-ring:focus-visible {
     outline: 2px solid rgba(59, 130, 246, 0.5);
     outline-offset: 2px;
 }
 
-/* Focus ring for dark backgrounds */
 .focus-ring-dark:focus-visible {
     outline: 2px solid rgba(147, 197, 253, 0.8);
     outline-offset: 2px;
@@ -438,136 +404,26 @@
     box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
 }
 
-/* Add pulse animation to status dots */
 .status-dot-pulse {
     animation: pulse-slow 2s ease-in-out infinite;
-}
-
-/* ============================================
-   RESPONSIVE UTILITIES
-   ============================================ */
-
-/* Mobile-specific styles */
-@media (max-width: 640px) {
-    .mobile-full {
-        width: 100%;
-    }
-
-    .mobile-hidden {
-        display: none;
-    }
-
-    .mobile-stack {
-        flex-direction: column;
-    }
-}
-
-/* Tablet-specific styles */
-@media (min-width: 641px) and (max-width: 1024px) {
-    .tablet-grid-2 {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* Desktop-specific styles */
-@media (min-width: 1025px) {
-    .desktop-grid-4 {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-/* ============================================
-   PRINT STYLES
-   ============================================ */
-
-@media print {
-    .no-print {
-        display: none !important;
-    }
-
-    .print-break-before {
-        break-before: page;
-    }
-
-    .print-break-after {
-        break-after: page;
-    }
-
-    /* Ensure charts and graphs print well */
-    .chart-container {
-        break-inside: avoid;
-    }
-}
-
-/* ============================================
-   ACCESSIBILITY
-   ============================================ */
-
-/* Reduced motion for users who prefer it */
-@media (prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    .border-white\/5 {
-        border-color: rgba(255, 255, 255, 0.2) !important;
-    }
-
-    .text-slate-500 {
-        color: rgba(255, 255, 255, 0.8) !important;
-    }
-}
-
-/* ============================================
-   DARK MODE UTILITIES
-   ============================================ */
-
-/* Light mode variants (your app uses dark mode by default) */
-.light-mode .bg-dark {
-    background-color: #ffffff;
-    color: #09090b;
-}
-
-.light-mode .text-light {
-    color: #09090b;
-}
-
-.light-mode .border-light {
-    border-color: rgba(0, 0, 0, 0.1);
 }
 
 /* ============================================
    PERFORMANCE OPTIMIZATIONS
    ============================================ */
 
-/* Enable GPU acceleration for smoother animations */
 .gpu-accelerate {
     transform: translateZ(0);
     backface-visibility: hidden;
     perspective: 1000px;
 }
 
-/* Optimize will-change for frequently animated elements */
 .will-animate-transform {
     will-change: transform;
 }
 
 .will-animate-opacity {
     will-change: opacity;
-}
-
-/* Reset will-change after animation completes */
-.animation-complete {
-    will-change: auto;
 }
 
 /* ============================================
@@ -592,6 +448,109 @@
     }
 }
 
-/* ============================================
-   END OF STYLES
-   ============================================ */
+/* =========================================================
+   GLOBAL MOBILE UI OVERRIDES (THE "HAMMER")
+   Fixes layout issues across 12+ sub-components automatically.
+   ========================================================= */
+
+@media (max-width: 1024px) {
+
+    /* 1. Force all standard grids to stack on mobile */
+    .grid {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        gap: 1.25rem !important;
+    }
+
+    /* 2. Fix Flex Row layouts (like Impact Banner or Header) */
+    .flex-row,
+    .md\:flex-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 1.5rem !important;
+    }
+
+    /* 3. Global Table & Data Grid Horizontal Scroll Safety */
+    table,
+    .KSIGrid,
+    .KSICard,
+    .TransparencyConsole {
+        display: block !important;
+        overflow-x: auto !important;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 4. Text Scaling for Mobile Readability */
+    h1,
+    .text-2xl,
+    .text-3xl {
+        font-size: 1.5rem !important;
+        line-height: 2rem !important;
+    }
+
+    h2,
+    .text-xl {
+        font-size: 1.25rem !important;
+    }
+
+    .text-4xl {
+        font-size: 2rem !important;
+    }
+
+    /* 5. Padding Adjustments (No "Edge Hugging") */
+    .p-6,
+    .p-8,
+    .lg\:p-8 {
+        padding: 1rem !important;
+    }
+
+    .p-5 {
+        padding: 0.875rem !important;
+    }
+
+    /* 6. Chart Height Safety for Recharts */
+    .recharts-responsive-container {
+        min-height: 240px !important;
+        width: 100% !important;
+    }
+
+    /* 7. Force cards to full width */
+    .rounded-xl,
+    .StatsCard {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* 8. Fix Hidden Elements on Mobile */
+    .hidden.md\:flex {
+        display: none !important;
+    }
+
+    .md\:block {
+        display: none !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .chart-container {
+        break-inside: avoid;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
