@@ -1,15 +1,13 @@
 import React, { useState, useMemo, useCallback, memo, useEffect } from 'react';
 import {
   LayoutDashboard, ShieldAlert, User, Settings, LogOut,
-  Menu, Bell, CheckCircle2, XCircle, AlertTriangle,
-  Activity, Download, Calendar, Clock,
-  Shield, Target, FileText, ChevronRight, Zap,
-  Filter, RefreshCw, BarChart3, FileCheck, Eye, X
+  Menu, Bell, Activity, Calendar, Clock,
+  FileText, RefreshCw, BarChart3, Eye, X
 } from 'lucide-react';
 
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, BarChart, Bar, Legend, ReferenceLine, Cell
+  BarChart, Bar, Legend, ReferenceLine, Cell
 } from 'recharts';
 
 import { AuthProvider, useAuth } from './hooks/useAuth';
@@ -74,7 +72,7 @@ const getTimeElapsed = (date) => {
 const SidebarItem = memo(({ icon: Icon, label, badge, isActive, onClick }) => (
   <button
     onClick={onClick}
-    className={`group flex items-center w-full px-3 py-2 mx-2 mb-1 text-sm font-medium rounded-md cursor-pointer ${TRANSITIONS.default} border border-transparent
+    className={`group flex items-center w-full px-3 py-3 mx-2 mb-1 text-sm font-medium rounded-md cursor-pointer ${TRANSITIONS.default} border border-transparent
     ${isActive ? THEME.active : `text-slate-400 ${THEME.hover} hover:text-slate-200`}`}
   >
     <Icon size={16} className={`mr-3 ${TRANSITIONS.default} ${isActive ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
@@ -84,57 +82,19 @@ const SidebarItem = memo(({ icon: Icon, label, badge, isActive, onClick }) => (
         {badge.text}
       </span>
     )}
-    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-blue-400 ml-2" />}
   </button>
 ));
 
-const Sparkline = memo(({ data, color }) => (
-  <div className="h-10 w-28 opacity-90">
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={data}>
-        <Line
-          type="monotone"
-          dataKey="val"
-          stroke={color}
-          strokeWidth={2}
-          dot={false}
-          isAnimationActive={true}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+const StatsCard = memo(({ title, value, contextMetric, statusLabel, statusColor }) => (
+  <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-5 group hover:border-white/20 transition-all shadow-sm`}>
+    <div className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">{title}</div>
+    <div className="text-2xl font-bold text-white mb-2 tracking-tight font-mono tabular-nums">{value}</div>
+    <div className="flex items-center justify-between text-[10px]">
+      <span className={`font-medium ${statusColor}`}>{statusLabel}</span>
+      <span className="text-slate-400 font-mono tabular-nums">{contextMetric}</span>
+    </div>
   </div>
 ));
-
-const StatsCard = memo(({ title, value, contextMetric, statusLabel, statusColor, colorClass, icon: Icon, chartData }) => {
-  const sparkData = chartData && chartData.length > 0 ? chartData : [{ val: 0 }, { val: 0 }];
-  const hexColor = colorClass.includes('emerald') ? '#10b981' : colorClass.includes('rose') ? '#f43f5e' : colorClass.includes('amber') ? '#f59e0b' : '#3b82f6';
-
-  return (
-    <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-5 relative overflow-hidden group hover:border-white/20 transition-all shadow-sm`}>
-      <div className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-5 transition-opacity duration-500 pointer-events-none`}
-        style={{ backgroundImage: `linear-gradient(135deg, ${hexColor}20, transparent)` }} />
-
-      <div className="flex justify-between items-start mb-4 relative z-10">
-        <div className={`p-2.5 rounded-lg bg-white/5 border border-white/5 ${colorClass}`}>
-          <Icon size={18} />
-        </div>
-        <Sparkline data={sparkData} color={hexColor} />
-      </div>
-
-      <div className="relative z-10">
-        <div className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">{title}</div>
-        <div className="text-2xl font-bold text-white mb-2 tracking-tight font-mono tabular-nums">{value}</div>
-        <div className="flex items-center justify-between text-[10px]">
-          <span className={`flex items-center gap-1 font-medium ${statusColor}`}>
-            <div className={`w-1.5 h-1.5 rounded-full ${statusColor.replace('text-', 'bg-')}`}></div>
-            {statusLabel}
-          </span>
-          <span className="text-slate-400 font-mono tabular-nums">{contextMetric}</span>
-        </div>
-      </div>
-    </div>
-  );
-});
 
 // --- DASHBOARD COMPONENTS ---
 
@@ -321,14 +281,9 @@ const ComplianceChart = memo(() => {
     <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6 mb-8 shadow-lg relative overflow-hidden flex flex-col h-96 group`}>
       <div className="flex justify-between items-center mb-6 relative z-10 shrink-0">
         <div>
-          <h3 className="text-white font-bold text-lg flex items-center gap-2 mb-1 tracking-tight">
-            <Activity size={18} className="text-blue-400" />
-            Validation Velocity
-          </h3>
-          <p className="text-slate-500 text-[11px] uppercase tracking-wider font-bold flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+          <h3 className="text-white font-bold text-lg mb-1 tracking-tight">Validation Velocity</h3>
+          <p className="text-slate-500 text-[11px] uppercase tracking-wider font-bold">
             Real-time Compliance Trend
-            {/* UPDATED: Added run counter with styling to match the dashboard */}
             <span className="text-slate-700 mx-1">•</span>
             <span className="text-blue-400 font-mono tracking-normal">{totalRuns} Historical Runs</span>
           </p>
@@ -433,16 +388,6 @@ const ComplianceChart = memo(() => {
 const DashboardContent = memo(() => {
   const { metrics, ksis, history, metadata } = useData();
 
-  const sparklines = useMemo(() => {
-    if (!history || history.length === 0) return { score: [], passed: [], failed: [] };
-    const sorted = [...history].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    return {
-      score: sorted.map(h => ({ val: parseFloat(h.compliance_rate || 0) })),
-      passed: sorted.map(h => ({ val: parseInt(h.passed || 0) })),
-      failed: sorted.map(h => ({ val: parseInt(h.failed || 0) }))
-    };
-  }, [history]);
-
   const totalControls = ksis?.length || 0;
   const targetThreshold = parseFloat(metadata?.impact_thresholds?.min || 90);
   const complianceTarget = `Target: ${targetThreshold}%`;
@@ -478,9 +423,6 @@ const DashboardContent = memo(() => {
           contextMetric={complianceTarget}
           statusLabel={complianceStatus.label}
           statusColor={complianceStatus.color}
-          colorClass="text-blue-400"
-          icon={Activity}
-          chartData={sparklines.score}
         />
         <StatsCard
           title="Passing Controls"
@@ -488,9 +430,6 @@ const DashboardContent = memo(() => {
           contextMetric={`${passingPercent}% of ${totalControls}`}
           statusLabel={passingStatus.label}
           statusColor={passingStatus.color}
-          colorClass="text-emerald-400"
-          icon={CheckCircle2}
-          chartData={sparklines.passed}
         />
         <StatsCard
           title="Failing Controls"
@@ -498,9 +437,6 @@ const DashboardContent = memo(() => {
           contextMetric={`${failingPercent}% of ${totalControls}`}
           statusLabel={failingStatus.label}
           statusColor={failingStatus.color}
-          colorClass="text-rose-400"
-          icon={XCircle}
-          chartData={sparklines.failed}
         />
         <StatsCard
           title="Warnings"
@@ -508,27 +444,19 @@ const DashboardContent = memo(() => {
           contextMetric={`${warningsPercent}% of ${totalControls}`}
           statusLabel={warningStatus.label}
           statusColor={warningStatus.color}
-          colorClass="text-amber-400"
-          icon={AlertTriangle}
-          chartData={[{ val: metrics.warning }]}
         />
       </div>
       <ComplianceChart />
       <div className={`${THEME.panel} rounded-xl border ${THEME.border} overflow-hidden shadow-sm`}>
         <div className="p-5 border-b border-white/5 flex justify-between items-center bg-[#09090b]">
           <div>
-            <h3 className="font-bold text-white text-sm flex items-center gap-2">
-              <Shield size={16} className="text-indigo-400" /> System Controls Register
-            </h3>
+            <h3 className="font-bold text-white text-sm">System Controls Register</h3>
             <p className="text-slate-500 text-[10px] mt-1 font-mono uppercase tracking-wider">
               Real-time validation of {ksis.length} security controls
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-bold border border-emerald-500/20 flex items-center gap-2 tracking-wider">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-              LIVE VALIDATION
-            </div>
+          <div className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-bold border border-emerald-500/20 tracking-wider">
+            LIVE
           </div>
         </div>
         <div className="p-0 bg-[#09090b]">

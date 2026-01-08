@@ -1,42 +1,75 @@
+/* Reset root constraints from Vite boilerplate */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  min-height: 100vh;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+/* Better touch targets for mobile */
+@media (max-width: 640px) {
+
+  button,
+  a {
+    min-height: 44px;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+/* Prevent horizontal overflow */
+body {
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar for webkit browsers */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
-.card {
-  padding: 2em;
+/* Prevent text selection on UI elements */
+.select-none {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.read-the-docs {
-  color: #888;
+/* GPU acceleration for smoother animations */
+.gpu {
+  transform: translateZ(0);
+  will-change: transform;
 }

@@ -64,9 +64,7 @@ const SystemCompositionChart = ({ awsActual }) => {
 
     return (
         <div className="bg-[#18181b] p-6 rounded-xl border border-white/5 flex flex-col h-full">
-            <h3 className="text-white font-bold text-sm mb-4 flex items-center gap-2">
-                <PieChart size={16} className="text-blue-400" /> System Composition
-            </h3>
+            <h3 className="text-white font-bold text-sm mb-4">System Composition</h3>
             <div className="flex-1 relative min-h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <RechartsPieChart>
@@ -127,10 +125,7 @@ const DriftHistoryChart = memo(({ history }) => {
     return (
         <div className="bg-[#18181b] p-6 rounded-xl border border-white/5 flex flex-col h-full shadow-lg">
             <div className="mb-6">
-                <h3 className="text-white font-bold text-sm flex items-center gap-2">
-                    <Activity size={16} className="text-amber-400" />
-                    Boundary Variances (30 Days)
-                </h3>
+                <h3 className="text-white font-bold text-sm">Boundary Variances (30 Days)</h3>
                 <p className="text-[10px] text-slate-500 mt-1">
                     Historical tracking of configuration changes.
                 </p>
@@ -175,13 +170,11 @@ const DataFlowNode = ({ flowKey, data, index, isLast }) => {
     if (!data) return null;
 
     const theme = {
-        entry: { color: 'text-emerald-400', border: 'group-hover:border-emerald-500/50', bg: 'group-hover:bg-emerald-500/5', icon: Shield },
-        processing: { color: 'text-blue-400', border: 'group-hover:border-blue-500/50', bg: 'group-hover:bg-blue-500/5', icon: Cpu },
-        storage: { color: 'text-purple-400', border: 'group-hover:border-purple-500/50', bg: 'group-hover:bg-purple-500/5', icon: Database },
-        dissemination: { color: 'text-amber-400', border: 'group-hover:border-amber-500/50', bg: 'group-hover:bg-amber-500/5', icon: Globe }
-    }[flowKey] || { color: 'text-slate-400', border: 'border-white/10', bg: '', icon: Activity };
-
-    const Icon = theme.icon;
+        entry: { color: 'text-emerald-400', border: 'group-hover:border-emerald-500/50', bg: 'group-hover:bg-emerald-500/5' },
+        processing: { color: 'text-blue-400', border: 'group-hover:border-blue-500/50', bg: 'group-hover:bg-blue-500/5' },
+        storage: { color: 'text-purple-400', border: 'group-hover:border-purple-500/50', bg: 'group-hover:bg-purple-500/5' },
+        dissemination: { color: 'text-amber-400', border: 'group-hover:border-amber-500/50', bg: 'group-hover:bg-amber-500/5' }
+    }[flowKey] || { color: 'text-slate-400', border: 'border-white/10', bg: '' };
 
     return (
         <div className="relative group">
@@ -192,14 +185,9 @@ const DataFlowNode = ({ flowKey, data, index, isLast }) => {
             )}
             <div className={`relative z-10 bg-[#18181b] border border-white/5 rounded-xl p-5 transition-all duration-300 ${theme.border} ${theme.bg}`}>
                 <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-lg bg-[#09090b] border border-white/10 shadow-inner ${theme.color}`}>
-                            <Icon size={20} />
-                        </div>
-                        <div>
-                            <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-0.5">Step 0{index + 1}</div>
-                            <h3 className="text-white font-bold text-sm tracking-tight">{data.title}</h3>
-                        </div>
+                    <div>
+                        <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-0.5">Step 0{index + 1}</div>
+                        <h3 className="text-white font-bold text-sm tracking-tight">{data.title}</h3>
                     </div>
                 </div>
                 <div className="mb-5 min-h-[40px]">
@@ -241,29 +229,21 @@ const IntegrationCard = ({ item }) => {
 
     let statusColor = 'text-slate-400';
     let statusBg = 'bg-slate-500/10 border-slate-500/20';
-    let Icon = Cloud;
 
     if (isFedRAMP) {
         statusColor = 'text-emerald-400';
         statusBg = 'bg-emerald-500/10 border-emerald-500/20';
-        Icon = Shield;
     } else if (isAgency) {
         statusColor = 'text-blue-400';
         statusBg = 'bg-blue-500/10 border-blue-500/20';
-        Icon = Landmark;
     }
 
     return (
         <div className="bg-[#18181b] border border-white/5 rounded-lg p-4 hover:bg-white/[0.02] transition-colors">
             <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center gap-3">
-                    <div className={`p-1.5 rounded-lg border ${statusBg} ${statusColor}`}>
-                        <Icon size={16} />
-                    </div>
-                    <div>
-                        <div className="text-sm font-bold text-white">{item.provider}</div>
-                        <div className="text-[10px] text-slate-500 uppercase">{item.category}</div>
-                    </div>
+                <div>
+                    <div className="text-sm font-bold text-white">{item.provider}</div>
+                    <div className="text-[10px] text-slate-500 uppercase">{item.category}</div>
                 </div>
                 <div className={`px-2 py-0.5 rounded border text-[9px] font-bold uppercase ${item.risk === 'low' ? 'bg-emerald-900/20 text-emerald-400 border-emerald-500/20' :
                     item.risk === 'high' ? 'bg-rose-900/20 text-rose-400 border-rose-500/20' :
@@ -338,13 +318,10 @@ const LiveMasDashboard = ({ boundary, architecture, history }) => {
         <div className="space-y-8 animate-in fade-in duration-700">
             {/* Header Metadata */}
             <div className="flex flex-col md:flex-row justify-between gap-4 bg-blue-900/10 border border-blue-500/30 p-4 rounded-xl">
-                <div className="flex items-center gap-3">
-                    <Shield className="text-blue-400" size={24} />
-                    <div>
-                        <h2 className="text-white font-bold text-sm">Live Boundary Authorization</h2>
-                        <div className="text-xs text-blue-300 font-mono mt-0.5">
-                            Ver: {meta?.compliance_ver || 'N/A'} • {boundary?.fingerprint?.substring(0, 7)}
-                        </div>
+                <div>
+                    <h2 className="text-white font-bold text-sm">Live Boundary Authorization</h2>
+                    <div className="text-xs text-blue-300 font-mono mt-0.5">
+                        Ver: {meta?.compliance_ver || 'N/A'} • {boundary?.fingerprint?.substring(0, 7)}
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -376,50 +353,35 @@ const LiveMasDashboard = ({ boundary, architecture, history }) => {
                 <div className="bg-[#121217] border border-white/10 rounded-xl p-6 mt-8">
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h3 className="text-white font-bold flex items-center gap-2">
-                                <Server size={18} className="text-indigo-400" />
-                                Core LMS Application Architecture
-                            </h3>
+                            <h3 className="text-white font-bold">Core LMS Application Architecture</h3>
                             <p className="text-[10px] text-slate-500 mt-1">Live polling of Three-Tier IaaS/PaaS components</p>
                         </div>
                         <span className="text-xs font-mono bg-indigo-900/20 text-indigo-300 px-2 py-1 rounded border border-indigo-500/20">IaaS / PaaS</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Monitor size={14} className="text-blue-400" />
-                                <div className="text-[10px] text-slate-500 uppercase font-bold">{system_profile.lms_core.presentation.component}</div>
-                            </div>
+                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.lms_core.presentation.component}</div>
                             <div className="text-2xl font-bold text-white mb-1">
                                 {(aws_actual.ec2 || 0)} <span className="text-xs font-normal text-slate-500">Instances</span>
                             </div>
                             <div className="text-xs text-blue-400 font-mono">{system_profile.lms_core.presentation.tech}</div>
                         </div>
                         <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Cpu size={14} className="text-amber-400" />
-                                <div className="text-[10px] text-slate-500 uppercase font-bold">{system_profile.lms_core.logic.component}</div>
-                            </div>
+                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.lms_core.logic.component}</div>
                             <div className="text-2xl font-bold text-white mb-1">
                                 {(aws_actual.alb || 0)} <span className="text-xs font-normal text-slate-500">Balancers</span>
                             </div>
                             <div className="text-xs text-slate-500 font-mono">{system_profile.lms_core.logic.tech}</div>
                         </div>
                         <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Database size={14} className="text-purple-400" />
-                                <div className="text-[10px] text-slate-500 uppercase font-bold">{system_profile.lms_core.data.component}</div>
-                            </div>
+                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.lms_core.data.component}</div>
                             <div className="text-2xl font-bold text-white mb-1">
                                 {(aws_actual.rds || 0) + (aws_actual.fsx || 0)} <span className="text-xs font-normal text-slate-500">Nodes</span>
                             </div>
                             <div className="text-xs text-slate-500 font-mono">{system_profile.lms_core.data.tech}</div>
                         </div>
                         <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Shield size={16} className="text-emerald-400" />
-                                <div className="text-[10px] text-slate-500 uppercase font-bold">Defense in Depth</div>
-                            </div>
+                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-3">Defense in Depth</div>
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center">
                                     <div className="text-[10px] text-slate-500 uppercase">Web Firewall</div>
@@ -454,44 +416,29 @@ const LiveMasDashboard = ({ boundary, architecture, history }) => {
                 <div className="bg-[#121217] border border-white/10 rounded-xl p-6 mt-6">
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h3 className="text-white font-bold flex items-center gap-2">
-                                <Landmark size={18} className="text-purple-400" />
-                                FedRAMP Trust Center Infrastructure
-                            </h3>
+                            <h3 className="text-white font-bold">FedRAMP Trust Center Infrastructure</h3>
                             <p className="text-[10px] text-slate-500 mt-1">Live polling of compliance delivery resources (FRR-ADS-TC-01)</p>
                         </div>
                         <span className="text-xs font-mono bg-purple-900/20 text-purple-300 px-2 py-1 rounded border border-purple-500/20">Serverless / SaaS</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Layout size={14} className="text-blue-400" />
-                                <div className="text-[10px] text-slate-500 uppercase font-bold">{system_profile.trust_center.frontend.component}</div>
-                            </div>
+                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.trust_center.frontend.component}</div>
                             <div className="text-2xl font-bold text-white mb-1">Active</div>
                             <div className="text-xs text-blue-400 font-mono">{system_profile.trust_center.frontend.tech}</div>
                         </div>
                         <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Network size={14} className="text-emerald-400" />
-                                <div className="text-[10px] text-slate-500 uppercase font-bold">{system_profile.trust_center.api.component}</div>
-                            </div>
+                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.trust_center.api.component}</div>
                             <div className="text-2xl font-bold text-white mb-1">{trust_center.api_count || 0}</div>
                             <div className="text-xs text-slate-500">Active Endpoints</div>
                         </div>
                         <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Cpu size={14} className="text-amber-400" />
-                                <div className="text-[10px] text-slate-500 uppercase font-bold">{system_profile.trust_center.compute.component}</div>
-                            </div>
+                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.trust_center.compute.component}</div>
                             <div className="text-2xl font-bold text-white mb-1">{trust_center.compute_count || 0}</div>
                             <div className="text-xs text-slate-500">Lambda Functions</div>
                         </div>
                         <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Database size={14} className="text-purple-400" />
-                                <div className="text-[10px] text-slate-500 uppercase font-bold">{system_profile.trust_center.storage.component}</div>
-                            </div>
+                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.trust_center.storage.component}</div>
                             <div className="text-2xl font-bold text-white mb-1">{trust_center.storage_count || 0}</div>
                             <div className="text-xs text-slate-500">Artifact Buckets</div>
                         </div>
@@ -502,10 +449,7 @@ const LiveMasDashboard = ({ boundary, architecture, history }) => {
             {/* 5. DATA FLOWS */}
             <div className="mt-24 border-t border-white/5 pt-12">
                 <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-white font-bold flex items-center gap-2">
-                        <Activity size={18} className="text-blue-400" />
-                        Digital Data Lifecycle
-                    </h3>
+                    <h3 className="text-white font-bold">Digital Data Lifecycle</h3>
                     <span className="text-[10px] font-mono text-slate-500 uppercase bg-white/5 px-2 py-1 rounded border border-white/5">
                         OMB A-130 Aligned
                     </span>
@@ -527,9 +471,7 @@ const LiveMasDashboard = ({ boundary, architecture, history }) => {
             {integrations && integrations.length > 0 && (
                 <div className="bg-[#121217] border border-white/10 rounded-xl p-6 mt-8">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-white font-bold flex items-center gap-2">
-                            <Globe size={18} className="text-indigo-400" /> Third-Party Interconnections
-                        </h3>
+                        <h3 className="text-white font-bold">Third-Party Interconnections</h3>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {integrations.map((item, idx) => (
@@ -561,9 +503,7 @@ const ZoneCard = ({ zoneId, data, isOpen, onToggle }) => {
             >
                 <div className="flex items-center gap-4">
                     <div className={`p-3 rounded-lg bg-black/40 border border-white/10 ${riskColor}`}>
-                        {zoneId.includes('entry') ? <Users size={20} /> :
-                            zoneId.includes('training') ? <Activity size={20} /> :
-                                zoneId.includes('infrastructure') ? <Database size={20} /> : <Shield size={20} />}
+                        <div className="w-5 h-5 rounded-full border-2 border-current"></div>
                     </div>
                     <div>
                         <h3 className="text-white font-bold text-lg">{policy.title}</h3>
@@ -581,8 +521,8 @@ const ZoneCard = ({ zoneId, data, isOpen, onToggle }) => {
 
             {isOpen && (
                 <div className="p-5 border-t border-white/5 bg-black/20">
-                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <Network size={12} /> Live Assets in Boundary ({assets?.length || 0})
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+                        Live Assets in Boundary ({assets?.length || 0})
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
                         {assets?.map((asset, idx) => (
@@ -726,7 +666,7 @@ export const TrustCenterView = () => {
     if (loading) return (
         <div className="flex h-screen items-center justify-center bg-[#09090b]">
             <div className="text-center animate-pulse">
-                <Shield className="mx-auto text-blue-500 mb-4" size={48} />
+                <div className="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-blue-500/50"></div>
                 <div className="text-slate-500 font-mono">Loading Authorization Context...</div>
             </div>
         </div>
@@ -750,9 +690,9 @@ export const TrustCenterView = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-1 bg-[#09090b]/50 p-1.5 rounded-xl border border-white/5 backdrop-blur-md">
-                            <TelemetryItem label="Uptime" value={uptime} icon={<Activity size={14} className="text-emerald-400" />} />
-                            <TelemetryItem label="Latency" value={latency} icon={<Zap size={14} className="text-amber-400" />} />
-                            <TelemetryItem label="Req/Hr" value={totalRequests} icon={<Globe size={14} className="text-blue-400" />} />
+                            <TelemetryItem label="Uptime" value={uptime} />
+                            <TelemetryItem label="Latency" value={latency} />
+                            <TelemetryItem label="Req/Hr" value={totalRequests} />
                         </div>
                     </div>
                 </div>
@@ -760,21 +700,17 @@ export const TrustCenterView = () => {
                 {/* --- SERVICE PROFILE --- */}
                 <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 shadow-lg`}>
                     <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/5">
-                        <Server size={20} className="text-indigo-400" />
-                        <h2 className="text-lg font-bold text-white">Service Profile</h2>
+                        <h2 className="text-xl font-bold text-white">Service Profile</h2>
+                        <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-bold uppercase">Authorized</span>
                     </div>
-                    <div className="flex flex-col lg:flex-row gap-8">
-                        <div className="flex-1">
-                            <p className="text-slate-400 leading-relaxed mb-6 font-medium text-sm">
-                                <strong className="text-white">Meridian Learning Management System (LMS) for Government</strong> is a FedRAMP Authorized SaaS hosted on AWS Commercial (US-east). The system leverages automated 20x validation for continuous authorization.
+                    <div className="flex flex-col lg:flex-row justify-between gap-8">
+                        <div className="flex-1 space-y-4">
+                            <p className="text-slate-400 text-sm leading-relaxed">
+                                Meridian Learning Management System (LMS) is an enterprise SaaS platform for workforce training, compliance tracking, and professional development.
                             </p>
-                            <div className="flex gap-2">
-                                {['LMS', 'SaaS'].map(tag => (
-                                    <span key={tag} className="text-[10px] bg-white/5 text-slate-300 border border-white/10 px-2 py-1 rounded font-mono uppercase">
-                                        {tag}
-                                    </span>
-                                ))}
-                            </div>
+                            <p className="text-slate-400 text-sm leading-relaxed">
+                                The system integrates with federal identity providers and delivers SCORM, xAPI, and multimedia content to authorized users across agencies.
+                            </p>
                         </div>
                         <div className="grid grid-cols-2 gap-4 lg:w-[500px]">
                             <InfoCard label="Deployment" value="Multi-tenant SaaS" sub="Shared Infrastructure" />
@@ -792,21 +728,19 @@ export const TrustCenterView = () => {
 
                 {/* --- AUTHORIZED SERVICES GRID --- */}
                 <div>
-                    <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                        <Layers size={20} className="text-blue-400" /> Authorized Services
-                    </h3>
+                    <h3 className="text-lg font-bold text-white mb-6">Authorized Services</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                        <ServiceCard title="Course Management" icon={Layers} desc="SCORM/AICC/xAPI delivery & multimedia." features={["Course catalog", "Mobile player", "Video delivery"]} />
-                        <ServiceCard title="User Management" icon={Users} desc="SSO, RBAC, and hierarchy management." features={["SAML 2.0 SSO", "MFA Support", "Role hierarchy"]} />
-                        <ServiceCard title="Assessment Engine" icon={FileText} desc="Quizzes, exams, and competency validation." features={["Auto-grading", "Question banks", "Certificates"]} />
-                        <ServiceCard title="Compliance Tracking" icon={Shield} desc="Regulatory reporting and audit trails." features={["Rules engine", "21 CFR Part 11", "Audit logs"]} />
-                        <ServiceCard title="Analytics" icon={BarChart} desc="Real-time dashboards and data exports." features={["Custom reports", "Trend analysis", "Scheduled exports"]} />
-                        <ServiceCard title="Learning Record Store" icon={Database} desc="Native xAPI-compliant LRS." features={["Statement capture", "Learning analytics", "Cross-platform"]} />
-                        <ServiceCard title="Career Development" icon={BookOpen} desc="IDP and skills gap analysis." features={["Career paths", "Skills inventory", "IDP tracking"]} />
-                        <ServiceCard title="Notifications" icon={Bell} desc="Automated engagement engine." features={["Deadline alerts", "Manager notifications", "Templates"]} />
-                        <ServiceCard title="API Gateway" icon={Code} desc="RESTful enterprise connectivity." features={["REST API", "Webhooks", "HRIS sync"]} />
-                        <ServiceCard title="Content Authoring" icon={FileText} desc="Built-in creation tools." features={["Course builder", "Version control", "Templates"]} />
-                        <ServiceCard title="Admin Console" icon={Settings} desc="System configuration and oversight." features={["Bulk ops", "System health", "Configuration"]} />
+                        <ServiceCard title="Course Management" desc="SCORM/AICC/xAPI delivery & multimedia." features={["Course catalog", "Mobile player", "Video delivery"]} />
+                        <ServiceCard title="User Management" desc="SSO, RBAC, and hierarchy management." features={["SAML 2.0 SSO", "MFA Support", "Role hierarchy"]} />
+                        <ServiceCard title="Assessment Engine" desc="Quizzes, exams, and competency validation." features={["Auto-grading", "Question banks", "Certificates"]} />
+                        <ServiceCard title="Compliance Tracking" desc="Regulatory reporting and audit trails." features={["Rules engine", "21 CFR Part 11", "Audit logs"]} />
+                        <ServiceCard title="Analytics" desc="Real-time dashboards and data exports." features={["Custom reports", "Trend analysis", "Scheduled exports"]} />
+                        <ServiceCard title="Learning Record Store" desc="Native xAPI-compliant LRS." features={["Statement capture", "Learning analytics", "Cross-platform"]} />
+                        <ServiceCard title="Career Development" desc="IDP and skills gap analysis." features={["Career paths", "Skills inventory", "IDP tracking"]} />
+                        <ServiceCard title="Notifications" desc="Automated engagement engine." features={["Deadline alerts", "Manager notifications", "Templates"]} />
+                        <ServiceCard title="API Gateway" desc="RESTful enterprise connectivity." features={["REST API", "Webhooks", "HRIS sync"]} />
+                        <ServiceCard title="Content Authoring" desc="Built-in creation tools." features={["Course builder", "Version control", "Templates"]} />
+                        <ServiceCard title="Admin Console" desc="System configuration and oversight." features={["Bulk ops", "System health", "Configuration"]} />
                     </div>
                 </div>
 
@@ -835,11 +769,10 @@ export const TrustCenterView = () => {
                 {/* --- ACTION DECK --- */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
                     <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 flex flex-col justify-between shadow-lg relative overflow-hidden group`}>
-                        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity"><Shield size={140} /></div>
                         <div>
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/10"><FileJson size={24} /></div>
-                                <div><h3 className="text-xl font-bold text-white">Authorization Data</h3><div className="text-xs text-slate-400">Machine-Readable Artifacts</div></div>
+                            <div className="mb-6">
+                                <h3 className="text-xl font-bold text-white">Authorization Data</h3>
+                                <div className="text-xs text-slate-400">Machine-Readable Artifacts</div>
                             </div>
                             <div className="flex flex-wrap gap-2 mb-8">
                                 <ArtifactBadge label="Machine Readable" /><ArtifactBadge label="OSCAL Ready" /><ArtifactBadge label="Continuous Validation" />
@@ -852,23 +785,25 @@ export const TrustCenterView = () => {
 
                     <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 flex flex-col justify-between shadow-lg`}>
                         <div>
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/10"><Activity size={24} /></div>
-                                <div><h3 className="text-xl font-bold text-white">Continuous Monitoring</h3><div className="text-xs text-slate-400">Real-time Compliance Tracking</div></div>
+                            <div className="mb-6">
+                                <h3 className="text-xl font-bold text-white">Continuous Monitoring</h3>
+                                <div className="text-xs text-slate-400">Real-time Compliance Tracking</div>
                             </div>
                             <div className="grid grid-cols-2 gap-4 mb-8">
                                 <div className="bg-[#09090b] p-4 rounded-xl border border-white/5">
                                     <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Next Snapshot</div>
-                                    <div className="text-blue-400 font-bold text-lg flex items-center gap-2"><Clock size={16} />{nextReportDate ? nextReportDate.toLocaleDateString() : '...'}</div>
+                                    <div className="text-blue-400 font-bold text-lg">{nextReportDate ? nextReportDate.toLocaleDateString() : '...'}</div>
                                 </div>
                                 <div className="bg-[#09090b] p-4 rounded-xl border border-white/5">
                                     <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Validation</div>
-                                    <div className="text-emerald-400 font-bold text-lg flex items-center gap-2"><CheckCircle2 size={16} /> Passing</div>
+                                    <div className="text-emerald-400 font-bold text-lg flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Passing
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div className="flex gap-3">
-                            <button onClick={viewQuarterlyReport} className="flex-1 py-3.5 bg-[#18181b] hover:bg-[#202025] text-slate-200 font-bold rounded-xl border border-white/5 transition-all flex items-center justify-center gap-2 text-sm"><FileText size={16} /> View Report</button>
+                            <button onClick={viewQuarterlyReport} className="flex-1 py-3.5 bg-[#18181b] hover:bg-[#202025] text-slate-200 font-bold rounded-xl border border-white/5 transition-all flex items-center justify-center gap-2 text-sm">View Report</button>
                             <button onClick={downloadQuarterlyReport} className="px-5 py-3.5 bg-[#18181b] hover:bg-[#202025] text-slate-200 rounded-xl border border-white/5 transition-all"><Download size={18} /></button>
                         </div>
                     </div>
@@ -878,9 +813,7 @@ export const TrustCenterView = () => {
                 <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 shadow-md mt-8`}>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <div>
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <GitCommit size={22} className="text-purple-400" /> Infrastructure Change Log
-                            </h3>
+                            <h3 className="text-xl font-bold text-white">Infrastructure Change Log</h3>
                             <div className="text-xs text-slate-500 mt-1 font-mono">SCN History (Significant Change Notifications)</div>
                         </div>
                         <div className="flex gap-2">
@@ -889,6 +822,7 @@ export const TrustCenterView = () => {
                             </span>
                         </div>
                     </div>
+
                     <div className="overflow-hidden rounded-xl border border-white/5 bg-[#09090b]">
                         {scnHistory.length === 0 ? (
                             <div className="p-8 text-center text-slate-600 text-sm italic">No significant changes detected yet...</div>
@@ -949,9 +883,9 @@ export const TrustCenterView = () => {
 
                 {/* --- FOOTER ACTIONS --- */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-8 mt-8">
-                    <FooterAction icon={<Code />} title="API Docs" onClick={openApiDocs} />
-                    <FooterAction icon={<Settings />} title="Secure Config" onClick={viewSecureConfig} />
-                    <FooterAction icon={<Mail />} title="Support" onClick={() => window.location.href = 'mailto:support@meridianks.com'} />
+                    <FooterAction title="API Docs" onClick={openApiDocs} />
+                    <FooterAction title="Secure Config" onClick={viewSecureConfig} />
+                    <FooterAction title="Support" onClick={() => window.location.href = 'mailto:support@meridianks.com'} />
                 </div>
             </div>
         </div>
@@ -960,9 +894,8 @@ export const TrustCenterView = () => {
 
 // --- HELPER COMPONENTS ---
 
-const TelemetryItem = ({ label, value, icon }) => (
+const TelemetryItem = ({ label, value }) => (
     <div className="flex items-center gap-3 px-4 py-1.5">
-        {icon}
         <div>
             <div className="text-white font-mono font-bold text-sm leading-none">{value}</div>
             <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mt-0.5">{label}</div>
@@ -978,15 +911,12 @@ const InfoCard = ({ label, value, sub }) => (
     </div>
 );
 
-const ServiceCard = ({ title, desc, features, icon: Icon }) => (
+const ServiceCard = ({ title, desc, features }) => (
     <div className={`${THEME.panel} border ${THEME.border} p-5 rounded-xl hover:border-blue-500/30 transition-all group flex flex-col h-full cursor-default`}>
         <div className="flex justify-between items-start mb-3">
-            <div className="p-2 rounded-lg bg-[#09090b] text-blue-400 group-hover:text-white group-hover:bg-blue-600 transition-colors border border-white/5">
-                {Icon && <Icon size={18} />}
-            </div>
+            <h4 className="font-bold text-white text-sm">{title}</h4>
             <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase font-bold">Auth</span>
         </div>
-        <h4 className="font-bold text-white mb-1 text-sm">{title}</h4>
         <p className="text-xs text-slate-400 mb-4 leading-relaxed line-clamp-2">{desc}</p>
         <div className="space-y-1.5 flex-1">
             {features?.slice(0, 3).map((f, i) => (
@@ -1001,23 +931,19 @@ const ServiceCard = ({ title, desc, features, icon: Icon }) => (
 
 const ArtifactBadge = ({ label }) => (
     <div className="flex items-center gap-2 bg-[#09090b] px-3 py-1.5 rounded-lg border border-white/5 text-xs font-mono text-slate-300">
-        <Hash size={10} className="text-blue-500" /> {label}
+        {label}
     </div>
 );
 
 const ClassificationBadge = ({ type, label }) => {
     let styles = "bg-slate-800 text-slate-300 border-slate-700";
-    let Icon = GitCommit;
 
     if (type === 'routine_recurring' || type === 'routine') {
         styles = "bg-blue-500/10 text-blue-400 border-blue-500/20";
-        Icon = RefreshCw;
     } else if (type === 'adaptive') {
         styles = "bg-purple-500/10 text-purple-400 border-purple-500/20";
-        Icon = Zap;
     } else if (type === 'transformative') {
         styles = "bg-rose-500/10 text-rose-400 border-rose-500/20";
-        Icon = AlertTriangle;
     }
 
     // Format label for display
@@ -1025,14 +951,13 @@ const ClassificationBadge = ({ type, label }) => {
 
     return (
         <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${styles}`}>
-            <Icon size={10} /> {displayLabel}
+            {displayLabel}
         </div>
     );
 };
 
-const FooterAction = ({ icon, title, onClick }) => (
+const FooterAction = ({ title, onClick }) => (
     <button onClick={onClick} className={`${THEME.panel} border ${THEME.border} hover:bg-[#18181b] p-4 rounded-xl flex items-center justify-center gap-2 text-sm font-bold text-slate-300 hover:text-white transition-all group`}>
-        <span className="text-slate-500 group-hover:text-blue-400 transition-colors">{React.cloneElement(icon, { size: 16 })}</span>
         {title}
     </button>
 );
