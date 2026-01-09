@@ -348,7 +348,7 @@ const DistributionChart = memo(() => {
               tick={{ fill: '#64748b', fontSize: 9, fontFamily: 'monospace' }}
               dy={10}
               interval={0}
-              angle={-45}
+              angle={-20}
               textAnchor="end"
               height={60}
             />
@@ -359,19 +359,16 @@ const DistributionChart = memo(() => {
               width={30}
             />
             <Tooltip
-              cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+              cursor={{ fill: 'rgba(255,255,255,0.03)' }}
               contentStyle={{
-                background: '#1a1a22',
+                backgroundColor: '#1a1a22',
                 border: '1px solid rgba(255,255,255,0.1)',
                 borderRadius: '8px',
-                padding: '12px',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+                fontSize: '11px'
               }}
-              itemStyle={{ color: '#94a3b8', fontSize: '11px', fontFamily: 'monospace' }}
-              labelStyle={{ color: '#fff', fontWeight: 'bold', marginBottom: '8px' }}
             />
-            <Bar dataKey="passed" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
-            <Bar dataKey="failed" stackId="a" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="passed" fill="#22c55e" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="failed" fill="#ef4444" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -380,88 +377,66 @@ const DistributionChart = memo(() => {
 });
 
 const DashboardContent = memo(() => {
-  const { metadata, ksis } = useData();
+  const { metrics, ksis } = useData();
 
-  const stats = useMemo(() => {
-    if (!metadata) {
-      return {
-        passRate: '—',
-        totalControls: '—',
-        passedControls: '—',
-        lastUpdated: '—',
-        statusLabel: 'Loading...',
-        statusColor: 'text-slate-500'
-      };
-    }
-
-    const rate = parseFloat(metadata.pass_rate);
-    return {
-      passRate: metadata.pass_rate,
-      totalControls: metadata.total_validated,
-      passedControls: metadata.passed,
-      lastUpdated: new Date(metadata.validation_date).toLocaleDateString(),
-      statusLabel: rate >= 90 ? 'Excellent' : rate >= 80 ? 'Good' : rate >= 70 ? 'Moderate' : 'At Risk',
-      statusColor: rate >= 90 ? 'text-emerald-400' : rate >= 80 ? 'text-blue-400' : rate >= 70 ? 'text-amber-400' : 'text-rose-400'
-    };
-  }, [metadata]);
+  const totalControls = ksis?.length || 0;
 
   return (
-    <div className="space-y-8">
+    <>
       <ImpactBanner />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatsCard
-          title="Pass Rate"
-          value={stats.passRate}
-          contextMetric="Target: 80%"
-          statusLabel={stats.statusLabel}
-          statusColor={stats.statusColor}
-        />
-        <StatsCard
-          title="Total Controls"
-          value={stats.totalControls}
-          contextMetric="FedRAMP Mod"
-          statusLabel="Active"
+          title="Total KSIs"
+          value={totalControls}
+          contextMetric="Active"
+          statusLabel="Monitored"
           statusColor="text-blue-400"
         />
         <StatsCard
-          title="Passed"
-          value={stats.passedControls}
-          contextMetric={`of ${stats.totalControls}`}
-          statusLabel="Validated"
+          title="Passing"
+          value={metrics.passed || 0}
+          contextMetric={`${totalControls > 0 ? ((metrics.passed / totalControls) * 100).toFixed(0) : 0}%`}
+          statusLabel="Compliant"
           statusColor="text-emerald-400"
         />
         <StatsCard
-          title="Failed"
-          value={metadata ? metadata.failed : '—'}
-          contextMetric="Requires Action"
-          statusLabel={metadata?.failed > 0 ? 'Critical' : 'None'}
-          statusColor={metadata?.failed > 0 ? 'text-rose-400' : 'text-emerald-400'}
+          title="Failing"
+          value={metrics.failed || 0}
+          contextMetric={`${totalControls > 0 ? ((metrics.failed / totalControls) * 100).toFixed(0) : 0}%`}
+          statusLabel="Action Required"
+          statusColor="text-rose-400"
+        />
+        <StatsCard
+          title="Warnings"
+          value={metrics.warning || 0}
+          contextMetric={`${totalControls > 0 ? ((metrics.warning / totalControls) * 100).toFixed(0) : 0}%`}
+          statusLabel="Review"
+          statusColor="text-amber-400"
         />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <TimelineChart />
         <DistributionChart />
       </div>
 
       <div className={`${THEME.panel} rounded-xl border ${THEME.border} overflow-hidden shadow-sm`}>
-        <div className="p-5 border-b border-white/5 flex justify-between items-center bg-[#09090b]">
-          <div>
-            <h3 className="font-bold text-white text-sm">System Controls Register</h3>
-            <p className="text-slate-500 text-[10px] mt-1 font-mono uppercase tracking-wider">
-              Real-time validation of {ksis.length} security controls
-            </p>
-          </div>
-          <div className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-bold border border-emerald-500/20 tracking-wider">
-            LIVE
+        <div className="p-5 border-b border-white/5 bg-[#09090b]">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-white text-sm">Key Security Indicators</h3>
+              <p className="text-slate-500 text-[10px] mt-1 font-mono uppercase tracking-wider">
+                Real-time control status
+              </p>
+            </div>
           </div>
         </div>
-        <div className="p-0 bg-[#09090b]">
+        <div className="p-6 bg-[#09090b]">
           <KSIGrid />
         </div>
       </div>
-    </div>
+    </>
   );
 });
 
@@ -488,14 +463,15 @@ const AppShell = () => {
         ></div>
       )}
 
-      {/* Mobile Sidebar Drawer */}
+      {/* Unified Sidebar: Drawer on Mobile, Persistent on Desktop */}
       <aside
-        className={`fixed z-[70] h-full bg-[#0c0c10] border-r border-white/5 transition-transform duration-300 
+        className={`fixed lg:relative z-[70] flex-shrink-0 h-full bg-[#0c0c10] border-r border-white/5 transition-all duration-300 transform 
           w-[280px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:hidden
+          lg:translate-x-0 ${sidebarOpen ? 'lg:w-64' : 'lg:w-0 lg:overflow-hidden'}
         `}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full min-w-[256px]">
+          {/* Header with Close Button for Mobile */}
           <div className="h-16 flex items-center justify-between px-5 border-b border-white/5 mb-2">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-1 relative overflow-hidden">
@@ -512,9 +488,10 @@ const AppShell = () => {
               </div>
             </div>
 
+            {/* Mobile Only: Explicit Close Button */}
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="p-2 text-slate-500 hover:text-white transition-colors"
+              className="lg:hidden p-2 text-slate-500 hover:text-white transition-colors"
             >
               <X size={20} />
             </button>
@@ -563,81 +540,6 @@ const AppShell = () => {
           <div className="p-4 border-t border-white/5 bg-[#09090b]">
             <button
               onClick={() => { setSettingsOpen(true); setMobileMenuOpen(false); }}
-              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase"
-            >
-              <Settings size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> System Settings
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Desktop Sidebar - Static in flex flow */}
-      <aside
-        className={`hidden lg:flex flex-col flex-shrink-0 h-full bg-[#0c0c10] border-r border-white/5 transition-all duration-300 overflow-hidden
-          ${sidebarOpen ? 'w-64' : 'w-0'}
-        `}
-      >
-        <div className="flex flex-col h-full min-w-[256px]">
-          <div className="h-16 flex items-center justify-between px-5 border-b border-white/5 mb-2">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-1 relative overflow-hidden">
-                <img
-                  src={`${import.meta.env.BASE_URL}meridian-favicon.png`}
-                  alt="Meridian Logo"
-                  className="w-full h-full object-contain relative z-10"
-                />
-                <div className="absolute inset-0 bg-blue-500/10 blur-xl"></div>
-              </div>
-              <div>
-                <div className="font-bold text-white tracking-tight leading-none text-sm">Meridian</div>
-                <div className="text-[9px] text-slate-500 font-mono mt-0.5 tracking-widest uppercase">Trust Center</div>
-              </div>
-            </div>
-          </div>
-
-          <nav className="flex-1 overflow-y-auto py-6 scrollbar-none">
-            <div className="px-5 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Platform</div>
-
-            <SidebarItem
-              icon={LayoutDashboard}
-              label="Overview"
-              isActive={activeView === 'dashboard'}
-              onClick={() => setActiveView('dashboard')}
-            />
-            <SidebarItem
-              icon={ShieldAlert}
-              label="Trust Center"
-              isActive={activeView === 'trust'}
-              onClick={() => setActiveView('trust')}
-            />
-            <SidebarItem
-              icon={Eye}
-              label="Transparency Console"
-              isActive={activeView === 'transparency'}
-              onClick={() => setActiveView('transparency')}
-            />
-            <SidebarItem
-              icon={BarChart3}
-              label="Pipeline Metrics"
-              isActive={activeView === 'metrics'}
-              onClick={() => setActiveView('metrics')}
-            />
-
-            <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
-
-            {isAuthenticated ? (
-              <>
-                <SidebarItem icon={User} label={user.agency || 'Agency User'} />
-                <SidebarItem icon={LogOut} label="Sign Out" onClick={logout} />
-              </>
-            ) : (
-              <SidebarItem icon={FileText} label="Register Access" onClick={() => openModal('registration')} />
-            )}
-          </nav>
-
-          <div className="p-4 border-t border-white/5 bg-[#09090b]">
-            <button
-              onClick={() => setSettingsOpen(true)}
               className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase"
             >
               <Settings size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> System Settings
