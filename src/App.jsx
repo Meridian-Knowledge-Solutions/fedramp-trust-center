@@ -169,22 +169,26 @@ const ImpactBanner = memo(() => {
                   year: 'numeric'
                 })}
               </span>
+              <Clock size={10} className="ml-1" />
+              <span className="text-slate-300 font-mono tabular-nums">
+                {lastRunDate.toLocaleTimeString(undefined, {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit'
+                })}
+              </span>
             </div>
-            <div className="flex items-center gap-2 text-[10px] text-slate-500">
-              <Clock size={10} />
-              <span>{timeElapsed}</span>
+            <div className="text-[9px] text-slate-500 font-mono">
+              Last validated {timeElapsed}
             </div>
           </div>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className={`text-[10px] font-bold tracking-wider py-1.5 px-3 rounded-md flex items-center gap-2 border uppercase ${isRefreshing
-              ? 'bg-white/5 text-slate-500 border-white/5 cursor-not-allowed'
-              : 'bg-white/5 hover:bg-white/10 text-slate-300 border-white/5 hover:border-white/10 cursor-pointer'
-              } transition-all`}
+            className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-blue-400 hover:text-blue-300 transition-colors"
           >
             <RefreshCw size={10} className={isRefreshing ? 'animate-spin' : ''} />
-            {isRefreshing ? 'Syncing...' : 'Refresh'}
+            Sync Now
           </button>
         </div>
       </div>
@@ -192,184 +196,189 @@ const ImpactBanner = memo(() => {
   );
 });
 
-const TimelineChart = memo(() => {
-  const { history } = useData();
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const value = parseFloat(data.rate);
+    const isPassing = value >= 90;
 
-  const chartData = useMemo(() => {
-    if (!history?.length) {
-      const dates = [];
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        dates.push({
-          date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          pass_rate: 80 + Math.random() * 15,
-          total_controls: 18,
-          controls_compliant: 14 + Math.floor(Math.random() * 3)
-        });
-      }
-      return dates;
-    }
-
-    return history.slice(-7).map(item => ({
-      date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      pass_rate: parseFloat(item.pass_rate) || 0,
-      total_controls: item.total || 0,
-      controls_compliant: item.passed || 0
-    }));
-  }, [history]);
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null;
     return (
-      <div className="bg-[#1a1a22] border border-white/10 rounded-lg p-3 shadow-2xl backdrop-blur-md">
-        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{label}</div>
-        <div className="text-white font-bold text-lg font-mono tabular-nums">{payload[0]?.value?.toFixed(1)}%</div>
-        <div className="text-[10px] text-slate-500 mt-1">
-          {payload[0]?.payload?.controls_compliant}/{payload[0]?.payload?.total_controls} controls
+      <div className="bg-[#18181b]/95 border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md min-w-[200px]">
+        <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/5">
+          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider font-mono">
+            {new Date(data.timestamp).toLocaleString(undefined, {
+              month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            })}
+          </p>
+          <div className={`w-2 h-2 rounded-full ${isPassing ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'}`} />
+        </div>
+
+        <div className="flex items-baseline gap-2 mb-4">
+          <span className={`text-3xl font-mono font-bold tracking-tight ${isPassing ? 'text-white' : 'text-rose-400'}`}>
+            {value}%
+          </span>
+          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Compliance</span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-white/5 rounded-lg p-2 border border-white/5">
+            <div className="text-[9px] text-slate-500 uppercase font-bold mb-0.5">Passing</div>
+            <div className="text-emerald-400 font-mono font-bold">{data.passCount}</div>
+          </div>
+          <div className="bg-white/5 rounded-lg p-2 border border-white/5">
+            <div className="text-[9px] text-slate-500 uppercase font-bold mb-0.5">Failing</div>
+            <div className="text-rose-400 font-mono font-bold">{data.failCount}</div>
+          </div>
         </div>
       </div>
     );
-  };
+  }
+  return null;
+};
 
-  return (
-    <div className={`${THEME.panel} rounded-xl border ${THEME.border} overflow-hidden shadow-sm`}>
-      <div className="p-5 border-b border-white/5 bg-[#09090b]">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-bold text-white text-sm">Compliance Timeline</h3>
-            <p className="text-slate-500 text-[10px] mt-1 font-mono uppercase tracking-wider">
-              7-day validation trend analysis
-            </p>
-          </div>
-          <div className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-[9px] font-bold border border-blue-500/20 tracking-wider">
-            TREND
-          </div>
-        </div>
-      </div>
+// --- ENHANCED CHART COMPONENT ---
+const ComplianceChart = memo(() => {
+  const { history, metadata } = useData();
+  const [chartView, setChartView] = useState('area');
 
-      <div className="p-6 h-80 bg-[#09090b]">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="passRateGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4} />
-                <stop offset="50%" stopColor="#3b82f6" stopOpacity={0.1} />
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-            <XAxis
-              dataKey="date"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
-              dy={10}
-            />
-            <YAxis
-              domain={[0, 100]}
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
-              tickFormatter={(v) => `${v}%`}
-              width={45}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <ReferenceLine y={80} stroke="#f59e0b" strokeDasharray="5 5" strokeOpacity={0.5} />
-            <Area
-              type="monotone"
-              dataKey="pass_rate"
-              stroke="#3b82f6"
-              strokeWidth={2}
-              fill="url(#passRateGradient)"
-              dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4, stroke: '#09090b' }}
-              activeDot={{ fill: '#60a5fa', strokeWidth: 0, r: 6, filter: 'drop-shadow(0 0 8px #3b82f6)' }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-});
-
-const DistributionChart = memo(() => {
-  const { domains } = useData();
+  const targetThreshold = parseFloat(metadata?.impact_thresholds?.min || 90);
 
   const chartData = useMemo(() => {
-    if (!domains?.length) {
-      return [
-        { name: 'Access Control', passed: 3, failed: 1 },
-        { name: 'Audit', passed: 2, failed: 0 },
-        { name: 'Config Mgmt', passed: 2, failed: 1 },
-        { name: 'Identity', passed: 3, failed: 0 },
-        { name: 'Protection', passed: 2, failed: 1 },
-        { name: 'Risk', passed: 3, failed: 0 }
-      ];
-    }
+    if (!history || history.length === 0) return [];
+    return [...history]
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+      .map(item => ({
+        ...item,
+        displayDate: new Date(item.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+        rate: parseFloat(item.compliance_rate || 0),
+        passCount: parseInt(item.passed || 0),
+        failCount: parseInt(item.failed || 0)
+      }));
+  }, [history]);
 
-    return domains.map(d => ({
-      name: d.name?.length > 12 ? d.name.substring(0, 12) + '...' : d.name,
-      passed: d.passed || 0,
-      failed: d.failed || 0
-    }));
-  }, [domains]);
+  // ADDED: Calculate the total number of validation runs
+  const totalRuns = chartData.length;
+
+  const ChartComponent = chartView === 'bar' ? BarChart : AreaChart;
+
+  if (chartData.length === 0) {
+    return (
+      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6 mb-8 shadow-sm flex items-center justify-center h-80`}>
+        <div className="text-center text-slate-500">
+          <BarChart3 size={40} className="mx-auto mb-3 opacity-20" />
+          <p className="text-sm font-medium">Initializing Trend Data...</p>
+          <p className="text-[10px] opacity-50 mt-1 uppercase tracking-wider">Awaiting pipeline history</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate min/max for dynamic Y-axis scaling
+  const minRate = Math.min(...chartData.map(d => d.rate));
+  const yDomainMin = Math.max(0, Math.floor(minRate - 5));
 
   return (
-    <div className={`${THEME.panel} rounded-xl border ${THEME.border} overflow-hidden shadow-sm`}>
-      <div className="p-5 border-b border-white/5 bg-[#09090b]">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-bold text-white text-sm">Domain Coverage</h3>
-            <p className="text-slate-500 text-[10px] mt-1 font-mono uppercase tracking-wider">
-              Controls by security domain
-            </p>
-          </div>
-          <div className="flex items-center gap-4 text-[9px] font-mono">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              <span className="text-slate-500 uppercase tracking-wider">Passed</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-              <span className="text-slate-500 uppercase tracking-wider">Failed</span>
-            </span>
-          </div>
+    <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6 mb-8 shadow-lg relative overflow-hidden flex flex-col h-96 group`}>
+      <div className="flex justify-between items-center mb-6 relative z-10 shrink-0">
+        <div>
+          <h3 className="text-white font-bold text-lg mb-1 tracking-tight">Validation Velocity</h3>
+          <p className="text-slate-500 text-[11px] uppercase tracking-wider font-bold">
+            Real-time Compliance Trend
+            <span className="text-slate-700 mx-1">•</span>
+            <span className="text-blue-400 font-mono tracking-normal">{totalRuns} Historical Runs</span>
+          </p>
+        </div>
+
+        <div className="flex bg-[#09090b] rounded-lg p-1 border border-white/10">
+          {['area', 'bar'].map(type => (
+            <button
+              key={type}
+              onClick={() => setChartView(type)}
+              className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${chartView === type
+                ? 'bg-white/10 text-white shadow-sm border border-white/5'
+                : 'text-slate-500 hover:text-slate-300'
+                }`}
+            >
+              {type}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="p-6 h-80 bg-[#09090b]">
+      <div className="flex-1 w-full min-h-0 relative z-10">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} barGap={2} barSize={20}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+          <ChartComponent data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
             <XAxis
-              dataKey="name"
+              dataKey="displayDate"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#64748b', fontSize: 9, fontFamily: 'monospace' }}
+              tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace', fontWeight: 600 }}
               dy={10}
-              interval={0}
-              angle={-20}
-              textAnchor="end"
-              height={60}
+              minTickGap={30}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }}
-              width={30}
+              tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace', fontWeight: 600 }}
+              domain={[yDomainMin, 100]}
+              allowDecimals={false}
+              tickFormatter={(value) => `${value}%`}
             />
             <Tooltip
-              cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-              contentStyle={{
-                backgroundColor: '#1a1a22',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '8px',
-                fontSize: '11px'
+              content={<CustomTooltip />}
+              cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4', opacity: 0.5 }}
+            />
+            <ReferenceLine
+              y={targetThreshold}
+              stroke="#f59e0b"
+              strokeDasharray="4 2"
+              strokeWidth={1}
+              label={{
+                value: `TARGET (${targetThreshold}%)`,
+                fill: '#f59e0b',
+                fontSize: 9,
+                position: 'insideTopRight',
+                fontWeight: 800,
+                dy: -10
               }}
             />
-            <Bar dataKey="passed" fill="#22c55e" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="failed" fill="#ef4444" radius={[4, 4, 0, 0]} />
-          </BarChart>
+            {chartView === 'bar' ? (
+              <Bar
+                dataKey="rate"
+                radius={[4, 4, 0, 0]}
+                barSize={8}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.rate >= targetThreshold ? '#10b981' : '#f43f5e'}
+                  />
+                ))}
+              </Bar>
+            ) : (
+              <Area
+                type="monotone"
+                dataKey="rate"
+                stroke="#10b981"
+                strokeWidth={3}
+                fill="url(#scoreGradient)"
+                activeDot={{
+                  r: 6,
+                  strokeWidth: 4,
+                  fill: '#09090b',
+                  stroke: '#10b981'
+                }}
+                animationDuration={1500}
+              />
+            )}
+          </ChartComponent>
         </ResponsiveContainer>
       </div>
     </div>
@@ -377,66 +386,84 @@ const DistributionChart = memo(() => {
 });
 
 const DashboardContent = memo(() => {
-  const { metrics, ksis } = useData();
+  const { metrics, ksis, history, metadata } = useData();
 
   const totalControls = ksis?.length || 0;
+  const targetThreshold = parseFloat(metadata?.impact_thresholds?.min || 90);
+  const complianceTarget = `Target: ${targetThreshold}%`;
+
+  const passingPercent = totalControls > 0 ? ((parseInt(metrics.passed) / totalControls) * 100).toFixed(1) : '0.0';
+  const failingPercent = totalControls > 0 ? ((parseInt(metrics.failed) / totalControls) * 100).toFixed(1) : '0.0';
+  const warningsPercent = totalControls > 0 ? ((parseInt(metrics.warning) / totalControls) * 100).toFixed(1) : '0.0';
+
+  const complianceScore = parseFloat(metrics.score);
+  const complianceStatus = complianceScore >= targetThreshold
+    ? { label: 'On Target', color: 'text-emerald-400' }
+    : complianceScore >= (targetThreshold - 5)
+      ? { label: 'Near Target', color: 'text-amber-400' }
+      : { label: 'Below Target', color: 'text-rose-400' };
+
+  const passingStatus = parseInt(metrics.passed) > 0 ? { label: 'Active', color: 'text-emerald-400' } : { label: 'No Data', color: 'text-slate-400' };
+
+  const failingStatus = parseInt(metrics.failed) === 0
+    ? { label: 'All Clear', color: 'text-emerald-400' }
+    : parseInt(metrics.failed) <= 5
+      ? { label: 'Minor Issues', color: 'text-amber-400' }
+      : { label: 'Needs Attention', color: 'text-rose-400' };
+
+  const warningStatus = parseInt(metrics.warning) === 0 ? { label: 'All Clear', color: 'text-emerald-400' } : { label: 'Active', color: 'text-amber-400' };
 
   return (
-    <>
+    <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4">
       <ImpactBanner />
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
-          title="Total KSIs"
-          value={totalControls}
-          contextMetric="Active"
-          statusLabel="Monitored"
-          statusColor="text-blue-400"
+          title="Compliance Score"
+          value={`${metrics.score}%`}
+          contextMetric={complianceTarget}
+          statusLabel={complianceStatus.label}
+          statusColor={complianceStatus.color}
         />
         <StatsCard
-          title="Passing"
-          value={metrics.passed || 0}
-          contextMetric={`${totalControls > 0 ? ((metrics.passed / totalControls) * 100).toFixed(0) : 0}%`}
-          statusLabel="Compliant"
-          statusColor="text-emerald-400"
+          title="Passing Controls"
+          value={metrics.passed}
+          contextMetric={`${passingPercent}% of ${totalControls}`}
+          statusLabel={passingStatus.label}
+          statusColor={passingStatus.color}
         />
         <StatsCard
-          title="Failing"
-          value={metrics.failed || 0}
-          contextMetric={`${totalControls > 0 ? ((metrics.failed / totalControls) * 100).toFixed(0) : 0}%`}
-          statusLabel="Action Required"
-          statusColor="text-rose-400"
+          title="Failing Controls"
+          value={metrics.failed}
+          contextMetric={`${failingPercent}% of ${totalControls}`}
+          statusLabel={failingStatus.label}
+          statusColor={failingStatus.color}
         />
         <StatsCard
           title="Warnings"
-          value={metrics.warning || 0}
-          contextMetric={`${totalControls > 0 ? ((metrics.warning / totalControls) * 100).toFixed(0) : 0}%`}
-          statusLabel="Review"
-          statusColor="text-amber-400"
+          value={metrics.warning}
+          contextMetric={`${warningsPercent}% of ${totalControls}`}
+          statusLabel={warningStatus.label}
+          statusColor={warningStatus.color}
         />
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <TimelineChart />
-        <DistributionChart />
-      </div>
-
+      <ComplianceChart />
       <div className={`${THEME.panel} rounded-xl border ${THEME.border} overflow-hidden shadow-sm`}>
-        <div className="p-5 border-b border-white/5 bg-[#09090b]">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-white text-sm">Key Security Indicators</h3>
-              <p className="text-slate-500 text-[10px] mt-1 font-mono uppercase tracking-wider">
-                Real-time control status
-              </p>
-            </div>
+        <div className="p-5 border-b border-white/5 flex justify-between items-center bg-[#09090b]">
+          <div>
+            <h3 className="font-bold text-white text-sm">System Controls Register</h3>
+            <p className="text-slate-500 text-[10px] mt-1 font-mono uppercase tracking-wider">
+              Real-time validation of {ksis.length} security controls
+            </p>
+          </div>
+          <div className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-bold border border-emerald-500/20 tracking-wider">
+            LIVE
           </div>
         </div>
-        <div className="p-6 bg-[#09090b]">
+        <div className="p-0 bg-[#09090b]">
           <KSIGrid />
         </div>
       </div>
-    </>
+    </div>
   );
 });
 
@@ -455,7 +482,7 @@ const AppShell = () => {
   return (
     <div className={`flex h-screen ${THEME.bg} text-slate-300 font-sans overflow-hidden selection:bg-blue-500/30`}>
 
-      {/* Mobile Backdrop */}
+      {/* Mobile Backdrop - Optimization: Darkens background and traps clicks to close menu */}
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] lg:hidden animate-in fade-in duration-300"
@@ -463,15 +490,14 @@ const AppShell = () => {
         ></div>
       )}
 
-      {/* Unified Sidebar: Drawer on Mobile, Persistent on Desktop */}
+      {/* Mobile Sidebar - Fixed positioned drawer */}
       <aside
-        className={`fixed lg:relative z-[70] flex-shrink-0 h-full bg-[#0c0c10] border-r border-white/5 transition-all duration-300 transform 
+        className={`fixed z-[70] h-full bg-[#0c0c10] border-r border-white/5 transition-transform duration-300 
           w-[280px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 ${sidebarOpen ? 'lg:w-64' : 'lg:w-0 lg:overflow-hidden'}
+          lg:hidden
         `}
       >
-        <div className="flex flex-col h-full min-w-[256px]">
-          {/* Header with Close Button for Mobile */}
+        <div className="flex flex-col h-full">
           <div className="h-16 flex items-center justify-between px-5 border-b border-white/5 mb-2">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-1 relative overflow-hidden">
@@ -487,11 +513,9 @@ const AppShell = () => {
                 <div className="text-[9px] text-slate-500 font-mono mt-0.5 tracking-widest uppercase">Trust Center</div>
               </div>
             </div>
-
-            {/* Mobile Only: Explicit Close Button */}
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="lg:hidden p-2 text-slate-500 hover:text-white transition-colors"
+              className="p-2 text-slate-500 hover:text-white transition-colors"
             >
               <X size={20} />
             </button>
@@ -548,13 +572,88 @@ const AppShell = () => {
         </div>
       </aside>
 
+      {/* Desktop Sidebar - Static flex child */}
+      <aside
+        className={`hidden lg:flex flex-col flex-shrink-0 h-full bg-[#0c0c10] border-r border-white/5 transition-all duration-300 overflow-hidden
+          ${sidebarOpen ? 'w-64' : 'w-0'}
+        `}
+      >
+        <div className="flex flex-col h-full min-w-[256px]">
+          <div className="h-16 flex items-center justify-between px-5 border-b border-white/5 mb-2">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-1 relative overflow-hidden">
+                <img
+                  src={`${import.meta.env.BASE_URL}meridian-favicon.png`}
+                  alt="Meridian Logo"
+                  className="w-full h-full object-contain relative z-10"
+                />
+                <div className="absolute inset-0 bg-blue-500/10 blur-xl"></div>
+              </div>
+              <div>
+                <div className="font-bold text-white tracking-tight leading-none text-sm">Meridian</div>
+                <div className="text-[9px] text-slate-500 font-mono mt-0.5 tracking-widest uppercase">Trust Center</div>
+              </div>
+            </div>
+          </div>
+
+          <nav className="flex-1 overflow-y-auto py-6 scrollbar-none">
+            <div className="px-5 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Platform</div>
+
+            <SidebarItem
+              icon={LayoutDashboard}
+              label="Overview"
+              isActive={activeView === 'dashboard'}
+              onClick={() => setActiveView('dashboard')}
+            />
+            <SidebarItem
+              icon={ShieldAlert}
+              label="Trust Center"
+              isActive={activeView === 'trust'}
+              onClick={() => setActiveView('trust')}
+            />
+            <SidebarItem
+              icon={Eye}
+              label="Transparency Console"
+              isActive={activeView === 'transparency'}
+              onClick={() => setActiveView('transparency')}
+            />
+            <SidebarItem
+              icon={BarChart3}
+              label="Pipeline Metrics"
+              isActive={activeView === 'metrics'}
+              onClick={() => setActiveView('metrics')}
+            />
+
+            <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
+
+            {isAuthenticated ? (
+              <>
+                <SidebarItem icon={User} label={user.agency || 'Agency User'} />
+                <SidebarItem icon={LogOut} label="Sign Out" onClick={logout} />
+              </>
+            ) : (
+              <SidebarItem icon={FileText} label="Register Access" onClick={() => openModal('registration')} />
+            )}
+          </nav>
+
+          <div className="p-4 border-t border-white/5 bg-[#09090b]">
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase"
+            >
+              <Settings size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> System Settings
+            </button>
+          </div>
+        </div>
+      </aside>
+
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
 
         {/* Global Responsive Header */}
         <header className={`h-16 bg-[#0c0c10]/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 lg:px-6 z-50 sticky top-0 ${scrollY > 0 ? 'shadow-lg shadow-black/20' : ''}`}>
           <div className="flex items-center gap-3">
-            {/* Mobile Hamburger */}
+            {/* Mobile Hamburger: More prominent trigger */}
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-white transition-colors"
@@ -562,7 +661,6 @@ const AppShell = () => {
               <Menu size={22} />
             </button>
 
-            {/* Desktop Toggle */}
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="hidden lg:block text-slate-400 hover:text-white transition-colors">
               <Menu size={18} />
             </button>
