@@ -1,333 +1,357 @@
 /**
- * KSI Validation Parser
+ * KSI Evidence Narrative Configuration
  * 
- * Dynamically parses the engine output (unified_ksi_validations.json) to extract
- * rich validation details for the Why modal and Transparency console.
+ * Maps each KSI to human-readable explanations of:
+ * - What evidence is collected
+ * - What validations are performed
+ * - How pass/fail is determined
  * 
- * The engine outputs:
- * - command_executions: Array of {command, description, status, exit_code, execution_time, error_message}
- * - assertion_reason: Summary text like "✅ Excellent (100%): 3 items: 3 verified"
- * - resources_scanned, resources_passed, resources_failed
- * - score, assertion (boolean)
+ * This provides transparency into the validation process
+ * WITHOUT exposing actual evidence file contents.
  */
 
-// AWS Service detection from CLI commands
-const SERVICE_PATTERNS = {
-  's3': { name: 'S3', icon: 'database', category: 'Storage' },
-  's3api': { name: 'S3', icon: 'database', category: 'Storage' },
-  'ec2': { name: 'EC2', icon: 'server', category: 'Compute' },
-  'iam': { name: 'IAM', icon: 'shield', category: 'Identity' },
-  'rds': { name: 'RDS', icon: 'database', category: 'Database' },
-  'cloudtrail': { name: 'CloudTrail', icon: 'file-text', category: 'Logging' },
-  'logs': { name: 'CloudWatch Logs', icon: 'file-text', category: 'Logging' },
-  'cloudwatch': { name: 'CloudWatch', icon: 'activity', category: 'Monitoring' },
-  'lambda': { name: 'Lambda', icon: 'zap', category: 'Compute' },
-  'kms': { name: 'KMS', icon: 'key', category: 'Security' },
-  'secretsmanager': { name: 'Secrets Manager', icon: 'lock', category: 'Security' },
-  'ssm': { name: 'Systems Manager', icon: 'cpu', category: 'Management' },
-  'config': { name: 'AWS Config', icon: 'settings', category: 'Compliance' },
-  'configservice': { name: 'AWS Config', icon: 'settings', category: 'Compliance' },
-  'guardduty': { name: 'GuardDuty', icon: 'shield', category: 'Security' },
-  'securityhub': { name: 'Security Hub', icon: 'shield', category: 'Security' },
-  'inspector': { name: 'Inspector', icon: 'search', category: 'Security' },
-  'inspector2': { name: 'Inspector', icon: 'search', category: 'Security' },
-  'backup': { name: 'AWS Backup', icon: 'archive', category: 'Recovery' },
-  'elbv2': { name: 'ELB', icon: 'globe', category: 'Networking' },
-  'elb': { name: 'ELB', icon: 'globe', category: 'Networking' },
-  'vpc': { name: 'VPC', icon: 'network', category: 'Networking' },
-  'sso': { name: 'SSO', icon: 'users', category: 'Identity' },
-  'sso-admin': { name: 'SSO', icon: 'users', category: 'Identity' },
-  'organizations': { name: 'Organizations', icon: 'layers', category: 'Management' },
-  'accessanalyzer': { name: 'IAM Access Analyzer', icon: 'eye', category: 'Security' },
-  'codecommit': { name: 'CodeCommit', icon: 'git-branch', category: 'Development' },
-  'curl': { name: 'API/HTTP', icon: 'globe', category: 'Documentation' },
-};
+const KSI_EVIDENCE_NARRATIVES = {
+  // ============================================
+  // Authorization by FedRAMP (KSI-AFR)
+  // ============================================
+  'KSI-AFR-01': {
+    name: 'Minimum Assessment Scope',
+    summary: 'Validates that the cloud service offering scope is properly documented and all components are identified for FedRAMP assessment.',
+    evidenceTypes: [
+      { name: 'System Boundary', description: 'Inventory of all system components within authorization boundary' },
+      { name: 'Data Flow Mapping', description: 'Documentation of data flows between components' },
+      { name: 'Service Catalog', description: 'List of services and their security classifications' },
+    ],
+    validationLogic: 'Pass requires: All system components documented, data flows mapped, and service boundaries clearly defined.',
+    passIndicators: ['Complete system inventory', 'Documented data flows', 'Defined authorization boundary'],
+    failIndicators: ['Missing component documentation', 'Undefined data flows', 'Unclear system boundaries'],
+  },
 
-// KSI Category mapping (from engine)
-const KSI_CATEGORIES = {
-  'KSI-AAA': { name: 'Authentication & Access', theme: 'Identity' },
-  'KSI-IAM': { name: 'Identity and Access Management', theme: 'Identity' },
-  'KSI-CNA': { name: 'Cloud Native Architecture', theme: 'Architecture' },
-  'KSI-SVC': { name: 'Service Configuration Management', theme: 'Configuration' },
-  'KSI-TPR': { name: 'Third-Party Information Resources', theme: 'Risk' },
-  'KSI-AFR': { name: 'Authorization by FedRAMP', theme: 'Compliance' },
-  'KSI-PIY': { name: 'Policy and Inventory', theme: 'Governance' },
-  'KSI-LOG': { name: 'Monitoring, Logging, and Auditing', theme: 'Observability' },
-  'KSI-MLA': { name: 'Monitoring, Logging, and Auditing', theme: 'Observability' },
-  'KSI-RPL': { name: 'Recovery Planning', theme: 'Resilience' },
-  'KSI-CED': { name: 'Cybersecurity Education', theme: 'Training' },
-  'KSI-CMT': { name: 'Change Management', theme: 'Operations' },
-  'KSI-IRP': { name: 'Incident Response', theme: 'Security' },
-  'KSI-INR': { name: 'Incident Response', theme: 'Security' },
-  'KSI-DPR': { name: 'Data Protection', theme: 'Security' },
-  'KSI-NSC': { name: 'Network Security', theme: 'Security' },
+  'KSI-AFR-04': {
+    name: 'Vulnerability Detection and Response',
+    summary: 'Validates vulnerability scanning coverage and remediation processes across infrastructure.',
+    evidenceTypes: [
+      { name: 'Scan Coverage', description: 'Percentage of assets with active vulnerability scanning' },
+      { name: 'Remediation SLAs', description: 'Time-to-remediate metrics by severity level' },
+      { name: 'Scanner Configuration', description: 'Validation of scanner settings and schedules' },
+    ],
+    validationLogic: 'Pass requires: 100% scan coverage, critical vulnerabilities remediated within 15 days, high within 30 days.',
+    passIndicators: ['Full scan coverage', 'SLAs met', 'No overdue critical findings'],
+    failIndicators: ['Scan gaps detected', 'Overdue remediations', 'Missing scanner configuration'],
+  },
+
+  'KSI-AFR-11': {
+    name: 'Using Cryptographic Modules',
+    summary: 'Validates that all cryptographic modules protecting federal data comply with FIPS 140-2/140-3 requirements.',
+    evidenceTypes: [
+      { name: 'S3 Encryption', description: 'Server-side encryption configuration for all S3 buckets (AES-256 or KMS)' },
+      { name: 'RDS Encryption', description: 'Storage encryption status for all RDS database instances' },
+      { name: 'KMS Key Policy', description: 'Key management configuration and rotation policies' },
+      { name: 'TLS Configuration', description: 'Load balancer listener TLS versions and cipher suites' },
+      { name: 'Crypto Policy', description: 'Organization-wide cryptographic standards documentation' },
+    ],
+    validationLogic: 'Pass requires: All data-at-rest encrypted with FIPS-validated modules, TLS 1.2+ for data-in-transit, KMS keys with appropriate policies.',
+    passIndicators: ['All storage encrypted', 'TLS 1.2+ enforced', 'KMS keys properly configured', 'FIPS-validated algorithms'],
+    failIndicators: ['Unencrypted storage', 'Weak TLS versions', 'Missing key rotation', 'Non-FIPS algorithms'],
+  },
+
+  // ============================================
+  // Cybersecurity Education (KSI-CED)
+  // ============================================
+  'KSI-CED-01': {
+    name: 'General Training',
+    summary: 'Validates security awareness training completion and effectiveness for all employees.',
+    evidenceTypes: [
+      { name: 'Training Records', description: 'Completion status for required security training modules' },
+      { name: 'Assessment Scores', description: 'Employee performance on security knowledge assessments' },
+      { name: 'Training Currency', description: 'Recency of completed training relative to requirements' },
+    ],
+    validationLogic: 'Pass requires: 100% completion of required training, passing scores on assessments, training current within 12 months.',
+    passIndicators: ['All employees trained', 'Passing assessment scores', 'Training up to date'],
+    failIndicators: ['Incomplete training', 'Failed assessments', 'Expired certifications'],
+  },
+
+  'KSI-CED-02': {
+    name: 'Role-Specific Training',
+    summary: 'Validates specialized training for employees in high-risk or privileged access roles.',
+    evidenceTypes: [
+      { name: 'Role Classification', description: 'Identification of privileged access roles requiring specialized training' },
+      { name: 'Specialized Curriculum', description: 'Role-specific training modules and requirements' },
+      { name: 'Completion Tracking', description: 'Training status for each identified role' },
+    ],
+    validationLogic: 'Pass requires: All privileged users completed role-specific training, specialized modules defined per role.',
+    passIndicators: ['Privileged users trained', 'Role-specific content delivered', 'Current certifications'],
+    failIndicators: ['Untrained privileged users', 'Missing role-specific modules', 'Expired training'],
+  },
+
+  // ============================================
+  // Change Management (KSI-CMT)
+  // ============================================
+  'KSI-CMT-01': {
+    name: 'Log and Monitor Changes',
+    summary: 'Validates that all changes to the cloud service are logged and monitored.',
+    evidenceTypes: [
+      { name: 'CloudTrail Logging', description: 'API activity logging across all AWS regions' },
+      { name: 'Config Recording', description: 'AWS Config resource change tracking' },
+      { name: 'Change Alerts', description: 'Monitoring alerts for significant configuration changes' },
+    ],
+    validationLogic: 'Pass requires: CloudTrail enabled in all regions, Config recording active, change alerts configured.',
+    passIndicators: ['Full API logging', 'Config tracking enabled', 'Alert rules active'],
+    failIndicators: ['Missing trail regions', 'Config disabled', 'No change monitoring'],
+  },
+
+  'KSI-CMT-02': {
+    name: 'Redeployment',
+    summary: 'Validates use of immutable infrastructure patterns with version-controlled deployments.',
+    evidenceTypes: [
+      { name: 'Infrastructure as Code', description: 'IaC templates in version control (Terraform, CloudFormation)' },
+      { name: 'Deployment Pipeline', description: 'CI/CD pipeline configuration for automated deployments' },
+      { name: 'Immutability Controls', description: 'Prevention of direct modification to deployed resources' },
+    ],
+    validationLogic: 'Pass requires: All infrastructure defined as code, deployments through CI/CD only, no manual modifications.',
+    passIndicators: ['IaC coverage complete', 'Pipeline deployments only', 'Drift detection active'],
+    failIndicators: ['Manual deployments detected', 'Missing IaC definitions', 'Configuration drift'],
+  },
+
+  // ============================================
+  // Cloud Native Architecture (KSI-CNA)
+  // ============================================
+  'KSI-CNA-01': {
+    name: 'Restrict Network Traffic',
+    summary: 'Validates that all resources have properly configured network access controls.',
+    evidenceTypes: [
+      { name: 'Security Groups', description: 'Inbound and outbound rules for EC2 security groups' },
+      { name: 'NACLs', description: 'Network ACL configurations for VPC subnets' },
+      { name: 'Default Deny', description: 'Verification of deny-by-default network posture' },
+    ],
+    validationLogic: 'Pass requires: No unrestricted inbound rules (0.0.0.0/0 on sensitive ports), outbound restricted to necessary services.',
+    passIndicators: ['Restricted security groups', 'Proper NACL rules', 'No open admin ports'],
+    failIndicators: ['Unrestricted inbound', 'Missing NACLs', 'Open SSH/RDP to internet'],
+  },
+
+  'KSI-CNA-06': {
+    name: 'High Availability',
+    summary: 'Validates infrastructure resilience and high availability configurations.',
+    evidenceTypes: [
+      { name: 'Multi-AZ Deployment', description: 'Resources distributed across multiple availability zones' },
+      { name: 'Auto Scaling', description: 'Auto scaling group configurations for compute resources' },
+      { name: 'Load Balancing', description: 'Load balancer health checks and distribution' },
+    ],
+    validationLogic: 'Pass requires: Critical resources in multiple AZs, auto scaling configured, health checks active.',
+    passIndicators: ['Multi-AZ active', 'Auto scaling enabled', 'Health checks passing'],
+    failIndicators: ['Single AZ deployment', 'No auto scaling', 'Failed health checks'],
+  },
+
+  // ============================================
+  // Identity and Access Management (KSI-IAM)
+  // ============================================
+  'KSI-IAM-01': {
+    name: 'Phishing-Resistant MFA',
+    summary: 'Validates enforcement of phishing-resistant multi-factor authentication.',
+    evidenceTypes: [
+      { name: 'MFA Policy', description: 'IAM policies requiring MFA for all user authentication' },
+      { name: 'MFA Device Types', description: 'Types of MFA devices in use (hardware keys, authenticator apps)' },
+      { name: 'MFA Coverage', description: 'Percentage of users with MFA enabled' },
+    ],
+    validationLogic: 'Pass requires: 100% MFA coverage, hardware security keys or TOTP authenticators, no SMS-based MFA.',
+    passIndicators: ['All users have MFA', 'Phishing-resistant methods', 'Root account secured'],
+    failIndicators: ['Users without MFA', 'SMS MFA in use', 'Root MFA missing'],
+  },
+
+  'KSI-IAM-04': {
+    name: 'Just-in-Time Authorization',
+    summary: 'Validates implementation of least-privilege and just-in-time access patterns.',
+    evidenceTypes: [
+      { name: 'Role Policies', description: 'IAM role permission boundaries and policies' },
+      { name: 'Access Patterns', description: 'Analysis of actual permissions used vs. granted' },
+      { name: 'Temporary Credentials', description: 'Use of temporary vs. long-lived credentials' },
+    ],
+    validationLogic: 'Pass requires: No wildcard permissions on sensitive services, temporary credentials preferred, regular access reviews.',
+    passIndicators: ['Scoped permissions', 'Temporary credentials', 'Regular access reviews'],
+    failIndicators: ['Wildcard permissions', 'Long-lived credentials', 'Stale access grants'],
+  },
+
+  // ============================================
+  // Monitoring, Logging, and Auditing (KSI-MLA)
+  // ============================================
+  'KSI-MLA-01': {
+    name: 'Security Information and Event Management',
+    summary: 'Validates centralized, tamper-resistant logging through SIEM or equivalent systems.',
+    evidenceTypes: [
+      { name: 'CloudTrail Configuration', description: 'Trail settings, S3 bucket, and log file validation' },
+      { name: 'Log Integrity', description: 'Log file validation and integrity monitoring settings' },
+      { name: 'Centralization', description: 'Log aggregation to central SIEM or log management' },
+    ],
+    validationLogic: 'Pass requires: CloudTrail enabled with log validation, logs sent to protected S3 bucket, SIEM integration active.',
+    passIndicators: ['Trails active', 'Log validation enabled', 'Centralized collection'],
+    failIndicators: ['Missing trails', 'No log validation', 'Decentralized logs'],
+  },
+
+  'KSI-MLA-02': {
+    name: 'Audit Logging',
+    summary: 'Validates comprehensive audit log collection and review processes.',
+    evidenceTypes: [
+      { name: 'Log Coverage', description: 'Services and actions being logged' },
+      { name: 'Retention Policy', description: 'Log retention duration and archival settings' },
+      { name: 'Review Process', description: 'Evidence of regular log review and analysis' },
+    ],
+    validationLogic: 'Pass requires: All security-relevant events logged, 365+ day retention, documented review process.',
+    passIndicators: ['Comprehensive logging', 'Adequate retention', 'Regular reviews'],
+    failIndicators: ['Log gaps', 'Short retention', 'No review process'],
+  },
+
+  // ============================================
+  // Policy and Inventory (KSI-PIY)
+  // ============================================
+  'KSI-PIY-01': {
+    name: 'Automated Inventory',
+    summary: 'Validates real-time, automated inventory of all information resources.',
+    evidenceTypes: [
+      { name: 'AWS Config', description: 'Config recorder status and resource coverage' },
+      { name: 'Resource Tagging', description: 'Tagging compliance for inventory classification' },
+      { name: 'Discovery Tools', description: 'Automated discovery and inventory tools in use' },
+    ],
+    validationLogic: 'Pass requires: AWS Config enabled, all resource types recorded, consistent tagging strategy.',
+    passIndicators: ['Config active', 'Full resource coverage', 'Tagging compliant'],
+    failIndicators: ['Config disabled', 'Missing resource types', 'Untagged resources'],
+  },
+
+  'KSI-PIY-06': {
+    name: 'Security Investment Effectiveness',
+    summary: 'Validates tracking and measurement of security investment outcomes.',
+    evidenceTypes: [
+      { name: 'Metrics Collection', description: 'Security metrics and KPI tracking mechanisms' },
+      { name: 'Investment Tracking', description: 'Security tool and program cost tracking' },
+      { name: 'Effectiveness Measurement', description: 'Outcomes measurement for security investments' },
+    ],
+    validationLogic: 'Pass requires: Defined security metrics, investment tracking, documented effectiveness reviews.',
+    passIndicators: ['Metrics defined', 'Costs tracked', 'ROI measured'],
+    failIndicators: ['No metrics', 'Untracked spending', 'No effectiveness review'],
+  },
+
+  // ============================================
+  // Recovery Planning (KSI-RPL)
+  // ============================================
+  'KSI-RPL-01': {
+    name: 'Recovery Objectives',
+    summary: 'Validates definition of Recovery Time Objectives (RTO) and Recovery Point Objectives (RPO).',
+    evidenceTypes: [
+      { name: 'RTO Definition', description: 'Documented maximum acceptable downtime per system' },
+      { name: 'RPO Definition', description: 'Documented maximum acceptable data loss per system' },
+      { name: 'Tier Classification', description: 'System criticality tiers with corresponding objectives' },
+    ],
+    validationLogic: 'Pass requires: RTO/RPO defined for all critical systems, tiered based on criticality.',
+    passIndicators: ['Objectives defined', 'Systems tiered', 'Stakeholder approval'],
+    failIndicators: ['Missing objectives', 'No tiering', 'Unapproved values'],
+  },
+
+  'KSI-RPL-03': {
+    name: 'System Backups',
+    summary: 'Validates backup configurations align with defined recovery objectives.',
+    evidenceTypes: [
+      { name: 'Backup Configuration', description: 'AWS Backup plans and vault configurations' },
+      { name: 'Backup Coverage', description: 'Resources included in backup scope' },
+      { name: 'Retention Settings', description: 'Backup retention periods and lifecycle policies' },
+    ],
+    validationLogic: 'Pass requires: Backup plans for all critical resources, retention meets RPO, cross-region copies for DR.',
+    passIndicators: ['Full backup coverage', 'Retention adequate', 'Cross-region enabled'],
+    failIndicators: ['Unprotected resources', 'Short retention', 'Single region only'],
+  },
+
+  // ============================================
+  // Service Configuration (KSI-SVC)
+  // ============================================
+  'KSI-SVC-02': {
+    name: 'Network Encryption',
+    summary: 'Validates encryption of data in transit across all network communications.',
+    evidenceTypes: [
+      { name: 'TLS Configuration', description: 'Load balancer and API gateway TLS settings' },
+      { name: 'Certificate Management', description: 'SSL/TLS certificate validity and management' },
+      { name: 'Internal Encryption', description: 'Encryption between internal services and databases' },
+    ],
+    validationLogic: 'Pass requires: TLS 1.2+ on all public endpoints, valid certificates, internal traffic encrypted.',
+    passIndicators: ['TLS 1.2+ enforced', 'Valid certificates', 'Internal encryption'],
+    failIndicators: ['Weak TLS versions', 'Expired certificates', 'Unencrypted internal traffic'],
+  },
+
+  'KSI-SVC-06': {
+    name: 'Secret Management',
+    summary: 'Validates secure storage and rotation of secrets, keys, and credentials.',
+    evidenceTypes: [
+      { name: 'Secrets Manager', description: 'AWS Secrets Manager configuration and usage' },
+      { name: 'Rotation Policies', description: 'Automatic rotation schedules for secrets' },
+      { name: 'Access Controls', description: 'IAM policies governing secret access' },
+    ],
+    validationLogic: 'Pass requires: All secrets in Secrets Manager or Parameter Store, automatic rotation enabled, least-privilege access.',
+    passIndicators: ['Centralized secrets', 'Rotation enabled', 'Access controlled'],
+    failIndicators: ['Hardcoded secrets', 'No rotation', 'Overly permissive access'],
+  },
+
+  // ============================================
+  // Third-Party Information Resources (KSI-TPR)
+  // ============================================
+  'KSI-TPR-03': {
+    name: 'Supply Chain Risk Management',
+    summary: 'Validates identification and mitigation of supply chain risks.',
+    evidenceTypes: [
+      { name: 'Vendor Inventory', description: 'List of third-party vendors and their risk classifications' },
+      { name: 'Risk Assessments', description: 'Security assessments performed on vendors' },
+      { name: 'Contractual Controls', description: 'Security requirements in vendor contracts' },
+    ],
+    validationLogic: 'Pass requires: All vendors inventoried, risk assessments completed, security clauses in contracts.',
+    passIndicators: ['Vendors cataloged', 'Assessments current', 'Contracts reviewed'],
+    failIndicators: ['Unknown vendors', 'Missing assessments', 'No security clauses'],
+  },
+
+  'KSI-TPR-04': {
+    name: 'Supply Chain Risk Monitoring',
+    summary: 'Validates continuous monitoring of third-party software for vulnerabilities.',
+    evidenceTypes: [
+      { name: 'Dependency Scanning', description: 'Automated scanning of software dependencies' },
+      { name: 'Vulnerability Feeds', description: 'Subscription to vulnerability notification services' },
+      { name: 'Update Process', description: 'Process for applying third-party security updates' },
+    ],
+    validationLogic: 'Pass requires: Dependency scanning in CI/CD, vulnerability notifications enabled, timely patching process.',
+    passIndicators: ['Scanning active', 'Notifications enabled', 'Patch process defined'],
+    failIndicators: ['No scanning', 'No notifications', 'Delayed patching'],
+  },
+
+  // ============================================
+  // Incident Response (KSI-INR)
+  // ============================================
+  'KSI-INR-01': {
+    name: 'Incident Response Procedures',
+    summary: 'Validates documented and tested incident response procedures.',
+    evidenceTypes: [
+      { name: 'IR Plan', description: 'Documented incident response plan and procedures' },
+      { name: 'Contact List', description: 'Current incident response team contacts' },
+      { name: 'Playbooks', description: 'Incident-specific response playbooks' },
+    ],
+    validationLogic: 'Pass requires: Documented IR plan, current contact list, playbooks for common incidents.',
+    passIndicators: ['Plan documented', 'Contacts current', 'Playbooks available'],
+    failIndicators: ['No IR plan', 'Stale contacts', 'Missing playbooks'],
+  },
 };
 
 /**
- * Extract AWS service from a CLI command string
+ * Get narrative for a specific KSI
  */
-export const extractServiceFromCommand = (command) => {
-  if (!command) return { name: 'Unknown', icon: 'help-circle', category: 'Other' };
-  
-  const cmdLower = command.toLowerCase().trim();
-  
-  // Check for curl first
-  if (cmdLower.startsWith('curl')) {
-    return SERVICE_PATTERNS['curl'];
-  }
-  
-  // Extract service from "aws <service> ..." pattern
-  const awsMatch = cmdLower.match(/^aws\s+([a-z0-9-]+)/);
-  if (awsMatch) {
-    const service = awsMatch[1];
-    return SERVICE_PATTERNS[service] || { name: service.toUpperCase(), icon: 'cloud', category: 'AWS' };
-  }
-  
-  return { name: 'CLI', icon: 'terminal', category: 'System' };
+export const getKsiNarrative = (ksiId) => {
+  return KSI_EVIDENCE_NARRATIVES[ksiId] || null;
 };
 
 /**
- * Parse assertion_reason to extract structured findings
- * Example: "✅ Excellent (100%): 3 items: 3 verified"
- * Example: "❌ Insufficient (60%): 5 items: 3 verified, 2 failed"
+ * Get all KSI narratives
  */
-export const parseAssertionReason = (reason) => {
-  if (!reason) return { status: 'unknown', label: 'Unknown', score: 0, findings: [] };
-  
-  // Extract status icon and label
-  const hasPass = reason.includes('✅') || reason.toLowerCase().includes('pass') || reason.toLowerCase().includes('excellent') || reason.toLowerCase().includes('good');
-  const hasFail = reason.includes('❌') || reason.toLowerCase().includes('fail') || reason.toLowerCase().includes('insufficient') || reason.toLowerCase().includes('critical');
-  
-  // Extract percentage score
-  const scoreMatch = reason.match(/\((\d+)%\)/);
-  const score = scoreMatch ? parseInt(scoreMatch[1], 10) : (hasPass ? 100 : 0);
-  
-  // Determine label
-  let label = 'Unknown';
-  if (reason.toLowerCase().includes('excellent')) label = 'Excellent';
-  else if (reason.toLowerCase().includes('good')) label = 'Good';
-  else if (reason.toLowerCase().includes('insufficient')) label = 'Insufficient';
-  else if (reason.toLowerCase().includes('technical failure')) label = 'Technical Failure';
-  else if (reason.toLowerCase().includes('critical')) label = 'Critical';
-  else if (hasPass) label = 'Passed';
-  else if (hasFail) label = 'Failed';
-  
-  // Extract individual findings from the reason text
-  const findings = [];
-  
-  // Pattern: "X verified", "X confirmed", "X failed"
-  const verifiedMatch = reason.match(/(\d+)\s*verified/i);
-  const confirmedMatch = reason.match(/(\d+)\s*confirmed/i);
-  const failedMatch = reason.match(/(\d+)\s*failed/i);
-  
-  if (verifiedMatch) {
-    findings.push({ type: 'pass', count: parseInt(verifiedMatch[1], 10), label: 'Verified' });
-  }
-  if (confirmedMatch) {
-    findings.push({ type: 'pass', count: parseInt(confirmedMatch[1], 10), label: 'Confirmed' });
-  }
-  if (failedMatch) {
-    findings.push({ type: 'fail', count: parseInt(failedMatch[1], 10), label: 'Failed' });
-  }
-  
-  // Split by semicolons or bullets for detailed findings
-  const parts = reason.split(/[;•]/).map(s => s.trim()).filter(s => s.length > 0);
-  
-  return {
-    status: hasPass && !hasFail ? 'pass' : hasFail ? 'fail' : 'unknown',
-    label,
-    score,
-    findings,
-    details: parts,
-  };
+export const getAllNarratives = () => {
+  return KSI_EVIDENCE_NARRATIVES;
 };
 
 /**
- * Parse command_executions array into structured check results
+ * Check if narrative exists for KSI
  */
-export const parseCommandExecutions = (executions) => {
-  if (!executions || !Array.isArray(executions)) return [];
-  
-  return executions.map((exec, idx) => {
-    const service = extractServiceFromCommand(exec.command);
-    const isPassed = exec.status === 'success' && exec.exit_code === 0;
-    
-    return {
-      index: exec.index ?? idx,
-      name: exec.description || `Check #${idx + 1}`,
-      command: exec.command,
-      service: service.name,
-      serviceIcon: service.icon,
-      category: service.category,
-      status: isPassed ? 'pass' : 'fail',
-      exitCode: exec.exit_code,
-      executionTime: exec.execution_time,
-      errorMessage: exec.error_message,
-      passed: isPassed,
-    };
-  });
+export const hasNarrative = (ksiId) => {
+  return ksiId in KSI_EVIDENCE_NARRATIVES;
 };
 
-/**
- * Get KSI category info from KSI ID
- */
-export const getKsiCategory = (ksiId) => {
-  if (!ksiId) return { name: 'Unknown', theme: 'Other' };
-  
-  // Extract prefix like "KSI-AAA" from "KSI-AAA-01"
-  const parts = ksiId.split('-');
-  if (parts.length >= 2) {
-    const prefix = `${parts[0]}-${parts[1]}`;
-    return KSI_CATEGORIES[prefix] || { name: prefix, theme: 'Compliance' };
-  }
-  
-  return { name: 'General', theme: 'Compliance' };
-};
-
-/**
- * Compute outcome summary from check results
- */
-export const computeOutcomeSummary = (checks) => {
-  if (!checks || checks.length === 0) {
-    return {
-      totalChecks: 0,
-      passedChecks: 0,
-      failedChecks: 0,
-      passRate: 0,
-      status: 'unknown',
-    };
-  }
-  
-  const passed = checks.filter(c => c.passed).length;
-  const failed = checks.length - passed;
-  const passRate = Math.round((passed / checks.length) * 100);
-  
-  return {
-    totalChecks: checks.length,
-    passedChecks: passed,
-    failedChecks: failed,
-    passRate,
-    status: passRate >= 80 ? 'pass' : 'fail',
-  };
-};
-
-/**
- * Group checks by AWS service
- */
-export const groupChecksByService = (checks) => {
-  const groups = {};
-  
-  checks.forEach(check => {
-    const svc = check.service || 'Other';
-    if (!groups[svc]) {
-      groups[svc] = {
-        name: svc,
-        icon: check.serviceIcon,
-        category: check.category,
-        checks: [],
-        passed: 0,
-        failed: 0,
-      };
-    }
-    groups[svc].checks.push(check);
-    if (check.passed) {
-      groups[svc].passed++;
-    } else {
-      groups[svc].failed++;
-    }
-  });
-  
-  return Object.values(groups);
-};
-
-/**
- * Main function: Parse a KSI validation object into enriched display data
- */
-export const parseKsiValidation = (ksi) => {
-  const ksiId = ksi.ksi_id || ksi.id || ksi.validation_id;
-  const category = getKsiCategory(ksiId);
-  const reasonParsed = parseAssertionReason(ksi.assertion_reason);
-  const checks = parseCommandExecutions(ksi.command_executions);
-  const outcomeSummary = computeOutcomeSummary(checks);
-  const serviceGroups = groupChecksByService(checks);
-  
-  return {
-    // Identity
-    id: ksiId,
-    category: category.name,
-    theme: category.theme,
-    requirement: ksi.requirement || ksi.description,
-    longName: ksi.long_name,
-    
-    // Status
-    assertion: ksi.assertion,
-    score: ksi.score ?? reasonParsed.score,
-    status: ksi.assertion ? 'passed' : 'failed',
-    statusLabel: reasonParsed.label,
-    
-    // Resources
-    resourcesScanned: ksi.resources_scanned || 0,
-    resourcesPassed: ksi.resources_passed || 0,
-    resourcesFailed: ksi.resources_failed || 0,
-    
-    // Parsed assertion reason
-    reasonParsed,
-    
-    // Command execution details
-    checks,
-    checksSummary: outcomeSummary,
-    serviceGroups,
-    
-    // Raw data for fallback
-    assertionReason: ksi.assertion_reason,
-    recommendedAction: ksi.recommended_action,
-    cliCommand: ksi.cli_command,
-    evidencePath: ksi.evidence_path,
-    timestamp: ksi.timestamp,
-    
-    // Commands summary
-    commandsExecuted: ksi.commands_executed || checks.length,
-    successfulCommands: ksi.successful_commands || outcomeSummary.passedChecks,
-  };
-};
-
-/**
- * Generate pass/fail criteria text based on parsed data
- */
-export const generateCriteriaText = (parsed) => {
-  const { checksSummary, serviceGroups } = parsed;
-  
-  // Generate dynamic pass criteria
-  const services = serviceGroups.map(g => g.name).join(', ');
-  const passCriteria = checksSummary.totalChecks > 0
-    ? `All ${checksSummary.totalChecks} validation checks must pass across ${services || 'configured services'}`
-    : 'Validation checks must complete successfully';
-  
-  // Generate dynamic fail criteria
-  const failCriteria = checksSummary.failedChecks > 0
-    ? `${checksSummary.failedChecks} of ${checksSummary.totalChecks} checks failed (${100 - checksSummary.passRate}% failure rate)`
-    : 'One or more validation checks failed or returned errors';
-  
-  // Generate remediation hint based on failed services
-  const failedServices = serviceGroups.filter(g => g.failed > 0).map(g => g.name);
-  const remediationHint = failedServices.length > 0
-    ? `Review and remediate issues in: ${failedServices.join(', ')}`
-    : 'Review validation output and apply necessary configuration changes';
-  
-  return {
-    passCriteria,
-    failCriteria,
-    remediationHint,
-  };
-};
-
-export default {
-  extractServiceFromCommand,
-  parseAssertionReason,
-  parseCommandExecutions,
-  getKsiCategory,
-  computeOutcomeSummary,
-  groupChecksByService,
-  parseKsiValidation,
-  generateCriteriaText,
-};
+export default KSI_EVIDENCE_NARRATIVES;6
