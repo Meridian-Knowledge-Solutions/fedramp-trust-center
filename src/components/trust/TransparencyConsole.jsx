@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../contexts/ModalContext';
 import {
@@ -74,8 +74,8 @@ const TabButton = ({ id, label, icon: Icon, active, set, count, badge }) => (
     <button
         onClick={() => set(id)}
         className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all relative ${active === id
-                ? 'text-white bg-white/5'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5'
+            ? 'text-white bg-white/5'
+            : 'text-zinc-400 hover:text-white hover:bg-white/5'
             }`}
     >
         <Icon size={16} className={active === id ? 'text-indigo-400' : ''} />
@@ -143,12 +143,58 @@ const IssueCard = ({ issue, type }) => {
 
 const ValidationCard = ({ validation }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [activeDetailTab, setActiveDetailTab] = useState('overview');
     const isPassing = validation.assertion;
+
+    // Dynamically extract service from CLI command
+    const extractService = (cmd) => {
+        if (!cmd) return 'Unknown';
+        if (cmd.startsWith('curl')) return 'API/HTTP';
+        const match = cmd.match(/^aws\s+([a-z0-9-]+)/i);
+        return match ? match[1].toUpperCase() : 'CLI';
+    };
+
+    // Parse command_executions into checks
+    const checks = useMemo(() => {
+        const executions = validation.command_executions || [];
+        return executions.map((exec, idx) => ({
+            index: exec.index ?? idx,
+            name: exec.description || `Check #${idx + 1}`,
+            command: exec.command,
+            service: extractService(exec.command),
+            passed: exec.status === 'success' && exec.exit_code === 0,
+            exitCode: exec.exit_code,
+            executionTime: exec.execution_time,
+            errorMessage: exec.error_message,
+        }));
+    }, [validation.command_executions]);
+
+    // Group checks by service
+    const serviceGroups = useMemo(() => {
+        const groups = {};
+        checks.forEach(check => {
+            const svc = check.service;
+            if (!groups[svc]) groups[svc] = { name: svc, checks: [], passed: 0, failed: 0 };
+            groups[svc].checks.push(check);
+            check.passed ? groups[svc].passed++ : groups[svc].failed++;
+        });
+        return Object.values(groups);
+    }, [checks]);
+
+    // Parse assertion reason into structured findings
+    const parseFindings = (reason) => {
+        if (!reason) return [];
+        return reason.split(/[;•]/).map(s => s.trim()).filter(s => s.length > 0);
+    };
+
+    const findings = parseFindings(validation.assertion_reason);
+    const checksCount = checks.length;
+    const passedChecks = checks.filter(c => c.passed).length;
 
     return (
         <div className={`rounded-lg border overflow-hidden transition-colors ${isPassing
-                ? 'border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/30'
-                : 'border-red-500/20 bg-red-500/5 hover:border-red-500/30'
+            ? 'border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/30'
+            : 'border-red-500/20 bg-red-500/5 hover:border-red-500/30'
             }`}>
             <div
                 className="p-4 cursor-pointer"
@@ -164,21 +210,30 @@ const ValidationCard = ({ validation }) => {
                             )}
                         </div>
                         <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
                                 <h3 className="font-mono text-sm font-bold text-white">{validation.ksi_id}</h3>
-                                <span className={`text-xs px-2 py-0.5 rounded ${isPassing ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'
-                                    }`}>
+                                <span className={`text-xs px-2 py-0.5 rounded ${isPassing ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}`}>
                                     {validation.score}%
                                 </span>
+                                {checksCount > 0 && (
+                                    <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300">
+                                        {passedChecks}/{checksCount} checks
+                                    </span>
+                                )}
                             </div>
                             <p className="text-sm text-zinc-300 mb-2">{validation.requirement}</p>
-                            <div className="flex items-center gap-3 text-xs text-zinc-500">
+                            <div className="flex items-center gap-3 text-xs text-zinc-500 flex-wrap">
                                 <span>📊 {validation.resources_scanned} resources</span>
                                 {validation.resources_passed > 0 && (
                                     <span className="text-emerald-400">✓ {validation.resources_passed} passed</span>
                                 )}
                                 {validation.resources_failed > 0 && (
                                     <span className="text-red-400">✗ {validation.resources_failed} failed</span>
+                                )}
+                                {serviceGroups.length > 0 && (
+                                    <span className="text-zinc-400">
+                                        Services: {serviceGroups.map(g => g.name).join(', ')}
+                                    </span>
                                 )}
                             </div>
                         </div>
@@ -191,38 +246,185 @@ const ValidationCard = ({ validation }) => {
             </div>
 
             {isExpanded && (
-                <div className="px-4 pb-4 border-t border-white/10 space-y-3">
-                    <div className="mt-3">
-                        <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Result</h4>
-                        <p className="text-sm text-zinc-300 bg-black/20 p-3 rounded">
-                            {validation.assertion_reason}
-                        </p>
+                <div className="border-t border-white/10">
+                    {/* Detail Tabs */}
+                    <div className="flex border-b border-white/5 bg-black/20 overflow-x-auto">
+                        {['overview', 'checks', 'evidence'].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={(e) => { e.stopPropagation(); setActiveDetailTab(tab); }}
+                                className={`px-4 py-2 text-xs font-medium transition-colors whitespace-nowrap ${activeDetailTab === tab
+                                        ? 'text-white bg-white/5 border-b-2 border-indigo-500'
+                                        : 'text-zinc-500 hover:text-white'
+                                    }`}
+                            >
+                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                {tab === 'checks' && checksCount > 0 && (
+                                    <span className={`ml-1 px-1 rounded text-[10px] ${passedChecks === checksCount ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}`}>
+                                        {passedChecks}/{checksCount}
+                                    </span>
+                                )}
+                            </button>
+                        ))}
                     </div>
 
-                    <div>
-                        <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Recommended Action</h4>
-                        <p className="text-sm text-zinc-300 bg-black/20 p-3 rounded">
-                            {validation.recommended_action}
-                        </p>
+                    <div className="p-4 space-y-3">
+                        {/* Overview Tab */}
+                        {activeDetailTab === 'overview' && (
+                            <>
+                                <div>
+                                    <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Result Summary</h4>
+                                    <p className="text-sm text-zinc-300 bg-black/20 p-3 rounded">
+                                        {validation.assertion_reason}
+                                    </p>
+                                </div>
+
+                                {findings.length > 1 && (
+                                    <div>
+                                        <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Findings Breakdown</h4>
+                                        <ul className="space-y-1">
+                                            {findings.map((finding, idx) => (
+                                                <li key={idx} className="flex items-start gap-2 text-xs text-zinc-300 bg-black/20 p-2 rounded">
+                                                    <span className={`mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0 ${finding.includes('✅') || finding.toLowerCase().includes('pass') || finding.toLowerCase().includes('verified')
+                                                            ? 'bg-emerald-500'
+                                                            : finding.includes('❌') || finding.toLowerCase().includes('fail')
+                                                                ? 'bg-red-500'
+                                                                : 'bg-indigo-500'
+                                                        }`} />
+                                                    {finding}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {/* Service Summary Cards */}
+                                {serviceGroups.length > 0 && (
+                                    <div>
+                                        <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Services Validated</h4>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {serviceGroups.map((group, idx) => (
+                                                <div key={idx} className={`p-2 rounded border ${group.failed === 0 ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-amber-500/20 bg-amber-500/5'}`}>
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-xs font-medium text-white">{group.name}</span>
+                                                        <span className={`text-[10px] px-1.5 rounded ${group.failed === 0 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
+                                                            {group.passed}/{group.checks.length}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Recommended Action</h4>
+                                    <p className="text-sm text-zinc-300 bg-black/20 p-3 rounded">
+                                        {validation.recommended_action}
+                                    </p>
+                                </div>
+                            </>
+                        )}
+
+                        {/* Checks Tab (Dynamic from command_executions) */}
+                        {activeDetailTab === 'checks' && (
+                            <>
+                                {checks.length > 0 ? (
+                                    <div className="space-y-2">
+                                        <p className="text-xs text-zinc-500 mb-3">
+                                            {checksCount} CLI commands executed against AWS infrastructure:
+                                        </p>
+                                        {checks.map((check, idx) => (
+                                            <CheckDetailRow key={idx} check={check} />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-6 text-zinc-500">
+                                        <Database size={24} className="mx-auto mb-2 opacity-50" />
+                                        <p className="text-sm">No command execution details available.</p>
+                                        <p className="text-xs mt-1">Check the Evidence tab for CLI commands.</p>
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {/* Evidence Tab */}
+                        {activeDetailTab === 'evidence' && (
+                            <>
+                                {validation.cli_command && (
+                                    <div>
+                                        <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">CLI Commands Executed</h4>
+                                        <div className="bg-black/40 p-3 rounded border border-white/5 font-mono text-xs max-h-64 overflow-y-auto">
+                                            <div className="text-green-400 whitespace-pre-wrap break-all">
+                                                {validation.cli_command.split(';').map((cmd, idx) => (
+                                                    <div key={idx} className="mb-1">
+                                                        <span className="text-blue-400 select-none">$ </span>
+                                                        {cmd.trim()}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {validation.evidence_path && (
+                                    <div className="text-xs text-zinc-500 flex items-center gap-1 mt-3 pt-3 border-t border-white/5">
+                                        <FileJson size={12} />
+                                        Evidence Path: <code className="text-zinc-400 bg-black/30 px-1 rounded">{validation.evidence_path}</code>
+                                    </div>
+                                )}
+
+                                {!validation.cli_command && (
+                                    <div className="text-center py-6 text-zinc-500">
+                                        <Clock size={24} className="mx-auto mb-2 opacity-50" />
+                                        <p className="text-sm">No evidence details available.</p>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
-
-                    {validation.cli_command && (
-                        <div>
-                            <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">CLI Commands</h4>
-                            <div className="bg-black/40 p-3 rounded border border-white/5 font-mono text-xs">
-                                <div className="text-zinc-400 whitespace-pre-wrap break-all">{validation.cli_command}</div>
-                            </div>
-                        </div>
-                    )}
-
-                    {validation.evidence_path && (
-                        <div className="text-xs text-zinc-500">
-                            <FileJson size={12} className="inline mr-1" />
-                            Evidence: {validation.evidence_path}
-                        </div>
-                    )}
                 </div>
             )}
+        </div>
+    );
+};
+
+// Sub-component for individual check details
+const CheckDetailRow = ({ check }) => {
+    const [showCmd, setShowCmd] = useState(false);
+
+    return (
+        <div className={`p-3 rounded border ${check.passed ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-red-500/20 bg-red-500/5'}`}>
+            <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-sm font-medium text-white">{check.name}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono">
+                            {check.service}
+                        </span>
+                        {check.executionTime && (
+                            <span className="text-[10px] text-zinc-500">{check.executionTime}</span>
+                        )}
+                    </div>
+                    {check.errorMessage && !check.passed && (
+                        <p className="text-xs text-red-300 bg-red-500/10 p-1.5 rounded mb-2">{check.errorMessage}</p>
+                    )}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setShowCmd(!showCmd); }}
+                        className="text-[10px] text-zinc-500 hover:text-zinc-300"
+                    >
+                        {showCmd ? '▼ Hide command' : '▶ Show command'}
+                    </button>
+                    {showCmd && (
+                        <pre className="mt-2 text-[10px] bg-black/40 p-2 rounded border border-zinc-800 text-green-400 font-mono overflow-x-auto">
+                            $ {check.command}
+                        </pre>
+                    )}
+                </div>
+                <span className={`flex-shrink-0 px-2 py-0.5 rounded text-[10px] font-bold ${check.passed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}`}>
+                    {check.passed ? 'PASS' : 'FAIL'}
+                </span>
+            </div>
         </div>
     );
 };
@@ -764,8 +966,8 @@ const TransparencyConsole = () => {
                                                                 <div className="w-24 h-2 bg-zinc-800 rounded-full overflow-hidden">
                                                                     <div
                                                                         className={`h-full rounded-full ${check.consistency_score >= 99 ? 'bg-emerald-500' :
-                                                                                check.consistency_score >= 95 ? 'bg-amber-500' :
-                                                                                    'bg-red-500'
+                                                                            check.consistency_score >= 95 ? 'bg-amber-500' :
+                                                                                'bg-red-500'
                                                                             }`}
                                                                         style={{ width: `${check.consistency_score}%` }}
                                                                     />
@@ -777,8 +979,8 @@ const TransparencyConsole = () => {
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <span className={`px-2 py-0.5 rounded text-xs font-medium ${check.issues_found === 0
-                                                                    ? 'bg-emerald-500/10 text-emerald-400'
-                                                                    : 'bg-red-500/10 text-red-400'
+                                                                ? 'bg-emerald-500/10 text-emerald-400'
+                                                                : 'bg-red-500/10 text-red-400'
                                                                 }`}>
                                                                 {check.issues_found}
                                                             </span>
