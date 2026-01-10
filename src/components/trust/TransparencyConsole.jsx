@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../contexts/ModalContext';
+import KSI_EVIDENCE_NARRATIVES from '../../config/ksiEvidenceNarrative';
 import {
     ShieldCheck, Terminal, Activity, CheckCircle2, XCircle,
     AlertCircle, TrendingUp, Database, Clock, FileJson,
@@ -146,6 +147,9 @@ const ValidationCard = ({ validation }) => {
     const [activeDetailTab, setActiveDetailTab] = useState('overview');
     const isPassing = validation.assertion;
 
+    // Get narrative for this KSI
+    const narrative = KSI_EVIDENCE_NARRATIVES[validation.ksi_id] || null;
+
     const extractService = (cmd) => {
         if (!cmd) return 'Unknown';
         if (cmd.startsWith('curl')) return 'HTTP';
@@ -226,8 +230,8 @@ const ValidationCard = ({ validation }) => {
                         <div className="flex gap-1 mb-4 border-b border-zinc-800">
                             {[
                                 { id: 'overview', label: 'Overview' },
+                                { id: 'validation', label: 'Validation Logic' },
                                 { id: 'checks', label: `Checks (${passedChecks}/${checksCount})` },
-                                { id: 'evidence', label: 'Evidence' }
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -245,35 +249,111 @@ const ValidationCard = ({ validation }) => {
 
                         {/* Overview */}
                         {activeDetailTab === 'overview' && (
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                {/* Narrative Summary */}
+                                {narrative && (
+                                    <div>
+                                        <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">What This Validates</div>
+                                        <p className="text-sm text-zinc-300 leading-relaxed">{narrative.summary}</p>
+                                    </div>
+                                )}
+
+                                {/* Result */}
                                 <div>
                                     <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Result</div>
-                                    <p className="text-sm text-zinc-300">{cleanText(validation.assertion_reason) || (isPassing ? 'All validations passed' : 'One or more validations failed')}</p>
-                                    
-                                    {serviceGroups.length > 0 && (
-                                        <div className="mt-4">
-                                            <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Services</div>
-                                            <div className="flex flex-wrap gap-2">
-                                                {serviceGroups.map((g, i) => (
-                                                    <span key={i} className="inline-flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded text-xs text-zinc-400">
-                                                        {g.name}
-                                                        <span className={g.failed === 0 ? 'text-emerald-400' : 'text-amber-400'}>
-                                                            {g.passed}/{g.passed + g.failed}
-                                                        </span>
+                                    <p className="text-sm text-zinc-400">{cleanText(validation.assertion_reason) || (isPassing ? 'All validations passed' : 'One or more validations failed')}</p>
+                                </div>
+
+                                {/* Services Checked */}
+                                {serviceGroups.length > 0 && (
+                                    <div>
+                                        <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Services Checked</div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {serviceGroups.map((g, i) => (
+                                                <span key={i} className="inline-flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded text-xs text-zinc-400">
+                                                    {g.name}
+                                                    <span className={g.failed === 0 ? 'text-emerald-400' : 'text-amber-400'}>
+                                                        {g.passed}/{g.passed + g.failed}
                                                     </span>
-                                                ))}
-                                            </div>
+                                                </span>
+                                            ))}
                                         </div>
-                                    )}
-                                </div>
-                                <div>
-                                    <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Recommended Action</div>
-                                    <p className="text-sm text-zinc-400">{cleanText(validation.recommended_action)}</p>
-                                </div>
+                                    </div>
+                                )}
+
+                                {/* Recommended Action */}
+                                {validation.recommended_action && (
+                                    <div>
+                                        <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Recommended Action</div>
+                                        <p className="text-sm text-zinc-400">{cleanText(validation.recommended_action)}</p>
+                                    </div>
+                                )}
                             </div>
                         )}
 
-                        {/* Checks */}
+                        {/* Validation Logic Tab - The Technical Story */}
+                        {activeDetailTab === 'validation' && (
+                            <div className="space-y-5">
+                                {narrative ? (
+                                    <>
+                                        {/* Evidence Types */}
+                                        <div>
+                                            <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-3">Evidence Collected</div>
+                                            <div className="space-y-2">
+                                                {narrative.evidenceTypes.map((ev, i) => (
+                                                    <div key={i} className="flex gap-3 p-3 bg-zinc-900 rounded border border-zinc-800">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-2 flex-shrink-0" />
+                                                        <div>
+                                                            <div className="text-sm font-medium text-zinc-300">{ev.name}</div>
+                                                            <div className="text-xs text-zinc-500 mt-0.5">{ev.description}</div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Pass/Fail Logic */}
+                                        <div>
+                                            <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Validation Criteria</div>
+                                            <p className="text-sm text-zinc-400 leading-relaxed">{narrative.validationLogic}</p>
+                                        </div>
+
+                                        {/* Pass/Fail Indicators */}
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <div className="text-[11px] font-medium text-emerald-500 uppercase tracking-wider mb-2">Pass Indicators</div>
+                                                <ul className="space-y-1.5">
+                                                    {narrative.passIndicators.map((ind, i) => (
+                                                        <li key={i} className="flex items-center gap-2 text-sm text-zinc-400">
+                                                            <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                                                            {ind}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                            <div>
+                                                <div className="text-[11px] font-medium text-red-500 uppercase tracking-wider mb-2">Fail Indicators</div>
+                                                <ul className="space-y-1.5">
+                                                    {narrative.failIndicators.map((ind, i) => (
+                                                        <li key={i} className="flex items-center gap-2 text-sm text-zinc-400">
+                                                            <div className="w-1 h-1 rounded-full bg-red-500" />
+                                                            {ind}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="text-center py-6">
+                                        <p className="text-sm text-zinc-500">Validation narrative not yet documented for this KSI.</p>
+                                        <p className="text-xs text-zinc-600 mt-1">View the Checks tab for execution details.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Checks Tab */}
                         {activeDetailTab === 'checks' && (
                             <div>
                                 {checks.length > 0 ? (
@@ -284,26 +364,6 @@ const ValidationCard = ({ validation }) => {
                                     </div>
                                 ) : (
                                     <p className="text-sm text-zinc-500 py-4 text-center">No execution data available</p>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Evidence */}
-                        {activeDetailTab === 'evidence' && (
-                            <div>
-                                {validation.cli_command ? (
-                                    <div className="bg-zinc-900 border border-zinc-800 rounded p-3 font-mono text-xs text-zinc-400 max-h-48 overflow-auto">
-                                        {validation.cli_command.split(';').map((cmd, i) => (
-                                            <div key={i} className="py-0.5"><span className="text-zinc-600">$</span> {cmd.trim()}</div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-sm text-zinc-500 py-4 text-center">No evidence data available</p>
-                                )}
-                                {validation.evidence_path && (
-                                    <div className="mt-3 text-xs text-zinc-600">
-                                        Path: <code className="text-zinc-500">{validation.evidence_path}</code>
-                                    </div>
                                 )}
                             </div>
                         )}
