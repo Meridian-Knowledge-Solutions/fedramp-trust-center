@@ -74,8 +74,8 @@ const TabButton = ({ id, label, icon: Icon, active, set, count, badge }) => (
     <button
         onClick={() => set(id)}
         className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all relative ${active === id
-            ? 'text-white bg-white/5'
-            : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                ? 'text-white bg-white/5'
+                : 'text-zinc-400 hover:text-white hover:bg-white/5'
             }`}
     >
         <Icon size={16} className={active === id ? 'text-indigo-400' : ''} />
@@ -146,20 +146,18 @@ const ValidationCard = ({ validation }) => {
     const [activeDetailTab, setActiveDetailTab] = useState('overview');
     const isPassing = validation.assertion;
 
-    // Dynamically extract service from CLI command
     const extractService = (cmd) => {
         if (!cmd) return 'Unknown';
-        if (cmd.startsWith('curl')) return 'API/HTTP';
+        if (cmd.startsWith('curl')) return 'HTTP';
         const match = cmd.match(/^aws\s+([a-z0-9-]+)/i);
-        return match ? match[1].toUpperCase() : 'CLI';
+        return match ? match[1] : 'CLI';
     };
 
-    // Parse command_executions into checks
     const checks = useMemo(() => {
         const executions = validation.command_executions || [];
         return executions.map((exec, idx) => ({
             index: exec.index ?? idx,
-            name: exec.description || `Check #${idx + 1}`,
+            name: exec.description || `Check ${idx + 1}`,
             command: exec.command,
             service: extractService(exec.command),
             passed: exec.status === 'success' && exec.exit_code === 0,
@@ -169,218 +167,145 @@ const ValidationCard = ({ validation }) => {
         }));
     }, [validation.command_executions]);
 
-    // Group checks by service
     const serviceGroups = useMemo(() => {
         const groups = {};
         checks.forEach(check => {
             const svc = check.service;
-            if (!groups[svc]) groups[svc] = { name: svc, checks: [], passed: 0, failed: 0 };
-            groups[svc].checks.push(check);
+            if (!groups[svc]) groups[svc] = { name: svc, passed: 0, failed: 0 };
             check.passed ? groups[svc].passed++ : groups[svc].failed++;
         });
         return Object.values(groups);
     }, [checks]);
 
-    // Parse assertion reason into structured findings
-    const parseFindings = (reason) => {
-        if (!reason) return [];
-        return reason.split(/[;•]/).map(s => s.trim()).filter(s => s.length > 0);
-    };
-
-    const findings = parseFindings(validation.assertion_reason);
     const checksCount = checks.length;
     const passedChecks = checks.filter(c => c.passed).length;
 
+    const cleanText = (text) => {
+        if (!text) return '';
+        return text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}✅❌⚠️📊🔧💡🚨]/gu, '').trim();
+    };
+
     return (
-        <div className={`rounded-lg border overflow-hidden transition-colors ${isPassing
-            ? 'border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/30'
-            : 'border-red-500/20 bg-red-500/5 hover:border-red-500/30'
-            }`}>
+        <div className={`${!isPassing ? 'bg-red-950/20' : 'hover:bg-zinc-800/30'} transition-colors`}>
+            {/* Row */}
             <div
-                className="p-4 cursor-pointer"
+                className="grid grid-cols-12 gap-4 px-6 py-4 cursor-pointer items-center"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                <div className="flex items-start justify-between">
-                    <div className="flex gap-3 flex-1">
-                        <div className="mt-0.5">
-                            {isPassing ? (
-                                <CheckCircle2 size={20} className="text-emerald-400" />
-                            ) : (
-                                <XCircle size={20} className="text-red-400" />
-                            )}
+                <div className="col-span-1">
+                    <div className={`w-2.5 h-2.5 rounded-full ${isPassing ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                </div>
+                <div className="col-span-2">
+                    <span className="font-mono text-sm font-medium text-white">{validation.ksi_id}</span>
+                </div>
+                <div className="col-span-5">
+                    <p className="text-sm text-zinc-400 line-clamp-1">{validation.requirement}</p>
+                </div>
+                <div className="col-span-2">
+                    <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden max-w-[80px]">
+                            <div 
+                                className={`h-full rounded-full ${validation.score >= 80 ? 'bg-emerald-500' : validation.score >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                                style={{ width: `${validation.score}%` }}
+                            />
                         </div>
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                <h3 className="font-mono text-sm font-bold text-white">{validation.ksi_id}</h3>
-                                <span className={`text-xs px-2 py-0.5 rounded ${isPassing ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}`}>
-                                    {validation.score}%
-                                </span>
-                                {checksCount > 0 && (
-                                    <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300">
-                                        {passedChecks}/{checksCount} checks
-                                    </span>
-                                )}
-                            </div>
-                            <p className="text-sm text-zinc-300 mb-2">{validation.requirement}</p>
-                            <div className="flex items-center gap-3 text-xs text-zinc-500 flex-wrap">
-                                <span>📊 {validation.resources_scanned} resources</span>
-                                {validation.resources_passed > 0 && (
-                                    <span className="text-emerald-400">✓ {validation.resources_passed} passed</span>
-                                )}
-                                {validation.resources_failed > 0 && (
-                                    <span className="text-red-400">✗ {validation.resources_failed} failed</span>
-                                )}
-                                {serviceGroups.length > 0 && (
-                                    <span className="text-zinc-400">
-                                        Services: {serviceGroups.map(g => g.name).join(', ')}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
+                        <span className="text-sm text-zinc-400 w-10">{validation.score}%</span>
                     </div>
-                    <ChevronDown
-                        size={16}
-                        className={`text-zinc-500 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
-                    />
+                </div>
+                <div className="col-span-2 flex items-center justify-end gap-3">
+                    <span className="text-sm text-zinc-500">{validation.resources_scanned}</span>
+                    <ChevronDown size={16} className={`text-zinc-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                 </div>
             </div>
 
+            {/* Expanded Details */}
             {isExpanded && (
-                <div className="border-t border-white/10">
-                    {/* Detail Tabs */}
-                    <div className="flex border-b border-white/5 bg-black/20 overflow-x-auto">
-                        {['overview', 'checks', 'evidence'].map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={(e) => { e.stopPropagation(); setActiveDetailTab(tab); }}
-                                className={`px-4 py-2 text-xs font-medium transition-colors whitespace-nowrap ${activeDetailTab === tab
-                                        ? 'text-white bg-white/5 border-b-2 border-indigo-500'
-                                        : 'text-zinc-500 hover:text-white'
+                <div className="border-t border-zinc-800 bg-zinc-950/50">
+                    <div className="px-6 py-4">
+                        {/* Tabs */}
+                        <div className="flex gap-1 mb-4 border-b border-zinc-800">
+                            {[
+                                { id: 'overview', label: 'Overview' },
+                                { id: 'checks', label: `Checks (${passedChecks}/${checksCount})` },
+                                { id: 'evidence', label: 'Evidence' }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={(e) => { e.stopPropagation(); setActiveDetailTab(tab.id); }}
+                                    className={`px-4 py-2 text-xs font-medium border-b-2 -mb-[2px] transition-colors ${
+                                        activeDetailTab === tab.id
+                                            ? 'text-white border-indigo-500'
+                                            : 'text-zinc-500 border-transparent hover:text-zinc-300'
                                     }`}
-                            >
-                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                                {tab === 'checks' && checksCount > 0 && (
-                                    <span className={`ml-1 px-1 rounded text-[10px] ${passedChecks === checksCount ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}`}>
-                                        {passedChecks}/{checksCount}
-                                    </span>
-                                )}
-                            </button>
-                        ))}
-                    </div>
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
 
-                    <div className="p-4 space-y-3">
-                        {/* Overview Tab */}
+                        {/* Overview */}
                         {activeDetailTab === 'overview' && (
-                            <>
+                            <div className="grid grid-cols-2 gap-6">
                                 <div>
-                                    <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Result Summary</h4>
-                                    <p className="text-sm text-zinc-300 bg-black/20 p-3 rounded">
-                                        {validation.assertion_reason}
-                                    </p>
-                                </div>
-
-                                {findings.length > 1 && (
-                                    <div>
-                                        <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Findings Breakdown</h4>
-                                        <ul className="space-y-1">
-                                            {findings.map((finding, idx) => (
-                                                <li key={idx} className="flex items-start gap-2 text-xs text-zinc-300 bg-black/20 p-2 rounded">
-                                                    <span className={`mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0 ${finding.includes('✅') || finding.toLowerCase().includes('pass') || finding.toLowerCase().includes('verified')
-                                                            ? 'bg-emerald-500'
-                                                            : finding.includes('❌') || finding.toLowerCase().includes('fail')
-                                                                ? 'bg-red-500'
-                                                                : 'bg-indigo-500'
-                                                        }`} />
-                                                    {finding}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-
-                                {/* Service Summary Cards */}
-                                {serviceGroups.length > 0 && (
-                                    <div>
-                                        <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Services Validated</h4>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {serviceGroups.map((group, idx) => (
-                                                <div key={idx} className={`p-2 rounded border ${group.failed === 0 ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-amber-500/20 bg-amber-500/5'}`}>
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-xs font-medium text-white">{group.name}</span>
-                                                        <span className={`text-[10px] px-1.5 rounded ${group.failed === 0 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
-                                                            {group.passed}/{group.checks.length}
+                                    <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Result</div>
+                                    <p className="text-sm text-zinc-300">{cleanText(validation.assertion_reason) || (isPassing ? 'All validations passed' : 'One or more validations failed')}</p>
+                                    
+                                    {serviceGroups.length > 0 && (
+                                        <div className="mt-4">
+                                            <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Services</div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {serviceGroups.map((g, i) => (
+                                                    <span key={i} className="inline-flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded text-xs text-zinc-400">
+                                                        {g.name}
+                                                        <span className={g.failed === 0 ? 'text-emerald-400' : 'text-amber-400'}>
+                                                            {g.passed}/{g.passed + g.failed}
                                                         </span>
-                                                    </div>
-                                                </div>
-                                            ))}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-
-                                <div>
-                                    <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Recommended Action</h4>
-                                    <p className="text-sm text-zinc-300 bg-black/20 p-3 rounded">
-                                        {validation.recommended_action}
-                                    </p>
+                                    )}
                                 </div>
-                            </>
+                                <div>
+                                    <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Recommended Action</div>
+                                    <p className="text-sm text-zinc-400">{cleanText(validation.recommended_action)}</p>
+                                </div>
+                            </div>
                         )}
 
-                        {/* Checks Tab (Dynamic from command_executions) */}
+                        {/* Checks */}
                         {activeDetailTab === 'checks' && (
-                            <>
+                            <div>
                                 {checks.length > 0 ? (
-                                    <div className="space-y-2">
-                                        <p className="text-xs text-zinc-500 mb-3">
-                                            {checksCount} CLI commands executed against AWS infrastructure:
-                                        </p>
+                                    <div className="space-y-1">
                                         {checks.map((check, idx) => (
                                             <CheckDetailRow key={idx} check={check} />
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-6 text-zinc-500">
-                                        <Database size={24} className="mx-auto mb-2 opacity-50" />
-                                        <p className="text-sm">No command execution details available.</p>
-                                        <p className="text-xs mt-1">Check the Evidence tab for CLI commands.</p>
-                                    </div>
+                                    <p className="text-sm text-zinc-500 py-4 text-center">No execution data available</p>
                                 )}
-                            </>
+                            </div>
                         )}
 
-                        {/* Evidence Tab */}
+                        {/* Evidence */}
                         {activeDetailTab === 'evidence' && (
-                            <>
-                                {validation.cli_command && (
-                                    <div>
-                                        <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">CLI Commands Executed</h4>
-                                        <div className="bg-black/40 p-3 rounded border border-white/5 font-mono text-xs max-h-64 overflow-y-auto">
-                                            <div className="text-green-400 whitespace-pre-wrap break-all">
-                                                {validation.cli_command.split(';').map((cmd, idx) => (
-                                                    <div key={idx} className="mb-1">
-                                                        <span className="text-blue-400 select-none">$ </span>
-                                                        {cmd.trim()}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
+                            <div>
+                                {validation.cli_command ? (
+                                    <div className="bg-zinc-900 border border-zinc-800 rounded p-3 font-mono text-xs text-zinc-400 max-h-48 overflow-auto">
+                                        {validation.cli_command.split(';').map((cmd, i) => (
+                                            <div key={i} className="py-0.5"><span className="text-zinc-600">$</span> {cmd.trim()}</div>
+                                        ))}
                                     </div>
+                                ) : (
+                                    <p className="text-sm text-zinc-500 py-4 text-center">No evidence data available</p>
                                 )}
-
                                 {validation.evidence_path && (
-                                    <div className="text-xs text-zinc-500 flex items-center gap-1 mt-3 pt-3 border-t border-white/5">
-                                        <FileJson size={12} />
-                                        Evidence Path: <code className="text-zinc-400 bg-black/30 px-1 rounded">{validation.evidence_path}</code>
+                                    <div className="mt-3 text-xs text-zinc-600">
+                                        Path: <code className="text-zinc-500">{validation.evidence_path}</code>
                                     </div>
                                 )}
-
-                                {!validation.cli_command && (
-                                    <div className="text-center py-6 text-zinc-500">
-                                        <Clock size={24} className="mx-auto mb-2 opacity-50" />
-                                        <p className="text-sm">No evidence details available.</p>
-                                    </div>
-                                )}
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -389,42 +314,38 @@ const ValidationCard = ({ validation }) => {
     );
 };
 
-// Sub-component for individual check details
 const CheckDetailRow = ({ check }) => {
-    const [showCmd, setShowCmd] = useState(false);
-
+    const [expanded, setExpanded] = useState(false);
+    
     return (
-        <div className={`p-3 rounded border ${check.passed ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-red-500/20 bg-red-500/5'}`}>
-            <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="text-sm font-medium text-white">{check.name}</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono">
-                            {check.service}
-                        </span>
-                        {check.executionTime && (
-                            <span className="text-[10px] text-zinc-500">{check.executionTime}</span>
-                        )}
-                    </div>
-                    {check.errorMessage && !check.passed && (
-                        <p className="text-xs text-red-300 bg-red-500/10 p-1.5 rounded mb-2">{check.errorMessage}</p>
-                    )}
-                    <button
-                        onClick={(e) => { e.stopPropagation(); setShowCmd(!showCmd); }}
-                        className="text-[10px] text-zinc-500 hover:text-zinc-300"
-                    >
-                        {showCmd ? '▼ Hide command' : '▶ Show command'}
-                    </button>
-                    {showCmd && (
-                        <pre className="mt-2 text-[10px] bg-black/40 p-2 rounded border border-zinc-800 text-green-400 font-mono overflow-x-auto">
-                            $ {check.command}
-                        </pre>
-                    )}
+        <div className="border border-zinc-800 rounded bg-zinc-900/50">
+            <div 
+                className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-zinc-800/30"
+                onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+            >
+                <div className="flex items-center gap-3">
+                    <div className={`w-1.5 h-1.5 rounded-full ${check.passed ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                    <span className="text-sm text-zinc-300">{check.name}</span>
+                    <span className="text-[10px] text-zinc-600 font-mono">{check.service}</span>
                 </div>
-                <span className={`flex-shrink-0 px-2 py-0.5 rounded text-[10px] font-bold ${check.passed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}`}>
-                    {check.passed ? 'PASS' : 'FAIL'}
-                </span>
+                <div className="flex items-center gap-3">
+                    {check.executionTime && <span className="text-[10px] text-zinc-600">{check.executionTime}</span>}
+                    <span className={`text-[10px] font-medium ${check.passed ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {check.passed ? 'PASS' : 'FAIL'}
+                    </span>
+                    <ChevronRight size={12} className={`text-zinc-600 transition-transform ${expanded ? 'rotate-90' : ''}`} />
+                </div>
             </div>
+            {expanded && (
+                <div className="px-3 pb-3 border-t border-zinc-800">
+                    {check.errorMessage && (
+                        <div className="mt-2 text-xs text-red-400 bg-red-500/5 border border-red-500/10 px-2 py-1.5 rounded">{check.errorMessage}</div>
+                    )}
+                    <div className="mt-2 bg-zinc-950 border border-zinc-800 rounded px-2 py-1.5 font-mono text-[11px] text-zinc-500 overflow-x-auto">
+                        <span className="text-zinc-700">$</span> {check.command}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -966,8 +887,8 @@ const TransparencyConsole = () => {
                                                                 <div className="w-24 h-2 bg-zinc-800 rounded-full overflow-hidden">
                                                                     <div
                                                                         className={`h-full rounded-full ${check.consistency_score >= 99 ? 'bg-emerald-500' :
-                                                                            check.consistency_score >= 95 ? 'bg-amber-500' :
-                                                                                'bg-red-500'
+                                                                                check.consistency_score >= 95 ? 'bg-amber-500' :
+                                                                                    'bg-red-500'
                                                                             }`}
                                                                         style={{ width: `${check.consistency_score}%` }}
                                                                     />
@@ -979,8 +900,8 @@ const TransparencyConsole = () => {
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <span className={`px-2 py-0.5 rounded text-xs font-medium ${check.issues_found === 0
-                                                                ? 'bg-emerald-500/10 text-emerald-400'
-                                                                : 'bg-red-500/10 text-red-400'
+                                                                    ? 'bg-emerald-500/10 text-emerald-400'
+                                                                    : 'bg-red-500/10 text-red-400'
                                                                 }`}>
                                                                 {check.issues_found}
                                                             </span>
@@ -1006,40 +927,73 @@ const TransparencyConsole = () => {
                 {activeTab === 'validations' && (
                     <div className="space-y-6">
                         {!consistencyLog || latestValidations.length === 0 ? (
-                            <div className="bg-[#18181b] rounded-lg border border-white/10 p-12 text-center">
-                                <AlertCircle size={48} className="text-zinc-600 mx-auto mb-4" />
-                                <h3 className="text-xl font-bold text-zinc-400 mb-2">No Validation Data</h3>
-                                <p className="text-zinc-500">temporal_consistency_log.json not found or contains no historical validations</p>
+                            <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-12 text-center">
+                                <Database size={40} className="text-zinc-700 mx-auto mb-4" />
+                                <h3 className="text-lg font-semibold text-zinc-400 mb-1">No Validation Data</h3>
+                                <p className="text-sm text-zinc-600">Validation data is not available</p>
                             </div>
                         ) : (
                             <>
-                                {/* Summary stats */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-4">
-                                        <div className="text-3xl font-bold text-emerald-400 mb-1">
-                                            {latestValidations.filter(v => v.assertion).length}
+                                {/* Header with stats */}
+                                <div className="bg-zinc-900 rounded-lg border border-zinc-800">
+                                    <div className="px-6 py-4 border-b border-zinc-800">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <h2 className="text-base font-semibold text-white">Key Security Indicators</h2>
+                                                <p className="text-sm text-zinc-500 mt-0.5">FedRAMP 20x compliance validation results</p>
+                                            </div>
+                                            <div className="flex items-center gap-6">
+                                                <div className="text-right">
+                                                    <div className="text-2xl font-semibold text-emerald-400">{latestValidations.filter(v => v.assertion).length}</div>
+                                                    <div className="text-xs text-zinc-500">Passing</div>
+                                                </div>
+                                                <div className="w-px h-10 bg-zinc-800" />
+                                                <div className="text-right">
+                                                    <div className="text-2xl font-semibold text-red-400">{latestValidations.filter(v => !v.assertion).length}</div>
+                                                    <div className="text-xs text-zinc-500">Failing</div>
+                                                </div>
+                                                <div className="w-px h-10 bg-zinc-800" />
+                                                <div className="text-right">
+                                                    <div className="text-2xl font-semibold text-zinc-300">{latestValidations.length}</div>
+                                                    <div className="text-xs text-zinc-500">Total</div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="text-sm text-zinc-400">Passing KSIs</div>
                                     </div>
-                                    <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-4">
-                                        <div className="text-3xl font-bold text-red-400 mb-1">
-                                            {latestValidations.filter(v => !v.assertion).length}
+                                    
+                                    {/* Progress bar */}
+                                    <div className="px-6 py-3 bg-zinc-950/50">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                                <div 
+                                                    className="h-full bg-emerald-500 rounded-full transition-all"
+                                                    style={{ width: `${(latestValidations.filter(v => v.assertion).length / latestValidations.length) * 100}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-sm font-medium text-zinc-400">
+                                                {Math.round((latestValidations.filter(v => v.assertion).length / latestValidations.length) * 100)}% compliant
+                                            </span>
                                         </div>
-                                        <div className="text-sm text-zinc-400">Failing KSIs</div>
-                                    </div>
-                                    <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                                        <div className="text-3xl font-bold text-white mb-1">
-                                            {latestValidations.length}
-                                        </div>
-                                        <div className="text-sm text-zinc-400">Total Validations</div>
                                     </div>
                                 </div>
 
-                                {/* Validation cards */}
-                                <div className="space-y-3">
-                                    {latestValidations.map((validation, idx) => (
-                                        <ValidationCard key={idx} validation={validation} />
-                                    ))}
+                                {/* Table-style list */}
+                                <div className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
+                                    {/* Table header */}
+                                    <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-zinc-950/50 border-b border-zinc-800 text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                                        <div className="col-span-1">Status</div>
+                                        <div className="col-span-2">KSI ID</div>
+                                        <div className="col-span-5">Requirement</div>
+                                        <div className="col-span-2">Score</div>
+                                        <div className="col-span-2 text-right">Resources</div>
+                                    </div>
+                                    
+                                    {/* Validation rows */}
+                                    <div className="divide-y divide-zinc-800/50">
+                                        {latestValidations.map((validation, idx) => (
+                                            <ValidationCard key={idx} validation={validation} />
+                                        ))}
+                                    </div>
                                 </div>
                             </>
                         )}
