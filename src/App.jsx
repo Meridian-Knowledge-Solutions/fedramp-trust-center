@@ -549,6 +549,12 @@ const AppShell = () => {
               isActive={activeView === 'metrics'}
               onClick={() => { setActiveView('metrics'); setMobileMenuOpen(false); }}
             />
+            <SidebarItem
+              icon={Clock}
+              label="Failure History"
+              isActive={activeView === 'failures'}
+              onClick={() => { setActiveView('failures'); setMobileMenuOpen(false); }}
+            />
 
             <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
 
@@ -624,6 +630,12 @@ const AppShell = () => {
               isActive={activeView === 'metrics'}
               onClick={() => setActiveView('metrics')}
             />
+            <SidebarItem
+              icon={Clock}
+              label="Failure History"
+              isActive={activeView === 'failures'}
+              onClick={() => setActiveView('failures')}
+            />
 
             <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
 
@@ -672,6 +684,7 @@ const AppShell = () => {
                 {activeView === 'trust' && 'Platform / Trust Center'}
                 {activeView === 'transparency' && 'Platform / Transparency Console'}
                 {activeView === 'metrics' && 'Platform / Pipeline Metrics'}
+                {activeView === 'failures' && 'Platform / Failure History'}
               </span>
             </div>
           </div>
@@ -703,7 +716,8 @@ const AppShell = () => {
             {activeView === 'dashboard' ? <DashboardContent /> :
               activeView === 'trust' ? <TrustCenterView /> :
                 activeView === 'transparency' ? <TransparencyConsole /> :
-                  activeView === 'metrics' ? <MetricsDashboard /> : null}
+                  activeView === 'metrics' ? <MetricsDashboard /> :
+                    activeView === 'failures' ? <KSIFailureDashboard /> : null}
           </div>
         </main>
       </div>
