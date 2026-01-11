@@ -19,7 +19,7 @@ import {
     AlertCircle, CheckCircle2, Clock, TrendingUp, TrendingDown,
     ChevronDown, ChevronRight, AlertTriangle, Timer, Download,
     Activity, Shield, Zap, Target, AlertOctagon, History,
-    ArrowUpRight, ArrowDownRight, GitCommit, Calendar
+    ArrowUpRight, ArrowDownRight, GitCommit, Calendar, FileText
 } from 'lucide-react';
 
 // ============================================
@@ -77,9 +77,10 @@ const StatCard = ({ label, value, icon: Icon, color, trend, trendValue, subtitle
 );
 
 // ============================================
-// Active Failure Card (Enhanced)
+// Active Failure Card (Enhanced with Full Reason)
 // ============================================
 const ActiveFailureCard = ({ failure }) => {
+    const [expanded, setExpanded] = useState(false);
     const hoursActive = useMemo(() => {
         const failedAt = new Date(failure.failed_at);
         const hours = Math.round((Date.now() - failedAt) / (1000 * 60 * 60));
@@ -93,31 +94,69 @@ const ActiveFailureCard = ({ failure }) => {
         info: 'border-blue-500/50 bg-blue-500/10 shadow-blue-500/5'
     };
 
+    // Parse reason into bullet points if it contains semicolons
+    const reasonParts = failure.reason?.split(';').map(s => s.trim()).filter(Boolean) || [];
+
     return (
-        <div className={`p-5 rounded-xl border ${severityColors[severity]} shadow-lg transition-all hover:scale-[1.02]`}>
-            <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${severity === 'critical' ? 'bg-red-500/20' : severity === 'warning' ? 'bg-amber-500/20' : 'bg-blue-500/20'}`}>
-                        <AlertOctagon size={18} className={severity === 'critical' ? 'text-red-400' : severity === 'warning' ? 'text-amber-400' : 'text-blue-400'} />
-                    </div>
-                    <div>
-                        <span className="font-mono text-base font-bold text-white">{failure.ksi_id}</span>
-                        <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">
-                            {severity === 'critical' ? 'Critical - Immediate Action' : severity === 'warning' ? 'Warning - Action Required' : 'Needs Attention'}
+        <div className={`rounded-xl border ${severityColors[severity]} shadow-lg transition-all`}>
+            {/* Header */}
+            <div className="p-5 pb-3">
+                <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${severity === 'critical' ? 'bg-red-500/20' : severity === 'warning' ? 'bg-amber-500/20' : 'bg-blue-500/20'}`}>
+                            <AlertOctagon size={18} className={severity === 'critical' ? 'text-red-400' : severity === 'warning' ? 'text-amber-400' : 'text-blue-400'} />
+                        </div>
+                        <div>
+                            <span className="font-mono text-base font-bold text-white">{failure.ksi_id}</span>
+                            <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">
+                                {severity === 'critical' ? 'Critical - Immediate Action' : severity === 'warning' ? 'Warning - Action Required' : 'Needs Attention'}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="text-right">
-                    <div className={`text-lg font-black ${severity === 'critical' ? 'text-red-400' : severity === 'warning' ? 'text-amber-400' : 'text-blue-400'}`}>
-                        {hoursActive}h
+                    <div className="text-right">
+                        <div className={`text-lg font-black ${severity === 'critical' ? 'text-red-400' : severity === 'warning' ? 'text-amber-400' : 'text-blue-400'}`}>
+                            {hoursActive}h
+                        </div>
+                        <div className="text-[10px] text-slate-500 uppercase">Active</div>
                     </div>
-                    <div className="text-[10px] text-slate-500 uppercase">Active</div>
+                </div>
+                
+                {/* Reason Preview */}
+                <div 
+                    className="cursor-pointer group"
+                    onClick={() => setExpanded(!expanded)}
+                >
+                    <div className="text-xs text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <FileText size={10} />
+                        Failure Reason
+                        <ChevronDown size={12} className={`ml-auto transition-transform ${expanded ? 'rotate-180' : ''}`} />
+                    </div>
+                    
+                    {!expanded ? (
+                        <p className="text-sm text-slate-300 line-clamp-2 leading-relaxed group-hover:text-white transition-colors">
+                            {failure.reason}
+                        </p>
+                    ) : (
+                        <div className="bg-black/30 rounded-lg p-3 border border-white/5">
+                            {reasonParts.length > 1 ? (
+                                <ul className="space-y-2">
+                                    {reasonParts.map((part, i) => (
+                                        <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                                            <span className="text-slate-600 mt-1">•</span>
+                                            <span className="leading-relaxed">{part}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-sm text-slate-300 leading-relaxed">{failure.reason}</p>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
             
-            <p className="text-sm text-slate-400 mb-4 line-clamp-2 leading-relaxed">{failure.reason}</p>
-            
-            <div className="flex items-center justify-between pt-3 border-t border-white/5">
+            {/* Footer */}
+            <div className="flex items-center justify-between px-5 py-3 border-t border-white/5 bg-black/20">
                 <div className="flex items-center gap-4 text-xs text-slate-500">
                     <span className="flex items-center gap-1">
                         <Target size={10} /> Score: <span className="text-white font-mono">{failure.score}%</span>
@@ -126,13 +165,16 @@ const ActiveFailureCard = ({ failure }) => {
                         <GitCommit size={10} /> <span className="text-slate-400 font-mono">{failure.failed_commit}</span>
                     </span>
                 </div>
+                <span className="text-[10px] text-slate-600">
+                    {new Date(failure.failed_at).toLocaleDateString()}
+                </span>
             </div>
         </div>
     );
 };
 
 // ============================================
-// Timeline Entry (Remediated Failure)
+// Timeline Entry (Remediated Failure with Reason)
 // ============================================
 const TimelineEntry = ({ failure, isLast }) => {
     const [expanded, setExpanded] = useState(false);
@@ -140,6 +182,13 @@ const TimelineEntry = ({ failure, isLast }) => {
     
     const mttrColor = failure.duration_hours < 4 ? 'text-emerald-400' : 
                       failure.duration_hours < 12 ? 'text-amber-400' : 'text-red-400';
+    
+    const mttrBg = failure.duration_hours < 4 ? 'bg-emerald-500/10' : 
+                   failure.duration_hours < 12 ? 'bg-amber-500/10' : 'bg-red-500/10';
+
+    // Parse reason into bullet points if it contains semicolons
+    const reasonParts = failure.reason?.split(';').map(s => s.trim()).filter(Boolean) || [];
+    const primaryReason = reasonParts[0] || failure.reason || 'No reason provided';
 
     return (
         <div className="relative pl-8">
@@ -153,54 +202,104 @@ const TimelineEntry = ({ failure, isLast }) => {
                 <CheckCircle2 size={12} className="text-emerald-400" />
             </div>
             
-            <div 
-                className={`${THEME.card} p-4 mb-4 cursor-pointer group`}
-                onClick={() => setExpanded(!expanded)}
-            >
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <span className="font-mono text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
-                            {failure.ksi_id}
-                        </span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${mttrColor} bg-black/40`}>
-                            {failure.duration_hours}h MTTR
-                        </span>
+            <div className={`${THEME.card} mb-4 overflow-hidden`}>
+                {/* Header - Always visible */}
+                <div 
+                    className="p-4 cursor-pointer group"
+                    onClick={() => setExpanded(!expanded)}
+                >
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                            <span className="font-mono text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
+                                {failure.ksi_id}
+                            </span>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${mttrColor} ${mttrBg}`}>
+                                {failure.duration_hours}h MTTR
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs text-slate-500 flex items-center gap-1">
+                                <Calendar size={10} />
+                                {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+                            </span>
+                            <ChevronDown 
+                                size={14} 
+                                className={`text-slate-500 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} 
+                            />
+                        </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <span className="text-xs text-slate-500 flex items-center gap-1">
-                            <Calendar size={10} />
-                            {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                        <ChevronRight 
-                            size={14} 
-                            className={`text-slate-500 transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`} 
-                        />
+                    
+                    {/* Reason Preview - Always visible */}
+                    <div className="bg-black/30 rounded-lg p-3 border border-white/5">
+                        <div className="text-[10px] text-slate-600 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                            <AlertCircle size={9} /> Failure Reason
+                        </div>
+                        <p className={`text-sm text-slate-300 leading-relaxed ${!expanded ? 'line-clamp-2' : ''}`}>
+                            {primaryReason}
+                        </p>
+                        {!expanded && reasonParts.length > 1 && (
+                            <span className="text-[10px] text-blue-400 mt-1 inline-block">
+                                +{reasonParts.length - 1} more details...
+                            </span>
+                        )}
                     </div>
                 </div>
                 
+                {/* Expanded Details */}
                 {expanded && (
-                    <div className="mt-4 pt-4 border-t border-white/5 space-y-3 text-xs">
-                        <p className="text-slate-400 leading-relaxed">{failure.reason}</p>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-black/20 p-3 rounded-lg">
-                                <div className="text-slate-600 uppercase text-[9px] tracking-wider mb-1">Failed At</div>
+                    <div className="px-4 pb-4 space-y-4">
+                        {/* Full Reason Breakdown */}
+                        {reasonParts.length > 1 && (
+                            <div className="bg-black/20 rounded-lg p-3 border border-white/5">
+                                <div className="text-[10px] text-slate-600 uppercase tracking-wider mb-2">
+                                    Full Analysis
+                                </div>
+                                <ul className="space-y-2">
+                                    {reasonParts.map((part, i) => (
+                                        <li key={i} className="flex items-start gap-2 text-xs text-slate-400">
+                                            <span className={`mt-0.5 ${i === 0 ? 'text-red-400' : 'text-slate-600'}`}>
+                                                {i === 0 ? '▸' : '•'}
+                                            </span>
+                                            <span className={`leading-relaxed ${i === 0 ? 'text-slate-200' : ''}`}>{part}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        
+                        {/* Commit Details */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-red-500/5 p-3 rounded-lg border border-red-500/10">
+                                <div className="text-[9px] text-red-400/70 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                    <AlertCircle size={9} /> Failed At
+                                </div>
                                 <div className="text-slate-300 font-mono text-[11px]">
                                     {new Date(failure.failed_at).toLocaleString()}
                                 </div>
-                                <div className="text-slate-500 font-mono text-[10px] mt-1">
-                                    Commit: {failure.failed_commit}
+                                <div className="text-slate-500 font-mono text-[10px] mt-1 flex items-center gap-1">
+                                    <GitCommit size={9} /> {failure.failed_commit}
                                 </div>
                             </div>
-                            <div className="bg-black/20 p-3 rounded-lg">
-                                <div className="text-slate-600 uppercase text-[9px] tracking-wider mb-1">Remediated At</div>
+                            <div className="bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/10">
+                                <div className="text-[9px] text-emerald-400/70 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                    <CheckCircle2 size={9} /> Remediated At
+                                </div>
                                 <div className="text-slate-300 font-mono text-[11px]">
                                     {date.toLocaleString()}
                                 </div>
-                                <div className="text-slate-500 font-mono text-[10px] mt-1">
-                                    Commit: {failure.remediation_commit}
+                                <div className="text-slate-500 font-mono text-[10px] mt-1 flex items-center gap-1">
+                                    <GitCommit size={9} /> {failure.remediation_commit}
                                 </div>
                             </div>
                         </div>
+                        
+                        {/* Score at failure */}
+                        {failure.score_at_failure !== undefined && (
+                            <div className="flex items-center gap-2 text-xs text-slate-500">
+                                <Target size={10} />
+                                Score at failure: <span className="text-white font-mono">{failure.score_at_failure}%</span>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -580,6 +679,81 @@ const KSIFailureDashboard = () => {
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
+                </div>
+            )}
+
+            {/* Failure Reasons Summary Table */}
+            {history.length > 0 && (
+                <div className={THEME.card}>
+                    <div className="px-6 py-4 border-b border-white/5">
+                        <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                            <FileText size={14} className="text-cyan-400" /> Recent Failure Reasons
+                        </h3>
+                        <p className="text-[10px] text-slate-500 mt-1">
+                            Detailed breakdown of why each KSI failed
+                        </p>
+                    </div>
+                    <div className="divide-y divide-white/5">
+                        {history.slice(0, 8).map((f, i) => {
+                            const reasonParts = f.reason?.split(';').map(s => s.trim()).filter(Boolean) || [];
+                            const mttrColor = f.duration_hours < 4 ? 'text-emerald-400' : 
+                                              f.duration_hours < 24 ? 'text-amber-400' : 'text-red-400';
+                            
+                            return (
+                                <div key={i} className="p-4 hover:bg-white/[0.02] transition-colors">
+                                    <div className="flex items-start justify-between mb-2">
+                                        <div className="flex items-center gap-3">
+                                            <span className="font-mono text-sm font-bold text-white">
+                                                {f.ksi_id}
+                                            </span>
+                                            <span className={`text-[10px] font-bold ${mttrColor}`}>
+                                                {f.duration_hours}h
+                                            </span>
+                                        </div>
+                                        <span className="text-[10px] text-slate-600">
+                                            {new Date(f.remediated_at).toLocaleDateString('en-US', { 
+                                                month: 'short', 
+                                                day: 'numeric',
+                                                year: '2-digit'
+                                            })}
+                                        </span>
+                                    </div>
+                                    <div className="pl-0">
+                                        {reasonParts.length > 1 ? (
+                                            <ul className="space-y-1">
+                                                {reasonParts.slice(0, 3).map((part, j) => (
+                                                    <li key={j} className="flex items-start gap-2 text-xs text-slate-400">
+                                                        <span className={j === 0 ? 'text-red-400' : 'text-slate-600'}>
+                                                            {j === 0 ? '▸' : '•'}
+                                                        </span>
+                                                        <span className={`leading-relaxed ${j === 0 ? 'text-slate-300' : ''}`}>
+                                                            {part}
+                                                        </span>
+                                                    </li>
+                                                ))}
+                                                {reasonParts.length > 3 && (
+                                                    <li className="text-[10px] text-slate-600 pl-4">
+                                                        +{reasonParts.length - 3} more...
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        ) : (
+                                            <p className="text-xs text-slate-400 leading-relaxed">
+                                                {f.reason || 'No reason provided'}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    {history.length > 8 && (
+                        <div className="px-4 py-3 border-t border-white/5 text-center">
+                            <span className="text-[10px] text-slate-500">
+                                Showing 8 of {history.length} failures • Expand timeline below for full history
+                            </span>
+                        </div>
+                    )}
                 </div>
             )}
 
