@@ -18,6 +18,7 @@ import SettingsModal from './components/modals/SettingsModal';
 
 import { TrustCenterView } from './components/trust/TrustCenterView';
 import { TransparencyConsole } from './components/trust/TransparencyConsole';
+import { KSIFailureDashboard } from './components/trust/KSIFailureDashboard';
 import { KSIGrid } from './components/findings/KSIGrid';
 import MetricsDashboard from './components/trust/MetricsDashboard';
 
