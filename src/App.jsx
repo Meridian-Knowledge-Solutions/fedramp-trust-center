@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, memo, useEffect } from 'react';
 import {
   LayoutDashboard, ShieldAlert, User, Settings, LogOut,
   Menu, Bell, Activity, Calendar, Clock,
-  FileText, RefreshCw, BarChart3, Eye, X
+  FileText, RefreshCw, BarChart3, Eye, X, Shield
 } from 'lucide-react';
 
 import {
@@ -21,6 +21,7 @@ import { TransparencyConsole } from './components/trust/TransparencyConsole';
 import { KSIFailureDashboard } from './components/trust/KSIFailureDashboard';
 import { KSIGrid } from './components/findings/KSIGrid';
 import MetricsDashboard from './components/trust/MetricsDashboard';
+import VDRPublicMetricsDashboard from './VDRPublicMetricsDashboard';
 
 // --- CONFIGURATION ---
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
@@ -257,7 +258,6 @@ const ComplianceChart = memo(() => {
       }));
   }, [history]);
 
-  // ADDED: Calculate the total number of validation runs
   const totalRuns = chartData.length;
 
   const ChartComponent = chartView === 'bar' ? BarChart : AreaChart;
@@ -274,7 +274,6 @@ const ComplianceChart = memo(() => {
     );
   }
 
-  // Calculate min/max for dynamic Y-axis scaling
   const minRate = Math.min(...chartData.map(d => d.rate));
   const yDomainMin = Math.max(0, Math.floor(minRate - 5));
 
@@ -483,7 +482,6 @@ const AppShell = () => {
   return (
     <div className={`flex h-screen ${THEME.bg} text-slate-300 font-sans overflow-hidden selection:bg-blue-500/30`}>
 
-      {/* Mobile Backdrop - Optimization: Darkens background and traps clicks to close menu */}
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] lg:hidden animate-in fade-in duration-300"
@@ -491,7 +489,7 @@ const AppShell = () => {
         ></div>
       )}
 
-      {/* Mobile Sidebar - Fixed positioned drawer */}
+      {/* Mobile Sidebar */}
       <aside
         className={`fixed z-[70] h-full bg-[#0c0c10] border-r border-white/5 transition-transform duration-300 
           w-[280px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -538,6 +536,12 @@ const AppShell = () => {
               onClick={() => { setActiveView('trust'); setMobileMenuOpen(false); }}
             />
             <SidebarItem
+              icon={Shield}
+              label="VDR Security"
+              isActive={activeView === 'vdr'}
+              onClick={() => { setActiveView('vdr'); setMobileMenuOpen(false); }}
+            />
+            <SidebarItem
               icon={Eye}
               label="Transparency Console"
               isActive={activeView === 'transparency'}
@@ -579,7 +583,7 @@ const AppShell = () => {
         </div>
       </aside>
 
-      {/* Desktop Sidebar - Static flex child */}
+      {/* Desktop Sidebar */}
       <aside
         className={`hidden lg:flex flex-col flex-shrink-0 h-full bg-[#0c0c10] border-r border-white/5 transition-all duration-300 overflow-hidden
           ${sidebarOpen ? 'w-64' : 'w-0'}
@@ -617,6 +621,12 @@ const AppShell = () => {
               label="Trust Center"
               isActive={activeView === 'trust'}
               onClick={() => setActiveView('trust')}
+            />
+            <SidebarItem
+              icon={Shield}
+              label="VDR Security"
+              isActive={activeView === 'vdr'}
+              onClick={() => setActiveView('vdr')}
             />
             <SidebarItem
               icon={Eye}
@@ -666,7 +676,6 @@ const AppShell = () => {
         {/* Global Responsive Header */}
         <header className={`h-16 bg-[#0c0c10]/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 lg:px-6 z-50 sticky top-0 ${scrollY > 0 ? 'shadow-lg shadow-black/20' : ''}`}>
           <div className="flex items-center gap-3">
-            {/* Mobile Hamburger: More prominent trigger */}
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-white transition-colors"
@@ -682,6 +691,7 @@ const AppShell = () => {
               <span className="text-slate-500 text-[10px] uppercase font-bold tracking-widest font-mono">
                 {activeView === 'dashboard' && 'Platform / Overview'}
                 {activeView === 'trust' && 'Platform / Trust Center'}
+                {activeView === 'vdr' && 'Platform / VDR Security'}
                 {activeView === 'transparency' && 'Platform / Transparency Console'}
                 {activeView === 'metrics' && 'Platform / Pipeline Metrics'}
                 {activeView === 'failures' && 'Platform / Failure History'}
@@ -715,9 +725,10 @@ const AppShell = () => {
           <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto relative z-10">
             {activeView === 'dashboard' ? <DashboardContent /> :
               activeView === 'trust' ? <TrustCenterView /> :
-                activeView === 'transparency' ? <TransparencyConsole /> :
-                  activeView === 'metrics' ? <MetricsDashboard /> :
-                    activeView === 'failures' ? <KSIFailureDashboard /> : null}
+                activeView === 'vdr' ? <VDRPublicMetricsDashboard /> :
+                  activeView === 'transparency' ? <TransparencyConsole /> :
+                    activeView === 'metrics' ? <MetricsDashboard /> :
+                      activeView === 'failures' ? <KSIFailureDashboard /> : null}
           </div>
         </main>
       </div>
