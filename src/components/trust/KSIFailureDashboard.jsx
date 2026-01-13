@@ -518,7 +518,7 @@ const KSIFailureDashboard = () => {
                     {stats.activeCount === 0 ? (
                         <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                             <CheckCircle2 size={16} className="text-emerald-400" />
-                            <span className="text-sm font-bold text-emerald-400">All Clear</span>
+                            <span className="text-sm font-bold text-emerald-400">No failures to report</span>
                         </div>
                     ) : (
                         <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 animate-pulse">
