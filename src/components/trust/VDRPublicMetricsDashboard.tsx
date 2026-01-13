@@ -491,7 +491,7 @@ export default function VDRPublicMetricsDashboard() {
                             VDR Security Metrics
                         </h1>
                         <p className="text-slate-500 text-sm mt-1">
-                            FedRAMP Vulnerability Detection & Response • {data.metadata?.vdr_standard || 'Release 25.09A'}
+                            FedRAMP Vulnerability Detection & Response • {data.metadata?.vdr_standard}
                         </p>
                     </div>
                     <div className="flex items-center gap-6">
@@ -842,7 +842,7 @@ export default function VDRPublicMetricsDashboard() {
                         <div className="mt-4 p-3 bg-black/30 rounded-lg border border-white/5">
                             <div className="text-[10px] text-slate-600 uppercase tracking-wider mb-1">VDR Standard</div>
                             <div className="text-sm text-slate-300">
-                                {data.metadata?.vdr_standard || 'Release 25.09A'} • {vdr_acceptance?.acceptance_threshold_days || 192}-day acceptance window
+                                {data.metadata?.vdr_standard} • {vdr_acceptance?.acceptance_threshold_days || 192}-day acceptance window
                             </div>
                         </div>
                     </div>
@@ -881,7 +881,7 @@ export default function VDRPublicMetricsDashboard() {
                             <span>Privacy: {data.metadata?.privacy_notice || 'Aggregate counts only • No sensitive data included'}</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <span>VDR Standard: {data.metadata?.vdr_standard || 'Release 25.09A'}</span>
+                            <span>VDR Standard: {data.metadata?.vdr_standard}</span>
                             <span>•</span>
                             <span>Classification: {data.metadata?.data_classification || 'PUBLIC'}</span>
                             {data.metadata?.generated_at && (
