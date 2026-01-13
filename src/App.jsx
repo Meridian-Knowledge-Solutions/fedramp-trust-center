@@ -21,7 +21,7 @@ import { TransparencyConsole } from './components/trust/TransparencyConsole';
 import { KSIFailureDashboard } from './components/trust/KSIFailureDashboard';
 import { KSIGrid } from './components/findings/KSIGrid';
 import MetricsDashboard from './components/trust/MetricsDashboard';
-import VDRPublicMetricsDashboard from './VDRPublicMetricsDashboard';
+import VDRPublicMetricsDashboard from './components/trust/VDRPublicMetricsDashboard';
 
 // --- CONFIGURATION ---
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
