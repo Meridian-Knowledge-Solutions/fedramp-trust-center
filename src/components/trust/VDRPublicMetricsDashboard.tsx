@@ -1,18 +1,16 @@
 /**
  * VDR Public Metrics Dashboard
- * 
- * FedRAMP 20x VDR (Vulnerability Detection & Response) visualization:
+ * * FedRAMP 20x VDR (Vulnerability Detection & Response) visualization:
  * - Current vulnerability snapshot with key metrics
  * - N-Rating and severity distribution charts
  * - Compliance and security posture indicators
  * - Attack surface analysis
  * - Historical trend visualization
  * - CSPM findings summary
- * 
- * Consumes: public/data/vdr_public_metrics.json
- * 
- * Privacy: This dashboard displays ONLY aggregate counts.
+ * * Consumes: public/data/vdr_public_metrics.json
+ * * Privacy: This dashboard displays ONLY aggregate counts.
  * No resource IDs, CVE details, or sensitive data is included.
+ * * Styling: Matches KSIFailureDashboard.tsx theme
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -74,7 +72,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 };
 
 // ============================================
-// Type Definitions
+// Type Definitions - Mapped to vdr_public_metrics.json
 // ============================================
 interface VDRMetrics {
     metadata: {
@@ -83,65 +81,66 @@ interface VDRMetrics {
         data_classification: string;
         privacy_notice: string;
     };
-    snapshot: {
+    current_snapshot: {
         timestamp: string;
         total_vulnerabilities: number;
         unique_cves: number;
-        affected_resources: number;
-        internet_reachable_resources: number;
+        affected_resource_count: number;
+        internet_reachable_resource_count: number;
     };
-    risk: {
-        n_ratings: Record<string, number>;
-        severity: Record<string, number>;
+    risk_classification: {
+        n_rating_distribution: Record<string, number>;
+        severity_distribution: Record<string, number>;
         lev_count: number;
         irv_count: number;
         kev_matches: number;
-        critical: number;
+        critical_findings: number;
     };
-    compliance: {
-        rate: number;
-        compliant: number;
-        non_compliant: number;
-        frr_cvm_04: string;
+    compliance_status: {
+        compliance_rate: number;
+        compliant_count: number;
+        non_compliant_count: number;
+        frr_cvm_04_status: string;
     };
-    posture: {
-        rating: string;
-        score: number;
-        network_security: boolean;
+    security_posture: {
+        overall_rating: string;
+        posture_score: number;
+        network_security_enabled: boolean;
         iam_least_privilege: boolean;
         logging_comprehensive: boolean;
-        encryption_enabled: boolean;
+        encryption_at_rest: boolean;
     };
     attack_surface: {
-        nodes: number;
-        edges: number;
-        paths: number;
-        critical_paths: number;
+        graph_node_count: number;
+        graph_edge_count: number;
+        total_attack_paths: number;
+        critical_attack_paths: number;
         exploitable_paths: number;
-        avg_risk_score: number;
-        blast_radius: number;
+        avg_path_risk_score: number;
+        blast_radius_score: number;
     };
-    cspm: {
-        total: number;
+    cspm_summary: {
+        total_findings: number;
         by_severity: Record<string, number>;
     };
     vdr_acceptance: {
-        threshold_days: number;
-        accepted: number;
-        active: number;
+        acceptance_threshold_days: number;
+        total_accepted: number;
+        total_active: number;
     };
-    exploit_types: Record<string, number>;
-    risk_distribution: Record<string, number>;
-    trends: Array<{
-        date: string;
-        total: number;
-        n5: number;
-        n4: number;
-        lev: number;
-        irv: number;
-        accepted: number;
-        active: number;
-    }>;
+    exploit_type_distribution: Record<string, number>;
+    trends: {
+        daily: Array<{
+            date: string;
+            total_vulnerabilities: number;
+            n5_count: number;
+            n4_count: number;
+            lev_count: number;
+            irv_count: number;
+            accepted_count: number;
+            active_count: number;
+        }>;
+    };
 }
 
 // ============================================
@@ -405,18 +404,18 @@ export default function VDRPublicMetricsDashboard() {
         fetchData();
     }, []);
 
-    // Computed trend values
+    // Computed trend values - Mapping from trends.daily
     const computedMetrics = useMemo(() => {
-        if (!data) return null;
+        if (!data || !data.trends?.daily) return null;
         
-        const trends = data.trends || [];
+        const trends = data.trends.daily || [];
         const latestTrend = trends[trends.length - 1];
         const prevTrend = trends[trends.length - 8]; // ~week ago
         
         let vulnTrend: 'up' | 'down' | 'neutral' = 'neutral';
         let vulnTrendValue = '';
         if (latestTrend && prevTrend) {
-            const diff = latestTrend.total - prevTrend.total;
+            const diff = latestTrend.total_vulnerabilities - prevTrend.total_vulnerabilities;
             if (diff > 0) {
                 vulnTrend = 'down'; // More vulns is bad
                 vulnTrendValue = `+${diff} this week`;
@@ -438,7 +437,7 @@ export default function VDRPublicMetricsDashboard() {
     // Loading state
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
+            <div className="min-h-[400px] bg-[#09090b] flex items-center justify-center">
                 <div className="text-center">
                     <RefreshCw size={40} className="text-blue-500 animate-spin mx-auto mb-4" />
                     <div className="text-slate-400">Loading VDR Metrics...</div>
@@ -450,7 +449,7 @@ export default function VDRPublicMetricsDashboard() {
     // Error state
     if (error) {
         return (
-            <div className="min-h-screen bg-[#09090b] flex items-center justify-center p-4">
+            <div className="min-h-[400px] bg-[#09090b] flex items-center justify-center p-4">
                 <div className={THEME.card + " p-8 max-w-md text-center"}>
                     <AlertOctagon size={48} className="text-red-500 mx-auto mb-4" />
                     <h2 className="text-xl font-bold text-white mb-2">Failed to Load VDR Metrics</h2>
@@ -466,10 +465,20 @@ export default function VDRPublicMetricsDashboard() {
 
     if (!data) return null;
 
-    const { snapshot, risk, compliance, posture, attack_surface, cspm, vdr_acceptance, trends, exploit_types } = data;
+    // Destructure mapped objects from JSON schema
+    const { 
+        current_snapshot: snapshot, 
+        risk_classification: risk, 
+        compliance_status: compliance, 
+        security_posture: posture, 
+        attack_surface, 
+        cspm_summary: cspm, 
+        vdr_acceptance, 
+        exploit_type_distribution: exploit_types 
+    } = data;
 
     return (
-        <div className="min-h-screen bg-[#09090b] text-white p-6 lg:p-8">
+        <div className="min-h-screen bg-[#09090b] text-white">
             <div className="max-w-7xl mx-auto space-y-8">
                 
                 {/* ========================================== */}
@@ -482,11 +491,11 @@ export default function VDRPublicMetricsDashboard() {
                             VDR Security Metrics
                         </h1>
                         <p className="text-slate-500 text-sm mt-1">
-                            FedRAMP Vulnerability Detection & Response • Release 25.09A
+                            FedRAMP Vulnerability Detection & Response • {data.metadata?.vdr_standard || 'Release 25.09A'}
                         </p>
                     </div>
                     <div className="flex items-center gap-6">
-                        <PostureBadge rating={posture?.rating} score={posture?.score} />
+                        <PostureBadge rating={posture?.overall_rating} score={posture?.posture_score} />
                         {lastUpdated && (
                             <div className="text-right hidden lg:block">
                                 <div className="text-[10px] text-slate-600 uppercase tracking-wider">Last Updated</div>
@@ -515,21 +524,21 @@ export default function VDRPublicMetricsDashboard() {
                         value={snapshot?.unique_cves || 0}
                         icon={Database}
                         color="text-purple-400"
-                        subtitle={`${snapshot?.affected_resources || 0} resources affected`}
+                        subtitle={`${snapshot?.affected_resource_count || 0} resources affected`}
                     />
                     <StatCard
                         label="Compliance Rate"
-                        value={`${compliance?.rate || 0}%`}
+                        value={`${compliance?.compliance_rate || 0}%`}
                         icon={CheckCircle2}
                         color="text-emerald-400"
-                        subtitle={compliance?.frr_cvm_04 === 'COMPLIANT' ? 'FRR-CVM-04 ✓' : 'Review Required'}
+                        subtitle={compliance?.frr_cvm_04_status === 'COMPLIANT' ? 'FRR-CVM-04 ✓' : 'Review Required'}
                     />
                     <StatCard
                         label="Security Score"
-                        value={`${posture?.score || 0}/10`}
+                        value={`${posture?.posture_score || 0}/10`}
                         icon={Shield}
                         color="text-blue-400"
-                        subtitle={posture?.rating || 'Unknown'}
+                        subtitle={posture?.overall_rating || 'Unknown'}
                     />
                 </section>
 
@@ -555,10 +564,10 @@ export default function VDRPublicMetricsDashboard() {
                     {expandedSections.risk && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                             <RiskIndicatorCard
-                                label="Critical (N4/N5)"
-                                value={risk?.critical || 0}
+                                label="Critical Findings"
+                                value={risk?.critical_findings || 0}
                                 icon={AlertOctagon}
-                                severity={risk?.critical > 0 ? 'critical' : 'safe'}
+                                severity={risk?.critical_findings > 0 ? 'critical' : 'safe'}
                                 description="Highest priority"
                             />
                             <RiskIndicatorCard
@@ -598,19 +607,19 @@ export default function VDRPublicMetricsDashboard() {
                             iconColor="text-blue-400"
                         />
                         <DistributionBar
-                            data={risk?.n_ratings || {}}
+                            data={risk?.n_rating_distribution || {}}
                             colors={N_RATING_COLORS}
                             title="Vulnerability Risk Ratings"
                         />
                         <div className="mt-6">
                             <ResponsiveContainer width="100%" height={150}>
-                                <BarChart data={Object.entries(risk?.n_ratings || {}).map(([name, value]) => ({ name, value }))}>
+                                <BarChart data={Object.entries(risk?.n_rating_distribution || {}).map(([name, value]) => ({ name, value }))}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
                                     <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} />
                                     <YAxis tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} />
                                     <Tooltip content={<CustomTooltip />} />
                                     <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                                        {Object.keys(risk?.n_ratings || {}).map((key, i) => (
+                                        {Object.keys(risk?.n_rating_distribution || {}).map((key, i) => (
                                             <Cell key={i} fill={N_RATING_COLORS[key] || '#3f3f46'} />
                                         ))}
                                     </Bar>
@@ -627,7 +636,7 @@ export default function VDRPublicMetricsDashboard() {
                             iconColor="text-amber-400"
                         />
                         <DistributionBar
-                            data={risk?.severity || {}}
+                            data={risk?.severity_distribution || {}}
                             colors={SEVERITY_COLORS}
                             title="CVSS Severity Levels"
                         />
@@ -635,7 +644,7 @@ export default function VDRPublicMetricsDashboard() {
                             <ResponsiveContainer width="100%" height={150}>
                                 <PieChart>
                                     <Pie
-                                        data={Object.entries(risk?.severity || {}).filter(([_, v]) => v > 0).map(([name, value]) => ({ name, value }))}
+                                        data={Object.entries(risk?.severity_distribution || {}).filter(([_, v]) => v > 0).map(([name, value]) => ({ name, value }))}
                                         cx="50%"
                                         cy="50%"
                                         innerRadius={35}
@@ -643,7 +652,7 @@ export default function VDRPublicMetricsDashboard() {
                                         paddingAngle={2}
                                         dataKey="value"
                                     >
-                                        {Object.entries(risk?.severity || {}).filter(([_, v]) => v > 0).map(([key], i) => (
+                                        {Object.entries(risk?.severity_distribution || {}).filter(([_, v]) => v > 0).map(([key], i) => (
                                             <Cell key={i} fill={SEVERITY_COLORS[key] || '#3f3f46'} />
                                         ))}
                                     </Pie>
@@ -657,7 +666,7 @@ export default function VDRPublicMetricsDashboard() {
                 {/* ========================================== */}
                 {/* Trend Chart */}
                 {/* ========================================== */}
-                {trends && trends.length > 0 && (
+                {computedMetrics?.trends && computedMetrics.trends.length > 0 && (
                     <section className={THEME.card + " p-6"}>
                         <div 
                             className="flex items-center justify-between cursor-pointer"
@@ -665,7 +674,7 @@ export default function VDRPublicMetricsDashboard() {
                         >
                             <SectionHeader 
                                 icon={TrendingUp} 
-                                title="30-Day Vulnerability Trend" 
+                                title="Vulnerability Trend History" 
                                 iconColor="text-emerald-400"
                             />
                             <ChevronDown 
@@ -676,15 +685,11 @@ export default function VDRPublicMetricsDashboard() {
                         
                         {expandedSections.trends && (
                             <ResponsiveContainer width="100%" height={250}>
-                                <AreaChart data={trends}>
+                                <AreaChart data={computedMetrics.trends}>
                                     <defs>
                                         <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
                                             <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                        </linearGradient>
-                                        <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
@@ -698,7 +703,7 @@ export default function VDRPublicMetricsDashboard() {
                                     <Tooltip content={<CustomTooltip />} />
                                     <Area
                                         type="monotone"
-                                        dataKey="total"
+                                        dataKey="total_vulnerabilities"
                                         name="Total"
                                         stroke="#3b82f6"
                                         strokeWidth={2}
@@ -706,7 +711,7 @@ export default function VDRPublicMetricsDashboard() {
                                     />
                                     <Line
                                         type="monotone"
-                                        dataKey="active"
+                                        dataKey="active_count"
                                         name="Active"
                                         stroke="#10b981"
                                         strokeWidth={2}
@@ -730,18 +735,18 @@ export default function VDRPublicMetricsDashboard() {
                             iconColor="text-emerald-400"
                         />
                         <div className="space-y-1">
-                            <PostureCheckItem label="Network Security (WAF)" enabled={posture?.network_security} />
+                            <PostureCheckItem label="Network Security (WAF)" enabled={posture?.network_security_enabled} />
                             <PostureCheckItem label="IAM Least Privilege" enabled={posture?.iam_least_privilege} />
                             <PostureCheckItem label="Comprehensive Logging" enabled={posture?.logging_comprehensive} />
-                            <PostureCheckItem label="Encryption at Rest" enabled={posture?.encryption_enabled} />
+                            <PostureCheckItem label="Encryption at Rest" enabled={posture?.encryption_at_rest} />
                         </div>
                         <div className="mt-6 pt-4 border-t border-white/5">
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-slate-400">FRR-CVM-04 Status</span>
                                 <span className={`font-bold ${
-                                    compliance?.frr_cvm_04 === 'COMPLIANT' ? 'text-emerald-400' : 'text-amber-400'
+                                    compliance?.frr_cvm_04_status === 'COMPLIANT' ? 'text-emerald-400' : 'text-amber-400'
                                 }`}>
-                                    {compliance?.frr_cvm_04 || 'Unknown'}
+                                    {compliance?.frr_cvm_04_status || 'Unknown'}
                                 </span>
                             </div>
                         </div>
@@ -756,22 +761,22 @@ export default function VDRPublicMetricsDashboard() {
                         />
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-black/30 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-black text-slate-200">{attack_surface?.nodes || 0}</div>
+                                <div className="text-2xl font-black text-slate-200">{attack_surface?.graph_node_count || 0}</div>
                                 <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Graph Nodes</div>
                             </div>
                             <div className="bg-black/30 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-black text-slate-200">{attack_surface?.edges || 0}</div>
+                                <div className="text-2xl font-black text-slate-200">{attack_surface?.graph_edge_count || 0}</div>
                                 <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Graph Edges</div>
                             </div>
                             <div className="bg-black/30 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-black text-blue-400">{attack_surface?.paths || 0}</div>
+                                <div className="text-2xl font-black text-blue-400">{attack_surface?.total_attack_paths || 0}</div>
                                 <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Attack Paths</div>
                             </div>
                             <div className="bg-black/30 rounded-lg p-4 text-center">
                                 <div className={`text-2xl font-black ${
-                                    (attack_surface?.critical_paths || 0) > 0 ? 'text-red-400' : 'text-emerald-400'
+                                    (attack_surface?.critical_attack_paths || 0) > 0 ? 'text-red-400' : 'text-emerald-400'
                                 }`}>
-                                    {attack_surface?.critical_paths || 0}
+                                    {attack_surface?.critical_attack_paths || 0}
                                 </div>
                                 <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Critical Paths</div>
                             </div>
@@ -780,14 +785,14 @@ export default function VDRPublicMetricsDashboard() {
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-slate-400">Blast Radius Score</span>
                                 <span className={`font-bold ${
-                                    (attack_surface?.blast_radius || 0) > 0 ? 'text-amber-400' : 'text-emerald-400'
+                                    (attack_surface?.blast_radius_score || 0) > 0 ? 'text-amber-400' : 'text-emerald-400'
                                 }`}>
-                                    {attack_surface?.blast_radius || 0}
+                                    {attack_surface?.blast_radius_score || 0}
                                 </span>
                             </div>
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-slate-400">Avg Path Risk Score</span>
-                                <span className="font-bold text-slate-200">{attack_surface?.avg_risk_score || 0}</span>
+                                <span className="font-bold text-slate-200">{attack_surface?.avg_path_risk_score || 0}</span>
                             </div>
                         </div>
                     </div>
@@ -805,7 +810,7 @@ export default function VDRPublicMetricsDashboard() {
                             iconColor="text-cyan-400"
                         />
                         <div className="flex items-center gap-4 mb-4">
-                            <div className="text-4xl font-black text-white">{cspm?.total || 0}</div>
+                            <div className="text-4xl font-black text-white">{cspm?.total_findings || 0}</div>
                             <div className="text-slate-500 text-sm">Total Findings</div>
                         </div>
                         {cspm?.by_severity && Object.keys(cspm.by_severity).length > 0 && (
@@ -826,18 +831,18 @@ export default function VDRPublicMetricsDashboard() {
                         />
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4">
-                                <div className="text-3xl font-black text-emerald-400">{vdr_acceptance?.active || 0}</div>
+                                <div className="text-3xl font-black text-emerald-400">{vdr_acceptance?.total_active || 0}</div>
                                 <div className="text-xs text-slate-400 mt-1">Active (Under Threshold)</div>
                             </div>
                             <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
-                                <div className="text-3xl font-black text-amber-400">{vdr_acceptance?.accepted || 0}</div>
-                                <div className="text-xs text-slate-400 mt-1">Accepted ({vdr_acceptance?.threshold_days || 192}+ days)</div>
+                                <div className="text-3xl font-black text-amber-400">{vdr_acceptance?.total_accepted || 0}</div>
+                                <div className="text-xs text-slate-400 mt-1">Accepted ({vdr_acceptance?.acceptance_threshold_days || 192}+ days)</div>
                             </div>
                         </div>
                         <div className="mt-4 p-3 bg-black/30 rounded-lg border border-white/5">
                             <div className="text-[10px] text-slate-600 uppercase tracking-wider mb-1">VDR Standard</div>
                             <div className="text-sm text-slate-300">
-                                Release 25.09A • {vdr_acceptance?.threshold_days || 192}-day acceptance window
+                                {data.metadata?.vdr_standard || 'Release 25.09A'} • {vdr_acceptance?.acceptance_threshold_days || 192}-day acceptance window
                             </div>
                         </div>
                     </div>
@@ -873,12 +878,12 @@ export default function VDRPublicMetricsDashboard() {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-xs text-slate-500">
                         <div className="flex items-center gap-2">
                             <Lock size={12} />
-                            <span>Privacy: Aggregate counts only • No sensitive data included</span>
+                            <span>Privacy: {data.metadata?.privacy_notice || 'Aggregate counts only • No sensitive data included'}</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <span>VDR Standard: Release 25.09A</span>
+                            <span>VDR Standard: {data.metadata?.vdr_standard || 'Release 25.09A'}</span>
                             <span>•</span>
-                            <span>Classification: PUBLIC</span>
+                            <span>Classification: {data.metadata?.data_classification || 'PUBLIC'}</span>
                             {data.metadata?.generated_at && (
                                 <>
                                     <span>•</span>
