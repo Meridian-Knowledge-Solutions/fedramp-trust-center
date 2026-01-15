@@ -10,7 +10,7 @@ import {
     Bell, Code, Settings, Info, Zap, MessageSquare,
     TrendingUp, BarChart3, Landmark, Network, Cloud, ArrowDown, ChevronDown, ChevronRight,
     AlertTriangle, GitCommit, RefreshCw, Hash, FileJson, Cpu, Key, Radio, CheckSquare, FileCheck,
-    PieChart, Layout, Monitor, HardDrive, Ticket, AlertCircle
+    PieChart, Layout, Monitor, HardDrive, Ticket, AlertCircle, Calendar, Video
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -34,6 +34,112 @@ const THEME = {
         muted: 'text-slate-500'
     }
 };
+
+// --- SUB-COMPONENT: Planned Changes ---
+const PlannedChangesSection = ({ changes }) => (
+    <div className="bg-[#121217] rounded-[2rem] border border-white/5 p-8 h-full">
+        <div className="flex items-center gap-3 mb-8">
+            <div className="p-2 bg-indigo-500/10 rounded-xl">
+                <Zap className="w-4 h-4 text-indigo-400" />
+            </div>
+            <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Planned Changes</h3>
+                <p className="text-[10px] text-slate-500 font-medium">NEXT 90 DAYS</p>
+            </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {changes && changes.length > 0 ? changes.map((change, idx) => (
+                <div key={idx} className="p-5 bg-white/[0.02] rounded-2xl border border-white/5 border-l-2 border-l-indigo-500 hover:bg-white/[0.04] transition-colors">
+                    <p className="text-xs font-bold text-slate-200">{change.title}</p>
+                    <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">{change.description}</p>
+                </div>
+            )) : (
+                <div className="col-span-full p-4 text-center">
+                    <p className="text-xs text-slate-500 italic">No transformative changes planned for the next cycle.</p>
+                </div>
+            )}
+        </div>
+    </div>
+);
+
+// --- SUB-COMPONENT: Quarterly Review Card ---
+const QuarterlyReviewCard = ({ meeting }) => {
+    if (!meeting) return null;
+
+    // Generates the ICS file in memory for the download button
+    const downloadICS = () => {
+        const icsContent = [
+            'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
+            `SUMMARY:${meeting.meetingTitle || 'FedRAMP Quarterly Review'}`,
+            `DTSTART:${(meeting.nextDate || '').replace(/-/g, '')}T190000Z`,
+            `DURATION:PT${meeting.durationMinutes || 60}M`,
+            `DESCRIPTION:${meeting.description || 'Synchronous review session.'}\\n\\nRegister: ${meeting.registrationUrl}`,
+            `LOCATION:Microsoft Teams (Registration Required)`,
+            'END:VEVENT', 'END:VCALENDAR'
+        ].join('\n');
+
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute('download', `FedRAMP_Review_${meeting.nextDate}.ics`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    return (
+        <div className="bg-indigo-600 rounded-[2rem] p-8 text-white shadow-xl shadow-indigo-500/10 relative overflow-hidden h-full">
+            <div className="relative z-10 flex flex-col h-full justify-between">
+                <div>
+                    <div className="flex justify-between items-start mb-8">
+                        <div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-200">Synchronous Review [QR-02]</span>
+                            <h3 className="text-xl font-bold mt-1 tracking-tight">Quarterly Session</h3>
+                        </div>
+                        <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10">
+                            <Video className="w-5 h-5 text-white" />
+                        </div>
+                    </div>
+
+                    <div className="mb-10">
+                        <p className="text-[10px] font-black text-indigo-100 uppercase tracking-widest mb-1">Target Review Date [QR-06]</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-black font-mono tracking-tighter">{meeting.nextDate || 'TBD'}</span>
+                            <span className="text-indigo-200 text-sm font-semibold">{meeting.time || '14:00 EST'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-3">
+                    <a href={meeting.registrationUrl || '#'} target="_blank" rel="noreferrer"
+                        className="flex items-center justify-center gap-2 w-full py-3.5 bg-white text-indigo-600 rounded-2xl font-bold text-xs hover:bg-indigo-50 transition-all shadow-lg">
+                        <Video className="w-4 h-4" /> Register for Session [QR-05]
+                    </a>
+                    <button onClick={downloadICS}
+                        className="flex items-center justify-center gap-2 w-full py-3 bg-indigo-700/40 text-indigo-100 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-colors border border-indigo-400/20">
+                        <Download className="w-3.5 h-3.5" /> Add to Calendar
+                    </button>
+                </div>
+            </div>
+            {/* Background Aesthetic */}
+            <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+        </div>
+    );
+};
+
+// --- SUB-COMPONENT: Report Archives ---
+const ReportArchives = () => (
+    <div className="mt-8 pt-8 border-t border-white/5">
+        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Official Report Archives</h3>
+        <div className="flex flex-wrap gap-4">
+            <a href="/reports/QUARTERLY_AUTHORIZATION_REPORT.html" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg border border-white/5 text-xs text-slate-300 hover:bg-white/10 transition">
+                <FileText className="w-4 h-4" />
+                Latest QAR (HTML)
+            </a>
+            {/* Archive links mapped here */}
+        </div>
+    </div>
+);
 
 // --- SUB-COMPONENT: Drift Alert ---
 const DriftAlert = ({ drift }) => {
@@ -559,6 +665,8 @@ export const TrustCenterView = () => {
     const [masHistory, setMasHistory] = useState([]);
     const [scnHistory, setScnHistory] = useState([]);
     const [nextReportDate, setNextReportDate] = useState(null);
+    const [plannedChanges, setPlannedChanges] = useState([]);
+    const [meetingData, setMeetingData] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const uptime = status?.uptime_percent ? `${parseFloat(status.uptime_percent).toFixed(2)}%` : '99.99%';
@@ -569,11 +677,13 @@ export const TrustCenterView = () => {
         const fetchData = async () => {
             const ts = Date.now();
             try {
-                const [boundRes, archRes, histRes, dateRes] = await Promise.all([
+                const [boundRes, archRes, histRes, dateRes, plannedRes, meetingRes] = await Promise.all([
                     fetch(`${BASE_PATH}mas_boundary.json?t=${ts}`),
                     fetch(`${BASE_PATH}mas_architecture_map.json?t=${ts}`),
                     fetch(`${BASE_PATH}mas_history.jsonl?t=${ts}`),
-                    fetch(`${BASE_PATH}next_report_date.json?t=${ts}`)
+                    fetch(`${BASE_PATH}next_report_date.json?t=${ts}`),
+                    fetch(`${BASE_PATH}planned_changes.json?t=${ts}`),
+                    fetch(`${BASE_PATH}quarterly_meetings.json?t=${ts}`)
                 ]);
 
                 // Try public_scn_history.jsonl first, fallback to scn_history.jsonl
@@ -584,6 +694,8 @@ export const TrustCenterView = () => {
 
                 if (boundRes.ok) setMasBoundary(await boundRes.json());
                 if (archRes.ok) setMasArch(await archRes.json());
+                if (plannedRes.ok) setPlannedChanges(await plannedRes.json());
+                if (meetingRes.ok) setMeetingData(await meetingRes.json());
 
                 if (histRes.ok) {
                     const text = await histRes.text();
@@ -718,6 +830,16 @@ export const TrustCenterView = () => {
                             <InfoCard label="Auth Level" value="FedRAMP Moderate" sub="20X" />
                             <InfoCard label="Access" value="HTTPS" sub="Port 443" />
                         </div>
+                    </div>
+                </div>
+
+                {/* --- GOVERNANCE ROW --- */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+                    <div className="lg:col-span-1">
+                        <QuarterlyReviewCard meeting={meetingData} />
+                    </div>
+                    <div className="lg:col-span-2">
+                        <PlannedChangesSection changes={plannedChanges} />
                     </div>
                 </div>
 
@@ -879,6 +1001,11 @@ export const TrustCenterView = () => {
                             </table>
                         )}
                     </div>
+                </div>
+
+                {/* --- REPORT ARCHIVES --- */}
+                <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 shadow-md mt-8`}>
+                    <ReportArchives />
                 </div>
 
                 {/* --- FOOTER ACTIONS --- */}
