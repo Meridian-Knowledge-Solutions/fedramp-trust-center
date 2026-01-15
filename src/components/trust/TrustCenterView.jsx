@@ -66,7 +66,11 @@ const PlannedChangesSection = ({ changes }) => (
 const QuarterlyReviewCard = ({ meeting }) => {
     if (!meeting) return null;
 
-    // Generates the ICS file in memory for the download button
+    // Dynamically resolve the path based on the environment BASE_URL to prevent GitHub Pages 404s
+    const reportsPath = import.meta.env.BASE_URL.endsWith('/') 
+        ? `${import.meta.env.BASE_URL}reports/` 
+        : `${import.meta.env.BASE_URL}/reports/`;
+
     const downloadICS = () => {
         const icsContent = [
             'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
@@ -91,7 +95,7 @@ const QuarterlyReviewCard = ({ meeting }) => {
         <div className="bg-indigo-600 rounded-[2rem] p-8 text-white shadow-xl shadow-indigo-500/10 relative overflow-hidden h-full">
             <div className="relative z-10 flex flex-col h-full justify-between">
                 <div>
-                    <div className="flex justify-between items-start mb-8">
+                    <div className="flex justify-between items-start mb-6">
                         <div>
                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-200">Synchronous Review [QR-02]</span>
                             <h3 className="text-xl font-bold mt-1 tracking-tight">Quarterly Session</h3>
@@ -101,7 +105,7 @@ const QuarterlyReviewCard = ({ meeting }) => {
                         </div>
                     </div>
 
-                    <div className="mb-10">
+                    <div className="mb-8">
                         <p className="text-[10px] font-black text-indigo-100 uppercase tracking-widest mb-1">Target Review Date [QR-06]</p>
                         <div className="flex items-baseline gap-2">
                             <span className="text-4xl font-black font-mono tracking-tighter">{meeting.nextDate || 'TBD'}</span>
@@ -111,17 +115,23 @@ const QuarterlyReviewCard = ({ meeting }) => {
                 </div>
 
                 <div className="space-y-3">
-                    <a href={meeting.registrationUrl || '#'} target="_blank" rel="noreferrer"
+                    {/* Primary Link: Grouped with governance data to ensure context */}
+                    <a href={`${reportsPath}QUARTERLY_AUTHORIZATION_REPORT.html`} target="_blank" rel="noreferrer"
                         className="flex items-center justify-center gap-2 w-full py-3.5 bg-white text-indigo-600 rounded-2xl font-bold text-xs hover:bg-indigo-50 transition-all shadow-lg">
+                        <FileText className="w-4 h-4" /> View Quarterly OAR [CCM-01]
+                    </a>
+
+                    <a href={meeting.registrationUrl || '#'} target="_blank" rel="noreferrer"
+                        className="flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-500 text-white rounded-2xl font-bold text-xs hover:bg-indigo-400 transition-all border border-indigo-400">
                         <Video className="w-4 h-4" /> Register for Session [QR-05]
                     </a>
+
                     <button onClick={downloadICS}
-                        className="flex items-center justify-center gap-2 w-full py-3 bg-indigo-700/40 text-indigo-100 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-colors border border-indigo-400/20">
+                        className="flex items-center justify-center gap-2 w-full py-2 bg-indigo-700/40 text-indigo-100 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-colors border border-indigo-400/20">
                         <Download className="w-3.5 h-3.5" /> Add to Calendar
                     </button>
                 </div>
             </div>
-            {/* Background Aesthetic */}
             <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
         </div>
     );
