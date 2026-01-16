@@ -1,150 +1,385 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-slate-50 h-full">
+<html lang="en">
 <head>
-    <meta charset="UTF-8"><title>Quarterly Authorization Report Dashboard</title>
+    <meta charset="UTF-8">
+    <title>Quarterly Authorization Report - 2026-01-16</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
-        .nav-glass { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); }
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .no-print { display: none; }
+            .page-break { page-break-before: always; }
+        }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        table { border-collapse: collapse; }
     </style>
 </head>
-<body class="h-full">
-    <nav class="nav-glass fixed w-full z-50 border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                    <span class="text-white font-black text-xs italic">QAR</span>
-                </div>
+<body class="bg-white">
+    <!-- Header Section -->
+    <header class="border-b-4 border-blue-600 bg-gray-50 py-6">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between items-start">
                 <div>
-                    <h1 class="text-white font-bold text-sm tracking-tight">Quarterly Authorization Report</h1>
-                    <span class="text-slate-500 text-[9px] uppercase font-mono tracking-widest block">FRR-CCM-QR-02 Compliant Dashboard</span>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Quarterly Authorization Report</h1>
+                    <p class="text-sm text-gray-600 uppercase tracking-wide font-semibold">FedRAMP Continuous Compliance Monitoring Dashboard</p>
                 </div>
-            </div>
-            <div class="flex items-center space-x-6 text-right">
-                <div>
-                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">System State</p>
-                    <span class="text-emerald-400 text-[10px] font-black uppercase tracking-widest">OPERATIONAL</span>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <main class="pt-24 pb-20 max-w-7xl mx-auto px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
-            <div class="lg:col-span-2">
-                <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Authorization Compliance Summary</h2>
-                <p class="text-slate-500 text-sm mt-2 max-w-2xl leading-relaxed">Persistent validation baseline for the current reporting cycle. Fulfills mandatory Ongoing Authorization (CCM-01) and Synchronous Review (QR-02) requirements.</p>
-            </div>
-            
-        <div class="bg-indigo-600 rounded-3xl p-8 shadow-xl shadow-indigo-500/20 text-white relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-4">Synchronous Review [QR-02]</p>
-                <h3 class="text-2xl font-bold mb-2">Next Quarterly Review</h3>
-                <p class="text-3xl font-black font-mono mb-6 tracking-tighter">2026-02-18</p>
-                <div class="space-y-4">
-                    <a href="https://trust.example.com/register" class="block w-full text-center py-3 bg-white text-indigo-600 rounded-xl font-bold text-xs hover:bg-indigo-50 transition">Register for Session [QR-05]</a>
-                    <p class="text-[9px] text-center text-indigo-200 uppercase font-bold">Scheduled within 10 days of report [QR-03]</p>
+                <div class="text-right">
+                    <div class="bg-white border-2 border-blue-600 px-4 py-2 mb-2">
+                        <p class="text-xs text-gray-600 uppercase font-semibold">Report Status</p>
+                        <p class="text-lg font-bold text-blue-600">OPERATIONAL</p>
+                    </div>
+                    <p class="text-xs text-gray-500">Generated: 2026-01-16 08:18 UTC</p>
                 </div>
             </div>
         </div>
-        </div>
+    </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Compliance Rate</p>
-                <h2 class="text-4xl font-black text-slate-900 tracking-tighter">100.0%</h2>
-                <span class="text-emerald-500 text-[10px] font-bold bg-emerald-50 px-2 py-1 rounded">Persistent</span>
-            </div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Next Review Target</p>
-                <h2 class="text-4xl font-black text-indigo-600 tracking-tighter font-mono">2026-02</h2>
-                <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">[QR-06 Compliance]</p>
-            </div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Temporal window</p>
-                <h2 class="text-4xl font-black text-slate-900 tracking-tighter">14d</h2>
-                <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">Verified Persistence</p>
-            </div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Verified Controls</p>
-                <h2 class="text-4xl font-black text-slate-900 tracking-tighter">61</h2>
-                <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">Machine-readable KSIs</p>
-            </div>
-        </div>
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Section 1: Executive Summary -->
+        <section class="mb-10">
+            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">1. Executive Summary</h2>
+            <p class="text-sm text-gray-700 leading-relaxed mt-4 mb-6">
+                This report provides a comprehensive overview of the authorization status for the current quarterly period, 
+                fulfilling requirements under FRR-CCM-QR-02 (Quarterly Review), FRR-CCM-QR-06 (Next Review Date Disclosure), 
+                and FRR-CCM-QR-04 (Responsible Information Disclosure). All data presented has been validated through automated 
+                Key System Indicator (KSI) checks and manual review processes.
+            </p>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
-            <div class="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
-                <div class="flex justify-between items-center mb-10">
-                    <h3 class="text-lg font-black text-slate-900 tracking-tight">Temporal Consistency Trend [Phase 2 Metric]</h3>
-                    <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest italic">Evidence Window</span>
+            <div class="grid grid-cols-4 gap-4">
+                <div class="border-2 border-gray-300 p-4 bg-gray-50">
+                    <p class="text-xs text-gray-600 uppercase font-semibold mb-2">Overall Compliance Rate</p>
+                    <p class="text-3xl font-bold text-gray-900">100.0%</p>
                 </div>
-                <div class="h-80"><canvas id="trendChart"></canvas></div>
-            </div>
-
-            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
-                <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest mb-6">Planned Changes (90d)</h3>
-                <div class="space-y-4">
-                    <p class="text-xs text-slate-400">No upcoming boundary changes.</p>
+                <div class="border-2 border-gray-300 p-4 bg-gray-50">
+                    <p class="text-xs text-gray-600 uppercase font-semibold mb-2">Total Verified Controls</p>
+                    <p class="text-3xl font-bold text-gray-900">61</p>
+                </div>
+                <div class="border-2 border-gray-300 p-4 bg-gray-50">
+                    <p class="text-xs text-gray-600 uppercase font-semibold mb-2">Validation Period</p>
+                    <p class="text-3xl font-bold text-gray-900">14 Days</p>
+                </div>
+                <div class="border-2 border-gray-300 p-4 bg-gray-50">
+                    <p class="text-xs text-gray-600 uppercase font-semibold mb-2">Next Review Cycle</p>
+                    <p class="text-3xl font-bold text-blue-600">2026-04</p>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
-                    <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest">Transformative Changes (SCN History)</h3>
+        <!-- Section 2: Compliance Trend Analysis -->
+        <section class="mb-10 page-break">
+            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">2. Compliance Trend Analysis</h2>
+            <p class="text-sm text-gray-700 mt-4 mb-4">
+                The following chart and table demonstrate temporal consistency across the 14-day validation window, 
+                providing evidence of persistent compliance with authorization requirements.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="border-2 border-gray-300 p-6 bg-white">
+                    <h3 class="text-sm font-bold text-gray-900 mb-4 uppercase">Compliance Rate Trend (14-Day Window)</h3>
+                    <div class="h-64"><canvas id="trendChart"></canvas></div>
                 </div>
-                <table class="min-w-full divide-y divide-slate-100">
-                    <tbody class="divide-y divide-slate-100"><tr><td colspan="3" class="py-10 text-center text-slate-400 italic">No transformative changes recorded.</td></tr></tbody>
+
+                <div class="border-2 border-gray-300 bg-white">
+                    <div class="bg-gray-50 px-4 py-3 border-b-2 border-gray-300">
+                        <h3 class="text-sm font-bold text-gray-900 uppercase">Recent Validation History</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-100 border-b-2 border-gray-300">
+                                <tr>
+                                    <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase">Date</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-center">Rate</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-center">Total</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-center">Passed</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                
+            <tr>
+                <td class="px-4 py-2 text-sm font-mono">2026-01-07</td>
+                <td class="px-4 py-2 text-sm text-center">100.0%</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center"><span class="text-blue-600">●</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-2 text-sm font-mono">2026-01-08</td>
+                <td class="px-4 py-2 text-sm text-center">100.0%</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center"><span class="text-blue-600">●</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-2 text-sm font-mono">2026-01-09</td>
+                <td class="px-4 py-2 text-sm text-center">100.0%</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center"><span class="text-blue-600">●</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-2 text-sm font-mono">2026-01-10</td>
+                <td class="px-4 py-2 text-sm text-center">100.0%</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center"><span class="text-blue-600">●</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-2 text-sm font-mono">2026-01-11</td>
+                <td class="px-4 py-2 text-sm text-center">100.0%</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center"><span class="text-blue-600">●</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-2 text-sm font-mono">2026-01-12</td>
+                <td class="px-4 py-2 text-sm text-center">100.0%</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center"><span class="text-blue-600">●</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-2 text-sm font-mono">2026-01-13</td>
+                <td class="px-4 py-2 text-sm text-center">100.0%</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center"><span class="text-blue-600">●</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-2 text-sm font-mono">2026-01-14</td>
+                <td class="px-4 py-2 text-sm text-center">100.0%</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center"><span class="text-blue-600">●</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-2 text-sm font-mono">2026-01-15</td>
+                <td class="px-4 py-2 text-sm text-center">100.0%</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center"><span class="text-blue-600">●</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-2 text-sm font-mono">2026-01-16</td>
+                <td class="px-4 py-2 text-sm text-center">100.0%</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center">0</td>
+                <td class="px-4 py-2 text-sm text-center"><span class="text-blue-600">●</span></td>
+            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Significant Change Notifications -->
+        <section class="mb-10">
+            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">3. Significant Change Notifications (SCN)</h2>
+            <p class="text-sm text-gray-700 mt-4 mb-4">
+                Documentation of transformative changes to the authorization boundary, system architecture, or security posture 
+                as required by FRR-CCM continuous monitoring protocols.
+            </p>
+
+            <div class="border-2 border-gray-300 bg-white">
+                <div class="bg-gray-50 px-4 py-3 border-b-2 border-gray-300">
+                    <h3 class="text-sm font-bold text-gray-900 uppercase">Recent Significant Changes</h3>
+                </div>
+                <table class="w-full">
+                    <thead class="bg-gray-100 border-b border-gray-300">
+                        <tr>
+                            <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">#</th>
+                            <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Date</th>
+                            <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Type</th>
+                            <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="4" class="px-4 py-8 text-sm text-gray-500 text-center">No significant changes recorded in current period.</td></tr>
+                    </tbody>
                 </table>
             </div>
+        </section>
 
-            <div class="bg-slate-900 rounded-3xl p-8 text-slate-400 shadow-2xl">
-                <h3 class="text-xs font-black text-white uppercase tracking-widest mb-6">QR Compliance Verification</h3>
-                <ul class="space-y-4 text-[11px] font-medium">
-                    <li class="flex items-start space-x-3"><span class="text-emerald-500">✓</span><span>FRR-CCM-QR-02: Quarterly Review baseline established.</span></li>
-                    <li class="flex items-start space-x-3"><span class="text-emerald-500">✓</span><span>FRR-CCM-QR-05: Registration/Calendar details integrated.</span></li>
-                    <li class="flex items-start space-x-3"><span class="text-emerald-500">✓</span><span>FRR-CCM-QR-06: Public target date for review disclosed.</span></li>
-                    <li class="flex items-start space-x-3"><span class="text-emerald-500">✓</span><span>FRR-CCM-QR-04: Automated PII/ARN redaction applied.</span></li>
-                </ul>
-                <div class="mt-10 pt-8 border-t border-slate-800 text-center">
-                    <p class="text-[9px] font-black uppercase tracking-[0.2em] mb-2 text-slate-500 italic">Report Integrity Hash (SHA-256)</p>
-                    <code class="text-[9px] bg-slate-800 px-3 py-1 rounded text-slate-600">76896e0f67f3b8533ae1a4cab5395d60...</code>
+        <!-- Section 4: Planned Changes -->
+        <section class="mb-10 page-break">
+            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">4. Planned Changes (90-Day Window)</h2>
+            <p class="text-sm text-gray-700 mt-4 mb-4">
+                Forward-looking transparency on anticipated modifications to system boundaries, security controls, 
+                or operational procedures within the next 90 days.
+            </p>
+
+            <div class="border-2 border-gray-300 bg-white">
+                <div class="bg-gray-50 px-4 py-3 border-b-2 border-gray-300">
+                    <h3 class="text-sm font-bold text-gray-900 uppercase">Upcoming System Changes</h3>
+                </div>
+                <table class="w-full">
+                    <thead class="bg-gray-100 border-b border-gray-300">
+                        <tr>
+                            <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">#</th>
+                            <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Title</th>
+                            <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Description</th>
+                            <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-center">Target Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="4" class="px-4 py-8 text-sm text-gray-500 text-center">No planned changes within 90-day window.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 5: Compliance Attestations -->
+        <section class="mb-10">
+            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">5. FRR-CCM-QR Compliance Attestations</h2>
+            <p class="text-sm text-gray-700 mt-4 mb-4">
+                This report fulfills the following FedRAMP Reverse Requirements for Continuous Compliance Monitoring:
+            </p>
+
+            <div class="border-2 border-gray-300 bg-white">
+                <table class="w-full">
+                    <thead class="bg-gray-100 border-b-2 border-gray-300">
+                        <tr>
+                            <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Requirement ID</th>
+                            <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Description</th>
+                            <th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        
+            <tr>
+                <td class="px-4 py-3 text-sm font-mono">FRR-CCM-QR-02</td>
+                <td class="px-4 py-3 text-sm">Quarterly Review baseline established and documented</td>
+                <td class="px-4 py-3 text-sm text-center"><span class="text-green-600 font-bold">✓ COMPLIANT</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-3 text-sm font-mono">FRR-CCM-QR-04</td>
+                <td class="px-4 py-3 text-sm">No irresponsible disclosure - PII/ARN redaction applied</td>
+                <td class="px-4 py-3 text-sm text-center"><span class="text-green-600 font-bold">✓ COMPLIANT</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-3 text-sm font-mono">FRR-CCM-QR-05</td>
+                <td class="px-4 py-3 text-sm">Meeting registration/calendar information integrated</td>
+                <td class="px-4 py-3 text-sm text-center"><span class="text-green-600 font-bold">✓ COMPLIANT</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-3 text-sm font-mono">FRR-CCM-QR-06</td>
+                <td class="px-4 py-3 text-sm">Next Quarterly Review target date publicly disclosed</td>
+                <td class="px-4 py-3 text-sm text-center"><span class="text-green-600 font-bold">✓ COMPLIANT</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-3 text-sm font-mono">FRR-CCM-QR-11</td>
+                <td class="px-4 py-3 text-sm">Content shared responsibly without adverse effects</td>
+                <td class="px-4 py-3 text-sm text-center"><span class="text-green-600 font-bold">✓ COMPLIANT</span></td>
+            </tr>
+        
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 6: Report Integrity -->
+        <section class="mb-10">
+            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">6. Report Integrity Verification</h2>
+            
+            <div class="border-2 border-gray-300 p-6 bg-gray-50 mt-4">
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-xs text-gray-600 uppercase font-semibold mb-2">Report Generation Timestamp</p>
+                        <p class="text-sm font-mono text-gray-900">2026-01-16T08:18:45.304476+00:00</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-600 uppercase font-semibold mb-2">Report Version</p>
+                        <p class="text-sm font-mono text-gray-900">QAR-2026-Q1-v1.0</p>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="text-xs text-gray-600 uppercase font-semibold mb-2">SHA-256 Integrity Hash</p>
+                        <p class="text-xs font-mono text-gray-900 bg-white border border-gray-300 p-2 break-all">fdccb88eb944b87a3a52f4965845b3e05929dd084bc0b922366b0f4878058028</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
     </main>
 
-    <footer class="max-w-7xl mx-auto px-6 py-12 border-t border-slate-200 text-center">
-        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em]">Persistent Validation & Ongoing Authorization Summary</p>
+    <footer class="border-t-2 border-gray-300 bg-gray-50 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-xs text-gray-600 uppercase font-semibold tracking-wide">Persistent Validation & Ongoing Authorization Report</p>
+            <p class="text-xs text-gray-500 mt-1">This report is automatically generated and updated in accordance with FRR-CCM continuous monitoring requirements.</p>
+        </div>
     </footer>
 
     <script>
-        const trendData = [{"timestamp": "2026-01-01T20:20:48Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-02T20:19:53Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-03T20:19:41Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-04T20:21:36Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-05T21:46:21Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-06T20:21:59Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-07T21:23:03Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-08T16:22:01Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-09T20:21:31Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-10T20:22:30Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-11T20:26:20Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-12T20:23:22Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-13T20:25:26Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-14T20:29:39Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}];
+        const trendData = [{"timestamp": "2026-01-03T20:19:41Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-04T20:21:36Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-05T21:46:21Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-06T20:21:59Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-07T21:23:03Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-08T16:22:01Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-09T20:21:31Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-10T20:22:30Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-11T20:26:20Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-12T20:23:22Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-13T20:25:26Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-14T20:29:39Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-15T23:48:19Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}, {"timestamp": "2026-01-16T07:24:09Z", "total": 61, "passed": 61, "failed": 0, "compliance_rate": 100.0, "source": "main-pipeline-4hr"}];
         const ctx = document.getElementById('trendChart').getContext('2d');
-        const grad = ctx.createLinearGradient(0, 0, 0, 400);
-        grad.addColorStop(0, 'rgba(79, 70, 229, 0.15)');
-        grad.addColorStop(1, 'rgba(79, 70, 229, 0)');
 
         new Chart(ctx, {
             type: 'line',
             data: {
                 labels: trendData.map(d => d.timestamp.substring(5,10)),
                 datasets: [{
+                    label: 'Compliance Rate (%)',
                     data: trendData.map(d => d.compliance_rate),
-                    borderColor: '#4f46e5', borderWidth: 4,
-                    backgroundColor: grad, fill: true, tension: 0.4,
-                    pointRadius: 6, pointBackgroundColor: '#fff', pointBorderWidth: 3, pointBorderColor: '#4f46e5'
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.1,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#2563eb',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
                 }]
             },
             options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 11, family: 'Helvetica Neue' },
+                            color: '#374151'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 10,
+                        titleFont: { size: 12 },
+                        bodyFont: { size: 11 }
+                    }
+                },
                 scales: {
-                    y: { min: 0, max: 100, grid: { color: '#f1f5f9' }, ticks: { font: { weight: '700', size: 10 }, color: '#94a3b8' } },
-                    x: { grid: { display: false }, ticks: { font: { weight: '700', size: 10 }, color: '#94a3b8' } }
+                    y: {
+                        min: 0,
+                        max: 100,
+                        grid: { color: '#e5e7eb' },
+                        ticks: {
+                            font: { size: 11, family: 'Helvetica Neue' },
+                            color: '#6b7280',
+                            callback: function(value) { return value + '%'; }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Compliance Rate (%)',
+                            font: { size: 11, weight: 'bold' },
+                            color: '#374151'
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 11, family: 'Helvetica Neue' },
+                            color: '#6b7280'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date',
+                            font: { size: 11, weight: 'bold' },
+                            color: '#374151'
+                        }
+                    }
                 }
             }
         });
