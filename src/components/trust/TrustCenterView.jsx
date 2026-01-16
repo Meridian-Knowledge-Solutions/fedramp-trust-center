@@ -35,7 +35,7 @@ const THEME = {
     }
 };
 
-// --- SUB-COMPONENT: Planned Changes ---
+// --- SUB-COMPONENT: Change Pipeline (Live SCN Tracking) ---
 const PlannedChangesSection = ({ scnHistory }) => {
     // Filter for upcoming or recently initiated changes if available, 
     // otherwise show the most recent significant activity.
@@ -78,10 +78,9 @@ const PlannedChangesSection = ({ scnHistory }) => {
                         </div>
                         <p className="text-xs font-bold text-slate-200 line-clamp-1">{change.description || 'Infrastructure Update'}</p>
                         <div className="mt-3 flex items-center gap-2">
-                            <div className={`w-1.5 h-1.5 rounded-full ${
-                                change.classification === 'transformative' ? 'bg-rose-500' : 
-                                change.classification === 'adaptive' ? 'bg-blue-500' : 'bg-emerald-500'
-                            }`} />
+                            <div className={`w-1.5 h-1.5 rounded-full ${change.classification === 'transformative' ? 'bg-rose-500' :
+                                    change.classification === 'adaptive' ? 'bg-blue-500' : 'bg-emerald-500'
+                                }`} />
                             <span className="text-[10px] uppercase font-bold text-slate-400 italic">
                                 {change.classification?.replace('_', ' ')}
                             </span>
@@ -102,8 +101,8 @@ const QuarterlyReviewCard = ({ meeting }) => {
     if (!meeting) return null;
 
     // Dynamically resolve the path based on the environment BASE_URL to prevent GitHub Pages 404s
-    const reportsPath = import.meta.env.BASE_URL.endsWith('/') 
-        ? `${import.meta.env.BASE_URL}reports/` 
+    const reportsPath = import.meta.env.BASE_URL.endsWith('/')
+        ? `${import.meta.env.BASE_URL}reports/`
         : `${import.meta.env.BASE_URL}/reports/`;
 
     const downloadICS = () => {
@@ -171,20 +170,6 @@ const QuarterlyReviewCard = ({ meeting }) => {
         </div>
     );
 };
-
-// --- SUB-COMPONENT: Report Archives ---
-const ReportArchives = () => (
-    <div className="mt-8 pt-8 border-t border-white/5">
-        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Official Report Archives</h3>
-        <div className="flex flex-wrap gap-4">
-            <a href="/reports/QUARTERLY_AUTHORIZATION_REPORT.html" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg border border-white/5 text-xs text-slate-300 hover:bg-white/10 transition">
-                <FileText className="w-4 h-4" />
-                Latest QAR (HTML)
-            </a>
-            {/* Archive links mapped here */}
-        </div>
-    </div>
-);
 
 // --- SUB-COMPONENT: Drift Alert ---
 const DriftAlert = ({ drift }) => {
@@ -884,7 +869,7 @@ export const TrustCenterView = () => {
                         <QuarterlyReviewCard meeting={meetingData} />
                     </div>
                     <div className="lg:col-span-2">
-                        <PlannedChangesSection changes={plannedChanges} />
+                        <PlannedChangesSection scnHistory={scnHistory} />
                     </div>
                 </div>
 
@@ -934,7 +919,7 @@ export const TrustCenterView = () => {
                 </div>
 
                 {/* --- ACTION DECK --- */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                <div className="grid grid-cols-1 gap-6 mt-8">
                     <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 flex flex-col justify-between shadow-lg relative overflow-hidden group`}>
                         <div>
                             <div className="mb-6">
@@ -949,108 +934,6 @@ export const TrustCenterView = () => {
                             {isAuthenticated ? <Download size={18} /> : <Lock size={18} />} Download Package
                         </button>
                     </div>
-
-                    <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 flex flex-col justify-between shadow-lg`}>
-                        <div>
-                            <div className="mb-6">
-                                <h3 className="text-xl font-bold text-white">Continuous Monitoring</h3>
-                                <div className="text-xs text-slate-400">Real-time Compliance Tracking</div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4 mb-8">
-                                <div className="bg-[#09090b] p-4 rounded-xl border border-white/5">
-                                    <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Next Snapshot</div>
-                                    <div className="text-blue-400 font-bold text-lg">{nextReportDate ? nextReportDate.toLocaleDateString() : '...'}</div>
-                                </div>
-                                <div className="bg-[#09090b] p-4 rounded-xl border border-white/5">
-                                    <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Validation</div>
-                                    <div className="text-emerald-400 font-bold text-lg flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Passing
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex gap-3">
-                            <button onClick={viewQuarterlyReport} className="flex-1 py-3.5 bg-[#18181b] hover:bg-[#202025] text-slate-200 font-bold rounded-xl border border-white/5 transition-all flex items-center justify-center gap-2 text-sm">View Report</button>
-                            <button onClick={downloadQuarterlyReport} className="px-5 py-3.5 bg-[#18181b] hover:bg-[#202025] text-slate-200 rounded-xl border border-white/5 transition-all"><Download size={18} /></button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* --- SCN LOG --- */}
-                <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 shadow-md mt-8`}>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                        <div>
-                            <h3 className="text-xl font-bold text-white">Infrastructure Change Log</h3>
-                            <div className="text-xs text-slate-500 mt-1 font-mono">SCN History (Significant Change Notifications)</div>
-                        </div>
-                        <div className="flex gap-2">
-                            <span className="text-[9px] bg-blue-500/10 text-blue-400 px-2 py-1 rounded border border-blue-500/20 font-mono">
-                                {scnHistory.length} Changes
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="overflow-hidden rounded-xl border border-white/5 bg-[#09090b]">
-                        {scnHistory.length === 0 ? (
-                            <div className="p-8 text-center text-slate-600 text-sm italic">No significant changes detected yet...</div>
-                        ) : (
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="border-b border-white/5 bg-white/[0.02] text-[10px] text-slate-500 uppercase font-mono">
-                                        <th className="p-4 font-bold">Date</th>
-                                        <th className="p-4 font-bold">Change ID</th>
-                                        <th className="p-4 font-bold">Classification</th>
-                                        <th className="p-4 font-bold text-center">Components</th>
-                                        <th className="p-4 font-bold text-right">Impact</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/5 text-sm font-mono">
-                                    {scnHistory.map((entry, index) => {
-                                        // Determine impact badge styling
-                                        const impact = entry.infrastructure_impact || 'low';
-                                        const impactStyles = {
-                                            high: 'text-rose-500 bg-rose-500/10 border-rose-500/20',
-                                            medium: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
-                                            low: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
-                                        }[impact] || 'text-slate-500 bg-slate-500/10 border-slate-500/20';
-
-                                        return (
-                                            <tr key={entry.change_id || index} className="hover:bg-white/[0.02] transition-colors">
-                                                <td className="p-4 text-slate-300">
-                                                    <div>{new Date(entry.timestamp).toLocaleDateString()}</div>
-                                                    <div className="text-[10px] text-slate-500">{new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <span className="text-xs text-blue-400 font-mono">{entry.change_id}</span>
-                                                </td>
-                                                <td className="p-4">
-                                                    <ClassificationBadge type={entry.classification} />
-                                                    {entry.description && (
-                                                        <div className="text-[10px] text-slate-500 mt-1 max-w-[200px] truncate" title={entry.description}>
-                                                            {entry.description}
-                                                        </div>
-                                                    )}
-                                                </td>
-                                                <td className="p-4 text-center">
-                                                    <span className="text-slate-300 font-bold">{entry.affected_component_count || 0}</span>
-                                                </td>
-                                                <td className="p-4 text-right">
-                                                    <span className={`text-[10px] font-bold border px-2 py-0.5 rounded uppercase ${impactStyles}`}>
-                                                        {impact}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        )}
-                    </div>
-                </div>
-
-                {/* --- REPORT ARCHIVES --- */}
-                <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 shadow-md mt-8`}>
-                    <ReportArchives />
                 </div>
 
                 {/* --- FOOTER ACTIONS --- */}
