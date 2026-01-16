@@ -36,31 +36,66 @@ const THEME = {
 };
 
 // --- SUB-COMPONENT: Planned Changes ---
-const PlannedChangesSection = ({ changes }) => (
-    <div className="bg-[#121217] rounded-[2rem] border border-white/5 p-8 h-full">
-        <div className="flex items-center gap-3 mb-8">
-            <div className="p-2 bg-indigo-500/10 rounded-xl">
-                <Zap className="w-4 h-4 text-indigo-400" />
+const PlannedChangesSection = ({ scnHistory }) => {
+    // Filter for upcoming or recently initiated changes if available, 
+    // otherwise show the most recent significant activity.
+    const displayChanges = scnHistory?.slice(0, 4) || [];
+
+    const getImpactStyles = (impact) => {
+        const type = impact?.toLowerCase();
+        if (type === 'transformative') return 'border-l-rose-500 bg-rose-500/5';
+        if (type === 'adaptive') return 'border-l-blue-500 bg-blue-500/5';
+        return 'border-l-emerald-500 bg-emerald-500/5';
+    };
+
+    return (
+        <div className="bg-[#121217] rounded-[2rem] border border-white/5 p-8 h-full">
+            <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-500/10 rounded-xl">
+                        <Activity className="w-4 h-4 text-indigo-400" />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Change Pipeline</h3>
+                        <p className="text-[10px] text-slate-500 font-medium">LIVE SCN TRACKING</p>
+                    </div>
+                </div>
+                <div className="px-3 py-1 bg-white/5 rounded-full border border-white/10">
+                    <span className="text-[10px] font-mono text-emerald-400 tracking-tighter">FRR-SCN COMPLIANT</span>
+                </div>
             </div>
-            <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Planned Changes</h3>
-                <p className="text-[10px] text-slate-500 font-medium">NEXT 90 DAYS</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {displayChanges.length > 0 ? displayChanges.map((change, idx) => (
+                    <div key={idx} className={`p-5 rounded-2xl border border-white/5 border-l-2 ${getImpactStyles(change.classification)} hover:bg-white/[0.04] transition-colors`}>
+                        <div className="flex justify-between items-start mb-2">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
+                                {change.change_id}
+                            </p>
+                            <span className="text-[8px] font-mono text-slate-500">
+                                {new Date(change.timestamp).toLocaleDateString()}
+                            </span>
+                        </div>
+                        <p className="text-xs font-bold text-slate-200 line-clamp-1">{change.description || 'Infrastructure Update'}</p>
+                        <div className="mt-3 flex items-center gap-2">
+                            <div className={`w-1.5 h-1.5 rounded-full ${
+                                change.classification === 'transformative' ? 'bg-rose-500' : 
+                                change.classification === 'adaptive' ? 'bg-blue-500' : 'bg-emerald-500'
+                            }`} />
+                            <span className="text-[10px] uppercase font-bold text-slate-400 italic">
+                                {change.classification?.replace('_', ' ')}
+                            </span>
+                        </div>
+                    </div>
+                )) : (
+                    <div className="col-span-full p-12 text-center border-2 border-dashed border-white/5 rounded-3xl">
+                        <p className="text-xs text-slate-500 italic">No active SCN flows detected in pipeline.</p>
+                    </div>
+                )}
             </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {changes && changes.length > 0 ? changes.map((change, idx) => (
-                <div key={idx} className="p-5 bg-white/[0.02] rounded-2xl border border-white/5 border-l-2 border-l-indigo-500 hover:bg-white/[0.04] transition-colors">
-                    <p className="text-xs font-bold text-slate-200">{change.title}</p>
-                    <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">{change.description}</p>
-                </div>
-            )) : (
-                <div className="col-span-full p-4 text-center">
-                    <p className="text-xs text-slate-500 italic">No transformative changes planned for the next cycle.</p>
-                </div>
-            )}
-        </div>
-    </div>
-);
+    );
+};
 
 // --- SUB-COMPONENT: Quarterly Review Card ---
 const QuarterlyReviewCard = ({ meeting }) => {
