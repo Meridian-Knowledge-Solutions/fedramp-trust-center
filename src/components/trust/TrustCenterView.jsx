@@ -171,6 +171,85 @@ const QuarterlyReviewCard = ({ meeting }) => {
     );
 };
 
+// --- SUB-COMPONENT: Ongoing Authorization Report Card ---
+const OngoingAuthorizationReportCard = () => {
+    const reportsPath = import.meta.env.BASE_URL.endsWith('/')
+        ? `${import.meta.env.BASE_URL}reports/`
+        : `${import.meta.env.BASE_URL}/reports/`;
+
+    // Calculate next OAR date (dynamically based on quarterly schedule: Feb 15, May 15, Aug 15, Nov 15)
+    const getNextOARDate = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1; // 0-indexed
+        
+        const oarMonths = [2, 5, 8, 11]; // Feb, May, Aug, Nov
+        const nextMonth = oarMonths.find(m => m > month) || oarMonths[0];
+        const nextYear = nextMonth > month ? year : year + 1;
+        
+        return `${nextYear}-${String(nextMonth).padStart(2, '0')}-15`;
+    };
+
+    return (
+        <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-[2rem] p-8 text-white shadow-xl shadow-emerald-500/10 relative overflow-hidden h-full">
+            <div className="relative z-10 flex flex-col h-full justify-between">
+                <div>
+                    <div className="flex justify-between items-start mb-6">
+                        <div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-100">Continuous Monitoring [CCM-01]</span>
+                            <h3 className="text-xl font-bold mt-1 tracking-tight">Ongoing Authorization</h3>
+                        </div>
+                        <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10">
+                            <Shield className="w-5 h-5 text-white" />
+                        </div>
+                    </div>
+
+                    <div className="mb-8">
+                        <p className="text-[10px] font-black text-emerald-100 uppercase tracking-widest mb-1">Next Report Date [CCM-03]</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-black font-mono tracking-tighter">{getNextOARDate()}</span>
+                        </div>
+                        <p className="text-emerald-100 text-xs mt-2 font-medium">Quarterly cycle: Feb 15, May 15, Aug 15, Nov 15</p>
+                    </div>
+                </div>
+
+                <div className="space-y-3">
+                    <a href={`${reportsPath}COMPLIANCE_VALIDATION_REPORT.html`} target="_blank" rel="noreferrer"
+                        className="flex items-center justify-center gap-2 w-full py-3.5 bg-white text-emerald-600 rounded-2xl font-bold text-xs hover:bg-emerald-50 transition-all shadow-lg">
+                        <FileCheck className="w-4 h-4" /> View Latest OAR
+                    </a>
+
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="bg-white/10 backdrop-blur-md rounded-xl py-2 border border-white/20">
+                            <div className="text-lg font-black font-mono">100%</div>
+                            <div className="text-[9px] uppercase tracking-wider text-emerald-100 font-bold">Compliance</div>
+                        </div>
+                        <div className="bg-white/10 backdrop-blur-md rounded-xl py-2 border border-white/20">
+                            <div className="text-lg font-black font-mono">0</div>
+                            <div className="text-[9px] uppercase tracking-wider text-emerald-100 font-bold">Gaps</div>
+                        </div>
+                        <div className="bg-white/10 backdrop-blur-md rounded-xl py-2 border border-white/20">
+                            <div className="text-lg font-black font-mono">101</div>
+                            <div className="text-[9px] uppercase tracking-wider text-emerald-100 font-bold">Days</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white/5 backdrop-blur-md rounded-xl p-3 border border-white/10">
+                        <div className="text-[9px] uppercase tracking-wider text-emerald-100 font-bold mb-2">Includes</div>
+                        <div className="grid grid-cols-2 gap-1 text-[10px] text-emerald-50">
+                            <div className="flex items-center gap-1"><CheckSquare className="w-3 h-3" /> Accepted Vulns</div>
+                            <div className="flex items-center gap-1"><CheckSquare className="w-3 h-3" /> Planned Changes</div>
+                            <div className="flex items-center gap-1"><CheckSquare className="w-3 h-3" /> Recommendations</div>
+                            <div className="flex items-center gap-1"><CheckSquare className="w-3 h-3" /> SCN Summary</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+        </div>
+    );
+};
+
 // --- SUB-COMPONENT: Drift Alert ---
 const DriftAlert = ({ drift }) => {
     if (!drift || !drift.detected || drift.count === 0) return null;
@@ -864,11 +943,14 @@ export const TrustCenterView = () => {
                 </div>
 
                 {/* --- GOVERNANCE ROW --- */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
                     <div className="lg:col-span-1">
                         <QuarterlyReviewCard meeting={meetingData} />
                     </div>
-                    <div className="lg:col-span-2">
+                    <div className="lg:col-span-1">
+                        <OngoingAuthorizationReportCard />
+                    </div>
+                    <div className="lg:col-span-1">
                         <PlannedChangesSection scnHistory={scnHistory} />
                     </div>
                 </div>
