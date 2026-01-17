@@ -45,6 +45,37 @@ const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
 
 const DATA_URL = `${BASE_PATH}/ksi_failure_tracker.json`;
 
+const KSI_ID_PATTERN = /^KSI-[A-Z]{3}-\d{2}$/;
+
+// ============================================
+// Data Validation Utilities
+// ============================================
+const isValidKSIId = (ksiId) => {
+    return ksiId && typeof ksiId === 'string' && KSI_ID_PATTERN.test(ksiId);
+};
+
+const isValidDate = (dateStr) => {
+    try {
+        const date = new Date(dateStr);
+        const now = new Date();
+        
+        if (isNaN(date.getTime())) return false;
+        if (date > now) return false;
+        if (date.getFullYear() < 2020) return false;
+        
+        return true;
+    } catch {
+        return false;
+    }
+};
+
+const filterValidFailure = (failure) => {
+    return failure &&
+           isValidKSIId(failure.ksi_id) &&
+           isValidDate(failure.failed_at) &&
+           (failure.remediated_at ? isValidDate(failure.remediated_at) : true);
+};
+
 // ============================================
 // Stat Card Component
 // ============================================
@@ -220,7 +251,7 @@ const TimelineEntry = ({ failure, isLast }) => {
                         <div className="flex items-center gap-3">
                             <span className="text-xs text-slate-500 flex items-center gap-1">
                                 <Calendar size={10} />
-                                {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+                                {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </span>
                             <ChevronDown 
                                 size={14} 
@@ -382,8 +413,23 @@ const KSIFailureDashboard = () => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to load tracker.`);
                 return res.json();
             })
-            .then(json => {
-                setData(json);
+            .then(rawData => {
+                // Filter out invalid data
+                const validData = {
+                    ...rawData,
+                    active_failures: Object.fromEntries(
+                        Object.entries(rawData.active_failures || {})
+                            .filter(([_, failure]) => filterValidFailure(failure))
+                    ),
+                    failure_history: (rawData.failure_history || [])
+                        .filter(filterValidFailure),
+                    ksi_stats: Object.fromEntries(
+                        Object.entries(rawData.ksi_stats || {})
+                            .filter(([ksiId]) => isValidKSIId(ksiId))
+                    )
+                };
+                
+                setData(validData);
                 setLoading(false);
             })
             .catch(err => {
@@ -401,15 +447,17 @@ const KSIFailureDashboard = () => {
         const durations = history.map(h => h.duration_hours).filter(Boolean);
         const activeCount = Object.keys(data.active_failures || {}).length;
         
-        // Group failures by month for chart
+        // Group failures by month for chart - FIX: Use full year format
         const byMonth = history.reduce((acc, f) => {
-            const month = new Date(f.remediated_at).toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+            const date = new Date(f.remediated_at);
+            const month = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
             acc[month] = (acc[month] || 0) + 1;
             return acc;
         }, {});
         
         const monthlyData = Object.entries(byMonth)
             .map(([month, count]) => ({ month, failures: count }))
+            .sort((a, b) => new Date(a.month) - new Date(b.month))
             .slice(-6);
         
         // Group by KSI category
@@ -714,7 +762,7 @@ const KSIFailureDashboard = () => {
                                             {new Date(f.remediated_at).toLocaleDateString('en-US', { 
                                                 month: 'short', 
                                                 day: 'numeric',
-                                                year: '2-digit'
+                                                year: 'numeric'
                                             })}
                                         </span>
                                     </div>
