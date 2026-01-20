@@ -131,7 +131,7 @@ const QuarterlyReviewCard = ({ meeting }) => {
                 <div>
                     <div className="flex justify-between items-start mb-6">
                         <div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-200">Synchronous Review [QR-02]</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-200">Synchronous Review</span>
                             <h3 className="text-xl font-bold mt-1 tracking-tight">Quarterly Session</h3>
                         </div>
                         <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10">
@@ -140,7 +140,7 @@ const QuarterlyReviewCard = ({ meeting }) => {
                     </div>
 
                     <div className="mb-8">
-                        <p className="text-[10px] font-black text-indigo-100 uppercase tracking-widest mb-1">Target Review Date [QR-06]</p>
+                        <p className="text-[10px] font-black text-indigo-100 uppercase tracking-widest mb-1">Target Review Date</p>
                         <div className="flex items-baseline gap-2">
                             <span className="text-4xl font-black font-mono tracking-tighter">{meeting.nextDate || 'TBD'}</span>
                             <span className="text-indigo-200 text-sm font-semibold">{meeting.time || '14:00 EST'}</span>
@@ -152,12 +152,12 @@ const QuarterlyReviewCard = ({ meeting }) => {
                     {/* Primary Link: Grouped with governance data to ensure context */}
                     <a href={`${reportsPath}QUARTERLY_AUTHORIZATION_REPORT.html`} target="_blank" rel="noreferrer"
                         className="flex items-center justify-center gap-2 w-full py-3.5 bg-white text-indigo-600 rounded-2xl font-bold text-xs hover:bg-indigo-50 transition-all shadow-lg">
-                        <FileText className="w-4 h-4" /> View Quarterly OAR [CCM-01]
+                        <FileText className="w-4 h-4" /> View Quarterly QAR 
                     </a>
 
                     <a href={meeting.registrationUrl || '#'} target="_blank" rel="noreferrer"
                         className="flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-500 text-white rounded-2xl font-bold text-xs hover:bg-indigo-400 transition-all border border-indigo-400">
-                        <Video className="w-4 h-4" /> Register for Session [QR-05]
+                        <Video className="w-4 h-4" /> Register for Session 
                     </a>
 
                     <button onClick={downloadICS}
@@ -196,7 +196,7 @@ const OngoingAuthorizationReportCard = () => {
                 <div>
                     <div className="flex justify-between items-start mb-6">
                         <div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-100">Continuous Monitoring [CCM-01]</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-100">Continuous Monitoring</span>
                             <h3 className="text-xl font-bold mt-1 tracking-tight">Ongoing Authorization</h3>
                         </div>
                         <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10">
@@ -205,7 +205,7 @@ const OngoingAuthorizationReportCard = () => {
                     </div>
 
                     <div className="mb-8">
-                        <p className="text-[10px] font-black text-emerald-100 uppercase tracking-widest mb-1">Next Report Date [CCM-03]</p>
+                        <p className="text-[10px] font-black text-emerald-100 uppercase tracking-widest mb-1">Next Report Date</p>
                         <div className="flex items-baseline gap-2">
                             <span className="text-4xl font-black font-mono tracking-tighter">{getNextOARDate()}</span>
                         </div>
