@@ -63,7 +63,7 @@ export const RegistrationModal = () => {
       
       // 1. Get API Endpoint (Ensure VITE_API_URL is set in your .env file)
       // Fallback is provided but should be replaced with your real API Gateway URL
-      const API_URL = import.meta.env.VITE_API_URL || 'https://REPLACE_WITH_YOUR_API_ID.execute-api.us-east-1.amazonaws.com/prod';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod';
 
       // 2. Prepare payload to match Backend expectations
       const payload = {
