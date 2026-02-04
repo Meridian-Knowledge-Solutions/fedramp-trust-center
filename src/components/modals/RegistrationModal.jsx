@@ -6,7 +6,7 @@ import { Shield, Mail, User, FileText, AlertCircle } from 'lucide-react';
 
 export const RegistrationModal = () => {
   const { modals, closeModal } = useModal();
-  const { login } = useAuth();
+  // const { login } = useAuth(); // REMOVED: Do not auto-login. User must verify email first.
   const { isOpen } = modals.registration;
 
   const [formData, setFormData] = useState({
@@ -21,14 +21,13 @@ export const RegistrationModal = () => {
   const [submitStatus, setSubmitStatus] = useState(null);
 
   const validateEmail = (email) => {
-    const govMilPattern = /^[^\s@]+@[^\s@]+\.(gov|mil)$/i;
+    const govMilPattern = /^[^\s@]+@[^\s@]+\.(gov|mil|fed\.us)$/i; // Updated regex to match backend validation
     return govMilPattern.test(email);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -42,7 +41,7 @@ export const RegistrationModal = () => {
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Must be a .gov or .mil email address';
+      newErrors.email = 'Must be a .gov, .mil, or .fed.us email address';
     }
     if (!formData.agency) {
       newErrors.agency = 'Agency name is required';
@@ -60,27 +59,60 @@ export const RegistrationModal = () => {
     setSubmitStatus(null);
 
     try {
-      // Simulate API call (replace with actual registration API)
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // --- START REAL API INTEGRATION ---
+      
+      // 1. Get API Endpoint (Ensure VITE_API_URL is set in your .env file)
+      // Fallback is provided but should be replaced with your real API Gateway URL
+      const API_URL = import.meta.env.VITE_API_URL || 'https://REPLACE_WITH_YOUR_API_ID.execute-api.us-east-1.amazonaws.com/prod';
 
-      // For demo: auto-login
-      login(formData.email, formData.agency);
+      // 2. Prepare payload to match Backend expectations
+      const payload = {
+        agency: formData.agency,
+        email: formData.email,
+        contact: formData.contact,
+        system_name: formData.system, // Backend expects 'system_name', not 'system'
+        purpose: formData.purpose
+      };
 
-      setSubmitStatus({
-        type: 'success',
-        message: `Registration successful! Welcome, ${formData.agency}.`
+      console.log("Submitting registration to:", `${API_URL}/register`);
+
+      // 3. Execute Fetch
+      const response = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
       });
 
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || `Registration failed: ${response.statusText}`);
+      }
+
+      console.log("Registration Success:", result);
+
+      // 4. Handle Success
+      setSubmitStatus({
+        type: 'success',
+        message: 'Verification email sent! Please check your inbox to complete registration.'
+      });
+
+      // Clear form after delay, but don't auto-login
       setTimeout(() => {
         closeModal('registration');
         setFormData({ email: '', agency: '', contact: '', system: '', purpose: '' });
         setSubmitStatus(null);
-      }, 2000);
+      }, 3000);
+      
+      // --- END REAL API INTEGRATION ---
 
     } catch (error) {
+      console.error("Registration Error:", error);
       setSubmitStatus({
         type: 'error',
-        message: 'Registration failed. Please try again.'
+        message: error.message || 'Registration failed. Please check your connection and try again.'
       });
     } finally {
       setIsSubmitting(false);
@@ -143,7 +175,7 @@ export const RegistrationModal = () => {
               {errors.email}
             </p>
           )}
-          <p className="text-xs text-gray-500 mt-1.5">Must be a .gov or .mil email address</p>
+          <p className="text-xs text-gray-500 mt-1.5">Must be a .gov, .mil, or .fed.us email address</p>
         </div>
 
         {/* Agency */}
