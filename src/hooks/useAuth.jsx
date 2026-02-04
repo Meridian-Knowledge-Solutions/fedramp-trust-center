@@ -1,55 +1,118 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback } from 'react';
 
 const AuthContext = createContext(null);
+
+// Consistent localStorage key - must match what verification flow uses
+const TOKEN_KEY = 'fedramp_token';
+const AGENCY_KEY = 'fedramp_agency';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Ported from FedRAMPAuth.constructor
-    const token = localStorage.getItem('fedRAMPAccessToken');
-    if (token) {
-      try {
-        // Ported from FedRAMPAuth.validateToken
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const payload = JSON.parse(window.atob(base64));
-        
-        if (payload.exp > Date.now() / 1000) {
-          setUser(payload);
-        } else {
-          localStorage.removeItem('fedRAMPAccessToken');
-        }
-      } catch (e) {
-        localStorage.removeItem('fedRAMPAccessToken');
+  // Validate and decode JWT token
+  const validateToken = useCallback((token) => {
+    if (!token) return null;
+    
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        console.warn('Invalid token format');
+        return null;
       }
+      
+      const base64Url = parts[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(window.atob(base64));
+      
+      // Check expiration
+      if (!payload.exp || payload.exp <= Date.now() / 1000) {
+        console.warn('Token expired');
+        return null;
+      }
+      
+      // Validate required claims exist
+      if (!payload.agency || !payload.email) {
+        console.warn('Token missing required claims');
+        return null;
+      }
+      
+      return payload;
+    } catch (e) {
+      console.error('Token validation error:', e);
+      return null;
     }
-    setIsLoading(false);
   }, []);
 
-  // Ported from handleRegistration (Demo Mode Logic)
-  const login = (email, agency) => {
-    const mockTokenPayload = {
-      agency: agency,
-      email: email,
-      exp: Math.floor(Date.now() / 1000) + 86400 
-    };
-    const token = `header.${btoa(JSON.stringify(mockTokenPayload))}.signature`;
-    localStorage.setItem('fedRAMPAccessToken', token);
-    setUser(mockTokenPayload);
-  };
+  // Initialize auth state from stored token
+  useEffect(() => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const payload = validateToken(token);
+    
+    if (payload) {
+      setUser(payload);
+    } else if (token) {
+      // Token exists but invalid - clean up
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(AGENCY_KEY);
+    }
+    
+    setIsLoading(false);
+  }, [validateToken]);
 
-  const logout = () => {
-    localStorage.removeItem('fedRAMPAccessToken');
+  // Handle successful verification - called after /verify API returns
+  const setAuthToken = useCallback((token) => {
+    const payload = validateToken(token);
+    
+    if (payload) {
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(AGENCY_KEY, payload.agency);
+      setUser(payload);
+      return true;
+    }
+    
+    return false;
+  }, [validateToken]);
+
+  // Get current token for API calls
+  const getToken = useCallback(() => {
+    return localStorage.getItem(TOKEN_KEY);
+  }, []);
+
+  // Logout - clear all auth state
+  const logout = useCallback(() => {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(AGENCY_KEY);
     setUser(null);
+  }, []);
+
+  // Check if current token is still valid (for components that need to re-verify)
+  const isTokenValid = useCallback(() => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    return validateToken(token) !== null;
+  }, [validateToken]);
+
+  const value = {
+    user,
+    isAuthenticated: !!user,
+    isLoading,
+    setAuthToken,  // Use this after /verify API success
+    getToken,      // Use this for API Authorization headers
+    logout,
+    isTokenValid,
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, isLoading }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
