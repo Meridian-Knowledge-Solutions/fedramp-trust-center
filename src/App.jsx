@@ -742,6 +742,7 @@ const AppShell = () => {
 export default function App() {
   return (
     <AuthProvider>
+      <VerifyHandler /> 
       <DataProvider>
         <ModalProvider>
           <AppShell />
