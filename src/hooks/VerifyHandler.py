@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from './hooks/useAuth';
-import { API_CONFIG } from './api';
+import { useAuth } from './useAuth';
+import { API_CONFIG } from '../api';
 import { Shield, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
 /**
