@@ -74,6 +74,19 @@ export const AuthProvider = ({ children }) => {
     return false;
   }, [validateToken]);
 
+  // Handle the full verify API response — extracts fedRAMPAccessToken from backend
+  // Backend returns: { success, fedRAMPAccessToken, agency, message, next_steps }
+  const handleVerifyResponse = useCallback((response) => {
+    const token = response?.fedRAMPAccessToken;
+
+    if (!token) {
+      console.error('No fedRAMPAccessToken found in verify response');
+      return false;
+    }
+
+    return setAuthToken(token);
+  }, [setAuthToken]);
+
   // Get current token for API calls
   const getToken = useCallback(() => {
     return localStorage.getItem(TOKEN_KEY);
@@ -96,8 +109,9 @@ export const AuthProvider = ({ children }) => {
     user,
     isAuthenticated: !!user,
     isLoading,
-    setAuthToken,  // Use this after /verify API success
-    getToken,      // Use this for API Authorization headers
+    setAuthToken,          // Use this if you already have the raw token string
+    handleVerifyResponse,  // Use this directly with the /verify API response
+    getToken,              // Use this for API Authorization headers
     logout,
     isTokenValid,
   };
