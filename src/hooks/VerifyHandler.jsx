@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from './useAuth';
-import { API_CONFIG } from '../api';
+import { API_CONFIG } from '../config/api';
 
 /**
  * VerifyHandler — GitHub Pages + API Gateway Compatible
