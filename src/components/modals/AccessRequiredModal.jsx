@@ -1,7 +1,93 @@
 import React from 'react';
 import { useModal } from '../../contexts/ModalContext';
 import { BaseModal } from './BaseModal';
-import { Lock, Shield, CheckCircle } from 'lucide-react';
+
+// ── Shared inline styles ──
+const s = {
+  heading: {
+    fontSize: 22,
+    fontWeight: 700,
+    color: '#f1f5f9',
+    margin: 0,
+    letterSpacing: '-0.02em',
+    lineHeight: 1.3,
+  },
+  subheading: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.45)',
+    margin: '8px auto 0',
+    lineHeight: 1.5,
+    maxWidth: 360,
+  },
+  submitBtn: {
+    width: '100%',
+    padding: '13px 24px',
+    fontSize: 15,
+    fontWeight: 600,
+    color: '#fff',
+    background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+    border: 'none',
+    borderRadius: 10,
+    letterSpacing: '0.01em',
+    transition: 'opacity 0.2s, transform 0.15s',
+    fontFamily: 'inherit',
+    cursor: 'pointer',
+  },
+  ghostBtn: {
+    width: '100%',
+    padding: '12px 24px',
+    fontSize: 14,
+    fontWeight: 500,
+    color: 'rgba(255,255,255,0.5)',
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 10,
+    marginTop: 10,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    transition: 'background 0.2s',
+  },
+  footer: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.25)',
+    marginTop: 24,
+    lineHeight: 1.5,
+    textAlign: 'center',
+  },
+  lockWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 16,
+    background: 'rgba(99,102,241,0.08)',
+    border: '1px solid rgba(99,102,241,0.15)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  benefitsBox: {
+    background: 'rgba(255,255,255,0.03)',
+    border: '1px solid rgba(255,255,255,0.07)',
+    borderRadius: 12,
+    padding: '16px 20px',
+    marginTop: 24,
+    textAlign: 'left',
+  },
+  benefitsTitle: {
+    fontSize: 11,
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+    color: 'rgba(255,255,255,0.4)',
+    marginBottom: 12,
+    marginTop: 0,
+  },
+  benefitRow: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginBottom: 8,
+  },
+};
 
 export const AccessRequiredModal = () => {
   const { modals, closeModal, openModal } = useModal();
@@ -16,78 +102,74 @@ export const AccessRequiredModal = () => {
     <BaseModal
       isOpen={isOpen}
       onClose={() => closeModal('accessRequired')}
-      title="🔒 Federal Agency Access Required"
+      title=""
       size="default"
       variant="dark"
     >
-      <div className="text-center py-8">
-        <div className="relative inline-block mb-8">
-          <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full"></div>
-          <div className="relative w-24 h-24 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl flex items-center justify-center border border-gray-700 shadow-2xl">
-            <Lock className="text-blue-400" size={48} />
-          </div>
+      <div style={{ textAlign: 'center', padding: '16px 0' }}>
+        {/* Lock icon */}
+        <div style={s.lockWrap}>
+          <svg
+            width="36"
+            height="36"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#818cf8"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
         </div>
 
-        <h3 className="text-2xl font-bold text-white mb-3">
-          {data?.featureName || 'This Feature'} Requires Authentication
-        </h3>
-
-        <p className="text-gray-300 mb-8 max-w-md mx-auto leading-relaxed">
-          Access to detailed technical validation findings and authorization materials
-          is restricted to authorized federal personnel.
+        <h2 style={{ ...s.heading, marginTop: 24 }}>
+          {data?.featureName || 'This feature'} requires authentication
+        </h2>
+        <p style={s.subheading}>
+          Access to technical validation findings and authorization materials is restricted to
+          authorized federal personnel.
         </p>
 
-        {/* Feature Benefits */}
+        {/* Benefits */}
         {data?.benefits && data.benefits.length > 0 && (
-          <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl p-6 mb-8 text-left shadow-xl">
-            <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gray-800">
-              <div className="p-2 bg-blue-500/20 rounded-lg border border-blue-500/30">
-                <Shield size={16} className="text-blue-400" />
+          <div style={s.benefitsBox}>
+            <p style={s.benefitsTitle}>With federal access</p>
+            {data.benefits.map((benefit, index) => (
+              <div key={index} style={s.benefitRow}>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#34d399"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ flexShrink: 0, marginTop: 2 }}
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14, lineHeight: 1.5 }}>
+                  {benefit}
+                </span>
               </div>
-              <h4 className="font-bold text-white text-sm uppercase tracking-wider">
-                With Federal Access
-              </h4>
-            </div>
-            <ul className="space-y-4">
-              {data.benefits.map((benefit, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30 mt-0.5">
-                    <CheckCircle className="text-green-400" size={14} />
-                  </div>
-                  <span className="text-sm text-gray-200 leading-relaxed">{benefit}</span>
-                </li>
-              ))}
-            </ul>
+            ))}
           </div>
         )}
 
-        {/* Call to Action */}
-        <div className="space-y-3">
-          <button
-            onClick={handleRequestAccess}
-            className="group relative w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-900/30 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-            <span className="relative flex items-center justify-center gap-2">
-              <Shield size={18} />
-              Request Federal Access
-            </span>
+        {/* Buttons */}
+        <div style={{ marginTop: 28 }}>
+          <button onClick={handleRequestAccess} style={s.submitBtn}>
+            Request federal access →
           </button>
-
-          <button
-            onClick={() => closeModal('accessRequired')}
-            className="w-full px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl font-medium transition-colors border border-gray-700"
-          >
-            Continue as Public User
+          <button onClick={() => closeModal('accessRequired')} style={s.ghostBtn}>
+            Continue as public user
           </button>
         </div>
 
-        {/* Info Footer */}
-        <div className="mt-8 pt-6 border-t border-gray-800">
-          <p className="text-xs text-gray-500">
-            Federal access requires a valid .gov or .mil email address
-          </p>
-        </div>
+        <p style={s.footer}>Requires a valid .gov or .mil email address</p>
       </div>
     </BaseModal>
   );
