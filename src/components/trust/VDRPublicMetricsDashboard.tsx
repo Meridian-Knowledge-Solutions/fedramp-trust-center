@@ -1,899 +1,478 @@
-/**
- * VDR Public Metrics Dashboard
- * * FedRAMP 20x VDR (Vulnerability Detection & Response) visualization:
- * - Current vulnerability snapshot with key metrics
- * - N-Rating and severity distribution charts
- * - Compliance and security posture indicators
- * - Attack surface analysis
- * - Historical trend visualization
- * - CSPM findings summary
- * * Consumes: public/data/vdr_public_metrics.json
- * * Privacy: This dashboard displays ONLY aggregate counts.
- * No resource IDs, CVE details, or sensitive data is included.
- * * Styling: Matches KSIFailureDashboard.tsx theme
- */
-
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from "react";
 import {
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-    ResponsiveContainer, BarChart, Bar, Cell, PieChart, Pie, LineChart, Line
-} from 'recharts';
-import {
-    Shield, AlertTriangle, Activity, TrendingUp, TrendingDown,
-    Lock, Eye, Zap, Target, CheckCircle2, XCircle, Clock,
-    Network, GitBranch, BarChart3, PieChart as PieChartIcon,
-    AlertOctagon, ShieldCheck, ShieldAlert, ShieldX, Database,
-    ArrowUpRight, ArrowDownRight, Calendar, Download, RefreshCw,
-    ChevronDown, ChevronRight, FileText, AlertCircle, Layers
-} from 'lucide-react';
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  BarChart, Bar, Cell, CartesianGrid
+} from "recharts";
 
-// ============================================
-// Theme & Constants (Matches KSI Failure Dashboard)
-// ============================================
-const THEME = {
-    card: "bg-[#18181b] border border-white/5 hover:border-blue-500/20 transition-all duration-500 shadow-2xl rounded-xl overflow-hidden",
-    statLabel: "text-[10px] uppercase tracking-[0.2em] font-black text-slate-500",
-    chartColors: {
-        primary: '#3b82f6',
-        success: '#10b981',
-        warning: '#f59e0b',
-        danger: '#ef4444',
-        purple: '#8b5cf6',
-        cyan: '#06b6d4',
-        pink: '#ec4899',
-        muted: '#3f3f46'
-    }
+// Embedded data
+const DATA = {
+  metadata: { generated_at: "2026-02-09T08:40:43.350630+00:00", vdr_standard: "Release 25.09A (2025-09-10)", data_classification: "PUBLIC", privacy_notice: "Aggregate counts only. No resource IDs, CVE details, or sensitive data included." },
+  current_snapshot: { timestamp: "2026-02-09T06:27:24.970027Z", total_vulnerabilities: 251, unique_cves: 164, affected_resource_count: 5, internet_reachable_resource_count: 0 },
+  risk_classification: { n_rating_distribution: { N5: 0, N4: 0, N3: 132, N2: 118, N1: 1, unrated: 0 }, severity_distribution: { CRITICAL: 0, HIGH: 133, MEDIUM: 85, LOW: 33, INFO: 0 }, lev_count: 0, irv_count: 0, kev_matches: 0, critical_findings: 0 },
+  compliance_status: { compliance_rate: 90.04, compliant_count: 226, non_compliant_count: 25, frr_cvm_04_status: "COMPLIANT" },
+  security_posture: { overall_rating: "GOOD", posture_score: 7.0, network_security_enabled: true, iam_least_privilege: false, logging_comprehensive: true, encryption_at_rest: true },
+  attack_surface: { graph_node_count: 62, graph_edge_count: 1085, total_attack_paths: 80, critical_attack_paths: 0, exploitable_paths: 0, avg_path_risk_score: 3.6, blast_radius_score: 0.0 },
+  cspm_summary: { total_findings: 11, by_severity: { MEDIUM: 1, HIGH: 6, CRITICAL: 4 } },
+  vdr_acceptance: { acceptance_threshold_days: 192, total_accepted: 0, total_active: 251 },
+  exploit_type_distribution: { "Unknown/Other": 176, "Remote Code Execution": 7, "Information Disclosure": 24, "Privilege Escalation": 44 },
+  risk_distribution: { CRITICAL: 0, HIGH: 60, MEDIUM: 159, LOW: 32 },
+  trends: { daily: [
+    { date: "2026-01-11", total_vulnerabilities: 167, active_count: 167 },
+    { date: "2026-01-12", total_vulnerabilities: 167, active_count: 167 },
+    { date: "2026-01-13", total_vulnerabilities: 167, active_count: 167 },
+    { date: "2026-01-14", total_vulnerabilities: 167, active_count: 167 },
+    { date: "2026-01-15", total_vulnerabilities: 167, active_count: 167 },
+    { date: "2026-01-16", total_vulnerabilities: 168, active_count: 168 },
+    { date: "2026-01-17", total_vulnerabilities: 167, active_count: 167 },
+    { date: "2026-01-18", total_vulnerabilities: 240, active_count: 240 },
+    { date: "2026-01-19", total_vulnerabilities: 240, active_count: 240 },
+    { date: "2026-01-20", total_vulnerabilities: 240, active_count: 240 },
+    { date: "2026-01-21", total_vulnerabilities: 239, active_count: 239 },
+    { date: "2026-01-22", total_vulnerabilities: 240, active_count: 240 },
+    { date: "2026-01-23", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-01-24", total_vulnerabilities: 250, active_count: 250 },
+    { date: "2026-01-25", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-01-26", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-01-27", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-01-28", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-01-29", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-01-30", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-01-31", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-02-01", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-02-02", total_vulnerabilities: 250, active_count: 250 },
+    { date: "2026-02-03", total_vulnerabilities: 250, active_count: 250 },
+    { date: "2026-02-04", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-02-05", total_vulnerabilities: 250, active_count: 250 },
+    { date: "2026-02-06", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-02-07", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-02-08", total_vulnerabilities: 251, active_count: 251 },
+    { date: "2026-02-09", total_vulnerabilities: 251, active_count: 251 },
+  ]}
 };
 
-const BASE_PATH = import.meta.env.BASE_URL?.endsWith('/')
-    ? `${import.meta.env.BASE_URL}data`
-    : `${import.meta.env.BASE_URL || ''}/data`;
+const SEV_COLORS = { CRITICAL: "#b91c1c", HIGH: "#dc2626", MEDIUM: "#d97706", LOW: "#2563eb", INFO: "#6b7280" };
+const N_COLORS = { N5: "#dc2626", N4: "#ea580c", N3: "#ca8a04", N2: "#2563eb", N1: "#9ca3af", unrated: "#52525b" };
 
-const DATA_URL = `${BASE_PATH}/vdr_public_metrics.json`;
-
-// N-Rating colors
-const N_RATING_COLORS: Record<string, string> = {
-    N5: '#dc2626', // red-600
-    N4: '#ea580c', // orange-600
-    N3: '#eab308', // yellow-500
-    N2: '#3b82f6', // blue-500
-    N1: '#9ca3af', // gray-400
-    unrated: '#52525b' // zinc-600
-};
-
-// Severity colors
-const SEVERITY_COLORS: Record<string, string> = {
-    CRITICAL: '#7f1d1d',
-    HIGH: '#dc2626',
-    MEDIUM: '#f59e0b',
-    LOW: '#3b82f6',
-    INFO: '#9ca3af',
-    UNKNOWN: '#52525b'
-};
-
-// ============================================
-// Type Definitions - Mapped to vdr_public_metrics.json
-// ============================================
-interface VDRMetrics {
-    metadata: {
-        generated_at: string;
-        vdr_standard: string;
-        data_classification: string;
-        privacy_notice: string;
-    };
-    current_snapshot: {
-        timestamp: string;
-        total_vulnerabilities: number;
-        unique_cves: number;
-        affected_resource_count: number;
-        internet_reachable_resource_count: number;
-    };
-    risk_classification: {
-        n_rating_distribution: Record<string, number>;
-        severity_distribution: Record<string, number>;
-        lev_count: number;
-        irv_count: number;
-        kev_matches: number;
-        critical_findings: number;
-    };
-    compliance_status: {
-        compliance_rate: number;
-        compliant_count: number;
-        non_compliant_count: number;
-        frr_cvm_04_status: string;
-    };
-    security_posture: {
-        overall_rating: string;
-        posture_score: number;
-        network_security_enabled: boolean;
-        iam_least_privilege: boolean;
-        logging_comprehensive: boolean;
-        encryption_at_rest: boolean;
-    };
-    attack_surface: {
-        graph_node_count: number;
-        graph_edge_count: number;
-        total_attack_paths: number;
-        critical_attack_paths: number;
-        exploitable_paths: number;
-        avg_path_risk_score: number;
-        blast_radius_score: number;
-    };
-    cspm_summary: {
-        total_findings: number;
-        by_severity: Record<string, number>;
-    };
-    vdr_acceptance: {
-        acceptance_threshold_days: number;
-        total_accepted: number;
-        total_active: number;
-    };
-    exploit_type_distribution: Record<string, number>;
-    trends: {
-        daily: Array<{
-            date: string;
-            total_vulnerabilities: number;
-            n5_count: number;
-            n4_count: number;
-            lev_count: number;
-            irv_count: number;
-            accepted_count: number;
-            active_count: number;
-        }>;
-    };
-}
-
-// ============================================
-// Stat Card Component
-// ============================================
-interface StatCardProps {
-    label: string;
-    value: string | number;
-    icon: React.ElementType;
-    color: string;
-    trend?: 'up' | 'down' | 'neutral';
-    trendValue?: string;
-    subtitle?: string;
-}
-
-const StatCard: React.FC<StatCardProps> = ({ label, value, icon: Icon, color, trend, trendValue, subtitle }) => (
-    <div className={THEME.card + " p-6 group relative overflow-hidden"}>
-        <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none">
-            <Icon size={80} />
+const ChartTip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{ background: "#18181b", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "8px 12px", fontSize: 12 }}>
+      <div style={{ color: "#71717a", marginBottom: 4, fontSize: 10, letterSpacing: 1 }}>{label}</div>
+      {payload.map((p, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, color: "#e4e4e7" }}>
+          <span style={{ width: 8, height: 8, borderRadius: 4, background: p.color, display: "inline-block" }} />
+          <span style={{ color: "#a1a1aa" }}>{p.name}:</span>
+          <span style={{ fontWeight: 700 }}>{p.value}</span>
         </div>
-        <div className="flex justify-between items-start relative z-10">
-            <div>
-                <span className={THEME.statLabel}>{label}</span>
-                <div className="text-4xl font-black text-white tracking-tighter mt-2 group-hover:text-blue-400 transition-colors">
-                    {value}
-                </div>
-                {subtitle && (
-                    <div className="text-xs text-slate-500 mt-1">{subtitle}</div>
-                )}
-                {trend && trendValue && (
-                    <div className={`flex items-center gap-1 mt-2 text-xs font-bold ${
-                        trend === 'up' ? 'text-emerald-400' : 
-                        trend === 'down' ? 'text-red-400' : 'text-slate-400'
-                    }`}>
-                        {trend === 'up' ? <ArrowUpRight size={12} /> : 
-                         trend === 'down' ? <ArrowDownRight size={12} /> : null}
-                        {trendValue}
-                    </div>
-                )}
-            </div>
-            <div className={`p-3 rounded-xl bg-black/40 border border-white/5 ${color} shadow-inner`}>
-                <Icon size={20} />
-            </div>
-        </div>
+      ))}
     </div>
+  );
+};
+
+// Horizontal stacked bar for distributions
+const StackBar = ({ data, colors, label }) => {
+  const total = Object.values(data).reduce((a, b) => a + b, 0);
+  if (!total) return null;
+  const entries = Object.entries(data).filter(([, v]) => v > 0);
+  return (
+    <div style={{ marginBottom: 16 }}>
+      {label && <div style={{ fontSize: 10, color: "#71717a", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6, fontWeight: 600 }}>{label}</div>}
+      <div style={{ display: "flex", height: 10, borderRadius: 5, overflow: "hidden", background: "#27272a" }}>
+        {entries.map(([k, v]) => (
+          <div key={k} style={{ width: `${(v / total) * 100}%`, background: colors[k] || "#3f3f46", transition: "width 0.4s" }} title={`${k}: ${v}`} />
+        ))}
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 14px", marginTop: 8 }}>
+        {entries.map(([k, v]) => (
+          <div key={k} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11 }}>
+            <span style={{ width: 8, height: 8, borderRadius: 2, background: colors[k] || "#3f3f46", display: "inline-block" }} />
+            <span style={{ color: "#71717a" }}>{k}</span>
+            <span style={{ color: "#d4d4d8", fontWeight: 700 }}>{v}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const Check = ({ ok }) => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    {ok ? (
+      <><circle cx="8" cy="8" r="7" fill="#065f4620" stroke="#10b981" strokeWidth="1.5" /><path d="M5 8l2 2 4-4" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></>
+    ) : (
+      <><circle cx="8" cy="8" r="7" fill="#7f1d1d20" stroke="#ef4444" strokeWidth="1.5" /><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" /></>
+    )}
+  </svg>
 );
 
-// ============================================
-// Risk Indicator Card
-// ============================================
-interface RiskIndicatorProps {
-    label: string;
-    value: number;
-    icon: React.ElementType;
-    severity: 'critical' | 'high' | 'medium' | 'low' | 'safe';
-    description?: string;
-}
+export default function VDRDashboard() {
+  const [tab, setTab] = useState("overview");
+  const d = DATA;
+  const snap = d.current_snapshot;
+  const risk = d.risk_classification;
+  const comp = d.compliance_status;
+  const posture = d.security_posture;
+  const atk = d.attack_surface;
+  const cspm = d.cspm_summary;
+  const acc = d.vdr_acceptance;
+  const exploit = d.exploit_type_distribution;
+  const trends = d.trends.daily;
 
-const RiskIndicatorCard: React.FC<RiskIndicatorProps> = ({ label, value, icon: Icon, severity, description }) => {
-    const severityClasses: Record<string, string> = {
-        critical: 'border-red-500/50 bg-red-500/10 text-red-400',
-        high: 'border-orange-500/50 bg-orange-500/10 text-orange-400',
-        medium: 'border-amber-500/50 bg-amber-500/10 text-amber-400',
-        low: 'border-blue-500/50 bg-blue-500/10 text-blue-400',
-        safe: 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400'
-    };
-    
-    const classes = severityClasses[severity] || severityClasses.low;
-    
-    return (
-        <div className={`rounded-xl border ${classes} p-5 transition-all hover:scale-[1.02]`}>
-            <div className="flex items-center justify-between mb-3">
-                <Icon size={20} className="opacity-70" />
-                <span className="text-2xl font-black">{value}</span>
+  const weekDiff = useMemo(() => {
+    const latest = trends[trends.length - 1];
+    const prev = trends[Math.max(0, trends.length - 8)];
+    return latest.total_vulnerabilities - prev.total_vulnerabilities;
+  }, [trends]);
+
+  const severityBarData = useMemo(() =>
+    Object.entries(risk.severity_distribution).filter(([, v]) => v > 0).map(([name, value]) => ({ name, value })),
+  [risk]);
+
+  const nRatingBarData = useMemo(() =>
+    Object.entries(risk.n_rating_distribution).filter(([, v]) => v > 0).map(([name, value]) => ({ name, value })),
+  [risk]);
+
+  const exploitData = useMemo(() =>
+    Object.entries(exploit).map(([name, value]) => ({ name: name.replace("Unknown/Other", "Other"), value })).sort((a, b) => b.value - a.value),
+  [exploit]);
+
+  const tabs = [
+    { id: "overview", label: "Overview" },
+    { id: "risk", label: "Risk & Severity" },
+    { id: "posture", label: "Posture & Surface" },
+  ];
+
+  // Styles
+  const bg = "#0a0a0b";
+  const card = { background: "#141416", border: "1px solid rgba(255,255,255,0.04)", borderRadius: 12, padding: 20 };
+  const mono = { fontFamily: "'SF Mono', 'Fira Code', 'Cascadia Code', monospace" };
+  const label = { fontSize: 10, color: "#52525b", letterSpacing: 1.8, textTransform: "uppercase", fontWeight: 700, marginBottom: 4 };
+
+  return (
+    <div style={{ minHeight: "100vh", background: bg, color: "#e4e4e7", fontFamily: "'DM Sans', 'Segoe UI', system-ui, sans-serif", padding: "24px 16px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+
+        {/* ── Header ── */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 28 }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5, color: "#fafafa" }}>VDR Metrics</span>
+              <span style={{ fontSize: 10, background: "#1e3a5f", color: "#60a5fa", padding: "2px 8px", borderRadius: 4, fontWeight: 600, letterSpacing: 0.5 }}>PUBLIC</span>
             </div>
-            <div className="text-xs font-bold uppercase tracking-wider">{label}</div>
-            {description && (
-                <div className="text-[10px] mt-1 opacity-60">{description}</div>
-            )}
+            <div style={{ fontSize: 12, color: "#52525b" }}>FedRAMP 20x Vulnerability Detection & Response · {d.metadata.vdr_standard}</div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ ...label }}>Security Score</div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 6, justifyContent: "flex-end" }}>
+              <span style={{ fontSize: 28, fontWeight: 800, color: "#3b82f6", ...mono }}>{posture.posture_score}</span>
+              <span style={{ fontSize: 13, color: "#52525b" }}>/10</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#3b82f6", background: "#1e3a5f30", padding: "2px 8px", borderRadius: 4, marginLeft: 4 }}>{posture.overall_rating}</span>
+            </div>
+          </div>
         </div>
-    );
-};
 
-// ============================================
-// Security Posture Badge
-// ============================================
-interface PostureBadgeProps {
-    rating: string;
-    score: number;
-}
-
-const PostureBadge: React.FC<PostureBadgeProps> = ({ rating, score }) => {
-    const config: Record<string, { color: string; icon: React.ElementType; text: string }> = {
-        'EXCELLENT': { color: 'bg-emerald-500', icon: ShieldCheck, text: 'Excellent' },
-        'GOOD': { color: 'bg-blue-500', icon: Shield, text: 'Good' },
-        'FAIR': { color: 'bg-amber-500', icon: ShieldAlert, text: 'Fair' },
-        'POOR': { color: 'bg-red-500', icon: ShieldX, text: 'Poor' },
-        'UNKNOWN': { color: 'bg-slate-500', icon: Shield, text: 'Unknown' }
-    };
-    
-    const { color, icon: Icon, text } = config[rating] || config.UNKNOWN;
-    
-    return (
-        <div className="flex items-center gap-3">
-            <div className={`${color} p-2.5 rounded-xl shadow-lg`}>
-                <Icon size={24} className="text-white" />
-            </div>
-            <div>
-                <div className="text-xl font-black text-white">{text}</div>
-                <div className="text-xs text-slate-400">{score}/10 Security Score</div>
-            </div>
+        {/* ── Tabs ── */}
+        <div style={{ display: "flex", gap: 2, marginBottom: 24, background: "#18181b", borderRadius: 8, padding: 3, width: "fit-content" }}>
+          {tabs.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)} style={{
+              padding: "7px 18px", borderRadius: 6, border: "none", cursor: "pointer",
+              fontSize: 12, fontWeight: 600, letterSpacing: 0.3, transition: "all 0.2s",
+              background: tab === t.id ? "#27272a" : "transparent",
+              color: tab === t.id ? "#fafafa" : "#71717a",
+            }}>{t.label}</button>
+          ))}
         </div>
-    );
-};
 
-// ============================================
-// Custom Tooltip
-// ============================================
-const CustomTooltip: React.FC<any> = ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null;
-    
-    return (
-        <div className="bg-[#0c0c0e] border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-xl">
-            <p className="text-[10px] font-mono text-slate-500 uppercase mb-2 border-b border-white/5 pb-2">
-                {label}
-            </p>
-            {payload.map((p: any, i: number) => (
-                <div key={i} className="flex items-center gap-2 text-sm py-0.5">
-                    <span className="w-2 h-2 rounded-full" style={{ background: p.color }} />
-                    <span className="text-slate-400">{p.name}:</span>
-                    <span className="font-bold text-white">{p.value}</span>
+        {/* ════════════════════════════════════════════ */}
+        {/* OVERVIEW TAB                                  */}
+        {/* ════════════════════════════════════════════ */}
+        {tab === "overview" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+            {/* KPI row */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+              {[
+                { l: "Vulnerabilities", v: snap.total_vulnerabilities, sub: weekDiff === 0 ? "Stable this week" : weekDiff > 0 ? `+${weekDiff} vs last week` : `${weekDiff} vs last week`, accent: "#d97706" },
+                { l: "Unique CVEs", v: snap.unique_cves, sub: `${snap.affected_resource_count} resources`, accent: "#8b5cf6" },
+                { l: "Compliance", v: `${comp.compliance_rate}%`, sub: comp.frr_cvm_04_status === "COMPLIANT" ? "FRR-CVM-04 ✓" : "Review needed", accent: "#10b981" },
+                { l: "Critical Findings", v: risk.critical_findings, sub: risk.kev_matches === 0 ? "No KEV matches" : `${risk.kev_matches} KEV matches`, accent: risk.critical_findings > 0 ? "#ef4444" : "#10b981" },
+              ].map((kpi, i) => (
+                <div key={i} style={{ ...card }}>
+                  <div style={{ ...label }}>{kpi.l}</div>
+                  <div style={{ fontSize: 30, fontWeight: 800, color: kpi.accent, ...mono, lineHeight: 1.1, marginTop: 2 }}>{kpi.v}</div>
+                  <div style={{ fontSize: 11, color: "#52525b", marginTop: 4 }}>{kpi.sub}</div>
                 </div>
-            ))}
-        </div>
-    );
-};
-
-// ============================================
-// Distribution Bar Component
-// ============================================
-interface DistributionBarProps {
-    data: Record<string, number>;
-    colors: Record<string, string>;
-    title: string;
-}
-
-const DistributionBar: React.FC<DistributionBarProps> = ({ data, colors, title }) => {
-    const total = Object.values(data).reduce((a, b) => a + b, 0);
-    if (total === 0) return null;
-    
-    return (
-        <div>
-            <div className="text-[10px] text-slate-600 uppercase tracking-wider mb-3 flex items-center gap-1">
-                <Layers size={10} />
-                {title}
+              ))}
             </div>
-            <div className="flex h-6 rounded-lg overflow-hidden">
-                {Object.entries(data).map(([key, value]) => {
-                    const pct = (value / total) * 100;
-                    if (pct === 0) return null;
-                    return (
-                        <div
-                            key={key}
-                            style={{ width: `${pct}%`, background: colors[key] || '#3f3f46' }}
-                            className="h-full transition-all hover:opacity-80"
-                            title={`${key}: ${value} (${pct.toFixed(1)}%)`}
-                        />
-                    );
-                })}
+
+            {/* Trend chart */}
+            <div style={{ ...card }}>
+              <div style={{ ...label, marginBottom: 12 }}>30-Day Vulnerability Trend</div>
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={trends}>
+                  <defs>
+                    <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.2} />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="#1e1e22" strokeDasharray="3 3" />
+                  <XAxis dataKey="date" tick={{ fill: "#52525b", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => v?.slice(5)} />
+                  <YAxis tick={{ fill: "#52525b", fontSize: 10 }} axisLine={false} tickLine={false} domain={["dataMin - 10", "dataMax + 10"]} />
+                  <Tooltip content={<ChartTip />} />
+                  <Area type="monotone" dataKey="total_vulnerabilities" name="Total" stroke="#3b82f6" strokeWidth={2} fill="url(#areaFill)" dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
-            <div className="flex flex-wrap gap-3 mt-3 text-xs">
-                {Object.entries(data).map(([key, value]) => (
-                    <div key={key} className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded" style={{ background: colors[key] || '#3f3f46' }} />
-                        <span className="text-slate-500">{key}:</span>
-                        <span className="font-bold text-slate-300">{value}</span>
+
+            {/* Two-col: Severity + Risk indicators */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div style={{ ...card }}>
+                <div style={{ ...label, marginBottom: 12 }}>Severity Distribution</div>
+                <StackBar data={risk.severity_distribution} colors={SEV_COLORS} />
+                <div style={{ marginTop: 12 }}>
+                  <ResponsiveContainer width="100%" height={130}>
+                    <BarChart data={severityBarData} barCategoryGap="20%">
+                      <XAxis dataKey="name" tick={{ fill: "#52525b", fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: "#3f3f46", fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <Tooltip content={<ChartTip />} />
+                      <Bar dataKey="value" radius={[3, 3, 0, 0]}>
+                        {severityBarData.map((e, i) => <Cell key={i} fill={SEV_COLORS[e.name] || "#3f3f46"} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div style={{ ...card }}>
+                <div style={{ ...label, marginBottom: 12 }}>Risk Indicators</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  {[
+                    { l: "LEV Count", v: risk.lev_count },
+                    { l: "IRV Count", v: risk.irv_count },
+                    { l: "KEV Matches", v: risk.kev_matches },
+                    { l: "Critical Findings", v: risk.critical_findings },
+                    { l: "Internet Reachable", v: snap.internet_reachable_resource_count },
+                    { l: "Exploitable Paths", v: atk.exploitable_paths },
+                  ].map((item, i) => (
+                    <div key={i} style={{
+                      background: item.v > 0 ? "#7f1d1d15" : "#065f4610",
+                      border: `1px solid ${item.v > 0 ? "#7f1d1d40" : "#065f4625"}`,
+                      borderRadius: 8, padding: "10px 12px",
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                    }}>
+                      <span style={{ fontSize: 11, color: "#a1a1aa" }}>{item.l}</span>
+                      <span style={{ fontSize: 18, fontWeight: 800, color: item.v > 0 ? "#ef4444" : "#10b981", ...mono }}>{item.v}</span>
                     </div>
-                ))}
+                  ))}
+                </div>
+                <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div style={{ ...label, marginBottom: 8 }}>Exploit Types</div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {exploitData.map((e, i) => (
+                      <div key={i} style={{ background: "#1e1e22", borderRadius: 6, padding: "5px 10px", fontSize: 11, display: "flex", gap: 6, alignItems: "center" }}>
+                        <span style={{ color: "#71717a" }}>{e.name}</span>
+                        <span style={{ fontWeight: 700, color: "#d4d4d8", ...mono }}>{e.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-        </div>
-    );
-};
-
-// ============================================
-// Posture Check Item
-// ============================================
-interface PostureCheckProps {
-    label: string;
-    enabled: boolean;
-}
-
-const PostureCheckItem: React.FC<PostureCheckProps> = ({ label, enabled }) => (
-    <div className="flex items-center justify-between py-2.5 border-b border-white/5 last:border-0">
-        <span className="text-sm text-slate-300">{label}</span>
-        {enabled ? (
-            <CheckCircle2 size={16} className="text-emerald-400" />
-        ) : (
-            <XCircle size={16} className="text-red-400" />
+          </div>
         )}
-    </div>
-);
 
-// ============================================
-// Section Header
-// ============================================
-interface SectionHeaderProps {
-    icon: React.ElementType;
-    title: string;
-    iconColor: string;
-    action?: React.ReactNode;
-}
+        {/* ════════════════════════════════════════════ */}
+        {/* RISK & SEVERITY TAB                           */}
+        {/* ════════════════════════════════════════════ */}
+        {tab === "risk" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-const SectionHeader: React.FC<SectionHeaderProps> = ({ icon: Icon, title, iconColor, action }) => (
-    <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-bold flex items-center gap-2">
-            <Icon size={18} className={iconColor} />
-            {title}
-        </h3>
-        {action}
-    </div>
-);
-
-// ============================================
-// Main Dashboard Component
-// ============================================
-export default function VDRPublicMetricsDashboard() {
-    const [data, setData] = useState<VDRMetrics | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-    const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-        risk: true,
-        distribution: true,
-        trends: true,
-        posture: true,
-        attack: true,
-        cspm: true
-    });
-
-    // Fetch data
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch(DATA_URL);
-                if (!response.ok) {
-                    throw new Error(`Failed to load VDR metrics: ${response.status}`);
-                }
-                const json: VDRMetrics = await response.json();
-                setData(json);
-                setLastUpdated(new Date(json.metadata?.generated_at || Date.now()));
-                setError(null);
-            } catch (err) {
-                console.error('VDR Metrics fetch error:', err);
-                setError(err instanceof Error ? err.message : 'Unknown error');
-            } finally {
-                setLoading(false);
-            }
-        };
-        
-        fetchData();
-    }, []);
-
-    // Computed trend values - Mapping from trends.daily
-    const computedMetrics = useMemo(() => {
-        if (!data || !data.trends?.daily) return null;
-        
-        const trends = data.trends.daily || [];
-        const latestTrend = trends[trends.length - 1];
-        const prevTrend = trends[trends.length - 8]; // ~week ago
-        
-        let vulnTrend: 'up' | 'down' | 'neutral' = 'neutral';
-        let vulnTrendValue = '';
-        if (latestTrend && prevTrend) {
-            const diff = latestTrend.total_vulnerabilities - prevTrend.total_vulnerabilities;
-            if (diff > 0) {
-                vulnTrend = 'down'; // More vulns is bad
-                vulnTrendValue = `+${diff} this week`;
-            } else if (diff < 0) {
-                vulnTrend = 'up'; // Less vulns is good
-                vulnTrendValue = `${diff} this week`;
-            } else {
-                vulnTrendValue = 'No change';
-            }
-        }
-        
-        return { vulnTrend, vulnTrendValue, trends };
-    }, [data]);
-
-    const toggleSection = (section: string) => {
-        setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
-    };
-
-    // Loading state
-    if (loading) {
-        return (
-            <div className="min-h-[400px] bg-[#09090b] flex items-center justify-center">
-                <div className="text-center">
-                    <RefreshCw size={40} className="text-blue-500 animate-spin mx-auto mb-4" />
-                    <div className="text-slate-400">Loading VDR Metrics...</div>
+            {/* N-Rating + Severity side by side */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div style={{ ...card }}>
+                <div style={{ ...label, marginBottom: 14 }}>N-Rating Distribution</div>
+                <StackBar data={risk.n_rating_distribution} colors={N_COLORS} />
+                <div style={{ marginTop: 16 }}>
+                  <ResponsiveContainer width="100%" height={160}>
+                    <BarChart data={nRatingBarData} barCategoryGap="16%">
+                      <CartesianGrid stroke="#1e1e22" strokeDasharray="3 3" />
+                      <XAxis dataKey="name" tick={{ fill: "#52525b", fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: "#3f3f46", fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <Tooltip content={<ChartTip />} />
+                      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                        {nRatingBarData.map((e, i) => <Cell key={i} fill={N_COLORS[e.name] || "#3f3f46"} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
-            </div>
-        );
-    }
+              </div>
 
-    // Error state
-    if (error) {
-        return (
-            <div className="min-h-[400px] bg-[#09090b] flex items-center justify-center p-4">
-                <div className={THEME.card + " p-8 max-w-md text-center"}>
-                    <AlertOctagon size={48} className="text-red-500 mx-auto mb-4" />
-                    <h2 className="text-xl font-bold text-white mb-2">Failed to Load VDR Metrics</h2>
-                    <p className="text-slate-400 text-sm mb-4">{error}</p>
-                    <div className="bg-black/30 rounded-lg p-3 border border-white/5">
-                        <div className="text-[10px] text-slate-600 uppercase tracking-wider mb-1">Expected File</div>
-                        <code className="text-xs text-slate-300 font-mono">{DATA_URL}</code>
-                    </div>
+              <div style={{ ...card }}>
+                <div style={{ ...label, marginBottom: 14 }}>Severity Distribution</div>
+                <StackBar data={risk.severity_distribution} colors={SEV_COLORS} />
+                <div style={{ marginTop: 16 }}>
+                  <ResponsiveContainer width="100%" height={160}>
+                    <BarChart data={severityBarData} barCategoryGap="16%">
+                      <CartesianGrid stroke="#1e1e22" strokeDasharray="3 3" />
+                      <XAxis dataKey="name" tick={{ fill: "#52525b", fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: "#3f3f46", fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <Tooltip content={<ChartTip />} />
+                      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                        {severityBarData.map((e, i) => <Cell key={i} fill={SEV_COLORS[e.name] || "#3f3f46"} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
+              </div>
             </div>
-        );
-    }
 
-    if (!data) return null;
-
-    // Destructure mapped objects from JSON schema
-    const { 
-        current_snapshot: snapshot, 
-        risk_classification: risk, 
-        compliance_status: compliance, 
-        security_posture: posture, 
-        attack_surface, 
-        cspm_summary: cspm, 
-        vdr_acceptance, 
-        exploit_type_distribution: exploit_types 
-    } = data;
-
-    return (
-        <div className="min-h-screen bg-[#09090b] text-white">
-            <div className="max-w-7xl mx-auto space-y-8">
-                
-                {/* ========================================== */}
-                {/* Header */}
-                {/* ========================================== */}
-                <header className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div>
-                        <h1 className="text-3xl font-black tracking-tight flex items-center gap-3">
-                            <Shield className="text-blue-500" />
-                            VDR Security Metrics
-                        </h1>
-                        <p className="text-slate-500 text-sm mt-1">
-                            FedRAMP Vulnerability Detection & Response • {data.metadata?.vdr_standard}
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-6">
-                        <PostureBadge rating={posture?.overall_rating} score={posture?.posture_score} />
-                        {lastUpdated && (
-                            <div className="text-right hidden lg:block">
-                                <div className="text-[10px] text-slate-600 uppercase tracking-wider">Last Updated</div>
-                                <div className="text-sm font-mono text-slate-300">
-                                    {lastUpdated.toLocaleDateString()} {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </header>
-
-                {/* ========================================== */}
-                {/* Main Stats Grid */}
-                {/* ========================================== */}
-                <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <StatCard
-                        label="Total Vulnerabilities"
-                        value={snapshot?.total_vulnerabilities || 0}
-                        icon={AlertTriangle}
-                        color="text-amber-400"
-                        trend={computedMetrics?.vulnTrend}
-                        trendValue={computedMetrics?.vulnTrendValue}
-                    />
-                    <StatCard
-                        label="Unique CVEs"
-                        value={snapshot?.unique_cves || 0}
-                        icon={Database}
-                        color="text-purple-400"
-                        subtitle={`${snapshot?.affected_resource_count || 0} resources affected`}
-                    />
-                    <StatCard
-                        label="Compliance Rate"
-                        value={`${compliance?.compliance_rate || 0}%`}
-                        icon={CheckCircle2}
-                        color="text-emerald-400"
-                        subtitle={compliance?.frr_cvm_04_status === 'COMPLIANT' ? 'FRR-CVM-04 ✓' : 'Review Required'}
-                    />
-                    <StatCard
-                        label="Security Score"
-                        value={`${posture?.posture_score || 0}/10`}
-                        icon={Shield}
-                        color="text-blue-400"
-                        subtitle={posture?.overall_rating || 'Unknown'}
-                    />
-                </section>
-
-                {/* ========================================== */}
-                {/* Risk Indicators */}
-                {/* ========================================== */}
-                <section className={THEME.card + " p-6"}>
-                    <div 
-                        className="flex items-center justify-between cursor-pointer"
-                        onClick={() => toggleSection('risk')}
-                    >
-                        <SectionHeader 
-                            icon={AlertOctagon} 
-                            title="Risk Indicators" 
-                            iconColor="text-red-400"
-                        />
-                        <ChevronDown 
-                            size={18} 
-                            className={`text-slate-500 transition-transform ${expandedSections.risk ? 'rotate-180' : ''}`}
-                        />
-                    </div>
-                    
-                    {expandedSections.risk && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                            <RiskIndicatorCard
-                                label="Critical Findings"
-                                value={risk?.critical_findings || 0}
-                                icon={AlertOctagon}
-                                severity={risk?.critical_findings > 0 ? 'critical' : 'safe'}
-                                description="Highest priority"
-                            />
-                            <RiskIndicatorCard
-                                label="Likely Exploitable"
-                                value={risk?.lev_count || 0}
-                                icon={Zap}
-                                severity={risk?.lev_count > 0 ? 'high' : 'safe'}
-                                description="LEV Classification"
-                            />
-                            <RiskIndicatorCard
-                                label="Internet Reachable"
-                                value={risk?.irv_count || 0}
-                                icon={Network}
-                                severity={risk?.irv_count > 0 ? 'high' : 'safe'}
-                                description="IRV Classification"
-                            />
-                            <RiskIndicatorCard
-                                label="CISA KEV Matches"
-                                value={risk?.kev_matches || 0}
-                                icon={Target}
-                                severity={risk?.kev_matches > 0 ? 'critical' : 'safe'}
-                                description="Known exploited"
-                            />
-                        </div>
-                    )}
-                </section>
-
-                {/* ========================================== */}
-                {/* Distribution Charts */}
-                {/* ========================================== */}
-                <section className="grid lg:grid-cols-2 gap-6">
-                    {/* N-Rating Distribution */}
-                    <div className={THEME.card + " p-6"}>
-                        <SectionHeader 
-                            icon={BarChart3} 
-                            title="N-Rating Distribution" 
-                            iconColor="text-blue-400"
-                        />
-                        <DistributionBar
-                            data={risk?.n_rating_distribution || {}}
-                            colors={N_RATING_COLORS}
-                            title="Vulnerability Risk Ratings"
-                        />
-                        <div className="mt-6">
-                            <ResponsiveContainer width="100%" height={150}>
-                                <BarChart data={Object.entries(risk?.n_rating_distribution || {}).map(([name, value]) => ({ name, value }))}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-                                    <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} />
-                                    <YAxis tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} />
-                                    <Tooltip content={<CustomTooltip />} />
-                                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                                        {Object.keys(risk?.n_rating_distribution || {}).map((key, i) => (
-                                            <Cell key={i} fill={N_RATING_COLORS[key] || '#3f3f46'} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    {/* Severity Distribution */}
-                    <div className={THEME.card + " p-6"}>
-                        <SectionHeader 
-                            icon={PieChartIcon} 
-                            title="Severity Distribution" 
-                            iconColor="text-amber-400"
-                        />
-                        <DistributionBar
-                            data={risk?.severity_distribution || {}}
-                            colors={SEVERITY_COLORS}
-                            title="CVSS Severity Levels"
-                        />
-                        <div className="mt-6">
-                            <ResponsiveContainer width="100%" height={150}>
-                                <PieChart>
-                                    <Pie
-                                        data={Object.entries(risk?.severity_distribution || {}).filter(([_, v]) => v > 0).map(([name, value]) => ({ name, value }))}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={35}
-                                        outerRadius={60}
-                                        paddingAngle={2}
-                                        dataKey="value"
-                                    >
-                                        {Object.entries(risk?.severity_distribution || {}).filter(([_, v]) => v > 0).map(([key], i) => (
-                                            <Cell key={i} fill={SEVERITY_COLORS[key] || '#3f3f46'} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip content={<CustomTooltip />} />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </section>
-
-                {/* ========================================== */}
-                {/* Trend Chart */}
-                {/* ========================================== */}
-                {computedMetrics?.trends && computedMetrics.trends.length > 0 && (
-                    <section className={THEME.card + " p-6"}>
-                        <div 
-                            className="flex items-center justify-between cursor-pointer"
-                            onClick={() => toggleSection('trends')}
-                        >
-                            <SectionHeader 
-                                icon={TrendingUp} 
-                                title="Vulnerability Trend History" 
-                                iconColor="text-emerald-400"
-                            />
-                            <ChevronDown 
-                                size={18} 
-                                className={`text-slate-500 transition-transform ${expandedSections.trends ? 'rotate-180' : ''}`}
-                            />
-                        </div>
-                        
-                        {expandedSections.trends && (
-                            <ResponsiveContainer width="100%" height={250}>
-                                <AreaChart data={computedMetrics.trends}>
-                                    <defs>
-                                        <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-                                    <XAxis
-                                        dataKey="date"
-                                        tick={{ fill: '#71717a', fontSize: 10 }}
-                                        axisLine={false}
-                                        tickFormatter={(v) => v?.slice(5) || ''}
-                                    />
-                                    <YAxis tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} />
-                                    <Tooltip content={<CustomTooltip />} />
-                                    <Area
-                                        type="monotone"
-                                        dataKey="total_vulnerabilities"
-                                        name="Total"
-                                        stroke="#3b82f6"
-                                        strokeWidth={2}
-                                        fill="url(#colorTotal)"
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="active_count"
-                                        name="Active"
-                                        stroke="#10b981"
-                                        strokeWidth={2}
-                                        dot={false}
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        )}
-                    </section>
-                )}
-
-                {/* ========================================== */}
-                {/* Security Posture & Attack Surface */}
-                {/* ========================================== */}
-                <section className="grid lg:grid-cols-2 gap-6">
-                    {/* Security Posture Checks */}
-                    <div className={THEME.card + " p-6"}>
-                        <SectionHeader 
-                            icon={ShieldCheck} 
-                            title="Security Posture" 
-                            iconColor="text-emerald-400"
-                        />
-                        <div className="space-y-1">
-                            <PostureCheckItem label="Network Security (WAF)" enabled={posture?.network_security_enabled} />
-                            <PostureCheckItem label="IAM Least Privilege" enabled={posture?.iam_least_privilege} />
-                            <PostureCheckItem label="Comprehensive Logging" enabled={posture?.logging_comprehensive} />
-                            <PostureCheckItem label="Encryption at Rest" enabled={posture?.encryption_at_rest} />
-                        </div>
-                        <div className="mt-6 pt-4 border-t border-white/5">
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-400">FRR-CVM-04 Status</span>
-                                <span className={`font-bold ${
-                                    compliance?.frr_cvm_04_status === 'COMPLIANT' ? 'text-emerald-400' : 'text-amber-400'
-                                }`}>
-                                    {compliance?.frr_cvm_04_status || 'Unknown'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Attack Surface */}
-                    <div className={THEME.card + " p-6"}>
-                        <SectionHeader 
-                            icon={GitBranch} 
-                            title="Attack Surface Analysis" 
-                            iconColor="text-purple-400"
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-black/30 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-black text-slate-200">{attack_surface?.graph_node_count || 0}</div>
-                                <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Graph Nodes</div>
-                            </div>
-                            <div className="bg-black/30 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-black text-slate-200">{attack_surface?.graph_edge_count || 0}</div>
-                                <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Graph Edges</div>
-                            </div>
-                            <div className="bg-black/30 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-black text-blue-400">{attack_surface?.total_attack_paths || 0}</div>
-                                <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Attack Paths</div>
-                            </div>
-                            <div className="bg-black/30 rounded-lg p-4 text-center">
-                                <div className={`text-2xl font-black ${
-                                    (attack_surface?.critical_attack_paths || 0) > 0 ? 'text-red-400' : 'text-emerald-400'
-                                }`}>
-                                    {attack_surface?.critical_attack_paths || 0}
-                                </div>
-                                <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">Critical Paths</div>
-                            </div>
-                        </div>
-                        <div className="mt-4 pt-4 border-t border-white/5 space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-400">Blast Radius Score</span>
-                                <span className={`font-bold ${
-                                    (attack_surface?.blast_radius_score || 0) > 0 ? 'text-amber-400' : 'text-emerald-400'
-                                }`}>
-                                    {attack_surface?.blast_radius_score || 0}
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-400">Avg Path Risk Score</span>
-                                <span className="font-bold text-slate-200">{attack_surface?.avg_path_risk_score || 0}</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* ========================================== */}
-                {/* CSPM & VDR Acceptance */}
-                {/* ========================================== */}
-                <section className="grid lg:grid-cols-2 gap-6">
-                    {/* CSPM Findings */}
-                    <div className={THEME.card + " p-6"}>
-                        <SectionHeader 
-                            icon={Eye} 
-                            title="CSPM Findings" 
-                            iconColor="text-cyan-400"
-                        />
-                        <div className="flex items-center gap-4 mb-4">
-                            <div className="text-4xl font-black text-white">{cspm?.total_findings || 0}</div>
-                            <div className="text-slate-500 text-sm">Total Findings</div>
-                        </div>
-                        {cspm?.by_severity && Object.keys(cspm.by_severity).length > 0 && (
-                            <DistributionBar
-                                data={cspm.by_severity}
-                                colors={SEVERITY_COLORS}
-                                title="By Severity"
-                            />
-                        )}
-                    </div>
-
-                    {/* VDR Acceptance */}
-                    <div className={THEME.card + " p-6"}>
-                        <SectionHeader 
-                            icon={Clock} 
-                            title="VDR Acceptance Status" 
-                            iconColor="text-amber-400"
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4">
-                                <div className="text-3xl font-black text-emerald-400">{vdr_acceptance?.total_active || 0}</div>
-                                <div className="text-xs text-slate-400 mt-1">Active (Under Threshold)</div>
-                            </div>
-                            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
-                                <div className="text-3xl font-black text-amber-400">{vdr_acceptance?.total_accepted || 0}</div>
-                                <div className="text-xs text-slate-400 mt-1">Accepted ({vdr_acceptance?.acceptance_threshold_days || 192}+ days)</div>
-                            </div>
-                        </div>
-                        <div className="mt-4 p-3 bg-black/30 rounded-lg border border-white/5">
-                            <div className="text-[10px] text-slate-600 uppercase tracking-wider mb-1">VDR Standard</div>
-                            <div className="text-sm text-slate-300">
-                                {data.metadata?.vdr_standard} • {vdr_acceptance?.acceptance_threshold_days || 192}-day acceptance window
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* ========================================== */}
-                {/* Exploit Types */}
-                {/* ========================================== */}
-                {exploit_types && Object.keys(exploit_types).length > 0 && (
-                    <section className={THEME.card + " p-6"}>
-                        <SectionHeader 
-                            icon={Zap} 
-                            title="Exploit Type Distribution" 
-                            iconColor="text-pink-400"
-                        />
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                            {Object.entries(exploit_types).map(([type, count]) => (
-                                <div key={type} className="bg-black/30 rounded-lg p-3 text-center border border-white/5 hover:border-white/10 transition-colors">
-                                    <div className="text-lg font-black text-slate-200">{count}</div>
-                                    <div className="text-[9px] text-slate-500 uppercase tracking-wider mt-1 truncate" title={type}>
-                                        {type.replace(/_/g, ' ')}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {/* ========================================== */}
-                {/* Footer */}
-                {/* ========================================== */}
-                <footer className="pt-6 border-t border-white/5">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-xs text-slate-500">
-                        <div className="flex items-center gap-2">
-                            <Lock size={12} />
-                            <span>Privacy: {data.metadata?.privacy_notice || 'Aggregate counts only • No sensitive data included'}</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <span>VDR Standard: {data.metadata?.vdr_standard}</span>
-                            <span>•</span>
-                            <span>Classification: {data.metadata?.data_classification || 'PUBLIC'}</span>
-                            {data.metadata?.generated_at && (
-                                <>
-                                    <span>•</span>
-                                    <span>Generated: {new Date(data.metadata.generated_at).toLocaleString()}</span>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </footer>
+            {/* Risk distribution (from risk_distribution field) */}
+            <div style={{ ...card }}>
+              <div style={{ ...label, marginBottom: 14 }}>Risk Distribution (Overall)</div>
+              <StackBar data={d.risk_distribution} colors={SEV_COLORS} />
             </div>
+
+            {/* Compliance + CSPM */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div style={{ ...card }}>
+                <div style={{ ...label, marginBottom: 10 }}>Compliance Status</div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                  <span style={{ fontSize: 36, fontWeight: 800, color: "#10b981", ...mono }}>{comp.compliance_rate}%</span>
+                  <span style={{ fontSize: 12, color: "#52525b" }}>compliant</span>
+                </div>
+                <div style={{ display: "flex", gap: 16, marginTop: 12 }}>
+                  <div style={{ fontSize: 12, color: "#a1a1aa" }}>
+                    <span style={{ fontWeight: 700, color: "#10b981" }}>{comp.compliant_count}</span> compliant
+                  </div>
+                  <div style={{ fontSize: 12, color: "#a1a1aa" }}>
+                    <span style={{ fontWeight: 700, color: "#ef4444" }}>{comp.non_compliant_count}</span> non-compliant
+                  </div>
+                </div>
+                <div style={{ marginTop: 14, padding: "8px 12px", background: "#065f4612", border: "1px solid #065f4625", borderRadius: 6, fontSize: 12 }}>
+                  <span style={{ color: "#71717a" }}>FRR-CVM-04: </span>
+                  <span style={{ fontWeight: 700, color: comp.frr_cvm_04_status === "COMPLIANT" ? "#10b981" : "#d97706" }}>{comp.frr_cvm_04_status}</span>
+                </div>
+              </div>
+
+              <div style={{ ...card }}>
+                <div style={{ ...label, marginBottom: 10 }}>CSPM Findings</div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 12 }}>
+                  <span style={{ fontSize: 36, fontWeight: 800, color: "#d97706", ...mono }}>{cspm.total_findings}</span>
+                  <span style={{ fontSize: 12, color: "#52525b" }}>total findings</span>
+                </div>
+                <StackBar data={cspm.by_severity} colors={SEV_COLORS} label="By Severity" />
+              </div>
+            </div>
+
+            {/* VDR Acceptance */}
+            <div style={{ ...card }}>
+              <div style={{ ...label, marginBottom: 10 }}>VDR Acceptance</div>
+              <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
+                <div>
+                  <span style={{ fontSize: 28, fontWeight: 800, color: "#3b82f6", ...mono }}>{acc.total_active}</span>
+                  <span style={{ fontSize: 12, color: "#52525b", marginLeft: 6 }}>active</span>
+                </div>
+                <div>
+                  <span style={{ fontSize: 28, fontWeight: 800, color: "#d97706", ...mono }}>{acc.total_accepted}</span>
+                  <span style={{ fontSize: 12, color: "#52525b", marginLeft: 6 }}>accepted</span>
+                </div>
+                <div style={{ fontSize: 12, color: "#52525b", marginLeft: "auto" }}>
+                  Acceptance window: <span style={{ color: "#a1a1aa", fontWeight: 600 }}>{acc.acceptance_threshold_days} days</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ════════════════════════════════════════════ */}
+        {/* POSTURE & SURFACE TAB                         */}
+        {/* ════════════════════════════════════════════ */}
+        {tab === "posture" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+            {/* Security posture */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div style={{ ...card }}>
+                <div style={{ ...label, marginBottom: 14 }}>Security Posture</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 12, background: "#1e3a5f", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: "#fafafa" }}>{posture.overall_rating}</div>
+                    <div style={{ fontSize: 12, color: "#52525b" }}>{posture.posture_score}/10 security score</div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                  {[
+                    { l: "Network Security (WAF)", ok: posture.network_security_enabled },
+                    { l: "IAM Least Privilege", ok: posture.iam_least_privilege },
+                    { l: "Comprehensive Logging", ok: posture.logging_comprehensive },
+                    { l: "Encryption at Rest", ok: posture.encryption_at_rest },
+                  ].map((item, i) => (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: i < 3 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
+                      <span style={{ fontSize: 13, color: "#a1a1aa" }}>{item.l}</span>
+                      <Check ok={item.ok} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Attack surface */}
+              <div style={{ ...card }}>
+                <div style={{ ...label, marginBottom: 14 }}>Attack Surface</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  {[
+                    { l: "Graph Nodes", v: atk.graph_node_count, c: "#d4d4d8" },
+                    { l: "Graph Edges", v: atk.graph_edge_count, c: "#d4d4d8" },
+                    { l: "Attack Paths", v: atk.total_attack_paths, c: "#3b82f6" },
+                    { l: "Critical Paths", v: atk.critical_attack_paths, c: atk.critical_attack_paths > 0 ? "#ef4444" : "#10b981" },
+                    { l: "Exploitable Paths", v: atk.exploitable_paths, c: atk.exploitable_paths > 0 ? "#ef4444" : "#10b981" },
+                    { l: "Blast Radius", v: atk.blast_radius_score, c: atk.blast_radius_score > 0 ? "#d97706" : "#10b981" },
+                  ].map((item, i) => (
+                    <div key={i} style={{ background: "#1a1a1e", borderRadius: 8, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 2 }}>
+                      <div style={{ fontSize: 10, color: "#52525b", letterSpacing: 1, textTransform: "uppercase", fontWeight: 600 }}>{item.l}</div>
+                      <div style={{ fontSize: 22, fontWeight: 800, color: item.c, ...mono }}>{item.v}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: 12, padding: "8px 12px", background: "#1a1a1e", borderRadius: 6, display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                  <span style={{ color: "#71717a" }}>Avg Path Risk Score</span>
+                  <span style={{ fontWeight: 700, color: "#d4d4d8", ...mono }}>{atk.avg_path_risk_score}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Trend + exploit breakdown */}
+            <div style={{ ...card }}>
+              <div style={{ ...label, marginBottom: 12 }}>30-Day Trend</div>
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={trends}>
+                  <defs>
+                    <linearGradient id="areaFill2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.15} />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="#1e1e22" strokeDasharray="3 3" />
+                  <XAxis dataKey="date" tick={{ fill: "#52525b", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => v?.slice(5)} />
+                  <YAxis tick={{ fill: "#52525b", fontSize: 10 }} axisLine={false} tickLine={false} domain={["dataMin - 10", "dataMax + 10"]} />
+                  <Tooltip content={<ChartTip />} />
+                  <Area type="monotone" dataKey="total_vulnerabilities" name="Total" stroke="#3b82f6" strokeWidth={2} fill="url(#areaFill2)" dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* ── Footer ── */}
+        <div style={{ marginTop: 28, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10, color: "#3f3f46", flexWrap: "wrap", gap: 8 }}>
+          <span>🔒 {d.metadata.privacy_notice}</span>
+          <span>{d.metadata.vdr_standard} · {d.metadata.data_classification} · Generated {new Date(d.metadata.generated_at).toLocaleDateString()}</span>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
