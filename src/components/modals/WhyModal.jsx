@@ -206,6 +206,19 @@ export const WhyModal = () => {
             </div>
           </div>
 
+          {/* Implementation Summary - visible to agencies before login */}
+          {data.implementation_summary && (
+            <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-500/5">
+              <div className="flex items-start gap-3">
+                <FileText size={18} className="text-blue-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-white text-sm mb-2">Implementation Summary</h4>
+                  <p className="text-sm text-gray-300 leading-relaxed">{data.implementation_summary}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-xl border border-gray-700 text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-gray-800 rounded-2xl flex items-center justify-center border border-gray-700">
               <Shield size={32} className="text-gray-500" />
@@ -277,6 +290,30 @@ export const WhyModal = () => {
             </div>
           </div>
         </div>
+
+        {/* Implementation Summary */}
+        {data.implementation_summary && (
+          <CollapsibleSection
+            title="Implementation Summary"
+            icon={FileText}
+            defaultOpen={true}
+            badge="SSP"
+            badgeColor="blue"
+          >
+            <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+              {data.implementation_summary}
+            </p>
+            {data.justification && (
+              <div className="mt-3 p-3 rounded-lg border border-gray-700/50 bg-black/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <Shield size={14} className="text-blue-400" />
+                  <span className="text-xs font-bold text-blue-400 uppercase">Justification</span>
+                </div>
+                <p className="text-sm text-gray-400 leading-relaxed">{data.justification}</p>
+              </div>
+            )}
+          </CollapsibleSection>
+        )}
 
         {/* Service Groups Summary */}
         {parsed.serviceGroups.length > 0 && (
