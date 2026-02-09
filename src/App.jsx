@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, memo, useEffect } from 'react';
 import {
   LayoutDashboard, ShieldAlert, User, Settings, LogOut,
   Menu, Bell, Activity, Calendar, Clock,
-  FileText, RefreshCw, BarChart3, Eye, X, Shield
+  FileText, RefreshCw, BarChart3, Eye, X, Shield, Layers
 } from 'lucide-react';
 
 import {
@@ -15,7 +15,6 @@ import { DataProvider, useData } from './hooks/useData';
 import { ModalProvider, useModal } from './contexts/ModalContext';
 import { ModalContainer } from './components/modals';
 import SettingsModal from './components/modals/SettingsModal';
-import VerifyHandler from './hooks/VerifyHandler';
 
 import { TrustCenterView } from './components/trust/TrustCenterView';
 import { TransparencyConsole } from './components/trust/TransparencyConsole';
@@ -23,6 +22,7 @@ import { KSIFailureDashboard } from './components/trust/KSIFailureDashboard';
 import { KSIGrid } from './components/findings/KSIGrid';
 import MetricsDashboard from './components/trust/MetricsDashboard';
 import VDRPublicMetricsDashboard from './components/trust/VDRPublicMetricsDashboard';
+import { UnifiedMasDashboard } from './components/trust/UnifiedMasDashboard';
 
 // --- CONFIGURATION ---
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
@@ -560,6 +560,12 @@ const AppShell = () => {
               isActive={activeView === 'failures'}
               onClick={() => { setActiveView('failures'); setMobileMenuOpen(false); }}
             />
+            <SidebarItem
+              icon={Layers}
+              label="Assessment Scope"
+              isActive={activeView === 'mas'}
+              onClick={() => { setActiveView('mas'); setMobileMenuOpen(false); }}
+            />
 
             <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
 
@@ -647,6 +653,12 @@ const AppShell = () => {
               isActive={activeView === 'failures'}
               onClick={() => setActiveView('failures')}
             />
+            <SidebarItem
+              icon={Layers}
+              label="Assessment Scope"
+              isActive={activeView === 'mas'}
+              onClick={() => setActiveView('mas')}
+            />
 
             <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
 
@@ -696,6 +708,7 @@ const AppShell = () => {
                 {activeView === 'transparency' && 'Platform / Transparency Console'}
                 {activeView === 'metrics' && 'Platform / Pipeline Metrics'}
                 {activeView === 'failures' && 'Platform / Failure History'}
+                {activeView === 'mas' && 'Platform / Assessment Scope'}
               </span>
             </div>
           </div>
@@ -729,7 +742,8 @@ const AppShell = () => {
                 activeView === 'vdr' ? <VDRPublicMetricsDashboard /> :
                   activeView === 'transparency' ? <TransparencyConsole /> :
                     activeView === 'metrics' ? <MetricsDashboard /> :
-                      activeView === 'failures' ? <KSIFailureDashboard /> : null}
+                      activeView === 'failures' ? <KSIFailureDashboard /> :
+                        activeView === 'mas' ? <UnifiedMasDashboard /> : null}
           </div>
         </main>
       </div>
@@ -742,7 +756,6 @@ const AppShell = () => {
 export default function App() {
   return (
     <AuthProvider>
-      <VerifyHandler /> 
       <DataProvider>
         <ModalProvider>
           <AppShell />
