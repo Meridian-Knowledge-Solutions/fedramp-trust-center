@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, memo } from 'react';
+import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../contexts/ModalContext';
 import { useSystemStatus } from '../../hooks/useSystemStatus';
@@ -10,12 +10,10 @@ import {
     Bell, Code, Settings, Info, Zap, MessageSquare,
     TrendingUp, BarChart3, Landmark, Network, Cloud, ArrowDown, ChevronDown, ChevronRight,
     AlertTriangle, GitCommit, RefreshCw, Hash, FileJson, Cpu, Key, Radio, CheckSquare, FileCheck,
-    PieChart, Layout, Monitor, HardDrive, Ticket, AlertCircle, Calendar, Video
+    PieChart, Layout, Monitor, HardDrive, Ticket, AlertCircle, Calendar, Video,
+    ArrowRight, User, ShieldCheck, Send, Eye as EyeIcon
 } from 'lucide-react';
-import {
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    ReferenceLine, BarChart as RechartsBarChart, Bar, Cell, PieChart as RechartsPieChart, Pie
-} from 'recharts';
+// Recharts imports removed — charts now in UnifiedMasDashboard
 
 // --- CONFIGURATION ---
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
@@ -250,192 +248,266 @@ const OngoingAuthorizationReportCard = () => {
     );
 };
 
-// --- SUB-COMPONENT: Drift Alert ---
-const DriftAlert = ({ drift }) => {
-    if (!drift || !drift.detected || drift.count === 0) return null;
-    return (
-        <div className="bg-amber-900/10 border border-amber-500/30 p-4 rounded-xl flex items-center gap-4 animate-in slide-in-from-top duration-500">
-            <div className="p-2 bg-amber-500/20 rounded-lg text-amber-400">
-                <AlertCircle size={20} />
-            </div>
-            <div className="flex-1">
-                <h4 className="text-sm font-bold text-white">System Variance Detected</h4>
-                <p className="text-xs text-amber-300/80">Automated scan identified {drift.count} infrastructure changes requiring review.</p>
-            </div>
-        </div>
-    );
+// DriftAlert removed — now in UnifiedMasDashboard
+
+// SystemCompositionChart removed — now in UnifiedMasDashboard
+
+// DriftHistoryChart removed — now in UnifiedMasDashboard
+
+// =========================================================================
+// ENHANCED DATA FLOW VISUALIZATION
+// n8n/Customer.io inspired pipeline of federal data lifecycle
+// =========================================================================
+
+const FLOW_NODE_THEMES = {
+    entry:         { accent: '#10b981', bg: 'bg-emerald-500/8',  border: 'border-emerald-500/25', text: 'text-emerald-400', glow: 'shadow-emerald-500/10' },
+    auth:          { accent: '#6366f1', bg: 'bg-indigo-500/8',   border: 'border-indigo-500/25',  text: 'text-indigo-400',  glow: 'shadow-indigo-500/10' },
+    processing:    { accent: '#3b82f6', bg: 'bg-blue-500/8',     border: 'border-blue-500/25',    text: 'text-blue-400',    glow: 'shadow-blue-500/10' },
+    storage:       { accent: '#8b5cf6', bg: 'bg-violet-500/8',   border: 'border-violet-500/25',  text: 'text-violet-400',  glow: 'shadow-violet-500/10' },
+    dissemination: { accent: '#f59e0b', bg: 'bg-amber-500/8',    border: 'border-amber-500/25',   text: 'text-amber-400',   glow: 'shadow-amber-500/10' },
+    monitoring:    { accent: '#ef4444', bg: 'bg-rose-500/8',     border: 'border-rose-500/25',    text: 'text-rose-400',    glow: 'shadow-rose-500/10' },
 };
 
-// --- SUB-COMPONENT: System Composition ---
-const SystemCompositionChart = ({ awsActual }) => {
-    if (!awsActual) return null;
+const FLOW_STAGES = [
+    {
+        id: 'entry', theme: 'entry', icon: User,
+        title: 'Federal User Entry', subtitle: 'COLLECTED', omb: 'OMB A-130',
+        description: 'Federal employee initiates access via HTTPS/TLS 1.2+ to Application Load Balancer',
+        security: ['TLS 1.2+', 'PIV/CAC'], classification: 'Federal Collected',
+        dataElements: ['Access Logs', 'Source IP', 'Session ID'],
+        ksis: ['KSI-IAM-01', 'KSI-IAM-02', 'KSI-SVC-02'],
+    },
+    {
+        id: 'auth', theme: 'auth', icon: ShieldCheck,
+        title: 'Identity & Auth', subtitle: 'COLLECTED', omb: 'OMB A-130',
+        description: 'Okta Federal Gov SAML 2.0 SSO with PIV/CAC certificate validation and MFA',
+        security: ['SAML 2.0', 'FIPS 140-2'], classification: 'Federal Collected',
+        dataElements: ['SAML Assertions', 'UPN Data', 'Group Memberships'],
+        ksis: ['KSI-IAM-01', 'KSI-IAM-03', 'KSI-SVC-03'],
+    },
+    {
+        id: 'processing', theme: 'processing', icon: Cpu,
+        title: 'Application Processing', subtitle: 'PROCESSED', omb: 'OMB A-130',
+        description: 'LMS Web UI (ASP.NET on EC2) processes training activity, assessments, and content delivery',
+        security: ['WAF', 'HTTPS', 'RBAC'], classification: 'Federal Processed',
+        dataElements: ['Training Records', 'Assessments', 'Completions'],
+        ksis: ['KSI-SVC-01', 'KSI-SVC-02', 'KSI-MLA-01'],
+    },
+    {
+        id: 'storage', theme: 'storage', icon: Database,
+        title: 'Encrypted Storage', subtitle: 'MAINTAINED', omb: 'OMB A-130',
+        description: 'Multi-service encrypted storage: RDS (SQL Server), S3, FSx with AES-256 and KMS',
+        security: ['AES-256', 'KMS', 'Backups'], classification: 'Federal Maintained',
+        dataElements: ['User Records', 'Learning Data', 'File Uploads', 'Audit Logs'],
+        ksis: ['KSI-CNA-01', 'KSI-CNA-04', 'KSI-INR-01'],
+    },
+    {
+        id: 'dissemination', theme: 'dissemination', icon: Send,
+        title: 'Third-Party Dissemination', subtitle: 'DISSEMINATED', omb: 'OMB A-130',
+        description: 'Federal PII shared with content providers via SAML SSO and xAPI/SCORM protocols',
+        security: ['xAPI', 'SCORM', 'SAML SSO'], classification: 'Federal Disseminated',
+        dataElements: ['Employee Names', 'Email', 'Learning Progress'],
+        ksis: ['KSI-TPR-01', 'KSI-TPR-02', 'KSI-PIY-02'],
+    },
+    {
+        id: 'monitoring', theme: 'monitoring', icon: EyeIcon,
+        title: 'Security Monitoring', subtitle: 'MAINTAINED', omb: 'OMB A-130',
+        description: 'CloudWatch, CloudTrail, GuardDuty, and Config provide continuous compliance monitoring',
+        security: ['24/7', 'SIEM', 'Alerts'], classification: 'Federal Maintained',
+        dataElements: ['CloudTrail Logs', 'Flow Logs', 'Config Snapshots'],
+        ksis: ['KSI-MLA-01', 'KSI-MLA-02', 'KSI-CNA-07'],
+    },
+];
 
-    const data = [
-        { name: 'Compute', value: (awsActual.ec2 || 0) + (awsActual.lambda || 0), color: '#3b82f6' },
-        { name: 'Storage', value: (awsActual.s3 || 0) + (awsActual.rds || 0), color: '#10b981' },
-        { name: 'Network', value: (awsActual.alb || 0) + (awsActual.api_gateway || 0), color: '#8b5cf6' },
-        { name: 'Security', value: (awsActual.security_groups || 0) + (awsActual.waf || 0), color: '#f59e0b' },
-    ].filter(item => item.value > 0);
+const PipelineConnector = ({ isVertical = false }) => (
+    <div className={`flex items-center justify-center shrink-0 ${isVertical ? 'py-0.5 flex-col' : ''}`}>
+        <div className={`relative ${isVertical ? 'h-6 w-px' : 'w-6 h-px'} bg-white/10`}>
+            <div className={`absolute inset-0 ${isVertical
+                ? 'bg-gradient-to-b from-blue-500/40 via-blue-400/20 to-transparent animate-pulse'
+                : 'bg-gradient-to-r from-blue-500/40 via-blue-400/20 to-transparent animate-pulse'
+                }`} style={{ animationDuration: '2s' }} />
+        </div>
+        <div className={isVertical ? 'rotate-90' : ''}>
+            <ArrowRight size={10} className="text-blue-500/50" />
+        </div>
+    </div>
+);
+
+const FlowNode = memo(({ stage, isActive, onClick }) => {
+    const theme = FLOW_NODE_THEMES[stage.theme];
+    const Icon = stage.icon;
 
     return (
-        <div className="bg-[#18181b] p-6 rounded-xl border border-white/5 flex flex-col h-full">
-            <h3 className="text-white font-bold text-sm mb-4">System Composition</h3>
-            <div className="flex-1 relative min-h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <RechartsPieChart>
-                        <Pie
-                            data={data}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
-                            paddingAngle={5}
-                            dataKey="value"
-                        >
-                            {data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} stroke="rgba(0,0,0,0)" />
-                            ))}
-                        </Pie>
-                        <Tooltip
-                            contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', fontSize: '12px', borderRadius: '8px' }}
-                            itemStyle={{ color: '#e5e7eb' }}
-                        />
-                    </RechartsPieChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-white">{data.reduce((a, b) => a + b.value, 0)}</div>
-                        <div className="text-[10px] text-slate-500 uppercase font-bold">Assets</div>
+        <button
+            onClick={() => onClick(stage.id)}
+            className={`group relative text-left w-full transition-all duration-300 rounded-xl border min-w-0
+                ${isActive
+                    ? `${theme.border} ${theme.bg} shadow-lg ${theme.glow} ring-1 ring-white/10`
+                    : 'border-white/[0.06] bg-[#141419] hover:border-white/15 hover:bg-white/[0.03]'
+                }`}
+        >
+            <div className="absolute top-0 left-3 right-3 h-[2px] rounded-b-full opacity-60"
+                style={{ backgroundColor: theme.accent }} />
+            <div className="p-4">
+                <div className="flex items-start gap-3 mb-3">
+                    <div className={`p-2 rounded-lg border shrink-0 ${isActive ? theme.border : 'border-white/10'} ${isActive ? theme.bg : 'bg-white/[0.03]'} transition-colors`}>
+                        <Icon size={16} className={isActive ? theme.text : 'text-slate-500'} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">{stage.subtitle}</div>
+                        <h4 className="text-sm font-bold text-white leading-tight truncate">{stage.title}</h4>
                     </div>
                 </div>
+                <p className="text-[11px] leading-relaxed text-slate-400 mb-3 line-clamp-2">{stage.description}</p>
+                <div className="flex flex-wrap gap-1.5">
+                    {stage.security.map((badge, i) => (
+                        <span key={i} className={`px-1.5 py-0.5 rounded text-[9px] font-bold border
+                            ${isActive ? `${theme.bg} ${theme.text} ${theme.border}` : 'bg-white/[0.03] text-slate-500 border-white/[0.06]'
+                            } transition-colors`}>
+                            {badge}
+                        </span>
+                    ))}
+                </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 mt-4">
-                {data.map((item, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs text-slate-400">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-                        <span>{item.name}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
-// --- SUB-COMPONENT: Drift History Chart ---
-const DriftHistoryChart = memo(({ history }) => {
-    const chartData = useMemo(() => {
-        if (!history || history.length === 0) return [];
-        return [...history]
-            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-            .slice(-30)
-            .map(item => ({
-                date: new Date(item.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
-                driftCount: item.drift_count || (item.drift?.count) || 0,
-                assetCount: (item.aws?.ec2 || 0) + (item.aws?.s3 || 0) + (item.aws?.rds || 0)
-            }));
-    }, [history]);
-
-    if (chartData.length === 0) return null;
-
-    return (
-        <div className="bg-[#18181b] p-6 rounded-xl border border-white/5 flex flex-col h-full shadow-lg">
-            <div className="mb-6">
-                <h3 className="text-white font-bold text-sm">Boundary Variances (30 Days)</h3>
-                <p className="text-[10px] text-slate-500 mt-1">
-                    Historical tracking of configuration changes.
-                </p>
-            </div>
-            <div className="flex-1 w-full min-h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <RechartsBarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                        <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 10, fontFamily: 'monospace' }} minTickGap={30} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 10, fontFamily: 'monospace' }} allowDecimals={false} />
-                        <Tooltip
-                            cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                            content={({ active, payload, label }) => {
-                                if (active && payload && payload.length) {
-                                    return (
-                                        <div className="bg-gray-800 border border-gray-700 p-3 rounded-lg shadow-xl text-xs">
-                                            <p className="text-gray-400 font-mono mb-2">{label}</p>
-                                            <div className="flex items-center gap-2">
-                                                <div className={`w-2 h-2 rounded-full ${payload[0].value > 0 ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                                                <span className="text-white font-bold">{payload[0].value} Variance{payload[0].value !== 1 ? 's' : ''}</span>
-                                            </div>
-                                        </div>
-                                    );
-                                }
-                                return null;
-                            }}
-                        />
-                        <Bar dataKey="driftCount" radius={[4, 4, 0, 0]} maxBarSize={40}>
-                            {chartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.driftCount > 0 ? '#f59e0b' : '#10b981'} />
-                            ))}
-                        </Bar>
-                    </RechartsBarChart>
-                </ResponsiveContainer>
-            </div>
-        </div>
+        </button>
     );
 });
 
-// --- SUB-COMPONENT: Data Flow Node ---
-const DataFlowNode = ({ flowKey, data, index, isLast }) => {
-    if (!data) return null;
-
-    const theme = {
-        entry: { color: 'text-emerald-400', border: 'group-hover:border-emerald-500/50', bg: 'group-hover:bg-emerald-500/5' },
-        processing: { color: 'text-blue-400', border: 'group-hover:border-blue-500/50', bg: 'group-hover:bg-blue-500/5' },
-        storage: { color: 'text-purple-400', border: 'group-hover:border-purple-500/50', bg: 'group-hover:bg-purple-500/5' },
-        dissemination: { color: 'text-amber-400', border: 'group-hover:border-amber-500/50', bg: 'group-hover:bg-amber-500/5' }
-    }[flowKey] || { color: 'text-slate-400', border: 'border-white/10', bg: '' };
+const FlowDetailPanel = ({ stage }) => {
+    if (!stage) return null;
+    const theme = FLOW_NODE_THEMES[stage.theme];
+    const Icon = stage.icon;
 
     return (
-        <div className="relative group">
-            {!isLast && (
-                <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-[#27272a] z-0">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-transparent w-1/2" />
+        <div className={`rounded-xl border ${theme.border} ${theme.bg} p-6 animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+            <div className="flex items-center gap-4 mb-6 pb-5 border-b border-white/5 flex-wrap">
+                <div className={`p-3 rounded-xl border ${theme.border} bg-black/20 shrink-0`}>
+                    <Icon size={22} className={theme.text} />
                 </div>
-            )}
-            <div className={`relative z-10 bg-[#18181b] border border-white/5 rounded-xl p-5 transition-all duration-300 ${theme.border} ${theme.bg}`}>
-                <div className="flex justify-between items-start mb-4">
-                    <div>
-                        <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-0.5">Step 0{index + 1}</div>
-                        <h3 className="text-white font-bold text-sm tracking-tight">{data.title}</h3>
-                    </div>
-                </div>
-                <div className="mb-5 min-h-[40px]">
-                    <p className="text-xs leading-relaxed text-slate-400 group-hover:text-slate-300 transition-colors">
-                        {data.description}
-                    </p>
-                </div>
-                <div className="space-y-3 pt-4 border-t border-white/5">
-                    <div className="flex items-center gap-2">
-                        <div className="p-1 rounded-full bg-white/5">
-                            <Lock size={10} className="text-slate-400" />
-                        </div>
-                        <span className="text-[10px] font-mono text-slate-400 truncate" title={data.encryption}>
-                            {data.encryption || "Standard Encryption"}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                        <h3 className="text-lg font-bold text-white">{stage.title}</h3>
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${theme.border} ${theme.text} uppercase tracking-wider`}>
+                            {stage.classification}
                         </span>
                     </div>
-                    {(data.pii_collected || data.pii_shared) && (
-                        <div>
-                            <div className="text-[9px] uppercase font-bold text-slate-600 mb-1.5">Data Elements</div>
-                            <div className="flex flex-wrap gap-1.5">
-                                {(data.pii_collected || data.pii_shared).map((field, i) => (
-                                    <span key={i} className="px-2 py-0.5 bg-[#09090b] border border-white/10 rounded text-[10px] text-slate-400 font-mono">
-                                        {field}
-                                    </span>
-                                ))}
+                    <p className="text-xs text-slate-400">{stage.description}</p>
+                </div>
+                <div className="text-[10px] font-mono text-slate-500 bg-white/5 px-2 py-1 rounded border border-white/5 shrink-0">
+                    {stage.omb}
+                </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="bg-black/20 rounded-lg p-4 border border-white/5">
+                    <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-3 flex items-center gap-2">
+                        <Database size={10} /> Data Elements
+                    </div>
+                    <div className="space-y-2">
+                        {stage.dataElements.map((el, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: theme.accent }} />
+                                <span className="text-xs text-slate-300 font-mono">{el}</span>
                             </div>
-                        </div>
-                    )}
+                        ))}
+                    </div>
+                </div>
+                <div className="bg-black/20 rounded-lg p-4 border border-white/5">
+                    <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-3 flex items-center gap-2">
+                        <Lock size={10} /> Security Controls
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                        {stage.security.map((s, i) => (
+                            <span key={i} className={`px-2 py-1 rounded text-[10px] font-bold border ${theme.border} ${theme.text} ${theme.bg}`}>{s}</span>
+                        ))}
+                    </div>
+                </div>
+                <div className="bg-black/20 rounded-lg p-4 border border-white/5">
+                    <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-3 flex items-center gap-2">
+                        <Shield size={10} /> FedRAMP 20x KSIs
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                        {stage.ksis.map((ksi, i) => (
+                            <span key={i} className="px-2 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded text-[10px] font-mono font-bold">{ksi}</span>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
+
+const FederalDataFlowPipeline = memo(() => {
+    const [activeStage, setActiveStage] = useState(null);
+    const handleNodeClick = (id) => setActiveStage(prev => prev === id ? null : id);
+    const activeStageData = FLOW_STAGES.find(s => s.id === activeStage);
+
+    return (
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h3 className="text-lg font-bold text-white flex items-center gap-3">
+                        Federal Data Flow Pipeline
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                    </h3>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                        Complete data lifecycle per OMB A-130 federal information classification. Click any stage to inspect.
+                    </p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-mono text-slate-500 uppercase bg-white/5 px-2.5 py-1 rounded-full border border-white/5">OMB A-130</span>
+                    <span className="text-[10px] font-mono text-emerald-400 uppercase bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">FRR-MAS</span>
+                </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+                {Object.entries(FLOW_NODE_THEMES).map(([key, t]) => (
+                    <div key={key} className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: t.accent }} />
+                        <span className="text-[10px] text-slate-500 capitalize">{key}</span>
+                    </div>
+                ))}
+            </div>
+
+            {/* Row 1: Entry → Auth → Processing */}
+            <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr,auto,1fr] gap-0 items-center">
+                <FlowNode stage={FLOW_STAGES[0]} isActive={activeStage === FLOW_STAGES[0].id} onClick={handleNodeClick} />
+                <div className="hidden md:flex"><PipelineConnector /></div>
+                <div className="flex md:hidden justify-center"><PipelineConnector isVertical /></div>
+                <FlowNode stage={FLOW_STAGES[1]} isActive={activeStage === FLOW_STAGES[1].id} onClick={handleNodeClick} />
+                <div className="hidden md:flex"><PipelineConnector /></div>
+                <div className="flex md:hidden justify-center"><PipelineConnector isVertical /></div>
+                <FlowNode stage={FLOW_STAGES[2]} isActive={activeStage === FLOW_STAGES[2].id} onClick={handleNodeClick} />
+            </div>
+
+            {/* Connector between rows */}
+            <div className="flex justify-center">
+                <div className="flex flex-col items-center">
+                    <div className="h-4 w-px bg-gradient-to-b from-blue-500/30 to-violet-500/30 animate-pulse" style={{ animationDuration: '2.5s' }} />
+                    <div className="w-5 h-5 rounded-full border border-white/10 bg-[#141419] flex items-center justify-center">
+                        <ArrowDown size={9} className="text-blue-400/60" />
+                    </div>
+                    <div className="h-4 w-px bg-gradient-to-b from-violet-500/30 to-amber-500/30 animate-pulse" style={{ animationDuration: '2.5s' }} />
+                </div>
+            </div>
+
+            {/* Row 2: Storage → Dissemination → Monitoring */}
+            <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr,auto,1fr] gap-0 items-center">
+                <FlowNode stage={FLOW_STAGES[3]} isActive={activeStage === FLOW_STAGES[3].id} onClick={handleNodeClick} />
+                <div className="hidden md:flex"><PipelineConnector /></div>
+                <div className="flex md:hidden justify-center"><PipelineConnector isVertical /></div>
+                <FlowNode stage={FLOW_STAGES[4]} isActive={activeStage === FLOW_STAGES[4].id} onClick={handleNodeClick} />
+                <div className="hidden md:flex"><PipelineConnector /></div>
+                <div className="flex md:hidden justify-center"><PipelineConnector isVertical /></div>
+                <FlowNode stage={FLOW_STAGES[5]} isActive={activeStage === FLOW_STAGES[5].id} onClick={handleNodeClick} />
+            </div>
+
+            {activeStageData && <FlowDetailPanel stage={activeStageData} />}
+        </div>
+    );
+});
 
 // --- SUB-COMPONENT: Integration Card ---
 const IntegrationCard = ({ item }) => {
@@ -488,7 +560,7 @@ const IntegrationCard = ({ item }) => {
     );
 };
 
-// --- SUB-COMPONENT: Live MAS Dashboard ---
+// --- SUB-COMPONENT: Live MAS Dashboard (Slimmed — Data Flow + Integrations only) ---
 const LiveMasDashboard = ({ boundary, architecture, history }) => {
     if (!boundary || !architecture) {
         return (
@@ -496,197 +568,30 @@ const LiveMasDashboard = ({ boundary, architecture, history }) => {
                 <div className="animate-pulse flex flex-col items-center">
                     <div className="h-12 w-12 bg-white/5 rounded-full mb-4"></div>
                     <div className="h-4 w-48 bg-white/5 rounded mb-2"></div>
-                    <div className="text-xs text-slate-500">Connecting to live boundary map...</div>
+                    <div className="text-xs text-slate-500">Loading data flow context...</div>
                 </div>
             </div>
         );
     }
 
-    const { data_flows, integrations, system_profile } = architecture;
-    const { zones, meta } = boundary;
-    const drift = boundary.drift || null;
-
-    // FIX 1: Access trust_center_stats from architecture map directly
-    const trust_center = {
-        api_count: architecture?.trust_center_stats?.api_count || 0,
-        compute_count: architecture?.trust_center_stats?.compute_count || 0,
-        storage_count: architecture?.trust_center_stats?.storage_count || 0
-    };
-
-    // FIX 2: Correct path to aws_actual (root level of mas_boundary.json)
-    const rawCounts = boundary?.aws_actual || {};
-
-    const aws_actual = {
-        ec2: rawCounts.ec2 || 0,
-        lambda: rawCounts.lambda || 0,
-        s3: rawCounts.s3 || 0,
-        rds: rawCounts.rds || 0,
-        alb: rawCounts.alb || 0,
-        fsx: rawCounts.fsx || 0,
-        waf: rawCounts.waf || 0,
-        shield: rawCounts.shield || 0,
-        shield_tier: rawCounts.shield_tier || 'Standard',
-        security_groups: rawCounts.security_groups || 0
-    };
+    const { integrations } = architecture;
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700">
-            {/* Header Metadata */}
-            <div className="flex flex-col md:flex-row justify-between gap-4 bg-blue-900/10 border border-blue-500/30 p-4 rounded-xl">
-                <div>
-                    <h2 className="text-white font-bold text-sm">Live Boundary Authorization</h2>
-                    <div className="text-xs text-blue-300 font-mono mt-0.5">
-                        Ver: {meta?.compliance_ver || 'N/A'} • {boundary?.fingerprint?.substring(0, 7)}
-                    </div>
-                </div>
-                <div className="flex items-center gap-4">
-                    <div className="text-xs font-mono text-emerald-400 bg-emerald-900/20 px-3 py-1 rounded border border-emerald-500/30 flex items-center gap-2">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        LIVE POLLING
-                    </div>
-                </div>
-            </div>
+        <div className="space-y-10 animate-in fade-in duration-700">
+            {/* ENHANCED DATA FLOW PIPELINE */}
+            <FederalDataFlowPipeline />
 
-            {/* 1. DRIFT ALERT */}
-            <DriftAlert drift={drift} />
-
-            {/* 2. ANALYTICS ROW: Composition & History */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1 h-[280px]">
-                    <SystemCompositionChart awsActual={aws_actual} />
-                </div>
-                <div className="lg:col-span-2 h-[280px]">
-                    <DriftHistoryChart history={history} />
-                </div>
-            </div>
-
-            {/* 3. CORE LMS ARCHITECTURE */}
-            {system_profile.lms_core && (
-                <div className="bg-[#121217] border border-white/10 rounded-xl p-6 mt-8">
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h3 className="text-white font-bold">Core LMS Application Architecture</h3>
-                            <p className="text-[10px] text-slate-500 mt-1">Live polling of Three-Tier IaaS/PaaS components</p>
-                        </div>
-                        <span className="text-xs font-mono bg-indigo-900/20 text-indigo-300 px-2 py-1 rounded border border-indigo-500/20">IaaS / PaaS</span>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.lms_core.presentation.component}</div>
-                            <div className="text-2xl font-bold text-white mb-1">
-                                {(aws_actual.ec2 || 0)} <span className="text-xs font-normal text-slate-500">Instances</span>
-                            </div>
-                            <div className="text-xs text-blue-400 font-mono">{system_profile.lms_core.presentation.tech}</div>
-                        </div>
-                        <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.lms_core.logic.component}</div>
-                            <div className="text-2xl font-bold text-white mb-1">
-                                {(aws_actual.alb || 0)} <span className="text-xs font-normal text-slate-500">Balancers</span>
-                            </div>
-                            <div className="text-xs text-slate-500 font-mono">{system_profile.lms_core.logic.tech}</div>
-                        </div>
-                        <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.lms_core.data.component}</div>
-                            <div className="text-2xl font-bold text-white mb-1">
-                                {(aws_actual.rds || 0) + (aws_actual.fsx || 0)} <span className="text-xs font-normal text-slate-500">Nodes</span>
-                            </div>
-                            <div className="text-xs text-slate-500 font-mono">{system_profile.lms_core.data.tech}</div>
-                        </div>
-                        <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-3">Defense in Depth</div>
-                            <div className="space-y-3">
-                                <div className="flex justify-between items-center">
-                                    <div className="text-[10px] text-slate-500 uppercase">Web Firewall</div>
-                                    <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                                        {(aws_actual.waf || 0) > 0 ? (
-                                            <><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></span>Active</>
-                                        ) : "Disabled"}
-                                    </div>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <div className="text-[10px] text-slate-500 uppercase">DDoS Shield</div>
-                                    <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></span>{aws_actual.shield_tier}
-                                    </div>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <div className="text-[10px] text-slate-500 uppercase">Net Firewall</div>
-                                    <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                                        {(aws_actual.security_groups || 0) > 0 ? (
-                                            <><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></span>Enforced</>
-                                        ) : "Checking..."}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* 4. TRUST CENTER ARCHITECTURE */}
-            {system_profile.trust_center && (
-                <div className="bg-[#121217] border border-white/10 rounded-xl p-6 mt-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h3 className="text-white font-bold">FedRAMP Trust Center Infrastructure</h3>
-                            <p className="text-[10px] text-slate-500 mt-1">Live polling of compliance delivery resources (FRR-ADS-TC-01)</p>
-                        </div>
-                        <span className="text-xs font-mono bg-purple-900/20 text-purple-300 px-2 py-1 rounded border border-purple-500/20">Serverless / SaaS</span>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.trust_center.frontend.component}</div>
-                            <div className="text-2xl font-bold text-white mb-1">Active</div>
-                            <div className="text-xs text-blue-400 font-mono">{system_profile.trust_center.frontend.tech}</div>
-                        </div>
-                        <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.trust_center.api.component}</div>
-                            <div className="text-2xl font-bold text-white mb-1">{trust_center.api_count || 0}</div>
-                            <div className="text-xs text-slate-500">Active Endpoints</div>
-                        </div>
-                        <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.trust_center.compute.component}</div>
-                            <div className="text-2xl font-bold text-white mb-1">{trust_center.compute_count || 0}</div>
-                            <div className="text-xs text-slate-500">Lambda Functions</div>
-                        </div>
-                        <div className="bg-black/20 p-4 rounded border border-white/5 relative group">
-                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-2">{system_profile.trust_center.storage.component}</div>
-                            <div className="text-2xl font-bold text-white mb-1">{trust_center.storage_count || 0}</div>
-                            <div className="text-xs text-slate-500">Artifact Buckets</div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* 5. DATA FLOWS */}
-            <div className="mt-24 border-t border-white/5 pt-12">
-                <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-white font-bold">Digital Data Lifecycle</h3>
-                    <span className="text-[10px] font-mono text-slate-500 uppercase bg-white/5 px-2 py-1 rounded border border-white/5">
-                        OMB A-130 Aligned
-                    </span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-                    {['entry', 'processing', 'storage', 'dissemination'].map((key, idx) => (
-                        <DataFlowNode
-                            key={key}
-                            flowKey={key}
-                            data={data_flows[key]}
-                            index={idx}
-                            isLast={idx === 3}
-                        />
-                    ))}
-                </div>
-            </div>
-
-            {/* 6. INTEGRATIONS */}
+            {/* THIRD-PARTY INTERCONNECTIONS */}
             {integrations && integrations.length > 0 && (
-                <div className="bg-[#121217] border border-white/10 rounded-xl p-6 mt-8">
+                <div className="bg-[#121217] border border-white/10 rounded-xl p-6 mt-4">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-white font-bold">Third-Party Interconnections</h3>
+                        <div>
+                            <h3 className="text-white font-bold">Third-Party Interconnections</h3>
+                            <p className="text-[10px] text-slate-500 mt-0.5">FRR-MAS-02 configuration and usage documentation</p>
+                        </div>
+                        <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 uppercase">
+                            {integrations.length} Active
+                        </span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {integrations.map((item, idx) => (
@@ -699,69 +604,7 @@ const LiveMasDashboard = ({ boundary, architecture, history }) => {
     );
 };
 
-// --- SUB-COMPONENT: Zone Card ---
-const ZoneCard = ({ zoneId, data, isOpen, onToggle }) => {
-    if (!data) return null;
-    const { policy, assets } = data;
-
-    const riskColor = policy.risk === 'High' || policy.risk === 'Critical' ? 'text-rose-400' :
-        policy.risk === 'Medium' ? 'text-amber-400' : 'text-emerald-400';
-
-    const borderColor = policy.risk === 'High' || policy.risk === 'Critical' ? 'border-rose-500/30' :
-        policy.risk === 'Medium' ? 'border-amber-500/30' : 'border-emerald-500/30';
-
-    return (
-        <div className={`bg-[#18181b] border ${borderColor} rounded-xl overflow-hidden transition-all duration-300 mb-6`}>
-            <div
-                className="p-5 flex items-center justify-between cursor-pointer bg-white/[0.02]"
-                onClick={() => onToggle(zoneId)}
-            >
-                <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-lg bg-black/40 border border-white/10 ${riskColor}`}>
-                        <div className="w-5 h-5 rounded-full border-2 border-current"></div>
-                    </div>
-                    <div>
-                        <h3 className="text-white font-bold text-lg">{policy.title}</h3>
-                        <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
-                            <span className="font-mono bg-white/10 px-1.5 py-0.5 rounded">{policy.omb_type}</span>
-                            <span>•</span>
-                            <span>{policy.definition}</span>
-                        </div>
-                    </div>
-                </div>
-                <div className="flex items-center gap-4">
-                    {isOpen ? <ChevronDown className="text-slate-500" /> : <ChevronRight className="text-slate-500" />}
-                </div>
-            </div>
-
-            {isOpen && (
-                <div className="p-5 border-t border-white/5 bg-black/20">
-                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
-                        Live Assets in Boundary ({assets?.length || 0})
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-                        {assets?.map((asset, idx) => (
-                            <div key={idx} className="bg-[#27272a] p-3 rounded-lg border border-white/5 flex items-center gap-3">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div>
-                                <div>
-                                    <div className="text-sm font-mono text-white">{asset.name}</div>
-                                    <div className="text-[10px] text-slate-500">{asset.type} • {asset.id}</div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {policy.controls?.map((ctrl, i) => (
-                            <span key={i} className="px-2 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded text-[10px] font-mono font-bold">
-                                {ctrl}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
+// ZoneCard removed — now in UnifiedMasDashboard
 
 // --- MAIN PAGE COMPONENT ---
 export const TrustCenterView = () => {
@@ -1072,26 +915,7 @@ const ArtifactBadge = ({ label }) => (
     </div>
 );
 
-const ClassificationBadge = ({ type, label }) => {
-    let styles = "bg-slate-800 text-slate-300 border-slate-700";
-
-    if (type === 'routine_recurring' || type === 'routine') {
-        styles = "bg-blue-500/10 text-blue-400 border-blue-500/20";
-    } else if (type === 'adaptive') {
-        styles = "bg-purple-500/10 text-purple-400 border-purple-500/20";
-    } else if (type === 'transformative') {
-        styles = "bg-rose-500/10 text-rose-400 border-rose-500/20";
-    }
-
-    // Format label for display
-    const displayLabel = label || type?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-
-    return (
-        <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${styles}`}>
-            {displayLabel}
-        </div>
-    );
-};
+// ClassificationBadge removed — no longer used
 
 const FooterAction = ({ title, onClick }) => (
     <button onClick={onClick} className={`${THEME.panel} border ${THEME.border} hover:bg-[#18181b] p-4 rounded-xl flex items-center justify-center gap-2 text-sm font-bold text-slate-300 hover:text-white transition-all group`}>
