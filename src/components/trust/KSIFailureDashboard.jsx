@@ -1,12 +1,12 @@
 /**
- * KSI Failure Dashboard - Enhanced with Drill-Down Details
+ * KSI Failure Dashboard - Enhanced with Date-Centric Drill-Down
  * 
  * FedRAMP 20x Phase 2 failure tracking visualization:
+ * - Date-range quick picks (7d / 30d / 90d / All / Custom range)
+ * - Failures grouped by date with visual date headers
  * - Click any failure to see full details in a slide-out panel
- * - Active failures with severity classification
- * - Searchable/filterable failure history table
+ * - Searchable/filterable history with category + date controls
  * - Per-KSI statistics with drill-down
- * - Visual charts for failure patterns
  * 
  * Consumes: public/data/ksi_failure_tracker.json
  */
@@ -21,7 +21,8 @@ import {
     ChevronDown, ChevronRight, AlertTriangle, Timer, Download,
     Activity, Shield, Zap, Target, AlertOctagon, History,
     ArrowUpRight, ArrowDownRight, GitCommit, Calendar, FileText,
-    X, Search, Copy, ArrowRight, Terminal, BookOpen
+    X, Search, Copy, ArrowRight, Terminal, BookOpen, CalendarDays,
+    ChevronLeft, RotateCcw
 } from 'lucide-react';
 
 // ============================================
@@ -57,10 +58,8 @@ const KSI_CATEGORIES = {
 // ============================================
 const isValidKSIId = (ksiId) => ksiId && typeof ksiId === 'string' && KSI_ID_PATTERN.test(ksiId);
 const isValidDate = (dateStr) => {
-    try {
-        const d = new Date(dateStr);
-        return !isNaN(d.getTime()) && d <= new Date() && d.getFullYear() >= 2020;
-    } catch { return false; }
+    try { const d = new Date(dateStr); return !isNaN(d.getTime()) && d <= new Date() && d.getFullYear() >= 2020; }
+    catch { return false; }
 };
 const filterValidFailure = (f) => f && isValidKSIId(f.ksi_id) && isValidDate(f.failed_at) && (f.remediated_at ? isValidDate(f.remediated_at) : true);
 
@@ -69,7 +68,17 @@ const formatDateTime = (s) => {
     return new Date(s).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', timeZoneName:'short' });
 };
 const formatDateShort = (s) => s ? new Date(s).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : 'N/A';
+const formatDateGroupKey = (s) => {
+    if (!s) return 'Unknown';
+    const d = new Date(s);
+    return d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+};
+const formatDateISO = (s) => {
+    if (!s) return '';
+    return new Date(s).toISOString().split('T')[0];
+};
 const getHoursAgo = (s) => Math.round((Date.now() - new Date(s)) / 3600000);
+const getDaysAgo = (s) => Math.round((Date.now() - new Date(s)) / 86400000);
 const getSeverity = (h) => h > 24 ? 'critical' : h > 8 ? 'warning' : 'info';
 const getCategoryFromKSI = (id) => id?.split('-')?.[1] || null;
 const getCategoryName = (id) => KSI_CATEGORIES[getCategoryFromKSI(id)] || getCategoryFromKSI(id) || 'Unknown';
@@ -88,8 +97,15 @@ const getMttrColor = (h) => {
     return { text:'text-red-400', bg:'bg-red-500/10', bar:'bg-red-500', label:'Critical' };
 };
 
+const daysAgoDate = (n) => {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    d.setHours(0, 0, 0, 0);
+    return d;
+};
+
 // ============================================
-// Detail Drawer - The main enhancement
+// Detail Drawer
 // ============================================
 const DetailDrawer = ({ failure, isActive, onClose, allHistory }) => {
     useEffect(() => {
@@ -147,10 +163,7 @@ const DetailDrawer = ({ failure, isActive, onClose, allHistory }) => {
                     {/* FedRAMP Requirement */}
                     {failure.requirement && (
                         <section className="bg-indigo-500/5 border border-indigo-500/15 rounded-xl p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <BookOpen size={12} className="text-indigo-400" />
-                                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-wider">FedRAMP Requirement</span>
-                            </div>
+                            <div className="flex items-center gap-2 mb-2"><BookOpen size={12} className="text-indigo-400" /><span className="text-[10px] font-black text-indigo-400 uppercase tracking-wider">FedRAMP Requirement</span></div>
                             <p className="text-sm text-slate-300 leading-relaxed">{failure.requirement}</p>
                         </section>
                     )}
@@ -158,10 +171,7 @@ const DetailDrawer = ({ failure, isActive, onClose, allHistory }) => {
                     {/* Full Failure Reason */}
                     <section className="bg-red-500/5 border border-red-500/15 rounded-xl p-4">
                         <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                                <AlertCircle size={12} className="text-red-400" />
-                                <span className="text-[10px] font-black text-red-400 uppercase tracking-wider">Failure Reason</span>
-                            </div>
+                            <div className="flex items-center gap-2"><AlertCircle size={12} className="text-red-400" /><span className="text-[10px] font-black text-red-400 uppercase tracking-wider">Failure Reason</span></div>
                             <button onClick={() => copyToClipboard(failure.reason)} className="p-1.5 rounded hover:bg-white/5 text-slate-500 hover:text-white transition-colors" title="Copy"><Copy size={12} /></button>
                         </div>
                         {hasMultiReason ? (
@@ -180,10 +190,7 @@ const DetailDrawer = ({ failure, isActive, onClose, allHistory }) => {
                         )}
                         {failure.reason?.includes('CLI command failed:') && (
                             <div className="mt-3">
-                                <div className="flex items-center gap-1.5 mb-1.5">
-                                    <Terminal size={10} className="text-slate-500" />
-                                    <span className="text-[9px] text-slate-500 uppercase tracking-wider">Raw CLI Output</span>
-                                </div>
+                                <div className="flex items-center gap-1.5 mb-1.5"><Terminal size={10} className="text-slate-500" /><span className="text-[9px] text-slate-500 uppercase tracking-wider">Raw CLI Output</span></div>
                                 <div className="bg-black rounded-lg p-3 border border-white/10 overflow-x-auto">
                                     <pre className="text-xs text-red-300/80 font-mono whitespace-pre-wrap break-all leading-relaxed">{failure.reason.replace('CLI command failed: ', '')}</pre>
                                 </div>
@@ -349,18 +356,84 @@ const ActiveFailureCard = ({ failure, onClick }) => {
 };
 
 // ============================================
-// History Row (clickable)
+// Date-Grouped History Row (clickable)
 // ============================================
 const HistoryRow = ({ failure, onClick }) => {
     const m = getMttrColor(failure.duration_hours);
     return (
-        <div className="group px-5 py-3.5 border-b border-white/5 last:border-0 hover:bg-white/[0.03] transition-colors cursor-pointer flex items-center gap-4" onClick={() => onClick(failure)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onClick(failure)}>
+        <div className="group px-5 py-3 hover:bg-white/[0.03] transition-colors cursor-pointer flex items-center gap-4" onClick={() => onClick(failure)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onClick(failure)}>
             <div className={`w-2 h-2 rounded-full flex-shrink-0 ${m.bar}`} />
             <span className="font-mono text-sm font-bold text-white w-28 flex-shrink-0 group-hover:text-blue-400 transition-colors">{failure.ksi_id}</span>
+            <span className="text-[10px] text-slate-600 w-14 flex-shrink-0">
+                {new Date(failure.remediated_at || failure.failed_at).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' })}
+            </span>
             <span className="text-xs text-slate-400 flex-1 line-clamp-1 min-w-0">{failure.reason || 'No reason provided'}</span>
             <span className={`text-xs font-mono font-bold w-16 text-right flex-shrink-0 ${m.text}`}>{failure.duration_hours}h</span>
-            <span className="text-[10px] text-slate-600 w-24 text-right flex-shrink-0">{formatDateShort(failure.remediated_at)}</span>
             <ArrowRight size={12} className="text-slate-700 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+        </div>
+    );
+};
+
+// ============================================
+// Date Group Header
+// ============================================
+const DateGroupHeader = ({ dateLabel, count, avgMttr }) => (
+    <div className="sticky top-0 z-[5] px-5 py-2.5 bg-[#111113] border-b border-t border-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+            <CalendarDays size={12} className="text-blue-400" />
+            <span className="text-xs font-black text-white">{dateLabel}</span>
+        </div>
+        <div className="flex items-center gap-4">
+            <span className="text-[10px] text-slate-500">{count} failure{count !== 1 ? 's' : ''}</span>
+            {avgMttr !== null && <span className={`text-[10px] font-mono font-bold ${avgMttr < 4 ? 'text-emerald-400' : avgMttr < 24 ? 'text-amber-400' : 'text-red-400'}`}>avg {avgMttr.toFixed(1)}h</span>}
+        </div>
+    </div>
+);
+
+// ============================================
+// Date Range Quick Picker
+// ============================================
+const DateRangePicker = ({ activeRange, onRangeChange, customFrom, customTo, onCustomFromChange, onCustomToChange }) => {
+    const ranges = [
+        { key: '7d', label: '7 Days' },
+        { key: '30d', label: '30 Days' },
+        { key: '90d', label: '90 Days' },
+        { key: 'all', label: 'All Time' },
+        { key: 'custom', label: 'Custom' },
+    ];
+
+    return (
+        <div className="flex items-center gap-2 flex-wrap">
+            {ranges.map(r => (
+                <button
+                    key={r.key}
+                    onClick={() => onRangeChange(r.key)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all border ${
+                        activeRange === r.key
+                            ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                            : 'bg-black/30 text-slate-500 border-white/5 hover:text-white hover:border-white/10'
+                    }`}
+                >
+                    {r.label}
+                </button>
+            ))}
+            {activeRange === 'custom' && (
+                <div className="flex items-center gap-2 ml-2">
+                    <input
+                        type="date"
+                        value={customFrom}
+                        onChange={(e) => onCustomFromChange(e.target.value)}
+                        className="bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
+                    />
+                    <span className="text-slate-600 text-xs">→</span>
+                    <input
+                        type="date"
+                        value={customTo}
+                        onChange={(e) => onCustomToChange(e.target.value)}
+                        className="bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500/50"
+                    />
+                </div>
+            )}
         </div>
     );
 };
@@ -419,9 +492,13 @@ const KSIFailureDashboard = () => {
     const [error, setError] = useState(null);
     const [selectedFailure, setSelectedFailure] = useState(null);
     const [selectedIsActive, setSelectedIsActive] = useState(false);
+
+    // Filters
     const [searchQuery, setSearchQuery] = useState('');
     const [filterCategory, setFilterCategory] = useState('all');
-    const [historyLimit, setHistoryLimit] = useState(25);
+    const [dateRange, setDateRange] = useState('all');
+    const [customFrom, setCustomFrom] = useState('');
+    const [customTo, setCustomTo] = useState('');
 
     useEffect(() => {
         fetch(DATA_URL)
@@ -458,19 +535,90 @@ const KSIFailureDashboard = () => {
 
         const recent = durations.slice(-5), older = durations.slice(-10,-5);
         const mttrDir = recent.length && older.length ? (recent.reduce((a,b)=>a+b,0)/recent.length) < (older.reduce((a,b)=>a+b,0)/older.length) ? 'improving':'degrading' : null;
-
         const allCategories = [...new Set(hist.map(f => getCategoryFromKSI(f.ksi_id)).filter(Boolean))].sort();
 
         return { activeCount, totalFailures:hist.length, avgMttr:avgMttr.toFixed(1), runsProcessed:data.metadata?.total_runs_processed||0, monthlyData, categoryData, mttrTrend, mttrTrendDirection:mttrDir, uniqueKsis:Object.keys(data.ksi_stats||{}).length, allCategories };
     }, [data]);
 
+    // Filtered + date-ranged history
     const filteredHistory = useMemo(() => {
         if (!data) return [];
         let h = (data.failure_history || []).slice().reverse();
-        if (searchQuery.trim()) { const q = searchQuery.toLowerCase(); h = h.filter(f => f.ksi_id?.toLowerCase().includes(q) || f.reason?.toLowerCase().includes(q) || f.requirement?.toLowerCase().includes(q) || f.failed_commit?.toLowerCase().includes(q)); }
-        if (filterCategory !== 'all') h = h.filter(f => getCategoryFromKSI(f.ksi_id) === filterCategory);
+
+        // Date range filter
+        if (dateRange !== 'all') {
+            let cutoff;
+            if (dateRange === '7d') cutoff = daysAgoDate(7);
+            else if (dateRange === '30d') cutoff = daysAgoDate(30);
+            else if (dateRange === '90d') cutoff = daysAgoDate(90);
+            else if (dateRange === 'custom' && customFrom) cutoff = new Date(customFrom);
+
+            if (cutoff) h = h.filter(f => new Date(f.remediated_at || f.failed_at) >= cutoff);
+
+            if (dateRange === 'custom' && customTo) {
+                const end = new Date(customTo);
+                end.setHours(23, 59, 59, 999);
+                h = h.filter(f => new Date(f.remediated_at || f.failed_at) <= end);
+            }
+        }
+
+        // Text search
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            h = h.filter(f =>
+                f.ksi_id?.toLowerCase().includes(q) ||
+                f.reason?.toLowerCase().includes(q) ||
+                f.requirement?.toLowerCase().includes(q) ||
+                f.failed_commit?.toLowerCase().includes(q)
+            );
+        }
+
+        // Category filter
+        if (filterCategory !== 'all') {
+            h = h.filter(f => getCategoryFromKSI(f.ksi_id) === filterCategory);
+        }
+
         return h;
-    }, [data, searchQuery, filterCategory]);
+    }, [data, searchQuery, filterCategory, dateRange, customFrom, customTo]);
+
+    // Group filtered history by date
+    const groupedHistory = useMemo(() => {
+        const groups = [];
+        let currentKey = null;
+        let currentGroup = null;
+
+        for (const f of filteredHistory) {
+            const dateKey = formatDateISO(f.remediated_at || f.failed_at);
+            if (dateKey !== currentKey) {
+                if (currentGroup) groups.push(currentGroup);
+                currentKey = dateKey;
+                currentGroup = {
+                    dateKey,
+                    dateLabel: formatDateGroupKey(f.remediated_at || f.failed_at),
+                    failures: [],
+                };
+            }
+            currentGroup.failures.push(f);
+        }
+        if (currentGroup) groups.push(currentGroup);
+
+        return groups;
+    }, [filteredHistory]);
+
+    // Summary for date range
+    const rangeSummary = useMemo(() => {
+        if (!filteredHistory.length) return null;
+        const durations = filteredHistory.map(f => f.duration_hours).filter(Boolean);
+        return {
+            count: filteredHistory.length,
+            avgMttr: durations.length ? durations.reduce((a,b)=>a+b,0)/durations.length : 0,
+            uniqueKsis: new Set(filteredHistory.map(f => f.ksi_id)).size,
+            days: groupedHistory.length,
+        };
+    }, [filteredHistory, groupedHistory]);
+
+    const hasActiveFilters = searchQuery || filterCategory !== 'all' || dateRange !== 'all';
+    const clearAllFilters = () => { setSearchQuery(''); setFilterCategory('all'); setDateRange('all'); setCustomFrom(''); setCustomTo(''); };
 
     if (loading) return (<div className="flex items-center justify-center py-24"><div className="text-center"><div className="w-12 h-12 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" /><div className="text-slate-500 text-sm">Loading failure data...</div></div></div>);
     if (error || !data) return (<div className={THEME.card+" p-12 text-center max-w-lg mx-auto"}><div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-6"><AlertTriangle size={28} className="text-amber-500" /></div><h3 className="text-xl font-bold text-white mb-2">Failure Tracking Unavailable</h3><p className="text-sm text-slate-500 mb-4">Ensure ksi_failure_tracker.json is synced to public/data/</p>{error && <code className="text-xs text-red-400 font-mono bg-red-500/10 px-3 py-2 rounded-lg inline-block">{error}</code>}</div>);
@@ -492,7 +640,7 @@ const KSIFailureDashboard = () => {
                         <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20"><History size={20} className="text-blue-400" /></div>
                         <h1 className="text-2xl font-black text-white tracking-tight">KSI Failure Tracking</h1>
                     </div>
-                    <p className="text-sm text-slate-500">FedRAMP 20x Phase 2 • Tracking {stats.runsProcessed.toLocaleString()} runs since {data.metadata?.backfill_since || 'N/A'} <span className="text-slate-600 ml-2">• Click any failure for details</span></p>
+                    <p className="text-sm text-slate-500">FedRAMP 20x Phase 2 • {stats.runsProcessed.toLocaleString()} runs since {data.metadata?.backfill_since || 'N/A'} <span className="text-slate-600 ml-2">• Click any failure for details</span></p>
                 </div>
                 <div className="flex items-center gap-2">
                     {stats.activeCount === 0
@@ -515,7 +663,7 @@ const KSIFailureDashboard = () => {
                 <div className={THEME.cardStatic+" p-6"}>
                     <div className="flex items-center gap-3 mb-6">
                         <div className="p-2 rounded-lg bg-red-500/20"><AlertOctagon size={18} className="text-red-400" /></div>
-                        <div><h2 className="text-sm font-black text-white uppercase tracking-wider">Active Failures Requiring Remediation</h2><p className="text-xs text-slate-500">Click a card to view full details, CLI output, and commit info</p></div>
+                        <div><h2 className="text-sm font-black text-white uppercase tracking-wider">Active Failures Requiring Remediation</h2><p className="text-xs text-slate-500">Click a card for full details, CLI output, and commit info</p></div>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {activeFailures.map((f,i) => <ActiveFailureCard key={i} failure={f} onClick={(failure) => openDrawer(failure, true)} />)}
@@ -572,50 +720,97 @@ const KSIFailureDashboard = () => {
                 </div>
             )}
 
-            {/* Searchable Failure History Table */}
+            {/* ==========================================
+                DATE-CENTRIC FAILURE HISTORY
+               ========================================== */}
             <div className={THEME.cardStatic} data-history-table>
-                <div className="px-6 py-4 border-b border-white/5">
+                {/* Header with date range + search + filters */}
+                <div className="px-6 py-4 border-b border-white/5 space-y-4">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
-                            <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2"><FileText size={14} className="text-cyan-400" /> Failure History</h3>
-                            <p className="text-[10px] text-slate-500 mt-1">Click any row to inspect full failure details, CLI output, and remediation info</p>
+                            <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2"><CalendarDays size={14} className="text-cyan-400" /> Failure Timeline</h3>
+                            <p className="text-[10px] text-slate-500 mt-1">Browse by date range • Click any failure to inspect details</p>
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="relative">
                                 <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search KSI, reason, commit..." className="bg-black/40 border border-white/10 rounded-lg pl-8 pr-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-blue-500/50 w-56" />
+                                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search KSI, reason, commit..." className="bg-black/40 border border-white/10 rounded-lg pl-8 pr-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-blue-500/50 w-52" />
                             </div>
                             <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500/50 appearance-none cursor-pointer">
                                 <option value="all">All Categories</option>
-                                {(stats.allCategories||[]).map(c => <option key={c} value={c}>KSI-{c} ({KSI_CATEGORIES[c]||c})</option>)}
+                                {(stats.allCategories||[]).map(c => <option key={c} value={c}>KSI-{c}</option>)}
                             </select>
+                            {hasActiveFilters && (
+                                <button onClick={clearAllFilters} className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] text-slate-400 hover:text-white bg-black/30 border border-white/5 hover:border-white/10 transition-all">
+                                    <RotateCcw size={10} /> Reset
+                                </button>
+                            )}
                         </div>
                     </div>
+                    {/* Date Range Picker */}
+                    <DateRangePicker
+                        activeRange={dateRange}
+                        onRangeChange={setDateRange}
+                        customFrom={customFrom}
+                        customTo={customTo}
+                        onCustomFromChange={setCustomFrom}
+                        onCustomToChange={setCustomTo}
+                    />
                 </div>
+
+                {/* Range Summary Bar */}
+                {rangeSummary && (
+                    <div className="px-5 py-2.5 border-b border-white/5 bg-blue-500/5 flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-4 text-[10px]">
+                            <span className="text-blue-300 font-bold">{rangeSummary.count} failures</span>
+                            <span className="text-slate-500">across {rangeSummary.days} day{rangeSummary.days !== 1 ? 's' : ''}</span>
+                            <span className="text-slate-500">{rangeSummary.uniqueKsis} unique KSIs</span>
+                        </div>
+                        <span className={`text-[10px] font-mono font-bold ${rangeSummary.avgMttr < 4 ? 'text-emerald-400' : rangeSummary.avgMttr < 24 ? 'text-amber-400' : 'text-red-400'}`}>
+                            Avg MTTR: {rangeSummary.avgMttr.toFixed(1)}h
+                        </span>
+                    </div>
+                )}
+
+                {/* Column Headers */}
                 <div className="px-5 py-2 border-b border-white/5 flex items-center gap-4 text-[9px] text-slate-600 uppercase tracking-wider font-black">
-                    <span className="w-2" /><span className="w-28">KSI</span><span className="flex-1">Reason</span><span className="w-16 text-right">MTTR</span><span className="w-24 text-right">Remediated</span><span className="w-3" />
+                    <span className="w-2" /><span className="w-28">KSI</span><span className="w-14">Time</span><span className="flex-1">Reason</span><span className="w-16 text-right">MTTR</span><span className="w-3" />
                 </div>
-                <div className="max-h-[500px] overflow-y-auto">
-                    {filteredHistory.length > 0 ? (
-                        <>
-                            {filteredHistory.slice(0, historyLimit).map((f,i) => <HistoryRow key={i} failure={f} onClick={(failure) => openDrawer(failure, false)} />)}
-                            {filteredHistory.length > historyLimit && (
-                                <div className="px-5 py-4 text-center border-t border-white/5">
-                                    <button onClick={() => setHistoryLimit(p => p+25)} className="text-xs text-blue-400 hover:text-blue-300 font-bold transition-colors">Load more ({filteredHistory.length-historyLimit} remaining)</button>
+
+                {/* Date-Grouped Rows */}
+                <div className="max-h-[600px] overflow-y-auto">
+                    {groupedHistory.length > 0 ? (
+                        groupedHistory.map((group) => {
+                            const durations = group.failures.map(f => f.duration_hours).filter(Boolean);
+                            const avgMttr = durations.length ? durations.reduce((a,b)=>a+b,0)/durations.length : null;
+                            return (
+                                <div key={group.dateKey}>
+                                    <DateGroupHeader dateLabel={group.dateLabel} count={group.failures.length} avgMttr={avgMttr} />
+                                    <div className="divide-y divide-white/[0.03]">
+                                        {group.failures.map((f, i) => (
+                                            <HistoryRow key={i} failure={f} onClick={(failure) => openDrawer(failure, false)} />
+                                        ))}
+                                    </div>
                                 </div>
-                            )}
-                        </>
+                            );
+                        })
                     ) : (
-                        <div className="text-center py-12 text-slate-500">
-                            <Search size={24} className="mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">No failures match your search</p>
-                            <button onClick={() => {setSearchQuery('');setFilterCategory('all');}} className="text-xs text-blue-400 hover:text-blue-300 mt-2">Clear filters</button>
+                        <div className="text-center py-16 text-slate-500">
+                            <CalendarDays size={28} className="mx-auto mb-3 opacity-20" />
+                            <p className="text-sm mb-1">No failures in this time range</p>
+                            <p className="text-[10px] text-slate-600">Try expanding the date range or clearing filters</p>
+                            {hasActiveFilters && <button onClick={clearAllFilters} className="text-xs text-blue-400 hover:text-blue-300 mt-3 font-bold">Reset all filters</button>}
                         </div>
                     )}
                 </div>
+
+                {/* Footer */}
                 <div className="px-5 py-3 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-500">
-                    <span>Showing {Math.min(historyLimit,filteredHistory.length)} of {filteredHistory.length}{(searchQuery||filterCategory!=='all')&&` (filtered from ${history.length} total)`}</span>
-                    <span>{history.length} total remediations</span>
+                    <span>
+                        {filteredHistory.length} failure{filteredHistory.length !== 1 ? 's' : ''}
+                        {hasActiveFilters && ` (filtered from ${history.length} total)`}
+                    </span>
+                    <span>{history.length} total remediations all time</span>
                 </div>
             </div>
 
@@ -623,7 +818,7 @@ const KSIFailureDashboard = () => {
             {ksiStats.length > 0 && (
                 <div className={THEME.cardStatic}>
                     <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
-                        <div><h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2"><Target size={14} className="text-amber-400" /> Per-KSI Statistics</h3><p className="text-[10px] text-slate-500 mt-1">Click a KSI to filter the history table above</p></div>
+                        <div><h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2"><Target size={14} className="text-amber-400" /> Per-KSI Statistics</h3><p className="text-[10px] text-slate-500 mt-1">Click a KSI to filter the timeline above</p></div>
                         <span className="text-xs text-slate-500">{ksiStats.length} KSIs with failures</span>
                     </div>
                     <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
