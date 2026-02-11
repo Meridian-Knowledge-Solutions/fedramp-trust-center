@@ -297,8 +297,7 @@ export const WhyModal = () => {
             title="Implementation Summary"
             icon={FileText}
             defaultOpen={true}
-            badge="SSP"
-            badgeColor="blue"
+            
           >
             <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
               {data.implementation_summary}
