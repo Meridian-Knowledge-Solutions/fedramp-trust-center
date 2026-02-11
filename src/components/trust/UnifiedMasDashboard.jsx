@@ -941,7 +941,7 @@ export const UnifiedMasDashboard = () => {
             if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
             const json = await response.json();
             setData(json);
-            setLastRefresh(new Date());
+            setLastRefresh(json?.meta?.generated_at ? new Date(json.meta.generated_at) : new Date());
             console.log('✅ Unified MAS Dashboard loaded:', json.health?.connected_systems, 'systems connected');
         } catch (err) {
             console.error('❌ Failed to load MAS dashboard:', err);
@@ -1105,7 +1105,7 @@ export const UnifiedMasDashboard = () => {
 
                     <div className="flex items-center gap-4">
                         <span className="text-[11px] text-slate-500">
-                            Updated: {lastRefresh?.toLocaleTimeString() || 'Never'}
+                            Last Sync: {lastRefresh?.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) || 'Never'}
                         </span>
                         <button
                             onClick={loadData}
