@@ -1,152 +1,12 @@
 import React, { useState } from 'react';
 import { useModal } from '../../contexts/ModalContext';
+import { useAuth } from '../../hooks/useAuth';
 import { BaseModal } from './BaseModal';
-
-// ── Shared inline styles ──
-const s = {
-  heading: {
-    fontSize: 22,
-    fontWeight: 700,
-    color: '#f1f5f9',
-    margin: 0,
-    letterSpacing: '-0.02em',
-    lineHeight: 1.3,
-  },
-  subheading: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.45)',
-    margin: '6px 0 24px',
-    lineHeight: 1.5,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: 600,
-    color: 'rgba(255,255,255,0.7)',
-    letterSpacing: '0.01em',
-  },
-  hint: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.3)',
-  },
-  input: {
-    width: '100%',
-    padding: '10px 14px',
-    fontSize: 14,
-    color: '#f1f5f9',
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 10,
-    outline: 'none',
-    transition: 'border-color 0.2s',
-    boxSizing: 'border-box',
-    fontFamily: 'inherit',
-  },
-  error: {
-    fontSize: 12,
-    color: '#fca5a5',
-    marginTop: 4,
-    marginBottom: 0,
-  },
-  statusBox: {
-    padding: '12px 16px',
-    borderRadius: 10,
-    border: '1px solid',
-    fontSize: 14,
-    fontWeight: 500,
-  },
-  submitBtn: {
-    flex: 1,
-    padding: '13px 24px',
-    fontSize: 15,
-    fontWeight: 600,
-    color: '#fff',
-    background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-    border: 'none',
-    borderRadius: 10,
-    letterSpacing: '0.01em',
-    transition: 'opacity 0.2s, transform 0.15s',
-    fontFamily: 'inherit',
-    cursor: 'pointer',
-  },
-  cancelBtn: {
-    padding: '13px 24px',
-    fontSize: 14,
-    fontWeight: 500,
-    color: 'rgba(255,255,255,0.5)',
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 10,
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-    transition: 'background 0.2s',
-  },
-  footer: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.25)',
-    marginTop: 20,
-    lineHeight: 1.5,
-    textAlign: 'center',
-  },
-  stepRow: { display: 'flex', alignItems: 'center', gap: 12 },
-  stepDot: {
-    width: 10,
-    height: 10,
-    borderRadius: '50%',
-    flexShrink: 0,
-    transition: 'all 0.3s',
-  },
-  stepLabel: { fontSize: 14, transition: 'color 0.3s' },
-};
-
-// ── Reusable field ──
-const Field = ({ label, name, type = 'text', placeholder, hint, value, onChange, error, required, textarea }) => (
-  <div>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-      <label style={s.label}>
-        {label} {required && <span style={{ color: '#818cf8' }}>*</span>}
-      </label>
-      {hint && <span style={s.hint}>{hint}</span>}
-    </div>
-    {textarea ? (
-      <textarea
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        rows={3}
-        style={{
-          ...s.input,
-          resize: 'vertical',
-          minHeight: 80,
-          ...(error ? { borderColor: 'rgba(248,113,113,0.5)' } : {}),
-        }}
-      />
-    ) : (
-      <input
-        type={type}
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        style={{
-          ...s.input,
-          ...(error ? { borderColor: 'rgba(248,113,113,0.5)' } : {}),
-        }}
-      />
-    )}
-    {error && <p style={s.error}>{error}</p>}
-  </div>
-);
-
-// ── Stepper steps ──
-const steps = [
-  { label: 'Register', active: true },
-  { label: 'Verify email', active: false },
-  { label: 'Access granted', active: false },
-];
+import { Shield, Mail, User, FileText, AlertCircle } from 'lucide-react';
 
 export const RegistrationModal = () => {
   const { modals, closeModal } = useModal();
+  // const { login } = useAuth(); // REMOVED: Do not auto-login. User must verify email first.
   const { isOpen } = modals.registration;
 
   const [formData, setFormData] = useState({
@@ -154,30 +14,42 @@ export const RegistrationModal = () => {
     agency: '',
     contact: '',
     system: '',
-    purpose: '',
+    purpose: ''
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
 
-  const validateEmail = (email) =>
-    /^[^\s@]+@[^\s@]+\.(gov|mil|fed\.us)$/i.test(email);
+  const validateEmail = (email) => {
+    const govMilPattern = /^[^\s@]+@[^\s@]+\.(gov|mil|fed\.us)$/i; // Updated regex to match backend validation
+    return govMilPattern.test(email);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
-    if (submitStatus) setSubmitStatus(null);
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation
     const newErrors = {};
-    if (!formData.email) newErrors.email = 'Email is required';
-    else if (!validateEmail(formData.email))
-      newErrors.email = 'Must be a .gov, .mil, or .fed.us email';
-    if (!formData.agency) newErrors.agency = 'Agency name is required';
-    if (!formData.contact) newErrors.contact = 'Contact name is required';
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Must be a .gov, .mil, or .fed.us email address';
+    }
+    if (!formData.agency) {
+      newErrors.agency = 'Agency name is required';
+    }
+    if (!formData.contact) {
+      newErrors.contact = 'Contact name is required';
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -187,38 +59,60 @@ export const RegistrationModal = () => {
     setSubmitStatus(null);
 
     try {
-      const API_URL =
-        import.meta.env.VITE_API_URL ||
-        'https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod';
+      // --- START REAL API INTEGRATION ---
+      
+      // 1. Get API Endpoint (Ensure VITE_API_URL is set in your .env file)
+      // Fallback is provided but should be replaced with your real API Gateway URL
+      const API_URL = import.meta.env.VITE_API_URL || 'https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod';
+
+      // 2. Prepare payload to match Backend expectations
       const payload = {
         agency: formData.agency,
         email: formData.email,
         contact: formData.contact,
-        system_name: formData.system,
-        purpose: formData.purpose,
+        system_name: formData.system, // Backend expects 'system_name', not 'system'
+        purpose: formData.purpose
       };
 
+      console.log("Submitting registration to:", `${API_URL}/register`);
+
+      // 3. Execute Fetch
       const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || `Registration failed: ${response.statusText}`);
 
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || `Registration failed: ${response.statusText}`);
+      }
+
+      console.log("Registration Success:", result);
+
+      // 4. Handle Success
       setSubmitStatus({
         type: 'success',
-        message: 'Verification email sent! Please check your inbox to complete registration.',
+        message: 'Verification email sent! Please check your inbox to complete registration.'
       });
 
+      // Clear form after delay, but don't auto-login
       setTimeout(() => {
-        handleClose();
+        closeModal('registration');
+        setFormData({ email: '', agency: '', contact: '', system: '', purpose: '' });
+        setSubmitStatus(null);
       }, 3000);
+      
+      // --- END REAL API INTEGRATION ---
+
     } catch (error) {
-      console.error('Registration Error:', error);
+      console.error("Registration Error:", error);
       setSubmitStatus({
         type: 'error',
-        message: error.message || 'Registration failed. Please check your connection and try again.',
+        message: error.message || 'Registration failed. Please check your connection and try again.'
       });
     } finally {
       setIsSubmitting(false);
@@ -233,136 +127,180 @@ export const RegistrationModal = () => {
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} title="" size="large" variant="dark">
-      <div style={{ display: 'flex', gap: 0 }}>
-        {/* ── Left: Form ── */}
-        <div style={{ flex: 1, paddingRight: 32 }}>
-          <h2 style={s.heading}>Enter your details</h2>
-          <p style={s.subheading}>
-            Federal personnel only — .gov / .mil / .fed.us email required.
-          </p>
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="🇺🇸 Request Federal Agency Access"
+      size="large"
+      variant="dark"
+    >
+      <div className="mb-6">
+        <div className="bg-gradient-to-br from-blue-900/30 to-blue-800/30 border border-blue-500/30 rounded-xl p-5 flex items-start gap-3 shadow-lg">
+          <div className="p-2 bg-blue-500/20 rounded-lg border border-blue-500/30 flex-shrink-0">
+            <Shield className="text-blue-400" size={20} />
+          </div>
+          <div className="text-sm">
+            <p className="text-white font-bold mb-2">
+              Federal Agency Personnel Only
+            </p>
+            <p className="text-gray-300 leading-relaxed">
+              Access to detailed technical validation findings and authorization package materials
+              is restricted to authorized federal personnel with valid .gov or .mil email addresses.
+            </p>
+          </div>
+        </div>
+      </div>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <Field
-              label="Contact name"
-              name="contact"
-              placeholder="Jane Doe"
-              value={formData.contact}
-              onChange={handleChange}
-              error={errors.contact}
-              required
-            />
-            <Field
-              label="Official email"
-              name="email"
-              type="email"
-              placeholder="jane.doe@agency.gov"
-              hint="No spam, guaranteed."
-              value={formData.email}
-              onChange={handleChange}
-              error={errors.email}
-              required
-            />
-            <Field
-              label="Agency / Organization"
-              name="agency"
-              placeholder="e.g. Department of Defense"
-              value={formData.agency}
-              onChange={handleChange}
-              error={errors.agency}
-              required
-            />
-            <Field
-              label="System / Project name"
-              name="system"
-              placeholder="e.g. Agency Training Platform"
-              hint="Optional"
-              value={formData.system}
-              onChange={handleChange}
-            />
-            <Field
-              label="Access purpose"
-              name="purpose"
-              placeholder="e.g. Authorization review for new deployment"
-              hint="Optional"
-              value={formData.purpose}
-              onChange={handleChange}
-              textarea
-            />
-
-            {/* Status message */}
-            {submitStatus && (
-              <div
-                style={{
-                  ...s.statusBox,
-                  borderColor:
-                    submitStatus.type === 'success'
-                      ? 'rgba(52,211,153,0.4)'
-                      : 'rgba(248,113,113,0.4)',
-                  color: submitStatus.type === 'success' ? '#6ee7b7' : '#fca5a5',
-                }}
-              >
-                {submitStatus.message}
-              </div>
-            )}
-
-            {/* Buttons */}
-            <div style={{ display: 'flex', gap: 12, paddingTop: 4 }}>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                style={{
-                  ...s.submitBtn,
-                  opacity: isSubmitting ? 0.6 : 1,
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                }}
-              >
-                {isSubmitting ? 'Submitting…' : 'Request access →'}
-              </button>
-              <button type="button" onClick={handleClose} style={s.cancelBtn}>
-                Cancel
-              </button>
-            </div>
-          </form>
-
-          <p style={s.footer}>
-            By registering you acknowledge access is restricted to federal personnel for official use only.
-          </p>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Email */}
+        <div>
+          <label htmlFor="email" className="block text-sm font-bold text-white mb-2">
+            <Mail size={14} className="inline mr-1 text-blue-400" />
+            Official Email Address *
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="e.g., john.smith@agency.gov"
+            className={`w-full px-4 py-3 bg-gray-900 border ${errors.email ? 'border-red-500/50' : 'border-gray-700'
+              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all`}
+            required
+          />
+          {errors.email && (
+            <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
+              <AlertCircle size={12} />
+              {errors.email}
+            </p>
+          )}
+          <p className="text-xs text-gray-500 mt-1.5">Must be a .gov, .mil, or .fed.us email address</p>
         </div>
 
-        {/* ── Right: Stepper ── */}
-        <div
-          style={{
-            width: 170,
-            paddingLeft: 28,
-            borderLeft: '1px solid rgba(255,255,255,0.06)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 28,
-            paddingTop: 8,
-          }}
-        >
-          {steps.map((step, i) => (
-            <div key={i} style={s.stepRow}>
-              <div
-                style={{
-                  ...s.stepDot,
-                  background: step.active ? '#6366f1' : 'rgba(255,255,255,0.1)',
-                  boxShadow: step.active ? '0 0 0 4px rgba(99,102,241,0.25)' : 'none',
-                }}
-              />
-              <span
-                style={{
-                  ...s.stepLabel,
-                  color: step.active ? '#e0e7ff' : 'rgba(255,255,255,0.35)',
-                  fontWeight: step.active ? 600 : 400,
-                }}
-              >
-                {step.label}
-              </span>
-            </div>
-          ))}
+        {/* Agency */}
+        <div>
+          <label htmlFor="agency" className="block text-sm font-bold text-white mb-2">
+            <Shield size={14} className="inline mr-1 text-blue-400" />
+            Agency/Organization Name *
+          </label>
+          <input
+            type="text"
+            id="agency"
+            name="agency"
+            value={formData.agency}
+            onChange={handleChange}
+            placeholder="e.g., Department of Defense"
+            className={`w-full px-4 py-3 bg-gray-900 border ${errors.agency ? 'border-red-500/50' : 'border-gray-700'
+              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all`}
+            required
+          />
+          {errors.agency && (
+            <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
+              <AlertCircle size={12} />
+              {errors.agency}
+            </p>
+          )}
         </div>
+
+        {/* Contact Name */}
+        <div>
+          <label htmlFor="contact" className="block text-sm font-bold text-white mb-2">
+            <User size={14} className="inline mr-1 text-blue-400" />
+            Contact Name *
+          </label>
+          <input
+            type="text"
+            id="contact"
+            name="contact"
+            value={formData.contact}
+            onChange={handleChange}
+            placeholder="e.g., John Smith"
+            className={`w-full px-4 py-3 bg-gray-900 border ${errors.contact ? 'border-red-500/50' : 'border-gray-700'
+              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all`}
+            required
+          />
+          {errors.contact && (
+            <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
+              <AlertCircle size={12} />
+              {errors.contact}
+            </p>
+          )}
+        </div>
+
+        {/* System Name (Optional) */}
+        <div>
+          <label htmlFor="system" className="block text-sm font-bold text-white mb-2">
+            <FileText size={14} className="inline mr-1 text-blue-400" />
+            System/Project Name
+          </label>
+          <input
+            type="text"
+            id="system"
+            name="system"
+            value={formData.system}
+            onChange={handleChange}
+            placeholder="e.g., Agency Training Platform"
+            className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all"
+          />
+          <p className="text-xs text-gray-500 mt-1.5">Optional</p>
+        </div>
+
+        {/* Purpose (Optional) */}
+        <div>
+          <label htmlFor="purpose" className="block text-sm font-bold text-white mb-2">
+            Access Purpose
+          </label>
+          <textarea
+            id="purpose"
+            name="purpose"
+            value={formData.purpose}
+            onChange={handleChange}
+            placeholder="e.g., Authorization review for new system deployment"
+            rows={3}
+            className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 resize-none transition-all"
+          />
+          <p className="text-xs text-gray-500 mt-1.5">Optional</p>
+        </div>
+
+        {/* Submit Status */}
+        {submitStatus && (
+          <div className={`p-4 rounded-lg border ${submitStatus.type === 'success'
+              ? 'bg-green-500/10 border-green-500/30 text-green-400'
+              : 'bg-red-500/10 border-red-500/30 text-red-400'
+            }`}>
+            <p className="font-medium">{submitStatus.message}</p>
+          </div>
+        )}
+
+        {/* Buttons */}
+        <div className="flex gap-3 pt-4">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="group relative flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 disabled:from-gray-700 disabled:to-gray-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-900/30 disabled:shadow-none disabled:cursor-not-allowed overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+            <span className="relative flex items-center justify-center gap-2">
+              <Shield size={18} />
+              {isSubmitting ? 'Submitting...' : 'Register for Access'}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="px-6 py-4 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl font-medium transition-colors border border-gray-700"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+
+      <div className="mt-6 pt-6 border-t border-gray-800">
+        <p className="text-xs text-gray-500 text-center leading-relaxed">
+          By registering, you acknowledge that access is restricted to federal personnel
+          for official government use only.
+        </p>
       </div>
     </BaseModal>
   );
