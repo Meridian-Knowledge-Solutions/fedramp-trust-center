@@ -15,6 +15,7 @@ import { DataProvider, useData } from './hooks/useData';
 import { ModalProvider, useModal } from './contexts/ModalContext';
 import { ModalContainer } from './components/modals';
 import SettingsModal from './components/modals/SettingsModal';
+import VerifyHandler from './hooks/VerifyHandler';
 
 import { TrustCenterView } from './components/trust/TrustCenterView';
 import { TransparencyConsole } from './components/trust/TransparencyConsole';
@@ -756,6 +757,7 @@ const AppShell = () => {
 export default function App() {
   return (
     <AuthProvider>
+      <VerifyHandler />
       <DataProvider>
         <ModalProvider>
           <AppShell />
