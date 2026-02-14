@@ -752,7 +752,7 @@
       "evidence_v2/KSI-IAM-05/mfa_types.json",
       "evidence_v2/KSI-IAM-05/sso_config.json"
     ],
-    "implementation_summary": "Least privilege enforced via role-based access. No wildcard (*) permissions in custom policies. Access reviews via IAM Access Analyzer."
+    "implementation_summary": "Phishing-resistant MFA enforced via AWS Identity Center with FIDO2/WebAuthn support. Virtual MFA devices audited to identify non-compliant tokens. IAM password policy provides hard-fail backstop if MFA is missing."
   },
   "KSI-IAM-06": {
     "description": "Automatically disable or otherwise secure accounts with privileged access in response to suspicious activity",
@@ -1177,7 +1177,7 @@
       "evidence_v2/KSI-SVC-02/acm_certs.json",
       "evidence_v2/KSI-SVC-02/encryption_policy.json"
     ],
-    "implementation_summary": "Internal scanning via Inspector (EC2, Lambda, ECR). External validation via third-party penetration testing (annual)."
+    "implementation_summary": "Network traffic encryption enforced via ACM-managed TLS certificates on ALB and CloudFront distributions. Encryption policy documented in CodeCommit governance repo. All external-facing endpoints require HTTPS."
   },
   "KSI-SVC-04": {
     "description": "Manage configuration of machine-based information resources using automation.",
@@ -1201,7 +1201,7 @@
       "evidence_v2/KSI-SVC-04/lock_tables.json",
       "evidence_v2/KSI-SVC-04/config_policy.json"
     ],
-    "implementation_summary": "Automated patching via SSM Patch Manager with maintenance windows. Critical patches applied within 15 days per VDR standard."
+    "implementation_summary": "Configuration management automated via Terraform with state stored in S3 (mks-states bucket) and DynamoDB state locking for concurrency control. Configuration management policy in CodeCommit mandates IaC-only changes."
   },
   "KSI-SVC-05": {
     "description": "Use cryptographic methods to validate the integrity of machine-based information resources.",
@@ -1225,7 +1225,7 @@
       "evidence_v2/KSI-SVC-05/integrity_bucket.json",
       "evidence_v2/KSI-SVC-05/ssm_integrity.json"
     ],
-    "implementation_summary": "Attestations stored in CodeCommit with GPG signatures. Compliance attestation dashboard available via Trust Center API."
+    "implementation_summary": "Cryptographic integrity validated via CloudTrail Log File Validation (digest hashing of audit trails), S3 bucket versioning on audit/artifact storage (tamper prevention), and SSM Session Manager for TLS-encrypted, IAM-signed instance access replacing SSH."
   },
   "KSI-SVC-06": {
     "description": "Automate management, protection, and regular rotation of digital keys, certificates, and other secrets.",
@@ -1273,7 +1273,7 @@
       "evidence_v2/KSI-SVC-08/kms_keys.json",
       "evidence_v2/KSI-SVC-08/sanitization_policy.json"
     ],
-    "implementation_summary": "Supply chain security via Dependabot, npm audit, and CodeBuild security scanning. Third-party dependencies reviewed quarterly."
+    "implementation_summary": "Residual data removal automated via S3 Lifecycle Policies (automatic expiration of temporary data), KMS key management (enabling crypto-shredding of encrypted backups), and a formal Data Sanitization Policy defining destruction procedures."
   },
   "KSI-SVC-09": {
     "description": "Persistently validate the authenticity and integrity of communications between machine-based information resources using automation.",
@@ -1297,7 +1297,7 @@
       "evidence_v2/KSI-SVC-09/tls_enforcement.json",
       "evidence_v2/KSI-SVC-09/issued_certs.json"
     ],
-    "implementation_summary": "Boundary connections limited to: ALB (ingress), NAT Gateway (egress), VPC Endpoints (AWS services). No direct peering."
+    "implementation_summary": "Communication authenticity and integrity validated via HTTPS/TLS enforcement on ALB listeners with specific SSL policies (TLS 1.2+), and ACM-issued certificates proving endpoint identity. All load balancer traffic encrypted in transit."
   },
   "KSI-SVC-10": {
     "description": "Remove unwanted federal customer data promptly when requested by an agency in alignment with customer agreements, including from backups if appropriate.",
@@ -1321,7 +1321,7 @@
       "evidence_v2/KSI-SVC-10/retention_plans.json",
       "evidence_v2/KSI-SVC-10/kms_destruction_keys.json"
     ],
-    "implementation_summary": "Cloud infrastructure managed via Terraform. Resource configurations validated pre-deployment and monitored post-deployment via Config."
+    "implementation_summary": "Data removal capabilities validated via Data Sanitization Policy (defining promptly SLA and procedures), AWS Backup Plans with automated retention/expiration rules, and KMS keys enabling crypto-shredding of data from immutable backups."
   },
   "KSI-TPR-03": {
     "description": "Persistently identify, review, and mitigate potential supply chain risks.",
@@ -1340,7 +1340,7 @@
         "note": "Check the commit history for an audit trail of recent policy updates."
       }
     ],
-    "implementation_summary": "Personnel security training required annually. Completion tracked via GitOps attestations. Current completion rate: 100% (48/48 personnel)."
+    "implementation_summary": "Supply chain risk management policy maintained in CodeCommit (security-governance repo) with formal approval rule templates and version-controlled commit history providing an audit trail of policy reviews and updates."
   },
   "KSI-TPR-04": {
     "description": "Automatically monitor third party software information resources for upstream vulnerabilities using mechanisms that may include contractual notification requirements or active monitoring services.",
@@ -1371,6 +1371,6 @@
         "note": "Validate SSM agent deployment for vulnerability management"
       }
     ],
-    "implementation_summary": "Access management reviewed quarterly. Access provisioning requires manager approval. Deprovisioning within 24 hours of termination."
+    "implementation_summary": "Third-party software vulnerabilities monitored via AWS Inspector with continuous scanning enabled for OS and application components. Active findings tracked for remediation. EC2 coverage validated alongside SSM agent deployment for patch management."
   }
 }
