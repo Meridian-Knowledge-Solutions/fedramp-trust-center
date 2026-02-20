@@ -249,7 +249,7 @@ const FlowLine = ({ startX, startY, endX, endY, color, thickness = 3, animated =
 // ============================================
 // System Node Component - PROMINENT connection status
 // ============================================
-const SystemNode = ({ x, y, system, isHovered, onHover, onLeave, awsServices }) => {
+const SystemNode = ({ x, y, system, isHovered, onHover, onLeave, onClick, awsServices }) => {
     const config = CATEGORY_CONFIG[system.category] || CATEGORY_CONFIG.application;
     const Icon = config.icon;
     const isConnected = system.connected;
@@ -265,6 +265,7 @@ const SystemNode = ({ x, y, system, isHovered, onHover, onLeave, awsServices }) 
             transform={`translate(${x}, ${y})`}
             onMouseEnter={() => onHover(system.id)}
             onMouseLeave={onLeave}
+            onClick={() => onClick && onClick(system.id)}
             style={{ cursor: 'pointer' }}
         >
             {/* Outer glow on hover */}
@@ -692,10 +693,20 @@ const CentralHub = ({ health, totalSystems, connectedSystems, totalResources, to
 };
 
 // Enhanced Tooltip Component with CIA Impact and AWS Services
+// Hover-only quick preview — click opens the full detail panel
 const SystemTooltip = ({ system, x, y, awsServices, onMouseEnter, onMouseLeave }) => {
     const config = CATEGORY_CONFIG[system.category] || CATEGORY_CONFIG.application;
     const isAWS = system.id === 'aws' && awsServices;
-    const tooltipHeight = isAWS ? 340 : 220;
+
+    // Dynamic height calculation
+    const baseHeight = 60; // header
+    const servicesHeight = isAWS ? 90 : 0;
+    const ciaHeight = system.cia_impact ? 80 + (system.cia_impact.rationale ? 30 : 0) : 0;
+    const gridHeight = 80;
+    const hintHeight = 28;
+    const padding = 32; // p-4 top+bottom
+    const tooltipHeight = baseHeight + servicesHeight + ciaHeight + gridHeight + hintHeight + padding + 20;
+
     const tooltipY = y > 320 ? y - tooltipHeight - 10 : y + 70;
     const tooltipX = x > 600 ? x - 300 : x < 200 ? x + 20 : x - 150;
 
@@ -786,8 +797,278 @@ const SystemTooltip = ({ system, x, y, awsServices, onMouseEnter, onMouseLeave }
                         <div className="text-sm text-slate-300 truncate">{system.data_source || 'API'}</div>
                     </div>
                 </div>
+
+                {/* Click hint */}
+                <div className="mt-3 pt-2 border-t border-white/5 text-center">
+                    <span className="text-[9px] text-slate-600">Click node for full details</span>
+                </div>
             </div>
         </foreignObject>
+    );
+};
+
+// ============================================
+// System Detail Panel — click-to-pin overlay with expandable services
+// Rendered as HTML overlay (not SVG foreignObject) for better scrolling/interactivity
+// ============================================
+const SystemDetailPanel = ({ system, awsServices, driftSummary, onClose }) => {
+    const [expandedService, setExpandedService] = useState(null);
+    const [showAllServices, setShowAllServices] = useState(false);
+    const config = CATEGORY_CONFIG[system.category] || CATEGORY_CONFIG.application;
+    const Icon = config.icon;
+    const isAWS = system.id === 'aws' && awsServices;
+
+    const allServices = isAWS
+        ? Object.entries(awsServices)
+            .sort((a, b) => b[1] - a[1])
+            .map(([name, cost]) => {
+                const shortName = name.replace('Amazon ', '').replace('AWS ', '');
+                const isSecurityService = name.includes('WAF') || name.includes('Firewall') ||
+                    name.includes('GuardDuty') || name.includes('Security') ||
+                    name.includes('Inspector') || name.includes('KMS') ||
+                    name.includes('CloudTrail') || name.includes('Config') ||
+                    name.includes('Secrets');
+                const isNetworking = name.includes('VPC') || name.includes('Virtual Private') ||
+                    name.includes('Load Balancing') || name.includes('Firewall');
+                const isCompute = name.includes('EC2') || name.includes('Compute') || name.includes('Lambda');
+                const isStorage = name.includes('S3') || name.includes('FSx') || name.includes('Storage');
+                const isDatabase = name.includes('Database') || name.includes('RDS');
+                const category = isSecurityService ? 'Security' : isNetworking ? 'Networking' :
+                    isCompute ? 'Compute' : isStorage ? 'Storage' : isDatabase ? 'Database' : 'Management';
+                // Find related drift items
+                const relatedDrift = (driftSummary || []).filter(d =>
+                    d.source === 'aws' && (
+                        name.toLowerCase().includes(d.type.replace(/_/g, ' ')) ||
+                        d.description.includes(shortName) ||
+                        d.description.includes(name)
+                    )
+                );
+                return { name, shortName, cost, isSecurityService, category, relatedDrift };
+            })
+        : [];
+
+    const visibleServices = showAllServices ? allServices : allServices.slice(0, 10);
+
+    // Group services by category for the expanded view
+    const servicesByCategory = allServices.reduce((acc, svc) => {
+        if (!acc[svc.category]) acc[svc.category] = [];
+        acc[svc.category].push(svc);
+        return acc;
+    }, {});
+
+    return (
+        <div className="absolute inset-0 z-30 flex items-start justify-center pt-8 pb-8" onClick={onClose}>
+            <div
+                className="bg-[#13131a] border border-white/15 rounded-xl shadow-2xl w-[460px] max-h-[85%] overflow-hidden flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+                style={{ boxShadow: '0 0 80px rgba(0,0,0,0.8), 0 0 40px rgba(59,130,246,0.08)' }}
+            >
+                {/* Header */}
+                <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center"
+                            style={{ backgroundColor: `${config.color}15`, border: `1px solid ${config.color}30` }}>
+                            <Icon size={18} color={config.color} />
+                        </div>
+                        <div>
+                            <div className="text-white font-semibold text-base">{system.name}</div>
+                            <div className="text-slate-500 text-xs">{config.label}</div>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <ConnectionStatusBadge connected={system.connected} health={system.health} size="normal" />
+                        <button
+                            onClick={onClose}
+                            className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+                        >
+                            <XCircle size={14} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Scrollable content */}
+                <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
+                    {/* Summary stats */}
+                    <div className="grid grid-cols-4 gap-3">
+                        <div className="bg-white/5 rounded-lg p-2.5 text-center">
+                            <div className="text-[9px] text-slate-500 uppercase">Health</div>
+                            <div className="text-sm font-semibold capitalize mt-0.5" style={{ color: STATUS_COLORS[system.health] }}>
+                                {system.health || 'Unknown'}
+                            </div>
+                        </div>
+                        <div className="bg-white/5 rounded-lg p-2.5 text-center">
+                            <div className="text-[9px] text-slate-500 uppercase">{isAWS ? 'Services' : 'Resources'}</div>
+                            <div className="text-sm font-bold text-white mt-0.5">
+                                {isAWS ? Object.keys(awsServices).length : (system.resource_count || 0)}
+                            </div>
+                        </div>
+                        <div className="bg-white/5 rounded-lg p-2.5 text-center">
+                            <div className="text-[9px] text-slate-500 uppercase">Drift</div>
+                            <div className={`text-sm font-bold mt-0.5 ${system.drift_count > 0 ? 'text-amber-400' : 'text-slate-400'}`}>
+                                {system.drift_count || 0}
+                            </div>
+                        </div>
+                        <div className="bg-white/5 rounded-lg p-2.5 text-center">
+                            <div className="text-[9px] text-slate-500 uppercase">Source</div>
+                            <div className="text-[11px] text-slate-300 mt-0.5 truncate">{system.data_source || 'API'}</div>
+                        </div>
+                    </div>
+
+                    {/* CIA Impact */}
+                    {system.cia_impact && (
+                        <div className="bg-white/5 rounded-lg p-3">
+                            <div className="text-[10px] text-slate-500 uppercase mb-2 flex items-center gap-1.5">
+                                <Info size={10} />
+                                CIA Impact (FRR-MAS-05)
+                            </div>
+                            <div className="flex items-center justify-between mb-2">
+                                <CIABadge impact={system.cia_impact} />
+                                <ThirdPartyBadge isThirdParty={system.is_third_party} isAuthorized={system.is_fedramp_authorized} />
+                            </div>
+                            {system.cia_impact.rationale && (
+                                <div className="text-[10px] text-slate-400 leading-relaxed">{system.cia_impact.rationale}</div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* AWS Services - Clickable */}
+                    {isAWS && allServices.length > 0 && (
+                        <div>
+                            <div className="text-[10px] text-slate-500 uppercase mb-2 flex items-center justify-between">
+                                <div className="flex items-center gap-1.5">
+                                    <Cloud size={10} />
+                                    Active Services ({allServices.length})
+                                </div>
+                                <span className="text-[9px] text-slate-600 normal-case">Click service for details</span>
+                            </div>
+
+                            <div className="space-y-1">
+                                {visibleServices.map((svc, idx) => (
+                                    <div key={idx}>
+                                        <button
+                                            onClick={() => setExpandedService(expandedService === idx ? null : idx)}
+                                            className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between gap-2 transition-all ${expandedService === idx
+                                                    ? 'bg-blue-500/10 border border-blue-500/30'
+                                                    : 'bg-white/5 hover:bg-white/8 border border-transparent'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${svc.isSecurityService ? 'bg-pink-400' : 'bg-blue-400'}`} />
+                                                <span className="text-[11px] text-slate-300 truncate">{svc.shortName}</span>
+                                                {svc.relatedDrift.length > 0 && (
+                                                    <span className="flex-shrink-0 w-4 h-4 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
+                                                        <AlertTriangle size={8} className="text-amber-400" />
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2 flex-shrink-0">
+                                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-slate-500">{svc.category}</span>
+                                                {expandedService === idx
+                                                    ? <ChevronUp size={12} className="text-slate-500" />
+                                                    : <ChevronDown size={12} className="text-slate-500" />
+                                                }
+                                            </div>
+                                        </button>
+
+                                        {/* Expanded service detail */}
+                                        {expandedService === idx && (
+                                            <div className="mx-3 mt-1 mb-2 px-3 py-2.5 bg-[#0c0c10] rounded-lg border border-white/5 space-y-2">
+                                                <div className="grid grid-cols-2 gap-3 text-[10px]">
+                                                    <div>
+                                                        <div className="text-slate-600 uppercase">Full Name</div>
+                                                        <div className="text-slate-300 mt-0.5">{svc.name}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-slate-600 uppercase">Monthly Cost</div>
+                                                        <div className="text-slate-300 mt-0.5">${svc.cost.toFixed(2)}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-slate-600 uppercase">Category</div>
+                                                        <div className="text-slate-300 mt-0.5">{svc.category}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-slate-600 uppercase">Classification</div>
+                                                        <div className={`mt-0.5 ${svc.isSecurityService ? 'text-pink-400' : 'text-blue-400'}`}>
+                                                            {svc.isSecurityService ? 'Security Service' : 'Infrastructure'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {svc.relatedDrift.length > 0 && (
+                                                    <div className="pt-2 border-t border-white/5">
+                                                        <div className="text-[9px] text-amber-500 uppercase mb-1 flex items-center gap-1">
+                                                            <AlertTriangle size={8} />
+                                                            Drift Detected
+                                                        </div>
+                                                        {svc.relatedDrift.map((drift, dIdx) => (
+                                                            <div key={dIdx} className="text-[10px] text-slate-400 leading-relaxed">
+                                                                {drift.description}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {svc.cost === 0 && svc.relatedDrift.length === 0 && (
+                                                    <div className="text-[9px] text-slate-600 italic">
+                                                        No billing activity detected. Service may be in free tier or newly provisioned.
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {allServices.length > 10 && !showAllServices && (
+                                <button
+                                    onClick={() => setShowAllServices(true)}
+                                    className="w-full mt-2 py-1.5 text-[10px] text-blue-400 hover:text-blue-300 bg-blue-500/5 hover:bg-blue-500/10 rounded-lg transition-colors border border-blue-500/10"
+                                >
+                                    Show all {allServices.length} services
+                                </button>
+                            )}
+                            {showAllServices && allServices.length > 10 && (
+                                <button
+                                    onClick={() => { setShowAllServices(false); setExpandedService(null); }}
+                                    className="w-full mt-2 py-1.5 text-[10px] text-slate-500 hover:text-slate-400 bg-white/5 rounded-lg transition-colors"
+                                >
+                                    Show fewer
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Drift details for this system */}
+                    {(driftSummary || []).filter(d => d.source === system.id).length > 0 && (
+                        <div>
+                            <div className="text-[10px] text-amber-500/80 uppercase mb-2 flex items-center gap-1.5">
+                                <AlertTriangle size={10} />
+                                Configuration Drift ({(driftSummary || []).filter(d => d.source === system.id).length})
+                            </div>
+                            <div className="space-y-1.5">
+                                {(driftSummary || []).filter(d => d.source === system.id).map((drift, idx) => (
+                                    <div key={idx} className="bg-amber-500/5 border border-amber-500/15 rounded-lg px-3 py-2">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-[10px] text-amber-400 font-medium">{drift.type.replace(/_/g, ' ')}</span>
+                                            <span className={`text-[9px] px-1.5 py-0.5 rounded ${drift.severity === 'critical' ? 'bg-rose-500/15 text-rose-400' : 'bg-amber-500/15 text-amber-400/80'}`}>
+                                                {drift.severity}
+                                            </span>
+                                        </div>
+                                        <div className="text-[10px] text-slate-400 leading-relaxed">{drift.description}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="px-5 py-3 border-t border-white/5 flex-shrink-0">
+                    <div className="flex items-center justify-between text-[9px] text-slate-600">
+                        <span>System ID: {system.id}</span>
+                        <span>Type: {system.system_type || 'connected'}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };
 
@@ -973,6 +1254,13 @@ export const UnifiedMasDashboard = () => {
     const [awsExpanded, setAwsExpanded] = useState(true);
     const [inventoryExpanded, setInventoryExpanded] = useState(false);
     const [integrationsExpanded, setIntegrationsExpanded] = useState(false);
+    const [selectedSystem, setSelectedSystem] = useState(null);
+
+    const handleSystemClick = useCallback((systemId) => {
+        setSelectedSystem(prev => prev === systemId ? null : systemId);
+        // Clear hover when clicking
+        setHoveredSystem(null);
+    }, []);
 
     const loadData = useCallback(async () => {
         setLoading(true);
@@ -1232,6 +1520,7 @@ export const UnifiedMasDashboard = () => {
                             isHovered={hoveredSystem === system.id}
                             onHover={handleSystemHover}
                             onLeave={handleSystemLeave}
+                            onClick={handleSystemClick}
                             awsServices={data?.aws_services}
                         />
                     ))}
@@ -1289,8 +1578,8 @@ export const UnifiedMasDashboard = () => {
                         );
                     })}
 
-                    {/* System Tooltip */}
-                    {hoveredSystemData && (
+                    {/* System Tooltip - hidden when detail panel is open */}
+                    {hoveredSystemData && !selectedSystem && (
                         <SystemTooltip
                             system={hoveredSystemData}
                             x={hoveredSystemData.x}
@@ -1341,6 +1630,19 @@ export const UnifiedMasDashboard = () => {
                         <span>Non-FedRAMP</span>
                     </div>
                 </div>
+
+                {/* System Detail Panel - Click overlay */}
+                {selectedSystem && (() => {
+                    const systemData = data?.systems?.find(s => s.id === selectedSystem);
+                    return systemData ? (
+                        <SystemDetailPanel
+                            system={systemData}
+                            awsServices={data?.aws_services}
+                            driftSummary={data?.drift_summary}
+                            onClose={() => setSelectedSystem(null)}
+                        />
+                    ) : null;
+                })()}
             </div>
 
             {/* AWS Services Panel - Shows ALL services */}
