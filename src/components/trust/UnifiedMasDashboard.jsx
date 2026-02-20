@@ -478,7 +478,7 @@ const IntegrationNode = ({ x, y, integration, isHovered, onHover, onLeave }) => 
 
 // Integration Tooltip - Enhanced with full metadata from mas_architecture_map.json
 // FRR-MAS-05: Information flows and CIA impact documented
-const IntegrationTooltip = ({ integration, x, y, svgHeight = 720 }) => {
+const IntegrationTooltip = ({ integration, x, y, svgHeight = 720, onMouseEnter, onMouseLeave }) => {
     const config = CATEGORY_CONFIG[integration.category] || CATEGORY_CONFIG.application;
     const tooltipWidth = 300;
 
@@ -520,7 +520,8 @@ const IntegrationTooltip = ({ integration, x, y, svgHeight = 720 }) => {
     const flowStyle = classificationColors[integration.data_flow?.classification] || classificationColors['non-federal'];
 
     return (
-        <foreignObject x={tooltipX} y={tooltipY} width={tooltipWidth} height={tooltipHeight + 20}>
+        <foreignObject x={tooltipX} y={tooltipY} width={tooltipWidth} height={tooltipHeight + 20}
+            onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} style={{ pointerEvents: 'all' }}>
             <div className="bg-[#13131a] border border-slate-700/50 rounded-lg shadow-2xl overflow-hidden">
                 {/* Header */}
                 <div className="px-3 py-2.5 bg-slate-800/30 border-b border-slate-700/30">
@@ -691,7 +692,7 @@ const CentralHub = ({ health, totalSystems, connectedSystems, totalResources, to
 };
 
 // Enhanced Tooltip Component with CIA Impact and AWS Services
-const SystemTooltip = ({ system, x, y, awsServices }) => {
+const SystemTooltip = ({ system, x, y, awsServices, onMouseEnter, onMouseLeave }) => {
     const config = CATEGORY_CONFIG[system.category] || CATEGORY_CONFIG.application;
     const isAWS = system.id === 'aws' && awsServices;
     const tooltipHeight = isAWS ? 340 : 220;
@@ -707,7 +708,8 @@ const SystemTooltip = ({ system, x, y, awsServices }) => {
         : [];
 
     return (
-        <foreignObject x={tooltipX} y={tooltipY} width="300" height={tooltipHeight}>
+        <foreignObject x={tooltipX} y={tooltipY} width="300" height={tooltipHeight}
+            onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} style={{ pointerEvents: 'all' }}>
             <div className="bg-[#1a1a1f] border border-white/20 rounded-xl p-4 shadow-2xl">
                 <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/10">
                     <div className="flex items-center gap-3">
@@ -928,6 +930,45 @@ export const UnifiedMasDashboard = () => {
     const [error, setError] = useState(null);
     const [hoveredSystem, setHoveredSystem] = useState(null);
     const [hoveredIntegration, setHoveredIntegration] = useState(null);
+    const hoverSystemTimerRef = React.useRef(null);
+    const hoverIntegrationTimerRef = React.useRef(null);
+
+    // Delayed leave handlers to allow mouse to travel from node to tooltip
+    const handleSystemHover = useCallback((id) => {
+        if (hoverSystemTimerRef.current) {
+            clearTimeout(hoverSystemTimerRef.current);
+            hoverSystemTimerRef.current = null;
+        }
+        setHoveredSystem(id);
+    }, []);
+
+    const handleSystemLeave = useCallback(() => {
+        hoverSystemTimerRef.current = setTimeout(() => {
+            setHoveredSystem(null);
+        }, 150);
+    }, []);
+
+    const handleIntegrationHover = useCallback((id) => {
+        if (hoverIntegrationTimerRef.current) {
+            clearTimeout(hoverIntegrationTimerRef.current);
+            hoverIntegrationTimerRef.current = null;
+        }
+        setHoveredIntegration(id);
+    }, []);
+
+    const handleIntegrationLeave = useCallback(() => {
+        hoverIntegrationTimerRef.current = setTimeout(() => {
+            setHoveredIntegration(null);
+        }, 150);
+    }, []);
+
+    // Cleanup timers on unmount
+    useEffect(() => {
+        return () => {
+            if (hoverSystemTimerRef.current) clearTimeout(hoverSystemTimerRef.current);
+            if (hoverIntegrationTimerRef.current) clearTimeout(hoverIntegrationTimerRef.current);
+        };
+    }, []);
     const [lastRefresh, setLastRefresh] = useState(null);
     const [awsExpanded, setAwsExpanded] = useState(true);
     const [inventoryExpanded, setInventoryExpanded] = useState(false);
@@ -1189,8 +1230,8 @@ export const UnifiedMasDashboard = () => {
                             y={system.y}
                             system={system}
                             isHovered={hoveredSystem === system.id}
-                            onHover={setHoveredSystem}
-                            onLeave={() => setHoveredSystem(null)}
+                            onHover={handleSystemHover}
+                            onLeave={handleSystemLeave}
                             awsServices={data?.aws_services}
                         />
                     ))}
@@ -1223,8 +1264,8 @@ export const UnifiedMasDashboard = () => {
                             y={integration.y}
                             integration={integration}
                             isHovered={hoveredIntegration === integration.id}
-                            onHover={setHoveredIntegration}
-                            onLeave={() => setHoveredIntegration(null)}
+                            onHover={handleIntegrationHover}
+                            onLeave={handleIntegrationLeave}
                         />
                     ))}
 
@@ -1255,6 +1296,8 @@ export const UnifiedMasDashboard = () => {
                             x={hoveredSystemData.x}
                             y={hoveredSystemData.y}
                             awsServices={data?.aws_services}
+                            onMouseEnter={() => handleSystemHover(hoveredSystemData.id)}
+                            onMouseLeave={handleSystemLeave}
                         />
                     )}
 
@@ -1265,6 +1308,8 @@ export const UnifiedMasDashboard = () => {
                             x={hoveredIntegrationData.x}
                             y={hoveredIntegrationData.y}
                             svgHeight={svgHeight}
+                            onMouseEnter={() => handleIntegrationHover(hoveredIntegrationData.id)}
+                            onMouseLeave={handleIntegrationLeave}
                         />
                     )}
                 </svg>
