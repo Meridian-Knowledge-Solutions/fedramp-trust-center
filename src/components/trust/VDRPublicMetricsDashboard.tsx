@@ -116,13 +116,28 @@ export default function VDRDashboard() {
   const cspm = d.cspm_summary;
   const acc = d.vdr_acceptance;
   const exploit = d.exploit_type_distribution;
-  const trends = d.trends.daily;
+  const dailyTrends = d.trends.daily;
+
+  const monthlyTrends = useMemo(() => {
+    const grouped: Record<string, { total_vulnerabilities: number[]; active_count: number[] }> = {};
+    dailyTrends.forEach(({ date, total_vulnerabilities, active_count }) => {
+      const month = date.slice(0, 7); // "YYYY-MM"
+      if (!grouped[month]) grouped[month] = { total_vulnerabilities: [], active_count: [] };
+      grouped[month].total_vulnerabilities.push(total_vulnerabilities);
+      grouped[month].active_count.push(active_count);
+    });
+    return Object.entries(grouped).map(([month, vals]) => ({
+      date: month,
+      total_vulnerabilities: Math.round(vals.total_vulnerabilities.reduce((a, b) => a + b, 0) / vals.total_vulnerabilities.length),
+      active_count: Math.round(vals.active_count.reduce((a, b) => a + b, 0) / vals.active_count.length),
+    }));
+  }, [dailyTrends]);
 
   const weekDiff = useMemo(() => {
-    const latest = trends[trends.length - 1];
-    const prev = trends[Math.max(0, trends.length - 8)];
+    const latest = dailyTrends[dailyTrends.length - 1];
+    const prev = dailyTrends[Math.max(0, dailyTrends.length - 8)];
     return latest.total_vulnerabilities - prev.total_vulnerabilities;
-  }, [trends]);
+  }, [dailyTrends]);
 
   const severityBarData = useMemo(() =>
     Object.entries(risk.severity_distribution).filter(([, v]) => v > 0).map(([name, value]) => ({ name, value })),
@@ -208,9 +223,9 @@ export default function VDRDashboard() {
 
             {/* Trend chart */}
             <div style={{ ...card }}>
-              <div style={{ ...label, marginBottom: 12 }}>30-Day Vulnerability Trend</div>
+              <div style={{ ...label, marginBottom: 12 }}>Monthly Vulnerability Trend</div>
               <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={trends}>
+                <AreaChart data={monthlyTrends}>
                   <defs>
                     <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.2} />
@@ -218,10 +233,10 @@ export default function VDRDashboard() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="#1e1e22" strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fill: "#52525b", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => v?.slice(5)} />
+                  <XAxis dataKey="date" tick={{ fill: "#52525b", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => { const [y, m] = v.split("-"); const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; return `${months[parseInt(m, 10) - 1]} ${y}`; }} />
                   <YAxis tick={{ fill: "#52525b", fontSize: 10 }} axisLine={false} tickLine={false} domain={["dataMin - 10", "dataMax + 10"]} />
                   <Tooltip content={<ChartTip />} />
-                  <Area type="monotone" dataKey="total_vulnerabilities" name="Total" stroke="#3b82f6" strokeWidth={2} fill="url(#areaFill)" dot={false} />
+                  <Area type="monotone" dataKey="total_vulnerabilities" name="Avg Total" stroke="#3b82f6" strokeWidth={2} fill="url(#areaFill)" dot={{ r: 4, fill: "#3b82f6", stroke: "#0a0a0b", strokeWidth: 2 }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -447,9 +462,9 @@ export default function VDRDashboard() {
 
             {/* Trend + exploit breakdown */}
             <div style={{ ...card }}>
-              <div style={{ ...label, marginBottom: 12 }}>30-Day Trend</div>
+              <div style={{ ...label, marginBottom: 12 }}>Monthly Trend</div>
               <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={trends}>
+                <AreaChart data={monthlyTrends}>
                   <defs>
                     <linearGradient id="areaFill2" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.15} />
@@ -457,10 +472,10 @@ export default function VDRDashboard() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="#1e1e22" strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fill: "#52525b", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => v?.slice(5)} />
+                  <XAxis dataKey="date" tick={{ fill: "#52525b", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => { const [y, m] = v.split("-"); const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; return `${months[parseInt(m, 10) - 1]} ${y}`; }} />
                   <YAxis tick={{ fill: "#52525b", fontSize: 10 }} axisLine={false} tickLine={false} domain={["dataMin - 10", "dataMax + 10"]} />
                   <Tooltip content={<ChartTip />} />
-                  <Area type="monotone" dataKey="total_vulnerabilities" name="Total" stroke="#3b82f6" strokeWidth={2} fill="url(#areaFill2)" dot={false} />
+                  <Area type="monotone" dataKey="total_vulnerabilities" name="Avg Total" stroke="#3b82f6" strokeWidth={2} fill="url(#areaFill2)" dot={{ r: 4, fill: "#3b82f6", stroke: "#0a0a0b", strokeWidth: 2 }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
