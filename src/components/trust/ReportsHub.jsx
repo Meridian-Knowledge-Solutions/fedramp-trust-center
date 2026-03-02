@@ -24,56 +24,44 @@ const REPORT_CONFIGS = {
     oar: {
         title: 'Ongoing Authorization Report',
         shortTitle: 'OAR',
-        subtitle: 'FRR-CCM Compliance',
+        subtitle: 'FRR-CCM',
         icon: Shield,
         gradient: 'from-emerald-600 to-teal-600',
         shadow: 'shadow-emerald-500/10',
-        accentBg: 'bg-emerald-500/10',
         accentText: 'text-emerald-400',
-        accentBorder: 'border-emerald-500/20',
-        lightText: 'text-emerald-100',
         cadence: 'Quarterly',
-        schedule: 'Feb 15, May 15, Aug 15, Nov 15',
+        schedule: 'Feb 15 / May 15 / Aug 15 / Nov 15',
     },
     qar: {
         title: 'Quarterly Authorization Review',
         shortTitle: 'QAR',
-        subtitle: 'FRR-CCM-QR Compliance',
+        subtitle: 'FRR-CCM-QR',
         icon: BarChart3,
         gradient: 'from-indigo-600 to-violet-600',
         shadow: 'shadow-indigo-500/10',
-        accentBg: 'bg-indigo-500/10',
         accentText: 'text-indigo-400',
-        accentBorder: 'border-indigo-500/20',
-        lightText: 'text-indigo-100',
         cadence: 'Quarterly',
         schedule: 'Synchronous review + dashboard',
     },
     vdr: {
         title: 'Vulnerability Detection & Response',
         shortTitle: 'VDR',
-        subtitle: 'FRR-VDR Compliance',
+        subtitle: 'FRR-VDR',
         icon: Activity,
         gradient: 'from-blue-600 to-indigo-600',
         shadow: 'shadow-blue-500/10',
-        accentBg: 'bg-blue-500/10',
         accentText: 'text-blue-400',
-        accentBorder: 'border-blue-500/20',
-        lightText: 'text-blue-100',
         cadence: '3-Day',
         schedule: 'Continuous pipeline',
     },
     scn: {
         title: 'Significant Change Notification',
         shortTitle: 'SCN',
-        subtitle: 'FRR-SCN Compliance',
+        subtitle: 'FRR-SCN',
         icon: Bell,
         gradient: 'from-amber-600 to-orange-600',
         shadow: 'shadow-amber-500/10',
-        accentBg: 'bg-amber-500/10',
         accentText: 'text-amber-400',
-        accentBorder: 'border-amber-500/20',
-        lightText: 'text-amber-100',
         cadence: 'Event-Driven',
         schedule: 'On qualifying change',
     },
@@ -82,13 +70,12 @@ const REPORT_CONFIGS = {
 // --- EXTRACT KEY METRICS FROM REPORT DATA ---
 const extractMetrics = (type, report) => {
     if (!report) return [];
-
     switch (type) {
         case 'oar': {
             const exec = report.executive_summary || {};
             const trend = report.compliance_trend || {};
             return [
-                { label: 'Compliance', value: `${exec.compliance_rate || 0}%` },
+                { label: 'Rate', value: `${exec.compliance_rate || 0}%` },
                 { label: 'KSIs', value: `${exec.total_ksis || 0}` },
                 { label: 'Gaps', value: `${exec.active_gaps || 0}` },
                 { label: 'Trend', value: trend.trend_direction || 'stable' },
@@ -96,34 +83,34 @@ const extractMetrics = (type, report) => {
         }
         case 'qar': {
             const exec = report.executive_summary || {};
-            const attestations = report.compliance_attestations || {};
-            const attCount = Object.values(attestations).filter(Boolean).length;
-            const attTotal = Object.keys(attestations).length || 5;
+            const att = report.compliance_attestations || {};
+            const attCount = Object.values(att).filter(Boolean).length;
+            const attTotal = Object.keys(att).length || 5;
             return [
-                { label: 'Compliance', value: `${exec.compliance_rate || exec.pass_rate || '100'}%` },
-                { label: 'Controls', value: `${exec.total_ksis || exec.verified_controls || 0}` },
-                { label: 'QR Reqs', value: `${attCount}/${attTotal}` },
-                { label: 'Window', value: '14-day' },
+                { label: 'Rate', value: `${exec.compliance_rate || exec.pass_rate || '100'}%` },
+                { label: 'KSIs', value: `${exec.total_ksis || exec.verified_controls || 0}` },
+                { label: 'QR', value: `${attCount}/${attTotal}` },
+                { label: 'Window', value: '14d' },
             ];
         }
         case 'vdr': {
-            const metrics = report.metrics || {};
-            const breakdown = metrics.severity_breakdown || {};
+            const m = report.metrics || {};
+            const b = m.severity_breakdown || {};
             return [
-                { label: 'Total', value: `${metrics.total_detected || 0}` },
-                { label: 'Critical', value: `${breakdown.critical || 0}` },
-                { label: 'Open', value: `${metrics.total_open || 0}` },
-                { label: 'SLA', value: `${metrics.sla_compliance_rate || 0}%` },
+                { label: 'Total', value: `${m.total_detected || 0}` },
+                { label: 'Crit', value: `${b.critical || 0}` },
+                { label: 'Open', value: `${m.total_open || 0}` },
+                { label: 'SLA', value: `${m.sla_compliance_rate || 0}%` },
             ];
         }
         case 'scn': {
             const cls = report.change_classification || {};
-            const verification = report.controls_verification || {};
+            const ver = report.controls_verification || {};
             return [
                 { label: 'Tier', value: cls.tier || 'N/A' },
-                { label: 'Emergency', value: cls.is_emergency ? 'Yes' : 'No' },
-                { label: 'Verification', value: verification.overall_status || 'N/A' },
-                { label: 'Controls', value: `${(verification.results || []).length}` },
+                { label: 'Emerg', value: cls.is_emergency ? 'Yes' : 'No' },
+                { label: 'Status', value: ver.overall_status || 'N/A' },
+                { label: 'Ctrls', value: `${(ver.results || []).length}` },
             ];
         }
         default:
@@ -131,148 +118,116 @@ const extractMetrics = (type, report) => {
     }
 };
 
-// --- INDIVIDUAL REPORT CARD ---
+// --- INDIVIDUAL REPORT CARD (compact) ---
 const ReportCard = memo(({ type, config, manifest, reportData }) => {
     const [expanded, setExpanded] = useState(false);
     const Icon = config.icon;
     const metrics = extractMetrics(type, reportData);
-    const manifestEntry = manifest?.reports?.find(r => r.type === type);
-    const dataType = manifestEntry?.data_type || 'unknown';
-    const frr = manifestEntry?.frr_requirements || [];
+    const entry = manifest?.reports?.find(r => r.type === type);
+    const dataType = entry?.data_type || 'unknown';
+    const frr = entry?.frr_requirements || [];
     const generatedAt = manifest?.generation_timestamp;
-    const generatedDate = generatedAt
-        ? new Date(generatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-        : 'N/A';
+    const genDate = generatedAt
+        ? new Date(generatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+        : '—';
 
-    const reportFile = manifestEntry?.file;
-    const htmlFile = manifestEntry?.html_file;
-    const schemaFile = manifestEntry?.schema;
+    const reportFile = entry?.file;
+    const htmlFile = entry?.html_file;
+    const schemaFile = entry?.schema;
 
     return (
-        <div className={`bg-gradient-to-br ${config.gradient} rounded-2xl text-white shadow-xl ${config.shadow} relative overflow-hidden`}>
-            <div className="relative z-10 p-6 flex flex-col h-full">
+        <div className={`bg-gradient-to-br ${config.gradient} rounded-xl text-white shadow-lg ${config.shadow} overflow-hidden min-w-0`}>
+            <div className="relative p-4 flex flex-col h-full">
                 {/* Header */}
-                <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white/70">{config.subtitle}</span>
-                            <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-white/60">{config.subtitle}</span>
+                            <span className={`text-[8px] font-bold uppercase px-1 py-px rounded ${
                                 dataType === 'live'
-                                    ? 'bg-emerald-400/20 text-emerald-200 border border-emerald-400/30'
-                                    : 'bg-amber-400/20 text-amber-200 border border-amber-400/30'
-                            }`}>
-                                {dataType}
-                            </span>
+                                    ? 'bg-emerald-400/20 text-emerald-200'
+                                    : 'bg-amber-400/20 text-amber-200'
+                            }`}>{dataType}</span>
                         </div>
-                        <h3 className="text-lg font-bold tracking-tight leading-tight">{config.title}</h3>
+                        <h3 className="text-[13px] font-bold leading-tight truncate">{config.title}</h3>
                     </div>
-                    <div className="p-2.5 bg-white/10 rounded-xl backdrop-blur-md border border-white/10 shrink-0 ml-3">
-                        <Icon className="w-5 h-5 text-white" />
+                    <div className="p-1.5 bg-white/10 rounded-lg shrink-0">
+                        <Icon className="w-4 h-4" />
                     </div>
                 </div>
 
-                {/* Metrics Row */}
-                <div className="grid grid-cols-4 gap-2 mb-4">
+                {/* Metrics Row - compact */}
+                <div className="grid grid-cols-4 gap-1.5 mb-3">
                     {metrics.map((m, i) => (
-                        <div key={i} className="bg-white/10 backdrop-blur-md rounded-xl py-2 px-2 border border-white/15 text-center">
-                            <div className="text-sm font-black font-mono leading-none">{m.value}</div>
-                            <div className="text-[8px] uppercase tracking-wider text-white/70 font-bold mt-1">{m.label}</div>
+                        <div key={i} className="bg-white/10 rounded-lg py-1.5 px-1 text-center min-w-0">
+                            <div className="text-[12px] font-black font-mono leading-none truncate">{m.value}</div>
+                            <div className="text-[7px] uppercase tracking-wider text-white/60 font-semibold mt-0.5">{m.label}</div>
                         </div>
                     ))}
                 </div>
 
-                {/* Schedule Info */}
-                <div className="flex items-center gap-2 text-[10px] text-white/70 mb-3">
-                    <Clock className="w-3 h-3" />
-                    <span className="font-bold uppercase tracking-wider">{config.cadence}</span>
-                    <span className="text-white/40">|</span>
-                    <span>{config.schedule}</span>
+                {/* Meta line */}
+                <div className="flex items-center gap-3 text-[9px] text-white/50 mb-3">
+                    <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />{config.cadence}</span>
+                    <span>|</span>
+                    <span className="flex items-center gap-1"><Calendar className="w-2.5 h-2.5" />{genDate}</span>
                 </div>
 
-                {/* Generated Date */}
-                <div className="flex items-center gap-2 text-[10px] text-white/60 mb-4">
-                    <Calendar className="w-3 h-3" />
-                    <span>Generated: <span className="font-mono text-white/80">{generatedDate}</span></span>
-                </div>
-
-                {/* Action Buttons — JSON + HTML + Schema */}
-                <div className="space-y-2 mt-auto">
-                    {/* Row 1: Human-readable HTML report */}
+                {/* Buttons - prominent HTML link + JSON/Schema row */}
+                <div className="mt-auto space-y-1.5">
                     {htmlFile && (
-                        <a
-                            href={`${REPORTS_PATH}html/${htmlFile}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center justify-center gap-1.5 w-full py-2.5 bg-white text-gray-800 rounded-xl font-bold text-[11px] hover:bg-white/90 transition-all shadow-lg"
-                        >
-                            <Globe className="w-3.5 h-3.5" /> View Report (HTML)
+                        <a href={`${REPORTS_PATH}html/${htmlFile}`} target="_blank" rel="noreferrer"
+                           className="group flex items-center justify-center gap-1.5 w-full py-2 bg-white text-gray-900 rounded-lg font-bold text-[11px] hover:bg-white/90 transition-all shadow-sm cursor-pointer">
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>View Human-Readable Report</span>
+                            <ExternalLink className="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" />
                         </a>
                     )}
-
-                    {/* Row 2: JSON + Schema side-by-side */}
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="flex gap-1.5">
                         {reportFile && (
-                            <a
-                                href={`${REPORTS_PATH}samples/${reportFile}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold text-[11px] transition-all ${
-                                    htmlFile
-                                        ? 'bg-white/15 text-white hover:bg-white/25 border border-white/20'
-                                        : 'bg-white text-gray-800 hover:bg-white/90 shadow-lg'
-                                }`}
-                            >
-                                <FileJson className="w-3.5 h-3.5" /> JSON
+                            <a href={`${REPORTS_PATH}samples/${reportFile}`} target="_blank" rel="noreferrer"
+                               className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-white/15 text-white rounded-lg font-bold text-[10px] hover:bg-white/25 transition-all cursor-pointer">
+                                <FileJson className="w-3 h-3" /> Machine-Readable (JSON)
                             </a>
                         )}
                         {schemaFile && (
-                            <a
-                                href={`${REPORTS_PATH}schemas/${schemaFile}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center justify-center gap-1.5 py-2.5 bg-white/15 text-white rounded-xl font-bold text-[11px] hover:bg-white/25 transition-all border border-white/20"
-                            >
-                                <FileText className="w-3.5 h-3.5" /> Schema
+                            <a href={`${REPORTS_PATH}schemas/${schemaFile}`} target="_blank" rel="noreferrer"
+                               className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-white/15 text-white rounded-lg font-bold text-[10px] hover:bg-white/25 transition-all cursor-pointer">
+                                <FileText className="w-3 h-3" /> Schema
                             </a>
                         )}
                     </div>
-
-                    {/* Expandable FRR Requirements */}
                     {frr.length > 0 && (
-                        <button
-                            onClick={() => setExpanded(!expanded)}
-                            className="flex items-center justify-between w-full py-2 px-3 bg-white/5 rounded-xl text-[10px] text-white/70 hover:bg-white/10 transition-all border border-white/10"
-                        >
-                            <span className="font-bold uppercase tracking-wider">
-                                {frr.length} FRR Requirements Covered
-                            </span>
-                            {expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                        </button>
-                    )}
-                    {expanded && (
-                        <div className="bg-white/5 rounded-xl p-3 border border-white/10 space-y-1">
-                            {frr.map((req, i) => (
-                                <div key={i} className="flex items-center gap-1.5 text-[10px] text-white/80">
-                                    <CheckCircle2 className="w-3 h-3 text-emerald-300 shrink-0" />
-                                    <span>{req}</span>
+                        <>
+                            <button onClick={() => setExpanded(!expanded)}
+                                className="flex items-center justify-between w-full py-1 px-2 bg-white/5 rounded-lg text-[9px] text-white/50 hover:bg-white/10 transition-all">
+                                <span className="font-semibold uppercase tracking-wider">{frr.length} FRR Requirements</span>
+                                {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                            </button>
+                            {expanded && (
+                                <div className="bg-white/5 rounded-lg p-2 space-y-0.5 max-h-28 overflow-y-auto">
+                                    {frr.map((req, i) => (
+                                        <div key={i} className="flex items-center gap-1 text-[9px] text-white/70">
+                                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-300 shrink-0" />
+                                            <span className="truncate">{req}</span>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
-            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
         </div>
     );
 });
 
-// --- SCHEDULE SIDEBAR ---
+// --- SCHEDULE SIDEBAR (compact) ---
 const SchedulePanel = memo(({ manifest, meeting }) => {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
 
-    // Calculate next OAR date
     const oarMonths = [2, 5, 8, 11];
     const nextOARMonth = oarMonths.find(m => m > month || (m === month && now.getDate() < 15)) || oarMonths[0];
     const nextOARYear = nextOARMonth >= month ? year : year + 1;
@@ -280,22 +235,20 @@ const SchedulePanel = memo(({ manifest, meeting }) => {
 
     const generatedAt = manifest?.generation_timestamp;
     const lastGenerated = generatedAt
-        ? new Date(generatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+        ? new Date(generatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
         : 'N/A';
 
     const downloadICS = () => {
         if (!meeting) return;
-        const icsContent = [
+        const ics = [
             'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
             `SUMMARY:${meeting.meetingTitle || 'FedRAMP Quarterly Review'}`,
             `DTSTART:${(meeting.nextDate || '').replace(/-/g, '')}T190000Z`,
             `DURATION:PT${meeting.durationMinutes || 60}M`,
-            `DESCRIPTION:${meeting.description || 'Synchronous review session.'}\\n\\nRegister: ${meeting.registrationUrl}`,
-            `LOCATION:Microsoft Teams (Registration Required)`,
+            `DESCRIPTION:${meeting.description || ''}\\n\\nRegister: ${meeting.registrationUrl}`,
             'END:VEVENT', 'END:VCALENDAR'
         ].join('\n');
-
-        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
         link.setAttribute('download', `FedRAMP_Review_${meeting.nextDate}.ics`);
@@ -304,105 +257,64 @@ const SchedulePanel = memo(({ manifest, meeting }) => {
         document.body.removeChild(link);
     };
 
-    const scheduleItems = [
-        {
-            label: 'Next OAR Report',
-            date: nextOARDate,
-            icon: Shield,
-            color: 'text-emerald-400',
-            bgColor: 'bg-emerald-500/10',
-            borderColor: 'border-emerald-500/20',
-        },
-        {
-            label: 'VDR Cadence',
-            date: 'Every 3 days',
-            icon: Activity,
-            color: 'text-blue-400',
-            bgColor: 'bg-blue-500/10',
-            borderColor: 'border-blue-500/20',
-        },
-        {
-            label: 'SCN Trigger',
-            date: 'On qualifying change',
-            icon: Bell,
-            color: 'text-amber-400',
-            bgColor: 'bg-amber-500/10',
-            borderColor: 'border-amber-500/20',
-        },
-    ];
-
+    const items = [];
     if (meeting?.nextDate) {
-        scheduleItems.unshift({
-            label: 'Quarterly Review',
-            date: meeting.nextDate,
-            icon: Video,
-            color: 'text-indigo-400',
-            bgColor: 'bg-indigo-500/10',
-            borderColor: 'border-indigo-500/20',
-        });
+        items.push({ label: 'Quarterly Review', date: meeting.nextDate, icon: Video, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' });
     }
+    items.push(
+        { label: 'Next OAR', date: nextOARDate, icon: Shield, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+        { label: 'VDR Cadence', date: 'Every 3 days', icon: Activity, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+        { label: 'SCN Trigger', date: 'On change', icon: Bell, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+    );
 
     return (
-        <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-6 h-full`}>
-            <div className="flex items-center gap-2 mb-5">
-                <Calendar className="w-4 h-4 text-slate-400" />
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Schedule & Deadlines</h3>
+        <div className={`${THEME.panel} border ${THEME.border} rounded-xl p-4 h-full`}>
+            <div className="flex items-center gap-2 mb-4">
+                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider">Schedule</h3>
             </div>
 
-            <div className="space-y-3 mb-6">
-                {scheduleItems.map((item, i) => {
-                    const ItemIcon = item.icon;
+            <div className="space-y-2 mb-4">
+                {items.map((item, i) => {
+                    const I = item.icon;
                     return (
-                        <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border ${item.borderColor} ${item.bgColor}`}>
-                            <ItemIcon className={`w-4 h-4 ${item.color} shrink-0`} />
-                            <div className="flex-1 min-w-0">
-                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{item.label}</div>
-                                <div className={`text-sm font-bold font-mono ${item.color}`}>{item.date}</div>
+                        <div key={i} className={`flex items-center gap-2.5 p-2.5 rounded-lg border ${item.border} ${item.bg}`}>
+                            <I className={`w-3.5 h-3.5 ${item.color} shrink-0`} />
+                            <div className="min-w-0 flex-1">
+                                <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{item.label}</div>
+                                <div className={`text-xs font-bold font-mono ${item.color} truncate`}>{item.date}</div>
                             </div>
                         </div>
                     );
                 })}
             </div>
 
-            {/* Quarterly Meeting Actions */}
             {meeting && (
-                <div className="space-y-2 mb-6">
-                    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-2">Quarterly Session</div>
-                    <a
-                        href={meeting.registrationUrl || '#'}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-[11px] hover:bg-indigo-500 transition-all border border-indigo-500"
-                    >
-                        <Video className="w-3.5 h-3.5" /> Register for Session
+                <div className="space-y-1.5 mb-4">
+                    <a href={meeting.registrationUrl || '#'} target="_blank" rel="noreferrer"
+                       className="flex items-center justify-center gap-1.5 w-full py-2 bg-indigo-600 text-white rounded-lg font-bold text-[10px] hover:bg-indigo-500 transition-all">
+                        <Video className="w-3 h-3" /> Register for Session
                     </a>
-                    <button
-                        onClick={downloadICS}
-                        className="flex items-center justify-center gap-2 w-full py-2 bg-white/5 text-slate-300 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-white/10 transition-colors border border-white/10"
-                    >
-                        <Download className="w-3.5 h-3.5" /> Add to Calendar
+                    <button onClick={downloadICS}
+                        className="flex items-center justify-center gap-1.5 w-full py-1.5 bg-white/5 text-slate-300 rounded-lg font-bold text-[9px] uppercase tracking-wider hover:bg-white/10 transition-all">
+                        <Download className="w-3 h-3" /> Add to Calendar
                     </button>
                 </div>
             )}
 
-            {/* Generation Info */}
-            <div className="border-t border-white/5 pt-4 space-y-2">
-                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Pipeline Info</div>
-                <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                    <Clock className="w-3 h-3" />
-                    <span>Last generated: <span className="font-mono text-slate-300">{lastGenerated}</span></span>
+            <div className="border-t border-white/5 pt-3 space-y-1.5">
+                <div className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Pipeline</div>
+                <div className="flex items-center gap-1.5 text-[9px] text-slate-400">
+                    <Clock className="w-2.5 h-2.5" />
+                    <span>Generated: <span className="font-mono text-slate-300">{lastGenerated}</span></span>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                    <span>{manifest?.reports?.length || 0} reports validated, 0 errors</span>
+                <div className="flex items-center gap-1.5 text-[9px] text-slate-400">
+                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+                    <span>{manifest?.reports?.length || 0} reports, 0 errors</span>
                 </div>
-                <a
-                    href={`${REPORTS_PATH}samples/report-generation-manifest.json`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 text-[10px] text-blue-400 hover:text-blue-300 transition-colors mt-1"
-                >
-                    <FileJson className="w-3 h-3" /> View Manifest
+                <a href={`${REPORTS_PATH}samples/report-generation-manifest.json`} target="_blank" rel="noreferrer"
+                   className="flex items-center gap-1 text-[9px] text-blue-400 hover:text-blue-300 transition-colors mt-1">
+                    <FileJson className="w-2.5 h-2.5" /> View Manifest
                 </a>
             </div>
         </div>
@@ -416,55 +328,41 @@ export const ReportsHub = memo(({ meeting }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const loadReports = async () => {
+        const load = async () => {
             const ts = Date.now();
             try {
-                // Load manifest first
-                const manifestRes = await fetch(`${REPORTS_PATH}samples/report-generation-manifest.json?t=${ts}`);
-                if (!manifestRes.ok) {
-                    setLoading(false);
-                    return;
-                }
-                const manifestData = await manifestRes.json();
-                setManifest(manifestData);
+                const res = await fetch(`${REPORTS_PATH}samples/report-generation-manifest.json?t=${ts}`);
+                if (!res.ok) { setLoading(false); return; }
+                const data = await res.json();
+                setManifest(data);
 
-                // Load all report JSONs in parallel
-                const reportEntries = manifestData.reports || [];
-                const fetches = reportEntries.map(async (entry) => {
-                    if (!entry.file) return [entry.type, null];
+                const fetches = (data.reports || []).map(async (e) => {
+                    if (!e.file) return [e.type, null];
                     try {
-                        const res = await fetch(`${REPORTS_PATH}samples/${entry.file}?t=${ts}`);
-                        if (res.ok) {
-                            const data = await res.json();
-                            return [entry.type, data];
-                        }
-                    } catch {
-                        // Silently skip failed fetches
-                    }
-                    return [entry.type, null];
+                        const r = await fetch(`${REPORTS_PATH}samples/${e.file}?t=${ts}`);
+                        if (r.ok) return [e.type, await r.json()];
+                    } catch {}
+                    return [e.type, null];
                 });
-
                 const results = await Promise.all(fetches);
-                const reportsMap = {};
-                for (const [type, data] of results) {
-                    if (data) reportsMap[type] = data;
-                }
-                setReports(reportsMap);
+                const map = {};
+                for (const [t, d] of results) { if (d) map[t] = d; }
+                setReports(map);
             } catch (e) {
                 console.error('Failed to load reports manifest:', e);
             } finally {
                 setLoading(false);
             }
         };
-        loadReports();
+        load();
     }, []);
 
     if (loading) {
         return (
-            <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-12`}>
-                <div className="flex items-center justify-center gap-3 text-slate-500">
-                    <div className="w-5 h-5 border-2 border-blue-500/50 border-t-blue-500 rounded-full animate-spin" />
-                    <span className="text-sm font-medium">Loading reports...</span>
+            <div className={`${THEME.panel} border ${THEME.border} rounded-xl p-8`}>
+                <div className="flex items-center justify-center gap-2 text-slate-500">
+                    <div className="w-4 h-4 border-2 border-blue-500/50 border-t-blue-500 rounded-full animate-spin" />
+                    <span className="text-xs font-medium">Loading reports...</span>
                 </div>
             </div>
         );
@@ -472,43 +370,35 @@ export const ReportsHub = memo(({ meeting }) => {
 
     if (!manifest) {
         return (
-            <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8`}>
+            <div className={`${THEME.panel} border ${THEME.border} rounded-xl p-6`}>
                 <div className="text-center text-slate-500">
-                    <FileText className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm font-medium">Reports not yet available</p>
-                    <p className="text-[10px] mt-1 uppercase tracking-wider">Pipeline has not generated reports yet</p>
+                    <FileText className="w-6 h-6 mx-auto mb-2 opacity-30" />
+                    <p className="text-xs font-medium">Reports not yet available</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {/* Section Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <h2 className="text-xl font-bold text-white tracking-tight">Reports & Compliance</h2>
-                    <span className="text-[9px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 font-bold uppercase tracking-wider">
-                        Machine-Readable
-                    </span>
-                    <span className="text-[9px] bg-violet-500/10 text-violet-400 px-2 py-0.5 rounded border border-violet-500/20 font-bold uppercase tracking-wider">
-                        Human-Readable
-                    </span>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                    <h2 className="text-lg font-bold text-white tracking-tight">Reports & Compliance</h2>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                        Each report is available in both human-readable (HTML) and machine-readable (JSON) formats.
+                    </p>
                 </div>
-                <div className="flex items-center gap-3 text-[10px] text-slate-500">
-                    <span className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> Live
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span> Sample
-                    </span>
+                <div className="flex items-center gap-2 text-[9px] text-slate-500">
+                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Live</span>
+                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span>Sample</span>
                 </div>
             </div>
 
             {/* 2x2 Report Cards + Schedule Sidebar */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                {/* Report Cards — 2x2 grid */}
-                <div className="xl:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-4">
+                {/* Report Cards - 2x2 grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
                     {['oar', 'qar', 'vdr', 'scn'].map(type => (
                         <ReportCard
                             key={type}
@@ -520,8 +410,8 @@ export const ReportsHub = memo(({ meeting }) => {
                     ))}
                 </div>
 
-                {/* Schedule Panel */}
-                <div className="xl:col-span-1">
+                {/* Schedule Panel - fixed width sidebar */}
+                <div className="min-w-0">
                     <SchedulePanel manifest={manifest} meeting={meeting} />
                 </div>
             </div>
