@@ -118,18 +118,49 @@ const extractMetrics = (type, report) => {
     }
 };
 
+// --- COMPUTE NEXT REPORT DATE PER TYPE ---
+const computeNextDate = (type, nextReportDates) => {
+    const now = new Date();
+    switch (type) {
+        case 'oar': {
+            // Use next_ongoing_report from next_report_date.json, or calculate from quarterly schedule
+            if (nextReportDates?.next_ongoing_report) {
+                const d = new Date(nextReportDates.next_ongoing_report + 'T00:00:00');
+                return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            }
+            const oarMonths = [2, 5, 8, 11];
+            const m = now.getMonth() + 1;
+            const nextM = oarMonths.find(om => om > m || (om === m && now.getDate() < 15)) || oarMonths[0];
+            const y = nextM > m || (nextM === m && now.getDate() < 15) ? now.getFullYear() : now.getFullYear() + 1;
+            return new Date(y, nextM - 1, 15).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+        case 'qar': {
+            // Use next_quarterly_review_iso from next_report_date.json
+            if (nextReportDates?.next_quarterly_review_iso) {
+                const d = new Date(nextReportDates.next_quarterly_review_iso + 'T00:00:00');
+                return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            }
+            if (nextReportDates?.next_quarterly_review) return nextReportDates.next_quarterly_review;
+            return 'TBD';
+        }
+        case 'vdr':
+            return '3-day cycle';
+        case 'scn':
+            return 'On change';
+        default:
+            return '—';
+    }
+};
+
 // --- INDIVIDUAL REPORT CARD (compact) ---
-const ReportCard = memo(({ type, config, manifest, reportData }) => {
+const ReportCard = memo(({ type, config, manifest, reportData, nextReportDates }) => {
     const [expanded, setExpanded] = useState(false);
     const Icon = config.icon;
     const metrics = extractMetrics(type, reportData);
     const entry = manifest?.reports?.find(r => r.type === type);
     const dataType = entry?.data_type || 'unknown';
     const frr = entry?.frr_requirements || [];
-    const generatedAt = manifest?.generation_timestamp;
-    const genDate = generatedAt
-        ? new Date(generatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-        : '—';
+    const nextDate = computeNextDate(type, nextReportDates);
 
     const reportFile = entry?.file;
     const htmlFile = entry?.html_file;
@@ -170,7 +201,7 @@ const ReportCard = memo(({ type, config, manifest, reportData }) => {
                 <div className="flex items-center gap-3 text-[9px] text-white/50 mb-3">
                     <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />{config.cadence}</span>
                     <span>|</span>
-                    <span className="flex items-center gap-1"><Calendar className="w-2.5 h-2.5" />{genDate}</span>
+                    <span className="flex items-center gap-1"><Calendar className="w-2.5 h-2.5" />Next: {nextDate}</span>
                 </div>
 
                 {/* Buttons - prominent HTML link + JSON/Schema row */}
@@ -325,16 +356,25 @@ const SchedulePanel = memo(({ manifest, meeting }) => {
 export const ReportsHub = memo(({ meeting }) => {
     const [manifest, setManifest] = useState(null);
     const [reports, setReports] = useState({});
+    const [nextReportDates, setNextReportDates] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const load = async () => {
             const ts = Date.now();
             try {
-                const res = await fetch(`${REPORTS_PATH}samples/report-generation-manifest.json?t=${ts}`);
-                if (!res.ok) { setLoading(false); return; }
-                const data = await res.json();
+                const [manifestRes, nrdRes] = await Promise.all([
+                    fetch(`${REPORTS_PATH}samples/report-generation-manifest.json?t=${ts}`),
+                    fetch(`${BASE_PATH}next_report_date.json?t=${ts}`).catch(() => null),
+                ]);
+
+                if (!manifestRes.ok) { setLoading(false); return; }
+                const data = await manifestRes.json();
                 setManifest(data);
+
+                if (nrdRes?.ok) {
+                    try { setNextReportDates(await nrdRes.json()); } catch {}
+                }
 
                 const fetches = (data.reports || []).map(async (e) => {
                     if (!e.file) return [e.type, null];
@@ -406,6 +446,7 @@ export const ReportsHub = memo(({ meeting }) => {
                             config={REPORT_CONFIGS[type]}
                             manifest={manifest}
                             reportData={reports[type]}
+                            nextReportDates={nextReportDates}
                         />
                     ))}
                 </div>
