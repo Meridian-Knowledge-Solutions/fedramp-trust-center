@@ -13,6 +13,7 @@ import {
     PieChart, Layout, Monitor, HardDrive, Ticket, AlertCircle, Calendar, Video,
     ArrowRight, User, ShieldCheck, Send, Eye as EyeIcon
 } from 'lucide-react';
+import { ReportsHub } from './ReportsHub';
 // Recharts imports removed — charts now in UnifiedMasDashboard
 
 // --- CONFIGURATION ---
@@ -180,11 +181,11 @@ const OngoingAuthorizationReportCard = () => {
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth() + 1; // 0-indexed
-        
+
         const oarMonths = [2, 5, 8, 11]; // Feb, May, Aug, Nov
         const nextMonth = oarMonths.find(m => m > month) || oarMonths[0];
         const nextYear = nextMonth > month ? year : year + 1;
-        
+
         return `${nextYear}-${String(nextMonth).padStart(2, '0')}-15`;
     };
 
@@ -705,6 +706,18 @@ export const TrustCenterView = () => {
 
     const viewQuarterlyReport = async () => {
         if (!handleAction('View Quarterly Report')) return;
+        // Try current OAR report first, fallback to legacy
+        try {
+            const reportsBase = `${BASE_PATH}reports/samples/`;
+            const res = await fetch(`${reportsBase}oar-report.json`);
+            if (res.ok) {
+                const data = await res.json();
+                const markdown = `# Ongoing Authorization Report\n\n**Report ID:** ${data.report_id || 'N/A'}\n**Period:** ${data.reporting_period?.start_date} to ${data.reporting_period?.end_date}\n**Generated:** ${data.reporting_period?.generated_at}\n\n## Executive Summary\n\n- **Compliance Rate:** ${data.executive_summary?.compliance_rate}%\n- **Total KSIs:** ${data.executive_summary?.total_ksis}\n- **Active Gaps:** ${data.executive_summary?.active_gaps}\n\n${data.executive_summary?.narrative || ''}\n\n## Compliance Attestations\n\n${Object.entries(data.compliance_attestations || {}).map(([k, v]) => `- **${k.toUpperCase()}**: ${v.description} ${v.compliant ? '✓' : '✗'}`).join('\n')}\n\n---\n*Machine-readable JSON available at reports/samples/oar-report.json*`;
+                openModal('markdown', { title: 'Ongoing Authorization Report', subtitle: `${data.report_id} | Live Production Data`, markdown });
+                return;
+            }
+        } catch { /* fallback below */ }
+        // Legacy fallback
         try {
             const res = await fetch(`${BASE_PATH}ongoing_authorization_report_Q4_2025.md`);
             if (!res.ok) throw new Error('Failed');
@@ -713,7 +726,7 @@ export const TrustCenterView = () => {
         } catch (e) { alert('Failed to load report.'); }
     };
 
-    const downloadQuarterlyReport = () => { if (!handleAction('Download Quarterly Report')) return; window.open(`${BASE_PATH}ongoing_authorization_report_Q4_2025.json`, '_blank'); };
+    const downloadQuarterlyReport = () => { if (!handleAction('Download Quarterly Report')) return; window.open(`${BASE_PATH}reports/samples/oar-report.json`, '_blank'); };
 
     const handleDownloadPackage = async () => {
         if (!handleAction('Download Authorization Package')) return;
@@ -785,18 +798,11 @@ export const TrustCenterView = () => {
                     </div>
                 </div>
 
-                {/* --- GOVERNANCE ROW --- */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-                    <div className="lg:col-span-1">
-                        <QuarterlyReviewCard meeting={meetingData} />
-                    </div>
-                    <div className="lg:col-span-1">
-                        <OngoingAuthorizationReportCard />
-                    </div>
-                    <div className="lg:col-span-1">
-                        <PlannedChangesSection scnHistory={scnHistory} />
-                    </div>
-                </div>
+                {/* --- REPORTS & COMPLIANCE HUB --- */}
+                <ReportsHub meeting={meetingData} />
+
+                {/* --- CHANGE PIPELINE (SCN Tracking) --- */}
+                <PlannedChangesSection scnHistory={scnHistory} />
 
                 {/* --- LIVE SYSTEM BOUNDARY --- */}
                 <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-6 shadow-md`}>
