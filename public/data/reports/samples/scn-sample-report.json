@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0.0",
+  "notification_id": "SCN-20260302-0814",
+  "report_type": "sample",
+  "report_type_rationale": "No transformative or adaptive significant change has occurred that would trigger a live SCN. All 20,000+ monitored change events have been classified as routine_recurring. This sample demonstrates full readiness to produce SCN reports when a qualifying change occurs.",
+  "provider": {
+    "name": "Meridian Knowledge Solutions",
+    "fedramp_id": "FR2412075M",
+    "service_name": "Meridian LMS",
+    "impact_level": "Moderate"
+  },
+  "change_classification": {
+    "tier": "adaptive",
+    "category": "Security Configuration Update",
+    "is_emergency": false,
+    "evaluation_rationale": "This change adjusts existing security configurations without adding, replacing, or removing major components. It qualifies as an adaptive change per the FRR-SCN tiered framework."
+  },
+  "change_summary": {
+    "title": "WAF Rule Update - Enhanced Bot Protection",
+    "description": "Updated AWS WAF managed rule group to the latest version, adding enhanced bot detection patterns and updated IP reputation lists. This change strengthens the existing web application firewall without modifying the system boundary.",
+    "affected_components": [
+      {
+        "component_type": "network_security",
+        "component_id": "waf-regional-lms-prod",
+        "change_type": "modified",
+        "description": "WAF managed rule group version updated"
+      },
+      {
+        "component_type": "application",
+        "component_id": "alb-lms-production",
+        "change_type": "modified",
+        "description": "ALB WAF association updated with new rule version"
+      }
+    ],
+    "boundary_impact": false
+  },
+  "timeline": {
+    "change_initiated": "2026-03-02T04:14:30.592669+00:00",
+    "change_completed": "2026-03-02T05:14:30.592669+00:00",
+    "verification_completed": "2026-03-02T06:14:30.592669+00:00",
+    "notification_sent": "2026-03-02T08:14:30.592669+00:00",
+    "documentation_updated": null,
+    "notification_deadline": "2026-03-07T08:14:30.592669+00:00",
+    "documentation_deadline": null
+  },
+  "security_impact_assessment": {
+    "overall_risk_level": "low",
+    "controls_affected": [
+      {
+        "control_id": "SC-7",
+        "control_name": "Boundary Protection",
+        "impact": "positive",
+        "notes": "Enhanced WAF rules improve boundary protection"
+      },
+      {
+        "control_id": "SI-4",
+        "control_name": "System Monitoring",
+        "impact": "positive",
+        "notes": "Improved bot detection enhances monitoring capability"
+      },
+      {
+        "control_id": "SC-5",
+        "control_name": "Denial of Service Protection",
+        "impact": "positive",
+        "notes": "Updated rate limiting rules strengthen DoS protection"
+      }
+    ],
+    "ksi_impact": [
+      "KSI-CNA-04"
+    ],
+    "data_impact": "none"
+  },
+  "controls_verification": {
+    "verification_method": "automated",
+    "verification_timestamp": "2026-03-02T06:14:30.592669+00:00",
+    "assessor": "Automated KSI Validation Pipeline",
+    "results": [
+      {
+        "control_id": "SC-7",
+        "control_name": "Boundary Protection",
+        "status": "operational",
+        "verification_detail": "WAF rules active, all test requests properly filtered"
+      },
+      {
+        "control_id": "SI-4",
+        "control_name": "System Monitoring",
+        "status": "operational",
+        "verification_detail": "GuardDuty and Security Hub receiving WAF logs"
+      },
+      {
+        "control_id": "AU-2",
+        "control_name": "Audit Events",
+        "status": "operational",
+        "verification_detail": "CloudTrail logging WAF configuration changes"
+      }
+    ],
+    "overall_status": "pass"
+  },
+  "notification_recipients": {
+    "fedramp_pmo": {
+      "notified": true,
+      "notification_timestamp": "2026-03-02T08:14:30.592669+00:00",
+      "method": "trust_center_publication"
+    },
+    "three_pao": {
+      "name": "Fortreum",
+      "notified": true,
+      "notification_timestamp": "2026-03-02T08:14:30.592669+00:00",
+      "method": "email_and_trust_center"
+    },
+    "agency_customers": [
+      {
+        "agency_id": "[AGENCY-REDACTED]",
+        "notified": true,
+        "notification_timestamp": "2026-03-02T08:14:30.592669+00:00",
+        "method": "email_and_trust_center",
+        "consulted_in_advance": false
+      }
+    ]
+  },
+  "audit_trail": {
+    "record_id": "AUDIT-SCN-20260302-0814",
+    "created_at": "2026-03-02T08:14:30.592669+00:00",
+    "last_updated": "2026-03-02T08:14:30.592669+00:00",
+    "evaluation_activities": [
+      {
+        "activity": "Change classification assessment",
+        "timestamp": "2026-03-02T03:14:30.592669+00:00",
+        "actor": "Security Engineering",
+        "outcome": "Classified as adaptive (no boundary impact)"
+      },
+      {
+        "activity": "Pre-change security baseline capture",
+        "timestamp": "2026-03-02T03:44:30.592669+00:00",
+        "actor": "Automated Pipeline",
+        "outcome": "Baseline KSI snapshot recorded"
+      },
+      {
+        "activity": "Change implementation",
+        "timestamp": "2026-03-02T04:14:30.592669+00:00",
+        "actor": "Infrastructure Team",
+        "outcome": "WAF rule group updated successfully"
+      },
+      {
+        "activity": "Post-change control verification",
+        "timestamp": "2026-03-02T06:14:30.592669+00:00",
+        "actor": "Automated KSI Pipeline",
+        "outcome": "All controls operational - PASS"
+      },
+      {
+        "activity": "SCN report generated and published",
+        "timestamp": "2026-03-02T08:14:30.592669+00:00",
+        "actor": "Report Generation Pipeline",
+        "outcome": "Published to trust center"
+      }
+    ],
+    "retention_until": "2027-03-02",
+    "integrity_hash": "e11c579829c8ac8162371d1907d84c119a1245744ac8b0e00d5273fc420a33b2"
+  },
+  "attachments": [
+    {
+      "name": "Pre-Change KSI Baseline",
+      "type": "application/json",
+      "url": "https://trust.meridianks.com/evidence/ksi-baseline-pre-change.json",
+      "hash": "[HASH-PLACEHOLDER]"
+    },
+    {
+      "name": "Post-Change Verification Results",
+      "type": "application/json",
+      "url": "https://trust.meridianks.com/evidence/post-change-verification.json",
+      "hash": "[HASH-PLACEHOLDER]"
+    }
+  ]
+}
