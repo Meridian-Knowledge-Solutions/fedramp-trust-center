@@ -3,7 +3,8 @@ import {
     Shield, FileText, FileJson, Download, ExternalLink,
     CheckCircle2, AlertTriangle, Clock, Calendar, Video,
     Activity, Database, Bell, ChevronDown, ChevronRight,
-    FileCheck, CheckSquare, Eye, TrendingUp, BarChart3
+    FileCheck, CheckSquare, Eye, TrendingUp, BarChart3,
+    Globe
 } from 'lucide-react';
 
 // --- CONFIGURATION ---
@@ -18,7 +19,7 @@ const THEME = {
     border: 'border-white/5',
 };
 
-// --- REPORT CARD CONFIGURATIONS ---
+// --- REPORT CARD CONFIGURATIONS (4 types) ---
 const REPORT_CONFIGS = {
     oar: {
         title: 'Ongoing Authorization Report',
@@ -33,6 +34,20 @@ const REPORT_CONFIGS = {
         lightText: 'text-emerald-100',
         cadence: 'Quarterly',
         schedule: 'Feb 15, May 15, Aug 15, Nov 15',
+    },
+    qar: {
+        title: 'Quarterly Authorization Review',
+        shortTitle: 'QAR',
+        subtitle: 'FRR-CCM-QR Compliance',
+        icon: BarChart3,
+        gradient: 'from-indigo-600 to-violet-600',
+        shadow: 'shadow-indigo-500/10',
+        accentBg: 'bg-indigo-500/10',
+        accentText: 'text-indigo-400',
+        accentBorder: 'border-indigo-500/20',
+        lightText: 'text-indigo-100',
+        cadence: 'Quarterly',
+        schedule: 'Synchronous review + dashboard',
     },
     vdr: {
         title: 'Vulnerability Detection & Response',
@@ -79,6 +94,18 @@ const extractMetrics = (type, report) => {
                 { label: 'Trend', value: trend.trend_direction || 'stable' },
             ];
         }
+        case 'qar': {
+            const exec = report.executive_summary || {};
+            const attestations = report.compliance_attestations || {};
+            const attCount = Object.values(attestations).filter(Boolean).length;
+            const attTotal = Object.keys(attestations).length || 5;
+            return [
+                { label: 'Compliance', value: `${exec.compliance_rate || exec.pass_rate || '100'}%` },
+                { label: 'Controls', value: `${exec.total_ksis || exec.verified_controls || 0}` },
+                { label: 'QR Reqs', value: `${attCount}/${attTotal}` },
+                { label: 'Window', value: '14-day' },
+            ];
+        }
         case 'vdr': {
             const metrics = report.metrics || {};
             const breakdown = metrics.severity_breakdown || {};
@@ -118,6 +145,7 @@ const ReportCard = memo(({ type, config, manifest, reportData }) => {
         : 'N/A';
 
     const reportFile = manifestEntry?.file;
+    const htmlFile = manifestEntry?.html_file;
     const schemaFile = manifestEntry?.schema;
 
     return (
@@ -167,17 +195,34 @@ const ReportCard = memo(({ type, config, manifest, reportData }) => {
                     <span>Generated: <span className="font-mono text-white/80">{generatedDate}</span></span>
                 </div>
 
-                {/* Action Buttons */}
+                {/* Action Buttons — JSON + HTML + Schema */}
                 <div className="space-y-2 mt-auto">
+                    {/* Row 1: Human-readable HTML report */}
+                    {htmlFile && (
+                        <a
+                            href={`${REPORTS_PATH}html/${htmlFile}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center justify-center gap-1.5 w-full py-2.5 bg-white text-gray-800 rounded-xl font-bold text-[11px] hover:bg-white/90 transition-all shadow-lg"
+                        >
+                            <Globe className="w-3.5 h-3.5" /> View Report (HTML)
+                        </a>
+                    )}
+
+                    {/* Row 2: JSON + Schema side-by-side */}
                     <div className="grid grid-cols-2 gap-2">
                         {reportFile && (
                             <a
                                 href={`${REPORTS_PATH}samples/${reportFile}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="flex items-center justify-center gap-1.5 py-2.5 bg-white text-gray-800 rounded-xl font-bold text-[11px] hover:bg-white/90 transition-all shadow-lg"
+                                className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold text-[11px] transition-all ${
+                                    htmlFile
+                                        ? 'bg-white/15 text-white hover:bg-white/25 border border-white/20'
+                                        : 'bg-white text-gray-800 hover:bg-white/90 shadow-lg'
+                                }`}
                             >
-                                <FileJson className="w-3.5 h-3.5" /> View Report
+                                <FileJson className="w-3.5 h-3.5" /> JSON
                             </a>
                         )}
                         {schemaFile && (
@@ -386,6 +431,7 @@ export const ReportsHub = memo(({ meeting }) => {
                 // Load all report JSONs in parallel
                 const reportEntries = manifestData.reports || [];
                 const fetches = reportEntries.map(async (entry) => {
+                    if (!entry.file) return [entry.type, null];
                     try {
                         const res = await fetch(`${REPORTS_PATH}samples/${entry.file}?t=${ts}`);
                         if (res.ok) {
@@ -445,8 +491,11 @@ export const ReportsHub = memo(({ meeting }) => {
                     <span className="text-[9px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 font-bold uppercase tracking-wider">
                         Machine-Readable
                     </span>
+                    <span className="text-[9px] bg-violet-500/10 text-violet-400 px-2 py-0.5 rounded border border-violet-500/20 font-bold uppercase tracking-wider">
+                        Human-Readable
+                    </span>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                <div className="flex items-center gap-3 text-[10px] text-slate-500">
                     <span className="flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> Live
                     </span>
@@ -456,11 +505,11 @@ export const ReportsHub = memo(({ meeting }) => {
                 </div>
             </div>
 
-            {/* Reports Grid + Schedule Sidebar */}
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-                {/* Report Cards */}
-                <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-5">
-                    {['oar', 'vdr', 'scn'].map(type => (
+            {/* 2x2 Report Cards + Schedule Sidebar */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                {/* Report Cards — 2x2 grid */}
+                <div className="xl:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {['oar', 'qar', 'vdr', 'scn'].map(type => (
                         <ReportCard
                             key={type}
                             type={type}
