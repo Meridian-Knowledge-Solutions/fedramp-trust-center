@@ -822,7 +822,7 @@ export const TrustCenterView = () => {
                                 <span className="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 font-bold uppercase">ADS-CSO-PUB</span>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                <InfoCard label="FedRAMP ID" value={csoInfo.fedramp_id} sub={csoInfo.authorization_type} />
+                                <InfoCard label="FedRAMP ID" value={csoInfo.package_id} sub={csoInfo.authorization_type} />
                                 <InfoCard label="UEI" value={csoInfo.uei} sub="SAM.gov" />
                                 <InfoCard label="Service Model" value={csoInfo.service_model} sub={csoInfo.deployment_model} />
                                 <InfoCard label="Category" value={csoInfo.business_category} sub={csoInfo.impact_level} />
