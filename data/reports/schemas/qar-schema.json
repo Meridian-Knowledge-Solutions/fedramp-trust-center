@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meridianks.com/fedramp/schemas/qar-v1.0.json",
+  "title": "FedRAMP 20x Quarterly Authorization Review (QAR)",
+  "description": "Machine-readable schema for Quarterly Authorization Review reports per FRR-CCM-QR requirements.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "report_id",
+    "provider",
+    "reporting_period",
+    "executive_summary",
+    "compliance_trend",
+    "compliance_attestations",
+    "integrity"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Version of this QAR schema"
+    },
+    "report_id": {
+      "type": "string",
+      "pattern": "^QAR-\\d{4}-Q[1-4]-v\\d+\\.\\d+$",
+      "description": "Unique report identifier (format: QAR-YYYY-QN-vX.Y)"
+    },
+    "report_type": {
+      "type": "string",
+      "enum": ["live", "sample"],
+      "description": "Whether report contains live production data or sample data"
+    },
+    "provider": {
+      "type": "object",
+      "required": ["name", "fedramp_id", "service_name"],
+      "properties": {
+        "name": { "type": "string" },
+        "fedramp_id": { "type": "string" },
+        "service_name": { "type": "string" },
+        "impact_level": {
+          "type": "string",
+          "enum": ["Low", "Moderate", "High"]
+        }
+      }
+    },
+    "reporting_period": {
+      "type": "object",
+      "required": ["quarter", "generated_at", "next_review_date"],
+      "properties": {
+        "quarter": {
+          "type": "string",
+          "pattern": "^\\d{4}-Q[1-4]$",
+          "description": "Reporting quarter"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Report generation timestamp"
+        },
+        "next_review_date": {
+          "type": "string",
+          "format": "date",
+          "description": "FRR-CCM-QR-06: Publicly disclosed next Quarterly Review date"
+        }
+      }
+    },
+    "executive_summary": {
+      "type": "object",
+      "required": ["compliance_rate", "total_ksis", "global_status"],
+      "description": "FRR-CCM-QR-02: High-level quarterly authorization health summary",
+      "properties": {
+        "compliance_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Overall KSI compliance percentage"
+        },
+        "total_ksis": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of KSIs evaluated"
+        },
+        "passed_ksis": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of KSIs currently passing"
+        },
+        "validation_window_days": {
+          "type": "integer",
+          "default": 14,
+          "description": "Number of days in the validation window"
+        },
+        "global_status": {
+          "type": "string",
+          "enum": ["OPERATIONAL", "DEGRADED", "NON_OPERATIONAL"],
+          "description": "Overall system operational status"
+        }
+      }
+    },
+    "compliance_trend": {
+      "type": "object",
+      "required": ["data_points"],
+      "description": "Temporal compliance data for the review window",
+      "properties": {
+        "window_days": {
+          "type": "integer",
+          "default": 14,
+          "description": "Number of days in the trend window"
+        },
+        "data_points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["date", "compliance_rate"],
+            "properties": {
+              "date": { "type": "string", "format": "date" },
+              "compliance_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+              "total_ksis": { "type": "integer" },
+              "passed_ksis": { "type": "integer" }
+            }
+          },
+          "description": "Daily compliance data points"
+        }
+      }
+    },
+    "significant_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "scn_id": { "type": "string" },
+          "date": { "type": "string", "format": "date" },
+          "tier": {
+            "type": "string",
+            "enum": ["routine_recurring", "adaptive", "transformative", "impact_categorization"]
+          },
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "description": "Significant changes during this quarter"
+    },
+    "planned_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "target_date": { "type": "string", "format": "date" },
+          "expected_tier": {
+            "type": "string",
+            "enum": ["routine_recurring", "adaptive", "transformative"]
+          }
+        }
+      },
+      "description": "Planned changes for the next quarter"
+    },
+    "compliance_attestations": {
+      "type": "object",
+      "required": ["qr_02", "qr_04", "qr_05", "qr_06", "qr_11"],
+      "description": "FRR-CCM-QR requirement attestation status",
+      "properties": {
+        "qr_02": {
+          "type": "boolean",
+          "description": "FRR-CCM-QR-02: Quarterly review baseline established and maintained"
+        },
+        "qr_04": {
+          "type": "boolean",
+          "description": "FRR-CCM-QR-04: No irresponsible disclosure of sensitive information"
+        },
+        "qr_05": {
+          "type": "boolean",
+          "description": "FRR-CCM-QR-05: Meeting registration information provided"
+        },
+        "qr_06": {
+          "type": "boolean",
+          "description": "FRR-CCM-QR-06: Next review date publicly disclosed"
+        },
+        "qr_11": {
+          "type": "boolean",
+          "description": "FRR-CCM-QR-11: Content shared responsibly"
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["generated_at", "content_hash"],
+      "properties": {
+        "generated_at": { "type": "string", "format": "date-time" },
+        "generator_version": { "type": "string" },
+        "report_version": { "type": "string" },
+        "content_hash": {
+          "type": "string",
+          "description": "SHA-256 hash for report integrity verification"
+        }
+      }
+    }
+  }
+}
