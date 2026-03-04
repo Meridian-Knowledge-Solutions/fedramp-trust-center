@@ -620,6 +620,8 @@ export const TrustCenterView = () => {
     const [nextReportDate, setNextReportDate] = useState(null);
     const [plannedChanges, setPlannedChanges] = useState([]);
     const [meetingData, setMeetingData] = useState(null);
+    const [csoInfo, setCsoInfo] = useState(null);
+    const [feedbackEntries, setFeedbackEntries] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const uptime = status?.uptime_percent ? `${parseFloat(status.uptime_percent).toFixed(2)}%` : '99.99%';
@@ -649,6 +651,21 @@ export const TrustCenterView = () => {
                 if (archRes.ok) setMasArch(await archRes.json());
                 if (plannedRes.ok) setPlannedChanges(await plannedRes.json());
                 if (meetingRes.ok) setMeetingData(await meetingRes.json());
+
+                // Load CSO public info
+                try {
+                    const csoRes = await fetch(`${BASE_PATH}cso_public_info.json?t=${ts}`);
+                    if (csoRes.ok) setCsoInfo(await csoRes.json());
+                } catch {}
+
+                // Load feedback entries from OAR
+                try {
+                    const oarRes = await fetch(`${BASE_PATH}reports/samples/oar-report.json?t=${ts}`);
+                    if (oarRes.ok) {
+                        const oar = await oarRes.json();
+                        if (oar.feedback_summary?.entries) setFeedbackEntries(oar.feedback_summary.entries);
+                    }
+                } catch {}
 
                 if (histRes.ok) {
                     const text = await histRes.text();
@@ -796,6 +813,36 @@ export const TrustCenterView = () => {
                             <InfoCard label="Access" value="HTTPS" sub="Port 443" />
                         </div>
                     </div>
+                    {/* CSO Public Metadata — ADS-CSO-PUB */}
+                    {csoInfo && (
+                        <div className="mt-6 pt-6 border-t border-white/5">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Globe className="w-4 h-4 text-blue-400" />
+                                <h3 className="text-sm font-bold text-white">CSO Public Information</h3>
+                                <span className="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 font-bold uppercase">ADS-CSO-PUB</span>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                <InfoCard label="FedRAMP ID" value={csoInfo.fedramp_id} sub={csoInfo.authorization_type} />
+                                <InfoCard label="UEI" value={csoInfo.uei} sub="SAM.gov" />
+                                <InfoCard label="Service Model" value={csoInfo.service_model} sub={csoInfo.deployment_model} />
+                                <InfoCard label="Category" value={csoInfo.business_category} sub={csoInfo.impact_level} />
+                            </div>
+                            <div className="flex flex-wrap gap-2 mt-4">
+                                <a href={csoInfo.marketplace_url} target="_blank" rel="noreferrer"
+                                   className="inline-flex items-center gap-1.5 bg-blue-600/10 text-blue-400 px-3 py-1.5 rounded-lg border border-blue-500/20 text-xs font-bold hover:bg-blue-600/20 transition-all">
+                                    <Landmark className="w-3.5 h-3.5" /> FedRAMP Marketplace <ExternalLink className="w-3 h-3 opacity-60" />
+                                </a>
+                                <a href={`${BASE_PATH}cso_public_info.json`} target="_blank" rel="noreferrer"
+                                   className="inline-flex items-center gap-1.5 bg-white/5 text-slate-400 px-3 py-1.5 rounded-lg border border-white/10 text-xs font-bold hover:bg-white/10 transition-all">
+                                    <FileJson className="w-3.5 h-3.5" /> Machine-Readable (JSON)
+                                </a>
+                            </div>
+                            {/* Customer Responsibilities */}
+                            <div className="mt-4">
+                                <CustomerResponsibilities responsibilities={csoInfo.customer_responsibilities} />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* --- REPORTS & COMPLIANCE HUB --- */}
@@ -867,6 +914,9 @@ export const TrustCenterView = () => {
                     </div>
                 </div>
 
+                {/* --- FEEDBACK MECHANISM (FRR-CCM-04/05) --- */}
+                <FeedbackSection feedbackEntries={feedbackEntries} />
+
                 {/* --- FOOTER ACTIONS --- */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-8 mt-8">
                     <FooterAction title="API Docs" onClick={openApiDocs} />
@@ -877,6 +927,154 @@ export const TrustCenterView = () => {
         </div>
     );
 };
+
+// --- FEEDBACK SECTION (FRR-CCM-04/05) ---
+const FeedbackSection = memo(({ feedbackEntries }) => {
+    const [question, setQuestion] = useState('');
+    const [email, setEmail] = useState('');
+    const [submitted, setSubmitted] = useState(false);
+    const [showHistory, setShowHistory] = useState(false);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!question.trim()) return;
+        const subject = encodeURIComponent('FedRAMP Trust Center Feedback');
+        const body = encodeURIComponent(
+            `Question/Feedback:\n${question}\n\nSubmitter Email: ${email || 'Anonymous'}\n\nSubmitted via Trust Center Feedback Form`
+        );
+        window.open(`mailto:fedramp_20x@meridianks.com?subject=${subject}&body=${body}`, '_self');
+        setSubmitted(true);
+        setQuestion('');
+        setEmail('');
+        setTimeout(() => setSubmitted(false), 5000);
+    };
+
+    return (
+        <div className="bg-[#121217] border border-white/5 rounded-2xl p-8 shadow-lg mt-8">
+            <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/5">
+                <div className="p-2 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
+                    <MessageSquare className="w-5 h-5 text-indigo-400" />
+                </div>
+                <div>
+                    <h2 className="text-xl font-bold text-white">Feedback & Questions</h2>
+                    <p className="text-[10px] text-slate-500 mt-0.5">FRR-CCM-04 / CCM-05 — Asynchronous feedback mechanism</p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Submission Form */}
+                <div>
+                    <h3 className="text-sm font-bold text-white mb-3">Submit Feedback</h3>
+                    <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                        Questions about our security posture, KSI validation methods, or authorization data are welcome.
+                        Responses are summarized anonymously in the Ongoing Authorization Report.
+                    </p>
+                    <form onSubmit={handleSubmit} className="space-y-3">
+                        <div>
+                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block mb-1">Your Question or Feedback *</label>
+                            <textarea
+                                value={question}
+                                onChange={(e) => setQuestion(e.target.value)}
+                                placeholder="e.g., How is multi-AZ resilience measured for Load Balancers?"
+                                rows={3}
+                                required
+                                className="w-full bg-[#09090b] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 resize-none"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block mb-1">Email (optional — for follow-up)</label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="you@agency.gov"
+                                className="w-full bg-[#09090b] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg flex items-center justify-center gap-2 transition-all text-sm"
+                        >
+                            <Send className="w-4 h-4" /> Submit Feedback
+                        </button>
+                        {submitted && (
+                            <div className="flex items-center gap-2 text-emerald-400 text-xs bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
+                                <CheckCircle className="w-4 h-4" /> Your email client should open with the feedback pre-filled. Send to complete.
+                            </div>
+                        )}
+                    </form>
+                    <div className="mt-4 flex items-center gap-2 text-[10px] text-slate-500">
+                        <Mail className="w-3 h-3" />
+                        <span>Direct: <a href="mailto:fedramp_20x@meridianks.com" className="text-blue-400 hover:text-blue-300">fedramp_20x@meridianks.com</a></span>
+                    </div>
+                </div>
+
+                {/* Feedback History (Anonymized Summary — CCM-05) */}
+                <div>
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-bold text-white">Feedback Summary</h3>
+                        <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 font-bold uppercase">CCM-05</span>
+                    </div>
+                    <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                        Anonymized summary of feedback received and responses provided, per FRR-CCM-05.
+                    </p>
+                    {feedbackEntries.length > 0 ? (
+                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                            {feedbackEntries.map((entry, i) => (
+                                <div key={i} className="bg-[#09090b] border border-white/5 rounded-lg p-3">
+                                    <div className="flex items-start gap-2 mb-2">
+                                        <MessageSquare className="w-3.5 h-3.5 text-indigo-400 mt-0.5 shrink-0" />
+                                        <p className="text-xs text-white font-medium leading-relaxed">{entry.question}</p>
+                                    </div>
+                                    <div className="flex items-start gap-2 ml-5.5 pl-0.5 border-l-2 border-indigo-500/20">
+                                        <p className="text-[11px] text-slate-400 leading-relaxed pl-2">{entry.answer}</p>
+                                    </div>
+                                    <div className="text-[9px] text-slate-600 mt-2 text-right font-mono">{entry.date}</div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-[#09090b] border border-white/5 rounded-lg p-6 text-center">
+                            <MessageSquare className="w-6 h-6 mx-auto mb-2 text-slate-600" />
+                            <p className="text-xs text-slate-500">No feedback entries yet. Be the first to submit a question.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+});
+
+// --- CUSTOMER RESPONSIBILITIES (ADS-CSO-PUB) ---
+const CustomerResponsibilities = memo(({ responsibilities }) => {
+    const [expanded, setExpanded] = useState(false);
+    if (!responsibilities || responsibilities.length === 0) return null;
+
+    return (
+        <div>
+            <button
+                onClick={() => setExpanded(!expanded)}
+                className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white transition-colors"
+            >
+                {expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                <Users className="w-3.5 h-3.5" />
+                Customer Responsibilities ({responsibilities.length})
+            </button>
+            {expanded && (
+                <div className="mt-3 bg-[#09090b] border border-white/5 rounded-lg p-4">
+                    <ul className="space-y-2">
+                        {responsibilities.map((r, i) => (
+                            <li key={i} className="flex items-start gap-2 text-xs text-slate-400">
+                                <CheckSquare className="w-3.5 h-3.5 text-blue-400 mt-0.5 shrink-0" />
+                                <span>{r}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+});
 
 // --- HELPER COMPONENTS ---
 
