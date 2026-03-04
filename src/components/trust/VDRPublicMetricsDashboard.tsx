@@ -27,7 +27,9 @@ function deriveMetrics(vdr: any) {
     else if (s in sevCounts) sevCounts[s]++;
   });
 
-  const kevCount = vulns.filter((v: any) => v.exploitability?.kev_listed).length;
+  const kevCount = vulns.filter((v: any) =>
+    v.exploitability?.kev_listed || v.cisa_kev_status?.has_known_exploited
+  ).length;
   const irvCount = vulns.filter((v: any) => v.internet_reachable).length;
   const affectedResources = new Set(
     vulns.flatMap((v: any) => (v.affected_components || []).map((c: any) => c.component_id))
