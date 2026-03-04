@@ -154,10 +154,10 @@ const QuarterlyReviewCard = ({ meeting }) => {
                         <FileText className="w-4 h-4" /> View Quarterly QAR 
                     </a>
 
-                    <a href={meeting.registrationUrl || '#'} target="_blank" rel="noreferrer"
-                        className="flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-500 text-white rounded-2xl font-bold text-xs hover:bg-indigo-400 transition-all border border-indigo-400">
-                        <Video className="w-4 h-4" /> Register for Session 
-                    </a>
+                    <button onClick={() => window.open(meeting.registrationUrl, '_blank', 'noopener')}
+                        className="flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-500 text-white rounded-2xl font-bold text-xs hover:bg-indigo-400 transition-all border border-indigo-400 cursor-pointer">
+                        <Video className="w-4 h-4" /> Register for Session
+                    </button>
 
                     <button onClick={downloadICS}
                         className="flex items-center justify-center gap-2 w-full py-2 bg-indigo-700/40 text-indigo-100 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-colors border border-indigo-400/20">

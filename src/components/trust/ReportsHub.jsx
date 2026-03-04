@@ -322,10 +322,10 @@ const SchedulePanel = memo(({ manifest, meeting }) => {
 
             {meeting && (
                 <div className="space-y-1.5 mb-4">
-                    <a href={meeting.registrationUrl || '#'} target="_blank" rel="noreferrer"
-                       className="flex items-center justify-center gap-1.5 w-full py-2 bg-indigo-600 text-white rounded-lg font-bold text-[10px] hover:bg-indigo-500 transition-all">
+                    <button onClick={() => window.open(meeting.registrationUrl, '_blank', 'noopener')}
+                       className="flex items-center justify-center gap-1.5 w-full py-2 bg-indigo-600 text-white rounded-lg font-bold text-[10px] hover:bg-indigo-500 transition-all cursor-pointer">
                         <Video className="w-3 h-3" /> Register for Session
-                    </a>
+                    </button>
                     <button onClick={downloadICS}
                         className="flex items-center justify-center gap-1.5 w-full py-1.5 bg-white/5 text-slate-300 rounded-lg font-bold text-[9px] uppercase tracking-wider hover:bg-white/10 transition-all">
                         <Download className="w-3 h-3" /> Add to Calendar
