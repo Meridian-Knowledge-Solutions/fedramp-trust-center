@@ -36,6 +36,12 @@ export const API_CONFIG = {
     DEMO_MODE: false
 };
 
+// === QUARTERLY REVIEW SESSION ===
+// Canonical registration URL maintained here so pipeline data syncs cannot overwrite it.
+// Update this value whenever a new Teams event is created for the next quarterly session.
+export const QUARTERLY_REGISTRATION_URL =
+    'https://events.teams.microsoft.com/event/7f521f38-4991-4772-8c5d-4d96f215c60c@bc633bf7-1766-4960-bc95-a16fdb861a57';
+
 // === GITHUB RAW DATA CONFIGURATION ===
 // Used for fetching static assets directly from the repo
 const REPO_OWNER = 'Meridian-Knowledge-Solutions';
