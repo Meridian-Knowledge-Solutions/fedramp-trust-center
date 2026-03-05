@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../contexts/ModalContext';
 import { useSystemStatus } from '../../hooks/useSystemStatus';
-import { API_CONFIG } from '../../config/api';
+import { API_CONFIG, QUARTERLY_REGISTRATION_URL } from '../../config/api';
 import {
     Shield, Download, FileText, ExternalLink,
     Clock, CheckCircle2, Mail, Globe, Lock, Server, Activity,
@@ -99,6 +99,9 @@ const PlannedChangesSection = ({ scnHistory }) => {
 const QuarterlyReviewCard = ({ meeting }) => {
     if (!meeting) return null;
 
+    // Use the locally-maintained URL so pipeline data syncs cannot overwrite it
+    const registrationUrl = QUARTERLY_REGISTRATION_URL || meeting.registrationUrl;
+
     // Dynamically resolve the path based on the environment BASE_URL to prevent GitHub Pages 404s
     const reportsPath = import.meta.env.BASE_URL.endsWith('/')
         ? `${import.meta.env.BASE_URL}reports/`
@@ -110,7 +113,7 @@ const QuarterlyReviewCard = ({ meeting }) => {
             `SUMMARY:${meeting.meetingTitle || 'FedRAMP Quarterly Review'}`,
             `DTSTART:${(meeting.nextDate || '').replace(/-/g, '')}T190000Z`,
             `DURATION:PT${meeting.durationMinutes || 60}M`,
-            `DESCRIPTION:${meeting.description || 'Synchronous review session.'}\\n\\nRegister: ${meeting.registrationUrl}`,
+            `DESCRIPTION:${meeting.description || 'Synchronous review session.'}\\n\\nRegister: ${registrationUrl}`,
             `LOCATION:Microsoft Teams (Registration Required)`,
             'END:VEVENT', 'END:VCALENDAR'
         ].join('\n');
@@ -154,7 +157,7 @@ const QuarterlyReviewCard = ({ meeting }) => {
                         <FileText className="w-4 h-4" /> View Quarterly QAR 
                     </a>
 
-                    <button onClick={() => window.open(meeting.registrationUrl, '_blank', 'noopener')}
+                    <button onClick={() => window.open(registrationUrl, '_blank', 'noopener')}
                         className="flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-500 text-white rounded-2xl font-bold text-xs hover:bg-indigo-400 transition-all border border-indigo-400 cursor-pointer">
                         <Video className="w-4 h-4" /> Register for Session
                     </button>

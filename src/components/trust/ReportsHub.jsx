@@ -7,6 +7,8 @@ import {
     Globe
 } from 'lucide-react';
 
+import { QUARTERLY_REGISTRATION_URL } from '../../config/api';
+
 // --- CONFIGURATION ---
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
     ? `${import.meta.env.BASE_URL}data/`
@@ -269,6 +271,9 @@ const SchedulePanel = memo(({ manifest, meeting }) => {
         ? new Date(generatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
         : 'N/A';
 
+    // Use locally-maintained URL so pipeline data syncs cannot overwrite it
+    const registrationUrl = QUARTERLY_REGISTRATION_URL || meeting?.registrationUrl;
+
     const downloadICS = () => {
         if (!meeting) return;
         const ics = [
@@ -276,7 +281,7 @@ const SchedulePanel = memo(({ manifest, meeting }) => {
             `SUMMARY:${meeting.meetingTitle || 'FedRAMP Quarterly Review'}`,
             `DTSTART:${(meeting.nextDate || '').replace(/-/g, '')}T190000Z`,
             `DURATION:PT${meeting.durationMinutes || 60}M`,
-            `DESCRIPTION:${meeting.description || ''}\\n\\nRegister: ${meeting.registrationUrl}`,
+            `DESCRIPTION:${meeting.description || ''}\\n\\nRegister: ${registrationUrl}`,
             'END:VEVENT', 'END:VCALENDAR'
         ].join('\n');
         const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
@@ -322,7 +327,7 @@ const SchedulePanel = memo(({ manifest, meeting }) => {
 
             {meeting && (
                 <div className="space-y-1.5 mb-4">
-                    <button onClick={() => window.open(meeting.registrationUrl, '_blank', 'noopener')}
+                    <button onClick={() => window.open(registrationUrl, '_blank', 'noopener')}
                        className="flex items-center justify-center gap-1.5 w-full py-2 bg-indigo-600 text-white rounded-lg font-bold text-[10px] hover:bg-indigo-500 transition-all cursor-pointer">
                         <Video className="w-3 h-3" /> Register for Session
                     </button>
