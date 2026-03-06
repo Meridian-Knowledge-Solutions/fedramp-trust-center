@@ -299,7 +299,7 @@ const SchedulePanel = memo(({ manifest, meeting }) => {
     }
     items.push(
         { label: 'Next OAR', date: nextOARDate, icon: Shield, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-        { label: 'VDR Cadence', date: 'Every 3 days', icon: Activity, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+        { label: 'VDR Cadence', date: 'Daily', icon: Activity, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
         { label: 'SCN Trigger', date: 'On change', icon: Bell, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
     );
 
