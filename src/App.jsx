@@ -2,7 +2,8 @@ import React, { useState, useMemo, useCallback, memo, useEffect } from 'react';
 import {
   LayoutDashboard, ShieldAlert, User, Settings, LogOut,
   Menu, Bell, Activity, Calendar, Clock,
-  FileText, RefreshCw, BarChart3, Eye, X, Shield, Layers
+  FileText, RefreshCw, BarChart3, Eye, X, Shield, Layers,
+  BookOpen, Code2, FileBarChart
 } from 'lucide-react';
 
 import {
@@ -24,6 +25,10 @@ import { KSIGrid } from './components/findings/KSIGrid';
 import MetricsDashboard from './components/trust/MetricsDashboard';
 import VDRPublicMetricsDashboard from './components/trust/VDRPublicMetricsDashboard';
 import { UnifiedMasDashboard } from './components/trust/UnifiedMasDashboard';
+import { PoliciesTab } from './components/trust/PoliciesTab';
+import { SchemaTab } from './components/trust/SchemaTab';
+import { ReportsTab } from './components/trust/ReportsTab';
+import { TrustCenterDataProvider } from './hooks/useTrustCenterData';
 
 // --- CONFIGURATION ---
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
@@ -568,6 +573,27 @@ const AppShell = () => {
               onClick={() => { setActiveView('mas'); setMobileMenuOpen(false); }}
             />
 
+            <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Organization</div>
+
+            <SidebarItem
+              icon={BookOpen}
+              label="Policies"
+              isActive={activeView === 'policies'}
+              onClick={() => { setActiveView('policies'); setMobileMenuOpen(false); }}
+            />
+            <SidebarItem
+              icon={Code2}
+              label="Schema"
+              isActive={activeView === 'schema'}
+              onClick={() => { setActiveView('schema'); setMobileMenuOpen(false); }}
+            />
+            <SidebarItem
+              icon={FileBarChart}
+              label="Reports"
+              isActive={activeView === 'reports'}
+              onClick={() => { setActiveView('reports'); setMobileMenuOpen(false); }}
+            />
+
             <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
 
             {isAuthenticated ? (
@@ -661,6 +687,27 @@ const AppShell = () => {
               onClick={() => setActiveView('mas')}
             />
 
+            <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Organization</div>
+
+            <SidebarItem
+              icon={BookOpen}
+              label="Policies"
+              isActive={activeView === 'policies'}
+              onClick={() => setActiveView('policies')}
+            />
+            <SidebarItem
+              icon={Code2}
+              label="Schema"
+              isActive={activeView === 'schema'}
+              onClick={() => setActiveView('schema')}
+            />
+            <SidebarItem
+              icon={FileBarChart}
+              label="Reports"
+              isActive={activeView === 'reports'}
+              onClick={() => setActiveView('reports')}
+            />
+
             <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
 
             {isAuthenticated ? (
@@ -710,6 +757,9 @@ const AppShell = () => {
                 {activeView === 'metrics' && 'Platform / Pipeline Metrics'}
                 {activeView === 'failures' && 'Platform / Failure History'}
                 {activeView === 'mas' && 'Platform / Assessment Scope'}
+                {activeView === 'policies' && 'Organization / Policies'}
+                {activeView === 'schema' && 'Organization / Schema'}
+                {activeView === 'reports' && 'Organization / Reports'}
               </span>
             </div>
           </div>
@@ -744,7 +794,10 @@ const AppShell = () => {
                   activeView === 'transparency' ? <TransparencyConsole /> :
                     activeView === 'metrics' ? <MetricsDashboard /> :
                       activeView === 'failures' ? <KSIFailureDashboard /> :
-                        activeView === 'mas' ? <UnifiedMasDashboard /> : null}
+                        activeView === 'mas' ? <UnifiedMasDashboard /> :
+                          activeView === 'policies' ? <PoliciesTab /> :
+                            activeView === 'schema' ? <SchemaTab /> :
+                              activeView === 'reports' ? <ReportsTab /> : null}
           </div>
         </main>
       </div>
@@ -759,10 +812,12 @@ export default function App() {
     <AuthProvider>
       <VerifyHandler />
       <DataProvider>
-        <ModalProvider>
-          <AppShell />
-          <ModalContainer />
-        </ModalProvider>
+        <TrustCenterDataProvider>
+          <ModalProvider>
+            <AppShell />
+            <ModalContainer />
+          </ModalProvider>
+        </TrustCenterDataProvider>
       </DataProvider>
     </AuthProvider>
   );

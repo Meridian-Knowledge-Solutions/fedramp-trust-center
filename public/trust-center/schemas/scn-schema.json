@@ -1,0 +1,385 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meridianks.com/fedramp/schemas/scn-v1.0.json",
+  "title": "FedRAMP 20x Significant Change Notification (SCN)",
+  "description": "Machine-readable schema for Significant Change Notifications per FRR-SCN requirements. Covers all four change tiers: Routine Recurring, Adaptive, Transformative, and Impact Categorization.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "notification_id",
+    "provider",
+    "change_classification",
+    "change_summary",
+    "timeline",
+    "security_impact_assessment",
+    "controls_verification",
+    "notification_recipients",
+    "audit_trail"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Version of this SCN schema"
+    },
+    "notification_id": {
+      "type": "string",
+      "pattern": "^SCN-\\d{8}-\\d{4}(-[A-Z]{2})?$",
+      "description": "Unique notification identifier (format: SCN-YYYYMMDD-HHMM or SCN-YYYYMMDD-HHMM-XX)"
+    },
+    "provider": {
+      "type": "object",
+      "required": ["name", "fedramp_id", "service_name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Cloud Service Provider name"
+        },
+        "fedramp_id": {
+          "type": "string",
+          "description": "FedRAMP package identifier"
+        },
+        "service_name": {
+          "type": "string",
+          "description": "Cloud Service Offering (CSO) name"
+        },
+        "impact_level": {
+          "type": "string",
+          "enum": ["Low", "Moderate", "High"],
+          "description": "FedRAMP impact level"
+        }
+      }
+    },
+    "change_classification": {
+      "type": "object",
+      "required": ["tier", "category"],
+      "description": "FRR-SCN change classification per tiered framework",
+      "properties": {
+        "tier": {
+          "type": "string",
+          "enum": ["routine_recurring", "adaptive", "transformative", "impact_categorization"],
+          "description": "Change tier per FRR-SCN tiered change framework"
+        },
+        "category": {
+          "type": "string",
+          "description": "Specific change category within the tier"
+        },
+        "is_emergency": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this change was executed during an emergency/incident"
+        },
+        "evaluation_rationale": {
+          "type": "string",
+          "description": "Documented rationale for the tier classification"
+        }
+      }
+    },
+    "change_summary": {
+      "type": "object",
+      "required": ["title", "description", "affected_components"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Brief title of the significant change"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the change and its purpose"
+        },
+        "affected_components": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["component_type", "component_id"],
+            "properties": {
+              "component_type": {
+                "type": "string",
+                "description": "Type of affected component (e.g., infrastructure, application, network)"
+              },
+              "component_id": {
+                "type": "string",
+                "description": "Identifier for the affected component"
+              },
+              "change_type": {
+                "type": "string",
+                "enum": ["added", "modified", "removed", "replaced"],
+                "description": "Nature of the change to this component"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of how this component was affected"
+              }
+            }
+          },
+          "minItems": 1,
+          "description": "List of system components affected by this change"
+        },
+        "boundary_impact": {
+          "type": "boolean",
+          "description": "Whether this change affects the authorization boundary"
+        }
+      }
+    },
+    "timeline": {
+      "type": "object",
+      "required": ["change_initiated", "change_completed"],
+      "description": "FRR-SCN-TF timeline tracking",
+      "properties": {
+        "change_initiated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the change implementation began"
+        },
+        "change_completed": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the change implementation was completed"
+        },
+        "verification_completed": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When post-change verification/assessment was completed"
+        },
+        "notification_sent": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When notification was sent to all necessary parties"
+        },
+        "documentation_updated": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "When service documentation was updated (within 30 business days for transformative). Null if not yet completed."
+        },
+        "notification_deadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Deadline for notification (5 business days after verification for transformative)"
+        },
+        "documentation_deadline": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Deadline for documentation update (30 business days for transformative). Null for non-transformative changes."
+        }
+      }
+    },
+    "security_impact_assessment": {
+      "type": "object",
+      "required": ["overall_risk_level", "controls_affected"],
+      "properties": {
+        "overall_risk_level": {
+          "type": "string",
+          "enum": ["none", "low", "moderate", "high", "critical"],
+          "description": "Overall risk level of this change"
+        },
+        "controls_affected": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["control_id", "impact"],
+            "properties": {
+              "control_id": {
+                "type": "string",
+                "description": "NIST 800-53 or KSI control identifier"
+              },
+              "control_name": {
+                "type": "string",
+                "description": "Human-readable control name"
+              },
+              "impact": {
+                "type": "string",
+                "enum": ["none", "positive", "negative", "neutral"],
+                "description": "Impact of the change on this control"
+              },
+              "notes": {
+                "type": "string",
+                "description": "Additional context about the control impact"
+              }
+            }
+          },
+          "description": "Security controls affected by this change"
+        },
+        "ksi_impact": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^KSI-[A-Z]{3}-\\d{2}$"
+          },
+          "description": "Key Security Indicators affected by this change"
+        },
+        "data_impact": {
+          "type": "string",
+          "enum": ["none", "access_pattern_change", "new_data_flow", "data_location_change", "encryption_change"],
+          "description": "Impact on federal customer data handling"
+        }
+      }
+    },
+    "controls_verification": {
+      "type": "object",
+      "required": ["verification_method", "verification_timestamp", "results"],
+      "description": "Post-change security control verification results",
+      "properties": {
+        "verification_method": {
+          "type": "string",
+          "enum": ["automated", "manual", "hybrid"],
+          "description": "Method used for post-change verification"
+        },
+        "verification_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When verification was completed"
+        },
+        "assessor": {
+          "type": "string",
+          "description": "Who performed the verification (3PAO for transformative changes)"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["control_id", "status"],
+            "properties": {
+              "control_id": {
+                "type": "string"
+              },
+              "control_name": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["operational", "degraded", "non_operational", "not_applicable"]
+              },
+              "verification_detail": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Per-control verification results"
+        },
+        "overall_status": {
+          "type": "string",
+          "enum": ["pass", "pass_with_findings", "fail"],
+          "description": "Overall verification result"
+        }
+      }
+    },
+    "notification_recipients": {
+      "type": "object",
+      "required": ["fedramp_pmo", "agency_customers"],
+      "description": "FRR-SCN-TR notification delivery tracking",
+      "properties": {
+        "fedramp_pmo": {
+          "type": "object",
+          "properties": {
+            "notified": { "type": "boolean" },
+            "notification_timestamp": { "type": "string", "format": "date-time" },
+            "method": { "type": "string" }
+          }
+        },
+        "three_pao": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "notified": { "type": "boolean" },
+            "notification_timestamp": { "type": "string", "format": "date-time" },
+            "method": { "type": "string" }
+          }
+        },
+        "agency_customers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "agency_id": { "type": "string" },
+              "notified": { "type": "boolean" },
+              "notification_timestamp": { "type": "string", "format": "date-time" },
+              "method": { "type": "string" },
+              "consulted_in_advance": {
+                "type": "boolean",
+                "description": "Required for transformative changes"
+              }
+            }
+          },
+          "description": "Agency customer notification tracking"
+        }
+      }
+    },
+    "audit_trail": {
+      "type": "object",
+      "required": ["record_id", "created_at"],
+      "description": "FRR-SCN audit record keeping requirement",
+      "properties": {
+        "record_id": {
+          "type": "string",
+          "description": "Unique audit record identifier"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_updated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evaluation_activities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "activity": { "type": "string" },
+              "timestamp": { "type": "string", "format": "date-time" },
+              "actor": { "type": "string" },
+              "outcome": { "type": "string" }
+            }
+          },
+          "description": "Auditable log of significant change evaluation activities"
+        },
+        "retention_until": {
+          "type": "string",
+          "format": "date",
+          "description": "Available at least until next annual assessment"
+        },
+        "integrity_hash": {
+          "type": "string",
+          "description": "SHA-256 hash for record integrity verification"
+        }
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "hash": { "type": "string" }
+        }
+      },
+      "description": "Supporting documentation and evidence"
+    }
+  },
+  "if": {
+    "properties": {
+      "change_classification": {
+        "properties": {
+          "tier": { "const": "transformative" }
+        }
+      }
+    }
+  },
+  "then": {
+    "properties": {
+      "notification_recipients": {
+        "properties": {
+          "agency_customers": {
+            "items": {
+              "required": ["consulted_in_advance"]
+            }
+          }
+        }
+      }
+    }
+  }
+}
