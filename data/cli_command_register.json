@@ -1,27 +1,47 @@
 {
   "KSI-AFR-01": {
-    "description": "Validates the complete FedRAMP Minimum Assessment Scope (MAS). This rule enforces Structural Boundaries (VPC ID) for compute assets AND validates that all peripheral assets (S3, RDS, ALB) are accounted for in the inventory.",
-    "justification": "Validates the Live FedRAMP Boundary (MAS). Explicitly inventories the four critical asset classes: 1) The Boundary itself (VPC), 2) Compute (EC2), 3) Data (RDS), and 4) Storage (S3), ensuring all are accounted for.",
+    "description": "Validates the complete FedRAMP Minimum Assessment Scope (MAS) covering machine resources, human resources, and process resources. This rule enforces Structural Boundaries (VPC ID) for compute assets, validates peripheral assets (S3, RDS, ALB), enumerates privileged human access (IAM), and confirms governance processes exist.",
+    "justification": "Validates the Live FedRAMP Boundary (MAS) across all three resource types: 1) Machine resources — the four critical asset classes (VPC boundary, EC2 compute, RDS data, S3 storage, ALB network), 2) Human resources — privileged IAM users/roles with production access, 3) Process resources — governance documentation defining security procedures.",
     "cli_commands": [
       {
         "command": "aws ec2 describe-vpcs --filters Name=isDefault,Values=false --output json",
-        "note": "BOUNDARY: Validate the dedicated Production VPC (The Structural Boundary of the MAS)."
+        "note": "BOUNDARY: Validate the dedicated Production VPC (The Structural Boundary of the MAS).",
+        "expected_output": "At least one non-default VPC must exist as the production boundary"
       },
       {
         "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json",
-        "note": "COMPUTE: Validate that all active EC2 instances reside within the defined VPC Boundary."
+        "note": "COMPUTE: Validate that all active EC2 instances reside within the defined VPC Boundary.",
+        "expected_output": "At least one running EC2 instance must exist within the boundary"
       },
       {
         "command": "aws rds describe-db-instances --query \"DBInstances[*].{ID:DBInstanceIdentifier, Engine:Engine, VPC:DBSubnetGroup.VpcId}\" --output json",
-        "note": "DATABASE: Validate RDS instances to ensure federal data is contained within the boundary."
+        "note": "DATABASE: Validate RDS instances to ensure federal data is contained within the boundary.",
+        "expected_output": "At least 1 RDS instance must exist"
       },
       {
         "command": "aws s3api list-buckets --output json",
-        "note": "STORAGE: Validate S3 buckets (Peripheral Assets) that fall within the assessment scope."
+        "note": "STORAGE: Validate S3 buckets (Peripheral Assets) that fall within the assessment scope.",
+        "expected_output": "At least 1 S3 bucket must exist"
       },
       {
         "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[*].{ARN:LoadBalancerArn, DNS:DNSName, VPC:VpcId}\" --output json",
-        "note": "NETWORK: Validate Load Balancers (The Ingress/Egress points of the boundary)."
+        "note": "NETWORK: Validate Load Balancers (The Ingress/Egress points of the boundary).",
+        "expected_output": "At least 1 load balancer must exist"
+      },
+      {
+        "command": "aws iam list-users --query \"Users[*].{UserName:UserName, CreateDate:CreateDate, PasswordLastUsed:PasswordLastUsed}\" --output json",
+        "note": "HUMAN: Enumerate IAM users with production account access (privileged human resources in the MAS).",
+        "expected_output": "IAM user list establishes the human resource inventory for the boundary"
+      },
+      {
+        "command": "aws iam list-roles --query \"Roles[?contains(RoleName, 'Admin') || contains(RoleName, 'Security') || contains(RoleName, 'Incident')]\" --output json",
+        "note": "HUMAN-ROLES: Enumerate security-relevant IAM roles (ISSO, SysAdmin, IR roles) mapped to human resource responsibilities.",
+        "expected_output": "Security-relevant IAM roles must exist mapping to ISSO, SysAdmin, and IR responsibilities"
+      },
+      {
+        "command": "aws codecommit get-folder --repository-name security-governance --folder-path procedures/ --output json",
+        "note": "PROCESS: Validate that security governance procedures exist (process resources in the MAS).",
+        "expected_output": "The procedures folder must exist in CodeCommit with security governance documentation"
       }
     ],
     "artifact_evidence_paths": [
@@ -29,9 +49,14 @@
       "evidence_v2/KSI-AFR-01/compute_inventory.json",
       "evidence_v2/KSI-AFR-01/database_inventory.json",
       "evidence_v2/KSI-AFR-01/storage_inventory.json",
-      "evidence_v2/KSI-AFR-01/network_inventory.json"
+      "evidence_v2/KSI-AFR-01/network_inventory.json",
+      "evidence_v2/KSI-AFR-01/iam_users.json",
+      "evidence_v2/KSI-AFR-01/iam_security_roles.json",
+      "evidence_v2/KSI-AFR-01/governance_procedures.json"
     ],
-    "implementation_summary": "Meridian maintains a single-VPC architecture with all production resources (5 EC2 instances, 1 RDS database, 11 S3 buckets, 1 ALB) explicitly enumerated and validated daily. Our small footprint enables complete boundary visibility without complex discovery tools."
+    "implementation_summary": "Meridian maintains a single-VPC architecture with all production resources (5 EC2 instances, 1 RDS database, 11 S3 buckets, 1 ALB) explicitly enumerated and validated daily. Human resources are inventoried via IAM user and role enumeration, with security-relevant roles (Admin, Security, Incident Response) specifically tracked. Process resources are validated by confirming the existence of governance procedures in the security-governance CodeCommit repository. Our small footprint enables complete boundary visibility across machine, human, and process resources.",
+    "pass_criteria": "PASS if: A dedicated non-default VPC exists as the production boundary, at least one running EC2 instance operates within it, at least one RDS database instance is provisioned, S3 buckets exist for storage, at least one load balancer provides ingress/egress, IAM users and security-relevant roles are enumerated, and security governance procedures exist in CodeCommit.",
+    "fail_criteria": "FAIL if: No non-default VPC exists, no running EC2 instances are found, no RDS instances are provisioned, no S3 buckets exist, no load balancers are configured, IAM enumeration fails, or security governance procedures are missing. Any missing resource class (machine, human, or process) means the Minimum Assessment Scope is incomplete."
   },
   "KSI-AFR-02": {
     "description": "Set security goals and develop automated validation of status and progress.",
@@ -39,18 +64,22 @@
     "cli_commands": [
       {
         "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/unified_ksi_validations.json --output json",
-        "note": "TRACKER: Validate existence and freshness of the Master Compliance Scorecard (unified_ksi_validations.json)."
+        "note": "TRACKER: Validate existence and freshness of the Master Compliance Scorecard (unified_ksi_validations.json).",
+        "expected_output": "Compliance scorecard must exist, be non-empty, and updated within 30 days (proving active tracking)"
       },
       {
         "command": "aws securityhub describe-hub --output json",
-        "note": "SOURCE: Validate Security Hub is enabled (The raw data source feeding the tracker)."
+        "note": "SOURCE: Validate Security Hub is enabled (The raw data source feeding the tracker).",
+        "expected_output": "Security Hub must be enabled"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-AFR-02/tracker_artifact.json",
       "evidence_v2/KSI-AFR-02/security_hub_status.json"
     ],
-    "implementation_summary": "Security goals are tracked via unified_ksi_validations.json, auto-generated by GitHub Actions and published to our Trust Center API. All 61 KSIs are evaluated daily with results publicly accessible."
+    "implementation_summary": "Security goals are tracked via unified_ksi_validations.json, auto-generated by GitHub Actions and published to our Trust Center API. All 61 KSIs are evaluated daily with results publicly accessible.",
+    "pass_criteria": "PASS if: The unified_ksi_validations.json compliance scorecard exists in the S3 compliance bucket with a LastModified timestamp within the last 7 days, AND AWS Security Hub is enabled and returning a valid HubArn.",
+    "fail_criteria": "FAIL if: The compliance scorecard artifact is missing from S3, its LastModified date is older than 7 days (stale data), or Security Hub is not enabled in the account."
   },
   "KSI-AFR-03": {
     "description": "Determine how authorization data will be shared in alignment with the ADS standard.",
@@ -58,18 +87,22 @@
     "cli_commands": [
       {
         "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/meridian-authorization-package-LATEST.zip --output json",
-        "note": "DELIVERABLE: Validate the existence of the downloadable Authorization Package ZIP file."
+        "note": "DELIVERABLE: Validate the existence of the downloadable Authorization Package ZIP file.",
+        "expected_output": "S3 artifact must exist"
       },
       {
         "command": "curl -s -o /dev/null -w \"%{http_code}\" https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/status || echo \"000\"",
-        "note": "INTERFACE: Ping the Trust Center API to ensure the delivery mechanism is live."
+        "note": "INTERFACE: Ping the Trust Center API to ensure the delivery mechanism is live.",
+        "expected_output": "HTTP 200 status code expected from Trust Center API"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-AFR-03/package_zip_proof.json",
       "evidence_v2/KSI-AFR-03/api_status.json"
     ],
-    "implementation_summary": "Authorization data is shared via our public Trust Center (trust.meridianks.com) and API. The authorization package ZIP is auto-compiled from CodeCommit governance artifacts and updated with each pipeline run."
+    "implementation_summary": "Authorization data is shared via our public Trust Center (trust.meridianks.com) and API. The authorization package ZIP is auto-compiled from CodeCommit governance artifacts and updated with each pipeline run.",
+    "pass_criteria": "PASS if: The meridian-authorization-package-LATEST.zip artifact exists in the S3 compliance bucket, AND the Trust Center API endpoint returns an HTTP 200 status code.",
+    "fail_criteria": "FAIL if: The authorization package ZIP is missing from S3, or the Trust Center API returns a non-200 status code (service unavailable)."
   },
   "KSI-AFR-04": {
     "description": "Document the vulnerability detection and response methodology.",
@@ -77,15 +110,18 @@
     "cli_commands": [
       {
         "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/assessed_vulnerabilities_integrated.json --output json",
-        "note": "DETECTION: Validate the Integrated Vulnerability Report artifact."
+        "note": "DETECTION: Validate the Integrated Vulnerability Report artifact.",
+        "expected_output": "Vulnerability report must exist, be non-empty, and updated within 30 days (proving active detection)"
       },
       {
         "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/vdr_vulnerability_status.json --output json",
-        "note": "STATUS: Validate the VDR Status artifact (Proof of remediation tracking)."
+        "note": "STATUS: Validate the VDR Status artifact (Proof of remediation tracking).",
+        "expected_output": "VDR status artifact must exist, be non-empty, and updated within 30 days (proving remediation tracking)"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
-        "note": "METHODOLOGY: Validate the Governance Policy defining the VDR process."
+        "note": "METHODOLOGY: Validate the Governance Policy defining the VDR process.",
+        "expected_output": "VDR governance policy must exist with substantive content defining the vulnerability management methodology"
       }
     ],
     "artifact_evidence_paths": [
@@ -93,7 +129,9 @@
       "evidence_v2/KSI-AFR-04/vdr_status_artifact.json",
       "evidence_v2/KSI-AFR-04/policy_doc.json"
     ],
-    "implementation_summary": "Vulnerability detection uses AWS Inspector and SecurityHub with VDR Release 25.09A compliance. Findings are aggregated into assessed_vulnerabilities_integrated.json with automated remediation tracking. Current posture: 0 CISA KEV matches, 0 internet-reachable criticals."
+    "implementation_summary": "Vulnerability detection uses AWS Inspector and SecurityHub with VDR Release 25.09A compliance. Findings are aggregated into assessed_vulnerabilities_integrated.json with automated remediation tracking. Current posture: 0 CISA KEV matches, 0 internet-reachable criticals.",
+    "pass_criteria": "PASS if: Both vulnerability artifacts (assessed_vulnerabilities_integrated.json and vdr_vulnerability_status.json) exist in S3, AND the vulnerability-management-policy.md governance document exists in CodeCommit.",
+    "fail_criteria": "FAIL if: Either vulnerability artifact is missing from S3, or the vulnerability management policy document does not exist in the security-governance repository."
   },
   "KSI-AFR-05": {
     "description": "Verify SCN procedures are documented and active change tracking is maintained.",
@@ -101,15 +139,18 @@
     "cli_commands": [
       {
         "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')]\" --output json",
-        "note": "DROP BOX: Validate existence of the Compliance Evidence bucket."
+        "note": "DROP BOX: Validate existence of the Compliance Evidence bucket.",
+        "expected_output": "At least 1 compliance/evidence S3 bucket must exist"
       },
       {
         "command": "aws s3api list-objects-v2 --bucket $(aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')].Name\" --output text | head -n 1) --prefix scn-flow-validation.html --output json",
-        "note": "PROCEDURE: Check for the 'scn-flow-validation.html' file."
+        "note": "PROCEDURE: Check for the 'scn-flow-validation.html' file.",
+        "expected_output": "SCN flow validation artifact must exist and be non-empty (proving the procedure is documented)"
       },
       {
         "command": "aws s3api list-objects-v2 --bucket $(aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')].Name\" --output text | head -n 1) --prefix audit_trail --output json",
-        "note": "LOGS: Check for the SCN Audit Trail file."
+        "note": "LOGS: Check for the SCN Audit Trail file.",
+        "expected_output": "SCN audit trail must exist with recent entries (proving changes are actively tracked)"
       }
     ],
     "artifact_evidence_paths": [
@@ -117,7 +158,9 @@
       "evidence_v2/KSI-AFR-05/scn_html_proof.json",
       "evidence_v2/KSI-AFR-05/audit_log_proof.json"
     ],
-    "implementation_summary": "Significant Change Notifications are tracked via CodeCommit commit history and Terraform state versioning. All infrastructure changes require PR approval and generate immutable audit trails."
+    "implementation_summary": "Significant Change Notifications are tracked via CodeCommit commit history and Terraform state versioning. All infrastructure changes require PR approval and generate immutable audit trails.",
+    "pass_criteria": "PASS if: A compliance/evidence S3 bucket exists, the scn-flow-validation.html procedure document is present in it, AND an audit_trail prefix contains SCN log entries.",
+    "fail_criteria": "FAIL if: No compliance/evidence bucket exists, the SCN flow validation HTML is missing, or no audit trail entries are found."
   },
   "KSI-AFR-06": {
     "description": "Maintain a plan and process for providing Ongoing Authorization Reports and Quarterly Reviews.",
@@ -125,18 +168,22 @@
     "cli_commands": [
       {
         "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/3pao_audit_report.json --output json",
-        "note": "INDEPENDENT REVIEW: Validate the 3PAO Audit Report artifact."
+        "note": "INDEPENDENT REVIEW: Validate the 3PAO Audit Report artifact.",
+        "expected_output": "S3 artifact must exist"
       },
       {
         "command": "curl -s -o /dev/null -w \"%{http_code}\" https://meridian-knowledge-solutions.github.io/fedramp-trust-center/ || echo \"000\"",
-        "note": "AVAILABILITY: Ping the Trust Center Portal (The delivery vehicle for these reports)."
+        "note": "AVAILABILITY: Ping the Trust Center Portal (The delivery vehicle for these reports).",
+        "expected_output": "HTTP 200 status code expected from Trust Center portal"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-AFR-06/3pao_report_artifact.json",
       "evidence_v2/KSI-AFR-06/portal_status.json"
     ],
-    "implementation_summary": "Ongoing authorization reports are auto-generated and published to our Trust Center. 3PAO audit reports are stored in the compliance bucket with quarterly review cadence built into GitHub Actions workflows."
+    "implementation_summary": "Ongoing authorization reports are auto-generated and published to our Trust Center. 3PAO audit reports are stored in the compliance bucket with quarterly review cadence built into GitHub Actions workflows.",
+    "pass_criteria": "PASS if: The 3pao_audit_report.json artifact exists in the S3 compliance bucket, AND the Trust Center portal returns an HTTP 200 status code confirming public availability of reports.",
+    "fail_criteria": "FAIL if: The 3PAO audit report artifact is missing from S3, or the Trust Center portal is unreachable (non-200 response)."
   },
   "KSI-AFR-07": {
     "description": "Document the secure configuration baseline for the cloud service offering.",
@@ -145,14 +192,17 @@
       {
         "command": "curl -s https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/config",
         "note": "DYNAMIC RETRIEVAL: Fetch the Security Baseline from the live API. This proves the configuration standards are documented and programmatically accessible.",
-        "service": "api_documentation"
+        "service": "api_documentation",
+        "expected_output": "Non-empty response expected"
       }
     ],
     "outcome_type": "documentation",
     "artifact_evidence_paths": [
       "evidence_v2/KSI-AFR-07/api_baseline_response.json"
     ],
-    "implementation_summary": "Security configuration baseline is documented in CodeCommit (security-governance repo) and served via our /prod/config API endpoint. Baselines cover EC2 hardening, RDS encryption, S3 policies, and network segmentation."
+    "implementation_summary": "Security configuration baseline is documented in CodeCommit (security-governance repo) and served via our /prod/config API endpoint. Baselines cover EC2 hardening, RDS encryption, S3 policies, and network segmentation.",
+    "pass_criteria": "PASS if: The /prod/config API endpoint returns a non-empty JSON response containing the security configuration baseline with defined standards for compute, database, storage, and network resources.",
+    "fail_criteria": "FAIL if: The API endpoint returns an empty response, an error, or does not include security baseline configuration data."
   },
   "KSI-AFR-08": {
     "description": "Operate a secure inbox to receive critical communication from FedRAMP and other government entities.",
@@ -160,18 +210,22 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/security-inbox-procedures.md --output json",
-        "note": "GOVERNANCE: Validate the existence of the Security Inbox Procedures document."
+        "note": "GOVERNANCE: Validate the existence of the Security Inbox Procedures document.",
+        "expected_output": "Governance document must exist in CodeCommit"
       },
       {
         "command": "aws sns list-topics --query \"Topics[?contains(TopicArn, 'security') || contains(TopicArn, 'alert') || contains(TopicArn, 'admin')]\" --output json",
-        "note": "INFRASTRUCTURE: Validate existence of an SNS Topic used to forward AWS alerts to the security inbox."
+        "note": "INFRASTRUCTURE: Validate existence of an SNS Topic used to forward AWS alerts to the security inbox.",
+        "expected_output": "At least 1 SNS topic must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-AFR-08/inbox_procedures.json",
       "evidence_v2/KSI-AFR-08/alert_topics.json"
     ],
-    "implementation_summary": "FedRAMP Secure Inbox operates via SNS topics with email forwarding to security@meridianks.com. Alerts from GuardDuty, SecurityHub, and CloudWatch route through dedicated security topics with <1hr SLA."
+    "implementation_summary": "FedRAMP Secure Inbox operates via SNS topics with email forwarding to security@meridianks.com. Alerts from GuardDuty, SecurityHub, and CloudWatch route through dedicated security topics with <1hr SLA.",
+    "pass_criteria": "PASS if: The security-inbox-procedures.md document exists in CodeCommit, AND at least one SNS topic with 'security', 'alert', or 'admin' in the ARN exists for alert forwarding.",
+    "fail_criteria": "FAIL if: The security inbox procedures document is missing from CodeCommit, or no SNS topics exist for security alert forwarding."
   },
   "KSI-AFR-09": {
     "description": "Persistently validate security posture using automated pipelines.",
@@ -179,18 +233,22 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path authorization_by_fedramp/fedramp-phase2-validation-architecture.mmd --output json",
-        "note": "ARCHITECTURE: Validate the existence of the Validation Architecture Diagram."
+        "note": "ARCHITECTURE: Validate the existence of the Validation Architecture Diagram.",
+        "expected_output": "Validation architecture document must exist with substantive content (sections, diagrams)"
       },
       {
         "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/unified_ksi_validations.json --output json",
-        "note": "EXECUTION: Validate existence (and freshness) of the Master Validation artifact in the production compliance bucket."
+        "note": "EXECUTION: Validate existence (and freshness) of the Master Validation artifact in the production compliance bucket.",
+        "expected_output": "Master validation artifact must exist, be non-empty, and updated within 30 days (proving persistent validation)"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-AFR-09/validation_architecture.json",
       "evidence_v2/KSI-AFR-09/s3_artifact_head.json"
     ],
-    "implementation_summary": "Automated validation runs via GitHub Actions (master-validator.yml) with 76% CI success rate. Pipeline validates all 61 KSIs, generates compliance artifacts, and publishes to Trust Center. Execution logs retained 90+ days."
+    "implementation_summary": "Automated validation runs via GitHub Actions (master-validator.yml) with 76% CI success rate. Pipeline validates all 61 KSIs, generates compliance artifacts, and publishes to Trust Center. Execution logs retained 90+ days.",
+    "pass_criteria": "PASS if: The validation architecture diagram (fedramp-phase2-validation-architecture.mmd) exists in CodeCommit, AND the unified_ksi_validations.json artifact exists in the S3 compliance bucket with a recent LastModified timestamp.",
+    "fail_criteria": "FAIL if: The validation architecture diagram is missing from CodeCommit, or the master validation artifact is absent or stale in S3."
   },
   "KSI-AFR-10": {
     "description": "Integrate FedRAMP's Incident Communications Procedures (ICP) into incident response procedures and infrastructure.",
@@ -198,19 +256,23 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/icp_playbook.md --output json",
-        "note": "GOVERNANCE: Validate the FedRAMP Incident Communications Procedure (ICP) Playbook."
+        "note": "GOVERNANCE: Validate the FedRAMP Incident Communications Procedure (ICP) Playbook.",
+        "expected_output": "Governance document must exist in CodeCommit"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json",
-        "note": "GOVERNANCE: Validate the master Incident Response Plan."
+        "note": "GOVERNANCE: Validate the master Incident Response Plan.",
+        "expected_output": "Governance document must exist in CodeCommit"
       },
       {
         "command": "aws sns list-topics --query \"Topics[?contains(TopicArn, 'security') || contains(TopicArn, 'incident') || contains(TopicArn, 'alert')]\" --output json",
-        "note": "INFRASTRUCTURE: Validate existence of dedicated SNS topics for Security Incidents."
+        "note": "INFRASTRUCTURE: Validate existence of dedicated SNS topics for Security Incidents.",
+        "expected_output": "At least 1 SNS topic must exist"
       },
       {
         "command": "aws sns list-subscriptions --query \"Subscriptions[?contains(TopicArn, 'security') || contains(TopicArn, 'incident') || contains(TopicArn, 'alert')]\" --output json",
-        "note": "REACHABILITY: Validate that the security topics have active subscriptions (email/SMS/Lambda) to ensure alerts are actually delivered."
+        "note": "REACHABILITY: Validate that the security topics have active subscriptions (email/SMS/Lambda) to ensure alerts are actually delivered.",
+        "expected_output": "At least 1 active subscription must exist on security SNS topics"
       }
     ],
     "artifact_evidence_paths": [
@@ -219,7 +281,9 @@
       "evidence_v2/KSI-AFR-10/security_topics.json",
       "evidence_v2/KSI-AFR-10/topic_subscriptions.json"
     ],
-    "implementation_summary": "ICP integration uses GitHub Actions for automated FedRAMP/CISA notification within 1 hour of incident detection. Playbooks in CodeCommit define escalation paths for Critical, High, and standard incidents."
+    "implementation_summary": "ICP integration uses GitHub Actions for automated FedRAMP/CISA notification within 1 hour of incident detection. Playbooks in CodeCommit define escalation paths for Critical, High, and standard incidents.",
+    "pass_criteria": "PASS if: Both the ICP playbook and incident response plan exist in CodeCommit, at least one dedicated security/incident/alert SNS topic exists, AND those topics have active subscriptions (email, SMS, or Lambda) to ensure alert delivery.",
+    "fail_criteria": "FAIL if: Either governance document (ICP playbook or IR plan) is missing, no dedicated security SNS topics exist, or the topics have zero active subscriptions (alerts would not be delivered)."
   },
   "KSI-AFR-11": {
     "description": "Ensure that cryptographic modules are selected and used in alignment with the FedRAMP 20x Using Cryptographic Modules (UCM) policy.",
@@ -227,23 +291,28 @@
     "cli_commands": [
       {
         "command": "aws kms list-keys --limit 5 --output json",
-        "note": "KEY MANAGEMENT: Validate that KMS keys exist and are available for cryptographic operations."
+        "note": "KEY MANAGEMENT: Validate that KMS keys exist and are available for cryptographic operations.",
+        "expected_output": "At least 1 KMS key must exist"
       },
       {
         "command": "aws s3api get-bucket-encryption --bucket fedramp-compliance-893894210484 --output json",
-        "note": "DATA AT REST (STORAGE): Validate that the Compliance Artifact Bucket enforces server-side encryption (SSE-S3 or SSE-KMS)."
+        "note": "DATA AT REST (STORAGE): Validate that the Compliance Artifact Bucket enforces server-side encryption (SSE-S3 or SSE-KMS).",
+        "expected_output": "Encryption configuration must exist"
       },
       {
         "command": "aws rds describe-db-instances --output json",
-        "note": "DATA AT REST (DATABASE): Validate that all RDS instances have 'StorageEncrypted' set to true."
+        "note": "DATA AT REST (DATABASE): Validate that all RDS instances have 'StorageEncrypted' set to true.",
+        "expected_output": "At least 1 RDS database instance must exist"
       },
       {
         "command": "aws elbv2 describe-listeners --load-balancer-arn $(aws elbv2 describe-load-balancers --query \"LoadBalancers[0].LoadBalancerArn\" --output text) --output json || echo \"[]\"",
-        "note": "DATA IN TRANSIT: Validate that Load Balancer Listeners are configured with secure SSL Policies (TLS 1.2+)."
+        "note": "DATA IN TRANSIT: Validate that Load Balancer Listeners are configured with secure SSL Policies (TLS 1.2+).",
+        "expected_output": "Load balancer listeners must use TLS 1.2+ SSL policies (e.g., ELBSecurityPolicy-TLS-1-2-2017-01 or newer)"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/cryptographic-modules-policy.md --output json",
-        "note": "GOVERNANCE: Validate the existence of the Cryptographic Modules (UCM) Policy."
+        "note": "GOVERNANCE: Validate the existence of the Cryptographic Modules (UCM) Policy.",
+        "expected_output": "Governance document must exist in CodeCommit"
       }
     ],
     "artifact_evidence_paths": [
@@ -253,7 +322,9 @@
       "evidence_v2/KSI-AFR-11/lb_listeners.json",
       "evidence_v2/KSI-AFR-11/crypto_policy.json"
     ],
-    "implementation_summary": "Cryptography uses AWS KMS with AES-256 for data at rest (S3, RDS, EBS). TLS 1.2+ enforced on ALB listeners. FIPS 140-2 validated modules via AWS GovCloud-compatible services."
+    "implementation_summary": "Cryptography uses AWS KMS with AES-256 for data at rest (S3, RDS, EBS). TLS 1.2+ enforced on ALB listeners. FIPS 140-2 validated modules via AWS GovCloud-compatible services.",
+    "pass_criteria": "PASS if: At least one KMS key exists for cryptographic operations, the compliance S3 bucket enforces server-side encryption (SSE-S3 or SSE-KMS), all RDS instances have StorageEncrypted=true, load balancer listeners enforce TLS 1.2+ via secure SSL policies, AND the cryptographic-modules-policy.md exists in CodeCommit.",
+    "fail_criteria": "FAIL if: No KMS keys exist, the compliance bucket lacks encryption configuration, any RDS instance has StorageEncrypted=false, load balancer listeners allow TLS below 1.2 or use insecure SSL policies, or the UCM policy document is missing."
   },
   "KSI-CED-01": {
     "description": "Persistently review the effectiveness of training given to all employees on policies, procedures, and security-related topics.",
@@ -261,18 +332,22 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path training/register.json --output json",
-        "note": "EVIDENCE: Validate the Training Register. The file must contain user commits with the correct decoded flag, proving active engagement."
+        "note": "EVIDENCE: Validate the Training Register. The file must contain user commits with the correct decoded flag, proving active engagement.",
+        "expected_output": "Training register must exist and contain attestation entries (user/token/date records proving completion)"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path training/security-refresh.md --output json",
-        "note": "CURRICULUM: Validate the existence of the Training Challenge Instructions (The 'Lesson Plan')."
+        "note": "CURRICULUM: Validate the existence of the Training Challenge Instructions (The 'Lesson Plan').",
+        "expected_output": "Training curriculum must exist with substantive content (structured training material, not an empty shell)"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-CED-01/training_register.json",
       "evidence_v2/KSI-CED-01/training_curriculum.json"
     ],
-    "implementation_summary": "Training tracked via GitOps - employees commit signed attestations to training/register.json after completing security awareness modules. CTF-style challenge tokens prove active engagement."
+    "implementation_summary": "Training tracked via GitOps - employees commit signed attestations to training/register.json after completing security awareness modules. CTF-style challenge tokens prove active engagement.",
+    "pass_criteria": "PASS if: The training/register.json file exists in CodeCommit containing at least one signed attestation entry with a decoded challenge token, AND the training/security-refresh.md curriculum document exists.",
+    "fail_criteria": "FAIL if: The training register is missing or contains zero attestation entries, or the training curriculum document does not exist in CodeCommit."
   },
   "KSI-CED-02": {
     "description": "Persistently review the effectiveness of role-specific training given to employees in high risk roles, including at least roles with privileged access.",
@@ -280,18 +355,22 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path training/privileged_register.json --output json",
-        "note": "EVIDENCE: Validate the Privileged User Training Register. Entries here confirm acknowledgement of high-risk responsibilities and completion of the IAM Deep Dive."
+        "note": "EVIDENCE: Validate the Privileged User Training Register. Entries here confirm acknowledgement of high-risk responsibilities and completion of the IAM Deep Dive.",
+        "expected_output": "Privileged user training register must contain attestation entries proving role-specific training completion"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path training/privileged-access-guide.md --output json",
-        "note": "CURRICULUM: Validate the existence of the Privileged Access Guide containing the link to the mandatory AWS Skill Builder IAM course."
+        "note": "CURRICULUM: Validate the existence of the Privileged Access Guide containing the link to the mandatory AWS Skill Builder IAM course.",
+        "expected_output": "Privileged access training guide must exist with substantive content covering role-specific security topics"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-CED-02/privileged_register.json",
       "evidence_v2/KSI-CED-02/privileged_guide.json"
     ],
-    "implementation_summary": "Privileged user training requires completion of AWS Skill Builder IAM Deep Dive course. Attestations stored in training/privileged_register.json with commit signatures."
+    "implementation_summary": "Privileged user training requires completion of AWS Skill Builder IAM Deep Dive course. Attestations stored in training/privileged_register.json with commit signatures.",
+    "pass_criteria": "PASS if: The training/privileged_register.json file exists in CodeCommit with signed attestations from privileged users confirming IAM Deep Dive completion, AND the privileged-access-guide.md exists with the mandatory AWS Skill Builder course link.",
+    "fail_criteria": "FAIL if: The privileged user training register is missing or empty, or the privileged access guide document does not exist in CodeCommit."
   },
   "KSI-CED-03": {
     "description": "Persistently review the effectiveness of role-specific training given to development and engineering staff that covers best practices for delivering secure software.",
@@ -299,18 +378,22 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path training/developer_register.json --output json",
-        "note": "EVIDENCE: Validate the Developer Training Register. Entries here confirm engineering staff have acknowledged the secure software development policy."
+        "note": "EVIDENCE: Validate the Developer Training Register. Entries here confirm engineering staff have acknowledged the secure software development policy.",
+        "expected_output": "Developer training register must contain attestation entries proving secure development training completion"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/secure-software-development.md --output json",
-        "note": "CURRICULUM: Validate the existence of the Secure Software Development policy."
+        "note": "CURRICULUM: Validate the existence of the Secure Software Development policy.",
+        "expected_output": "Secure software development policy must exist with substantive content covering SDLC security practices"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-CED-03/developer_register.json",
       "evidence_v2/KSI-CED-03/secure_dev_policy.json"
     ],
-    "implementation_summary": "Developer security training covers OWASP Top 10, secure coding in Python/TypeScript, and Checkov IaC scanning. Attestations in training/developer_register.json."
+    "implementation_summary": "Developer security training covers OWASP Top 10, secure coding in Python/TypeScript, and Checkov IaC scanning. Attestations in training/developer_register.json.",
+    "pass_criteria": "PASS if: The training/developer_register.json file exists in CodeCommit with signed attestations from engineering staff, AND the secure-software-development.md policy exists in the policies directory.",
+    "fail_criteria": "FAIL if: The developer training register is missing or contains no attestations, or the secure software development policy document is absent."
   },
   "KSI-CED-04": {
     "description": "Persistently review the effectiveness of role-specific training given to staff involved with incident response or disaster recovery.",
@@ -318,18 +401,22 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path training/ir_dr_register.json --output json",
-        "note": "EVIDENCE: Validate the IR/DR Training Register. Entries here confirm the IR team has reviewed the active response procedures."
+        "note": "EVIDENCE: Validate the IR/DR Training Register. Entries here confirm the IR team has reviewed the active response procedures.",
+        "expected_output": "IR/DR training register must contain attestation entries proving incident response training completion"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json",
-        "note": "CURRICULUM: Validate the existence of the Incident Response Plan (The core training material)."
+        "note": "CURRICULUM: Validate the existence of the Incident Response Plan (The core training material).",
+        "expected_output": "Incident response plan must exist with substantive content covering response procedures and escalation"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-CED-04/ir_dr_register.json",
       "evidence_v2/KSI-CED-04/ir_plan_doc.json"
     ],
-    "implementation_summary": "IR/DR training requires review of incident-response-plan.md and participation in tabletop exercises. Attestations tracked in training/ir_dr_register.json."
+    "implementation_summary": "IR/DR training requires review of incident-response-plan.md and participation in tabletop exercises. Attestations tracked in training/ir_dr_register.json.",
+    "pass_criteria": "PASS if: The training/ir_dr_register.json file exists in CodeCommit with attestations from designated incident responders, AND the incident-response-plan.md exists as the core training material.",
+    "fail_criteria": "FAIL if: The IR/DR training register is missing or empty, or the incident response plan document does not exist in CodeCommit."
   },
   "KSI-CMT-01": {
     "description": "Log and monitor modifications to the cloud service offering.",
@@ -337,19 +424,23 @@
     "cli_commands": [
       {
         "command": "aws cloudtrail describe-trails --output json",
-        "note": "AUDIT: Validate existence of CloudTrail trails (The primary change logger)."
+        "note": "AUDIT: Validate existence of CloudTrail trails (The primary change logger).",
+        "expected_output": "At least 1 CloudTrail trail must exist"
       },
       {
         "command": "aws cloudtrail get-event-selectors --trail-name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
-        "note": "SCOPE: Validate that the trail is recording 'Management Events' (Read/Write API calls)."
+        "note": "SCOPE: Validate that the trail is recording 'Management Events' (Read/Write API calls).",
+        "expected_output": "At least 1 event selector must exist"
       },
       {
         "command": "aws configservice describe-configuration-recorder-status --output json",
-        "note": "TRACKING: Validate that AWS Config is actively recording resource changes (Recording: true)."
+        "note": "TRACKING: Validate that AWS Config is actively recording resource changes (Recording: true).",
+        "expected_output": "At least 1 Config recorder must exist"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/change-management-policy.md --output json",
-        "note": "GOVERNANCE: Validate the Change Management Policy document."
+        "note": "GOVERNANCE: Validate the Change Management Policy document.",
+        "expected_output": "Governance document must exist in CodeCommit"
       }
     ],
     "artifact_evidence_paths": [
@@ -358,7 +449,9 @@
       "evidence_v2/KSI-CMT-01/config_status.json",
       "evidence_v2/KSI-CMT-01/change_policy.json"
     ],
-    "implementation_summary": "All modifications logged via CloudTrail (management events) and AWS Config (resource state). Change management policy requires Terraform-only changes with PR approval."
+    "implementation_summary": "All modifications logged via CloudTrail (management events) and AWS Config (resource state). Change management policy requires Terraform-only changes with PR approval.",
+    "pass_criteria": "PASS if: At least one CloudTrail trail exists and is logging, event selectors are configured to record Management Events (Read/Write API calls), AWS Config recorder is actively recording (recording=true), AND the change-management-policy.md exists in CodeCommit.",
+    "fail_criteria": "FAIL if: No CloudTrail trail exists, no event selectors are configured, the Config recorder is not recording, or the change management policy is missing."
   },
   "KSI-CMT-02": {
     "description": "Execute changes to machine-based information resources through redeployment of version controlled immutable resources rather than direct modification wherever possible.",
@@ -366,19 +459,23 @@
     "cli_commands": [
       {
         "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'terraform') || contains(Name, 'state') || contains(Name, 'tfstate')]\" --output json",
-        "note": "VERSION CONTROL: Validate existence of the Terraform State bucket (Proof that infrastructure is defined as code)."
+        "note": "VERSION CONTROL: Validate existence of the Terraform State bucket (Proof that infrastructure is defined as code).",
+        "expected_output": "At least 1 S3 bucket with 'terraform', 'state', or 'tfstate' in the name must exist"
       },
       {
         "command": "aws dynamodb list-tables --query \"TableNames[?contains(@, 'terraform') || contains(@, 'lock') || contains(@, 'state')]\" --output json",
-        "note": "MANAGEMENT: Validate existence of the Terraform Lock Table (Proof of active, safe IaC workflows)."
+        "note": "MANAGEMENT: Validate existence of the Terraform Lock Table (Proof of active, safe IaC workflows).",
+        "expected_output": "At least 1 DynamoDB table with 'terraform', 'lock', or 'state' in the name must exist"
       },
       {
         "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json",
-        "note": "INVENTORY: List the active EC2 instances managed by this Terraform state."
+        "note": "INVENTORY: List the active EC2 instances managed by this Terraform state.",
+        "expected_output": "At least 1 EC2 instance must exist"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json",
-        "note": "GOVERNANCE: Validate the policy that mandates Terraform usage for all production changes."
+        "note": "GOVERNANCE: Validate the policy that mandates Terraform usage for all production changes.",
+        "expected_output": "Governance document must exist in CodeCommit"
       }
     ],
     "artifact_evidence_paths": [
@@ -387,7 +484,9 @@
       "evidence_v2/KSI-CMT-02/managed_instances.json",
       "evidence_v2/KSI-CMT-02/iac_policy.json"
     ],
-    "implementation_summary": "Infrastructure deployed exclusively via Terraform with state stored in S3 (mks-states bucket) and DynamoDB locking. No console changes permitted in production."
+    "implementation_summary": "Infrastructure deployed exclusively via Terraform with state stored in S3 (mks-states bucket) and DynamoDB locking. No console changes permitted in production.",
+    "pass_criteria": "PASS if: A Terraform state S3 bucket exists (containing 'terraform', 'state', or 'tfstate' in the name), a DynamoDB lock table exists for state locking, at least one running EC2 instance is managed by Terraform, AND the configuration-management-policy.md mandating IaC exists in CodeCommit.",
+    "fail_criteria": "FAIL if: No Terraform state bucket exists (infrastructure not managed as code), no DynamoDB lock table exists (no concurrency control), no managed EC2 instances exist, or the IaC policy document is missing."
   },
   "KSI-CMT-03": {
     "description": "Automate persistent testing and validation of changes throughout deployment.",
@@ -395,15 +494,18 @@
     "cli_commands": [
       {
         "command": "aws configservice describe-configuration-recorder-status --output json",
-        "note": "MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation)."
+        "note": "MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation).",
+        "expected_output": "At least 1 Config recorder must exist"
       },
       {
         "command": "aws configservice describe-config-rules --query \"ConfigRules[?RuleState=='ACTIVE']\" --max-items 5 --output json",
-        "note": "VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources."
+        "note": "VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources.",
+        "expected_output": "At least 1 active AWS Config rule must exist"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/sdlc-policy.md --output json",
-        "note": "GOVERNANCE: Validate the SDLC Policy which mandates 'Automated Testing' (Checkov) before deployment."
+        "note": "GOVERNANCE: Validate the SDLC Policy which mandates 'Automated Testing' (Checkov) before deployment.",
+        "expected_output": "Governance document must exist in CodeCommit"
       }
     ],
     "artifact_evidence_paths": [
@@ -412,7 +514,9 @@
       "evidence_v2/KSI-CMT-03/checkov_scan_summary.json",
       "evidence_v2/KSI-CMT-03/sdlc_policy.json"
     ],
-    "implementation_summary": "Changes validated by Checkov scans in CI pipeline before deployment. AWS Config rules provide continuous drift detection post-deployment."
+    "implementation_summary": "Changes validated by Checkov scans in CI pipeline before deployment. AWS Config rules provide continuous drift detection post-deployment.",
+    "pass_criteria": "PASS if: AWS Config recorder is actively recording, at least one active Config Rule exists enforcing security policies on live resources, AND the sdlc-policy.md mandating automated testing (Checkov) exists in CodeCommit.",
+    "fail_criteria": "FAIL if: Config recorder is not active, no Config Rules are in ACTIVE state, or the SDLC policy document is missing from CodeCommit."
   },
   "KSI-CMT-04": {
     "description": "Persistently review the effectiveness of documented change management procedures.",
@@ -420,18 +524,22 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/change-management-procedure.md --output json",
-        "note": "GOVERNANCE: Validate the existence of the Change Management Procedure document."
+        "note": "GOVERNANCE: Validate the existence of the Change Management Procedure document.",
+        "expected_output": "Governance document must exist in CodeCommit"
       },
       {
         "command": "aws s3api list-objects-v2 --bucket mks-states --prefix terraform.tfstate --max-items 1 --output json",
-        "note": "IMMUTABILITY: List Terraform State file with versioning metadata, proving version-controlled infrastructure changes."
+        "note": "IMMUTABILITY: List Terraform State file with versioning metadata, proving version-controlled infrastructure changes.",
+        "expected_output": "S3 object must exist at specified prefix"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-CMT-04/cm_procedure.json",
       "evidence_v2/KSI-CMT-04/state_history.json"
     ],
-    "implementation_summary": "Change management effectiveness measured via Terraform state version history and CloudTrail event analysis. All changes traceable to specific PRs and approvers."
+    "implementation_summary": "Change management effectiveness measured via Terraform state version history and CloudTrail event analysis. All changes traceable to specific PRs and approvers.",
+    "pass_criteria": "PASS if: The change-management-procedure.md document exists in CodeCommit, AND the Terraform state file exists in S3 with version history proving sequential, tracked infrastructure changes.",
+    "fail_criteria": "FAIL if: The change management procedure document is missing, or no Terraform state file exists in the mks-states bucket."
   },
   "KSI-CNA-01": {
     "description": "Persistently ensure all machine-based information resources are configured to limit inbound and outbound network traffic.",
@@ -439,15 +547,18 @@
     "cli_commands": [
       {
         "command": "aws ec2 describe-security-groups --filters Name=group-name,Values=default --output json",
-        "note": "BASELINE: Validate that the 'default' VPC Security Group restricts all traffic (Best practice is to leave this empty/unused)."
+        "note": "BASELINE: Validate that the 'default' VPC Security Group restricts all traffic (Best practice is to leave this empty/unused).",
+        "expected_output": "Default security group must exist for baseline validation"
       },
       {
         "command": "aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=tcp --max-items 5 --output json",
-        "note": "ACTIVE CONTROLS: Validate a sample of active Security Groups to verify specific port restrictions (Limit Inbound)."
+        "note": "ACTIVE CONTROLS: Validate a sample of active Security Groups to verify specific port restrictions (Limit Inbound).",
+        "expected_output": "At least one TCP-permitting security group must exist"
       },
       {
         "command": "aws ec2 describe-network-acls --max-items 5 --output json",
-        "note": "BOUNDARY: Validate Network ACLs which provide a stateless traffic filter at the subnet level."
+        "note": "BOUNDARY: Validate Network ACLs which provide a stateless traffic filter at the subnet level.",
+        "expected_output": "At least one network ACL must exist for subnet-level filtering"
       }
     ],
     "artifact_evidence_paths": [
@@ -455,7 +566,9 @@
       "evidence_v2/KSI-CNA-01/active_sgs.json",
       "evidence_v2/KSI-CNA-01/nacls.json"
     ],
-    "implementation_summary": "Network traffic limited via Security Groups (default SG empty, specific allow-lists only) and NACLs at subnet boundaries. All ingress flows through ALB."
+    "implementation_summary": "Network traffic limited via Security Groups (default SG empty, specific allow-lists only) and NACLs at subnet boundaries. All ingress flows through ALB.",
+    "pass_criteria": "PASS if: The default VPC security group exists with no inbound or outbound rules (empty/unused as best practice), at least one TCP-permitting security group exists with specific port restrictions (not 0.0.0.0/0 on all ports), AND at least one network ACL provides subnet-level filtering.",
+    "fail_criteria": "FAIL if: The default security group has active inbound/outbound rules, security groups allow unrestricted access (0.0.0.0/0 on all ports), or no network ACLs exist."
   },
   "KSI-CNA-02": {
     "description": "Persistently ensure machine-based information resources have a minimal attack surface and that lateral movement is minimized if compromised.",
@@ -463,15 +576,18 @@
     "cli_commands": [
       {
         "command": "aws ec2 describe-subnets --filters \"Name=map-public-ip-on-launch,Values=false\" --max-items 5 --output json",
-        "note": "ATTACK SURFACE: Validate the existence of Private Subnets (where Public IP mapping is disabled)."
+        "note": "ATTACK SURFACE: Validate the existence of Private Subnets (where Public IP mapping is disabled).",
+        "expected_output": "At least 1 subnet must exist"
       },
       {
         "command": "aws ec2 describe-security-groups --max-items 20 --output json",
-        "note": "LATERAL MOVEMENT: Validate Security Groups that allow access ONLY from other specific Security Groups (Tiered Security), rather than broad IP ranges."
+        "note": "LATERAL MOVEMENT: Validate Security Groups that allow access ONLY from other specific Security Groups (Tiered Security), rather than broad IP ranges.",
+        "expected_output": "At least 1 security group must exist"
       },
       {
         "command": "aws rds describe-db-instances --output json",
-        "note": "ISOLATION: Validate that RDS Databases are configured as 'PubliclyAccessible: false' and reside in defined subnets."
+        "note": "ISOLATION: Validate that RDS Databases are configured as 'PubliclyAccessible: false' and reside in defined subnets.",
+        "expected_output": "At least 1 RDS database instance must exist"
       }
     ],
     "artifact_evidence_paths": [
@@ -479,7 +595,9 @@
       "evidence_v2/KSI-CNA-02/tiered_sgs.json",
       "evidence_v2/KSI-CNA-02/private_dbs.json"
     ],
-    "implementation_summary": "Attack surface minimized via private subnets for compute/database, Security Group references (no IP-based rules), and RDS PubliclyAccessible=false."
+    "implementation_summary": "Attack surface minimized via private subnets for compute/database, Security Group references (no IP-based rules), and RDS PubliclyAccessible=false.",
+    "pass_criteria": "PASS if: At least one private subnet exists (MapPublicIpOnLaunch=false), security groups reference other security groups (tiered access, not broad IP ranges), AND all RDS instances have PubliclyAccessible=false.",
+    "fail_criteria": "FAIL if: No private subnets exist, security groups use only broad IP-based rules instead of security group references, or any RDS instance has PubliclyAccessible=true."
   },
   "KSI-CNA-03": {
     "description": "Use logical networking and related capabilities to enforce traffic flow controls.",
@@ -487,15 +605,18 @@
     "cli_commands": [
       {
         "command": "aws ec2 describe-vpc-endpoints --output json",
-        "note": "PRIVATE FLOW: Validate existence of VPC Endpoints, ensuring traffic to services like S3/DynamoDB bypasses the public internet."
+        "note": "PRIVATE FLOW: Validate existence of VPC Endpoints, ensuring traffic to services like S3/DynamoDB bypasses the public internet.",
+        "expected_output": "At least 1 VPC endpoint must exist"
       },
       {
         "command": "aws ec2 describe-nat-gateways --filter Name=state,Values=available --output json",
-        "note": "EGRESS CONTROL: Validate active NAT Gateways. This proves instances in private subnets route outbound traffic centrally, rather than having individual Public IPs."
+        "note": "EGRESS CONTROL: Validate active NAT Gateways. This proves instances in private subnets route outbound traffic centrally, rather than having individual Public IPs.",
+        "expected_output": "At least 1 NAT gateway must exist"
       },
       {
         "command": "aws elbv2 describe-load-balancers --output json",
-        "note": "INGRESS CONTROL: Validate Load Balancers. The 'Scheme' (internet-facing vs internal) proves that ingress traffic is logically separated and managed."
+        "note": "INGRESS CONTROL: Validate Load Balancers. The 'Scheme' (internet-facing vs internal) proves that ingress traffic is logically separated and managed.",
+        "expected_output": "At least 1 load balancer must exist"
       }
     ],
     "artifact_evidence_paths": [
@@ -503,7 +624,9 @@
       "evidence_v2/KSI-CNA-03/nat_gateways.json",
       "evidence_v2/KSI-CNA-03/lb_schemes.json"
     ],
-    "implementation_summary": "Traffic flow enforced via VPC Endpoints (S3, DynamoDB), NAT Gateway for egress, and ALB for ingress. No direct internet access from compute tier."
+    "implementation_summary": "Traffic flow enforced via VPC Endpoints (S3, DynamoDB), NAT Gateway for egress, and ALB for ingress. No direct internet access from compute tier.",
+    "pass_criteria": "PASS if: At least one VPC endpoint exists (enforcing private connectivity to AWS services like S3/DynamoDB), at least one NAT gateway is available (centralized egress for private subnets), AND at least one load balancer manages ingress traffic.",
+    "fail_criteria": "FAIL if: No VPC endpoints exist (traffic to AWS services traverses public internet), no NAT gateway is available, or no load balancer exists for ingress management."
   },
   "KSI-CNA-04": {
     "description": "Use immutable infrastructure with strictly defined functionality and privileges by default.",
@@ -511,15 +634,18 @@
     "cli_commands": [
       {
         "command": "aws s3api list-objects-v2 --bucket mks-states --prefix terraform.tfstate --max-items 1 --output json",
-        "note": "IMMUTABILITY: List Terraform State file with versioning metadata, proving version-controlled infrastructure changes."
+        "note": "IMMUTABILITY: List Terraform State file with versioning metadata, proving version-controlled infrastructure changes.",
+        "expected_output": "S3 object must exist at specified prefix"
       },
       {
         "command": "aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=-1 --output json",
-        "note": "FUNCTIONALITY: Check for Security Groups allowing 'All Traffic' (-1). Absence of these proves strictly defined network functionality."
+        "note": "FUNCTIONALITY: Check for Security Groups allowing 'All Traffic' (-1). Absence of these proves strictly defined network functionality.",
+        "expected_output": "At least 1 security group must exist"
       },
       {
         "command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, 'AWSServiceRole') || contains(Path, '/aws-service-role/'))]\" --output json",
-        "note": "PRIVILEGE: Audit Custom IAM Roles. This focuses the scan on roles you created, verifying they follow least-privilege principles."
+        "note": "PRIVILEGE: Audit Custom IAM Roles. This focuses the scan on roles you created, verifying they follow least-privilege principles.",
+        "expected_output": "At least 1 custom IAM role must exist"
       }
     ],
     "artifact_evidence_paths": [
@@ -527,7 +653,9 @@
       "evidence_v2/KSI-CNA-04/restricted_sgs.json",
       "evidence_v2/KSI-CNA-04/custom_roles.json"
     ],
-    "implementation_summary": "Immutable infrastructure via Terraform. EC2 instances replaced (not modified) on updates. IAM roles follow least-privilege with no wildcard permissions."
+    "implementation_summary": "Immutable infrastructure via Terraform. EC2 instances replaced (not modified) on updates. IAM roles follow least-privilege with no wildcard permissions.",
+    "pass_criteria": "PASS if: A Terraform state file exists in S3 (proving IaC management), no security groups allow unrestricted 'All Traffic' protocol (-1) to 0.0.0.0/0, AND at least one custom IAM role exists following least-privilege principles (excluding AWS service-linked roles).",
+    "fail_criteria": "FAIL if: No Terraform state exists (infrastructure not immutable), any security group allows 'All Traffic' to 0.0.0.0/0, or no custom IAM roles exist."
   },
   "KSI-CNA-05": {
     "description": "Persistently review the effectiveness of protection against denial of service attacks and other unwanted activity.",
@@ -535,19 +663,23 @@
     "cli_commands": [
       {
         "command": "aws wafv2 list-web-acls --scope REGIONAL --output json",
-        "note": "DDOS LAYER 7: Validate existence of Web Application Firewalls (WAF) to block malicious requests."
+        "note": "DDOS LAYER 7: Validate existence of Web Application Firewalls (WAF) to block malicious requests.",
+        "expected_output": "At least 1 WAF web ACL must exist"
       },
       {
         "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Shield: 'Enabled (Standard)'}\" --output json",
-        "note": "DDOS LAYER 3/4: Validate Load Balancers. All ALBs act as the perimeter and automatically benefit from AWS Shield Standard."
+        "note": "DDOS LAYER 3/4: Validate Load Balancers. All ALBs act as the perimeter and automatically benefit from AWS Shield Standard.",
+        "expected_output": "At least 1 load balancer must exist"
       },
       {
         "command": "aws route53 list-hosted-zones --max-items 5 --output json",
-        "note": "DNS RESILIENCE: Validate Route53 usage (AWS AnyCast network provides DNS flood protection)."
+        "note": "DNS RESILIENCE: Validate Route53 usage (AWS AnyCast network provides DNS flood protection).",
+        "expected_output": "At least 1 Route53 hosted zone must exist"
       },
       {
         "command": "aws ses list-identities --max-items 5 --output json",
-        "note": "SPOOFING: Validate SES Identities. If email is sent, this checks for authorized identities (DKIM/SPF managed)."
+        "note": "SPOOFING: Validate SES Identities. If email is sent, this checks for authorized identities (DKIM/SPF managed).",
+        "expected_output": "SES identities should exist if email is used (validates DKIM/SPF anti-spoofing)"
       }
     ],
     "artifact_evidence_paths": [
@@ -556,7 +688,9 @@
       "evidence_v2/KSI-CNA-05/route53_zones.json",
       "evidence_v2/KSI-CNA-05/ses_identities.json"
     ],
-    "implementation_summary": "DDoS protection via AWS Shield Standard (automatic on ALB), WAFv2 Web ACLs, and Route53 anycast. SES handles email with DKIM/SPF validation."
+    "implementation_summary": "DDoS protection via AWS Shield Standard (automatic on ALB), WAFv2 Web ACLs, and Route53 anycast. SES handles email with DKIM/SPF validation.",
+    "pass_criteria": "PASS if: At least one WAFv2 Web ACL exists (Layer 7 protection), at least one load balancer with Shield Standard provides Layer 3/4 protection, at least one Route53 hosted zone exists (DNS resilience), AND if SES is used, verified identities exist with DKIM/SPF.",
+    "fail_criteria": "FAIL if: No WAF Web ACLs exist, no load balancers provide Shield protection, or no Route53 hosted zones exist for DNS resilience."
   },
   "KSI-CNA-06": {
     "description": "Appropriately optimize machine-based information resources for high availability and rapid recovery.",
@@ -564,15 +698,18 @@
     "cli_commands": [
       {
         "command": "aws elbv2 describe-load-balancers --output json",
-        "note": "NETWORK HA: Validate that Load Balancers are configured across multiple Availability Zones."
+        "note": "NETWORK HA: Validate that Load Balancers are configured across multiple Availability Zones.",
+        "expected_output": "At least 1 load balancer must exist"
       },
       {
         "command": "aws rds describe-db-instances --output json",
-        "note": "DATABASE HA: Validate that critical RDS instances have Multi-AZ enabled for automatic failover."
+        "note": "DATABASE HA: Validate that critical RDS instances have Multi-AZ enabled for automatic failover.",
+        "expected_output": "At least 1 RDS database instance must exist"
       },
       {
         "command": "aws backup list-backup-plans --output json",
-        "note": "RECOVERY: Validate existence of Backup Plans to support rapid data recovery."
+        "note": "RECOVERY: Validate existence of Backup Plans to support rapid data recovery.",
+        "expected_output": "At least 1 backup plan must exist"
       }
     ],
     "artifact_evidence_paths": [
@@ -580,7 +717,9 @@
       "evidence_v2/KSI-CNA-06/multi_az_rds.json",
       "evidence_v2/KSI-CNA-06/backup_plans.json"
     ],
-    "implementation_summary": "High availability via Multi-AZ ALB, Multi-AZ RDS, and AWS Backup plans with 24-hour RPO. RTO target: 4 hours for full recovery."
+    "implementation_summary": "High availability via Multi-AZ ALB, Multi-AZ RDS, and AWS Backup plans with 24-hour RPO. RTO target: 4 hours for full recovery.",
+    "pass_criteria": "PASS if: At least one load balancer spans multiple Availability Zones, at least one RDS instance has MultiAZ=true for automatic failover, AND at least one AWS Backup plan exists for data recovery.",
+    "fail_criteria": "FAIL if: Load balancers are in a single AZ, no RDS instance has MultiAZ enabled, or no backup plans exist for recovery."
   },
   "KSI-CNA-07": {
     "description": "Persistently ensure cloud-native machine-based information resources are implemented based on the host providers best practices and documented guidance.",
@@ -588,34 +727,42 @@
     "cli_commands": [
       {
         "command": "aws ec2 describe-instances --output json",
-        "note": "BASELINE: Measure legacy compute footprint (Denominator) to compare against managed service adoption."
+        "note": "BASELINE: Measure legacy compute footprint (Denominator) to compare against managed service adoption.",
+        "expected_output": "EC2 instances enumerated as legacy compute baseline"
       },
       {
         "command": "aws lambda list-functions --output json",
-        "note": "ACCELERATOR: Validate adoption of serverless compute (High Impact)."
+        "note": "ACCELERATOR: Validate adoption of serverless compute (High Impact).",
+        "expected_output": "Lambda functions should exist demonstrating serverless adoption"
       },
       {
         "command": "aws rds describe-db-instances --output json",
-        "note": "ACCELERATOR: Validate use of fully managed databases vs self-hosted DBs."
+        "note": "ACCELERATOR: Validate use of fully managed databases vs self-hosted DBs.",
+        "expected_output": "At least 1 RDS instance should exist as managed database"
       },
       {
         "command": "aws apigateway get-rest-apis --output json",
-        "note": "ACCELERATOR: Validate use of managed API hosting infrastructure."
+        "note": "ACCELERATOR: Validate use of managed API hosting infrastructure.",
+        "expected_output": "At least 1 API Gateway REST API should exist"
       },
       {
         "command": "aws elbv2 describe-load-balancers --output json",
-        "note": "ACCELERATOR: Validate use of managed application networking."
+        "note": "ACCELERATOR: Validate use of managed application networking.",
+        "expected_output": "At least 1 load balancer should exist as managed networking"
       },
       {
         "command": "aws autoscaling describe-auto-scaling-groups --output json",
-        "note": "ACCELERATOR: Validate use of dynamic scaling/statelessness vs static servers."
+        "note": "ACCELERATOR: Validate use of dynamic scaling/statelessness vs static servers.",
+        "expected_output": "Auto Scaling groups indicate dynamic scaling capability"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-CNA-07/lambda_functions.json",
       "evidence_v2/KSI-CNA-07/ec2_instances.json"
     ],
-    "implementation_summary": "Cloud-native architecture: 21 Lambda functions, 1 managed RDS, API Gateway. Legacy EC2 (5 instances) hardened with IMDSv2, no public IPs, VPC-only Lambdas."
+    "implementation_summary": "Cloud-native architecture: 21 Lambda functions, 1 managed RDS, API Gateway. Legacy EC2 (5 instances) hardened with IMDSv2, no public IPs, VPC-only Lambdas.",
+    "pass_criteria": "PASS if: The ratio of managed services (Lambda functions, RDS, API Gateway, ALB, ASG) to legacy EC2 instances demonstrates cloud-native adoption. At least 2 categories of managed services must be in use alongside EC2.",
+    "fail_criteria": "FAIL if: Only EC2 instances exist with no managed service adoption (no Lambda, no managed DB, no API Gateway), indicating failure to follow cloud-native best practices."
   },
   "KSI-CNA-08": {
     "description": "Use automated services to persistently assess the security posture of all machine-based information resources and automatically enforce their intended operational state.",
@@ -623,26 +770,32 @@
     "cli_commands": [
       {
         "command": "aws securityhub get-enabled-standards --output json",
-        "note": "Validate that Security Hub is active and enforcing specific compliance standards (CIS, PCI, etc)."
+        "note": "Validate that Security Hub is active and enforcing specific compliance standards (CIS, PCI, etc).",
+        "expected_output": "At least 1 Security Hub standard must exist"
       },
       {
         "command": "aws guardduty list-detectors --output json",
-        "note": "Validate that GuardDuty is enabled (Detector ID exists) for automated threat detection."
+        "note": "Validate that GuardDuty is enabled (Detector ID exists) for automated threat detection.",
+        "expected_output": "At least 1 GuardDuty detector must exist"
       },
       {
         "command": "aws configservice describe-configuration-recorders --output json",
-        "note": "Validate that AWS Config is actively recording resource changes for persistent assessment."
+        "note": "Validate that AWS Config is actively recording resource changes for persistent assessment.",
+        "expected_output": "At least 1 Config recorder must exist"
       },
       {
         "command": "aws inspector2 list-coverage --output json",
-        "note": "Validate that Amazon Inspector is actively scanning resources (EC2/ECR/Lambda)."
+        "note": "Validate that Amazon Inspector is actively scanning resources (EC2/ECR/Lambda).",
+        "expected_output": "At least 1 Inspector-covered resource must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-CNA-08/securityhub_standards.json",
       "evidence_v2/KSI-CNA-08/guardduty_detectors.json"
     ],
-    "implementation_summary": "Security posture assessed by SecurityHub (CIS/FedRAMP standards), GuardDuty (threat detection), AWS Config (compliance rules), and Inspector (vulnerability scanning)."
+    "implementation_summary": "Security posture assessed by SecurityHub (CIS/FedRAMP standards), GuardDuty (threat detection), AWS Config (compliance rules), and Inspector (vulnerability scanning).",
+    "pass_criteria": "PASS if: At least one Security Hub compliance standard is enabled (CIS, FedRAMP, PCI), at least one GuardDuty detector is active, at least one AWS Config recorder exists, AND at least one resource is covered by Amazon Inspector scanning.",
+    "fail_criteria": "FAIL if: No Security Hub standards are enabled, no GuardDuty detector exists, no Config recorder is configured, or no Inspector coverage exists."
   },
   "KSI-IAM-01": {
     "description": "Enforce multi-factor authentication (MFA) using methods that are difficult to intercept or impersonate (phishing-resistant MFA) for all user authentication.",
@@ -650,21 +803,26 @@
     "cli_commands": [
       {
         "command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
-        "note": "FILTERED: Retrieve only IAM Users who have active password usage (Humans)."
+        "note": "FILTERED: Retrieve only IAM Users who have active password usage (Humans).",
+        "expected_output": "All IAM users with PasswordLastUsed must have MFA enabled"
       },
       {
         "command": "aws sso-admin list-instances --output json",
-        "note": "Verify that AWS Identity Center is the primary identity platform."
+        "note": "Verify that AWS Identity Center is the primary identity platform.",
+        "expected_output": "At least 1 Identity Center instance must exist"
       },
       {
         "command": "aws iam list-virtual-mfa-devices --output json",
-        "note": "Get list of all Virtual MFA devices to validate protection (replaces list-mfa-devices which requires user)."
+        "note": "Get list of all Virtual MFA devices to validate protection (replaces list-mfa-devices which requires user).",
+        "expected_output": "Virtual MFA devices should be assigned to all human users"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-IAM-01/iam_users.json"
     ],
-    "implementation_summary": "MFA enforced for all human users via AWS Identity Center with FIDO2/WebAuthn support. Break-glass IAM users require hardware tokens."
+    "implementation_summary": "MFA enforced for all human users via AWS Identity Center with FIDO2/WebAuthn support. Break-glass IAM users require hardware tokens.",
+    "pass_criteria": "PASS if: All IAM users with active password usage (console access) have MFA enabled, AWS Identity Center is configured as the primary identity platform, AND virtual MFA devices are inventoried with no unprotected human accounts.",
+    "fail_criteria": "FAIL if: Any IAM user with console access lacks MFA, Identity Center is not configured, or human accounts exist without any MFA device assigned."
   },
   "KSI-IAM-02": {
     "description": "Use secure passwordless methods for user authentication and authorization when feasible, otherwise enforce strong passwords with MFA.",
@@ -672,22 +830,27 @@
     "cli_commands": [
       {
         "command": "aws sso-admin list-instances --output json",
-        "note": "MODERN: Validate presence of AWS Identity Center (Single Sign-On)."
+        "note": "MODERN: Validate presence of AWS Identity Center (Single Sign-On).",
+        "expected_output": "At least 1 Identity Center instance must exist"
       },
       {
         "command": "aws iam list-saml-providers --output json",
-        "note": "LEGACY/FEDERATED: Validate presence of external Identity Providers (Okta, Azure AD)."
+        "note": "LEGACY/FEDERATED: Validate presence of external Identity Providers (Okta, Azure AD).",
+        "expected_output": "SAML providers may exist for federated identity (Okta, Azure AD)"
       },
       {
         "command": "aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
-        "note": "FALLBACK: Validate that if passwords ARE used, the policy enforces complexity and rotation."
+        "note": "FALLBACK: Validate that if passwords ARE used, the policy enforces complexity and rotation.",
+        "expected_output": "Password policy must enforce MinimumPasswordLength >= 14, RequireSymbols, RequireNumbers, MaxPasswordAge <= 90"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-IAM-02/password_policy.json",
       "evidence_v2/KSI-IAM-02/sso_instances.json"
     ],
-    "implementation_summary": "Primary authentication via AWS Identity Center (SSO). Fallback IAM password policy enforces 14+ chars, complexity, 90-day rotation."
+    "implementation_summary": "Primary authentication via AWS Identity Center (SSO). Fallback IAM password policy enforces 14+ chars, complexity, 90-day rotation.",
+    "pass_criteria": "PASS if: AWS Identity Center (SSO) is configured as the primary authentication method. If SAML providers exist, they provide federated access. If IAM passwords are used as fallback, the password policy enforces minimum 14 characters, complexity requirements, and 90-day rotation.",
+    "fail_criteria": "FAIL if: No Identity Center instance exists AND no SAML providers are configured (no centralized auth), or the IAM password policy allows passwords shorter than 14 characters or lacks complexity/rotation requirements."
   },
   "KSI-IAM-03": {
     "description": "Enforce appropriately secure authentication methods for non-user accounts and services.",
@@ -695,22 +858,27 @@
     "cli_commands": [
       {
         "command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, 'AWSServiceRole') || contains(Path, '/aws-service-role/'))]\" --output json",
-        "note": "Validate Trust Policies for CUSTOMER managed roles only."
+        "note": "Validate Trust Policies for CUSTOMER managed roles only.",
+        "expected_output": "At least 1 custom IAM role must exist"
       },
       {
         "command": "aws iam list-users --query \"Users[?PasswordLastUsed==null]\" --output json",
-        "note": "Validate Service Accounts (Bots) that do not have console access (should rely on keys/roles)."
+        "note": "Validate Service Accounts (Bots) that do not have console access (should rely on keys/roles).",
+        "expected_output": "Service accounts (no PasswordLastUsed) should use roles, not long-lived keys"
       },
       {
         "command": "aws iam get-credential-report --output text > /dev/null && aws iam get-credential-report --output json || echo '{\"Content\": \"Permission Denied\"}'",
-        "note": "Deep inspection of access key rotation status for service accounts."
+        "note": "Deep inspection of access key rotation status for service accounts.",
+        "expected_output": "Credential report must show access keys rotated within 90 days"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-IAM-03/iam_roles.json",
       "evidence_v2/KSI-IAM-03/credential_report.json"
     ],
-    "implementation_summary": "Service accounts use IAM Roles with no long-lived credentials. Access keys (where required) rotate every 90 days per credential report monitoring."
+    "implementation_summary": "Service accounts use IAM Roles with no long-lived credentials. Access keys (where required) rotate every 90 days per credential report monitoring.",
+    "pass_criteria": "PASS if: All custom IAM roles have trust policies scoped to specific services or accounts (no wildcard principals), service accounts (users without console access) rely on roles or have access keys rotated within 90 days per the credential report.",
+    "fail_criteria": "FAIL if: Any custom role has a wildcard (*) principal in its trust policy, or the credential report shows access keys older than 90 days for service accounts."
   },
   "KSI-IAM-04": {
     "description": "Require a centralized identity management system.",
@@ -718,18 +886,22 @@
     "cli_commands": [
       {
         "command": "aws sso-admin list-instances --output json",
-        "note": "PRIMARY: Validate that AWS Identity Center (SSO) is configured and running."
+        "note": "PRIMARY: Validate that AWS Identity Center (SSO) is configured and running.",
+        "expected_output": "At least 1 Identity Center instance must exist"
       },
       {
         "command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
-        "note": "AUDIT: List human users who are bypassing the Centralized System (should be empty or minimal)."
+        "note": "AUDIT: List human users who are bypassing the Centralized System (should be empty or minimal).",
+        "expected_output": "Zero or minimal IAM users with PasswordLastUsed (target: 0 human IAM users)"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-IAM-04/sso_instances.json",
       "evidence_v2/KSI-IAM-04/legacy_users.json"
     ],
-    "implementation_summary": "Centralized identity via AWS Identity Center. Legacy IAM users audited and minimized (target: 0 human IAM users)."
+    "implementation_summary": "Centralized identity via AWS Identity Center. Legacy IAM users audited and minimized (target: 0 human IAM users).",
+    "pass_criteria": "PASS if: AWS Identity Center (SSO) is configured and active, AND the number of IAM users with direct console access (bypassing centralized identity) is zero or minimal (break-glass only).",
+    "fail_criteria": "FAIL if: No Identity Center instance exists, or multiple IAM users have active console passwords indicating widespread bypass of centralized identity management."
   },
   "KSI-IAM-05": {
     "description": "Persistently ensure that identity and access management employs measures to ensure each user or device can only access the resources they need.",
@@ -737,22 +909,27 @@
     "cli_commands": [
       {
         "command": "aws sso-admin list-instances --output json",
-        "note": "PRIMARY: Validate Identity Center configuration for WebAuthn/FIDO2 enforcement."
+        "note": "PRIMARY: Validate Identity Center configuration for WebAuthn/FIDO2 enforcement.",
+        "expected_output": "At least 1 Identity Center instance must exist"
       },
       {
         "command": "aws iam list-virtual-mfa-devices --output json",
-        "note": "AUDIT: Inventory MFA devices to identify non-FIDO compliant virtual tokens."
+        "note": "AUDIT: Inventory MFA devices to identify non-FIDO compliant virtual tokens.",
+        "expected_output": "Virtual MFA devices inventoried; FIDO2/hardware tokens preferred over TOTP"
       },
       {
         "command": "aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
-        "note": "Validate that hard-fail measures are in place if MFA is missing."
+        "note": "Validate that hard-fail measures are in place if MFA is missing.",
+        "expected_output": "Password policy must exist as hard-fail backstop (MinimumPasswordLength >= 14)"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-IAM-05/mfa_types.json",
       "evidence_v2/KSI-IAM-05/sso_config.json"
     ],
-    "implementation_summary": "Phishing-resistant MFA enforced via AWS Identity Center with FIDO2/WebAuthn support. Virtual MFA devices audited to identify non-compliant tokens. IAM password policy provides hard-fail backstop if MFA is missing."
+    "implementation_summary": "Phishing-resistant MFA enforced via AWS Identity Center with FIDO2/WebAuthn support. Virtual MFA devices audited to identify non-compliant tokens. IAM password policy provides hard-fail backstop if MFA is missing.",
+    "pass_criteria": "PASS if: AWS Identity Center is configured with FIDO2/WebAuthn support, all MFA devices are inventoried (preference for hardware/FIDO tokens over virtual), AND the IAM password policy provides a hard-fail backstop if MFA is missing.",
+    "fail_criteria": "FAIL if: Identity Center is not configured, MFA device inventory shows unprotected accounts, or no password policy exists as fallback protection."
   },
   "KSI-IAM-06": {
     "description": "Automatically disable or otherwise secure accounts with privileged access in response to suspicious activity",
@@ -760,18 +937,22 @@
     "cli_commands": [
       {
         "command": "aws guardduty list-detectors --output json",
-        "note": "SENSOR: Validate that the Threat Detection sensor is active."
+        "note": "SENSOR: Validate that the Threat Detection sensor is active.",
+        "expected_output": "At least 1 GuardDuty detector must exist"
       },
       {
         "command": "aws events list-rules --name-prefix GuardDuty --output json",
-        "note": "BRAIN: Validate existence of EventBridge rules that listen for GuardDuty signals (evidence of automated response logic)."
+        "note": "BRAIN: Validate existence of EventBridge rules that listen for GuardDuty signals (evidence of automated response logic).",
+        "expected_output": "At least 1 EventBridge rule monitoring IAM events must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-IAM-06/guardduty_detectors.json",
       "evidence_v2/KSI-IAM-06/response_rules.json"
     ],
-    "implementation_summary": "Automated response to suspicious activity via GuardDuty \u2192 EventBridge \u2192 Lambda chain. High-severity findings trigger automatic credential rotation."
+    "implementation_summary": "Automated response to suspicious activity via GuardDuty \u2192 EventBridge \u2192 Lambda chain. High-severity findings trigger automatic credential rotation.",
+    "pass_criteria": "PASS if: The access-review-policy.md document exists in CodeCommit defining the access review process, AND at least one EventBridge rule exists that monitors IAM events (CreateUser, AttachRolePolicy, etc.) for automated access review triggers.",
+    "fail_criteria": "FAIL if: The access review policy document is missing from CodeCommit, or no EventBridge rules exist to monitor IAM events (no automated access review capability)."
   },
   "KSI-IAM-07": {
     "description": "Securely manage the lifecycle and privileges of all accounts, roles, and groups, using automation.",
@@ -779,18 +960,22 @@
     "cli_commands": [
       {
         "command": "aws iam generate-credential-report > /dev/null && aws iam get-credential-report --output text | base64 --decode || echo 'Permission Denied'",
-        "note": "PRIMARY: Retrieve the full Credential Report to analyze password and key rotation ages."
+        "note": "PRIMARY: Retrieve the full Credential Report to analyze password and key rotation ages.",
+        "expected_output": "Credential report must show password and access key rotation within 90 days"
       },
       {
         "command": "aws iam list-roles --query \"Roles[?CreateDate<='2024-01-01']\" --output json",
-        "note": "AUDIT: Identify potential 'Zombie Roles' that are older than a specific threshold (adjust date as needed)."
+        "note": "AUDIT: Identify potential 'Zombie Roles' that are older than a specific threshold (adjust date as needed).",
+        "expected_output": "No IAM roles older than 365 days without recent usage should exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-IAM-07/credential_report.csv",
       "evidence_v2/KSI-IAM-07/stale_roles.json"
     ],
-    "implementation_summary": "Account lifecycle managed via credential report monitoring. Stale credentials (>90 days unused) flagged for removal. Termination process documented."
+    "implementation_summary": "Account lifecycle managed via credential report monitoring. Stale credentials (>90 days unused) flagged for removal. Termination process documented.",
+    "pass_criteria": "PASS if: The IAM credential report shows all passwords and access keys are compliant with rotation policies (passwords rotated within 90 days, access keys within 90 days), AND no IAM roles older than 365 days exist without recent usage (no zombie roles).",
+    "fail_criteria": "FAIL if: The credential report shows passwords or access keys exceeding rotation thresholds, or IAM roles exist that are older than 365 days with no recent activity (indicating orphaned/zombie roles)."
   },
   "KSI-INR-01": {
     "description": "Persistently review of the effectiveness of documented incident response procedures.",
@@ -798,13 +983,16 @@
     "cli_commands": [
       {
         "command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, 'policy') || contains(repositoryName, 'compliance') || contains(repositoryName, 'playbook') || contains(repositoryName, 'security') || contains(repositoryName, 'procedures') || contains(repositoryName, 'runbook')]\" --output json",
-        "note": "Validate existence of the designated Policy/Runbook repository (filters out application code)."
+        "note": "Validate existence of the designated Policy/Runbook repository (filters out application code).",
+        "expected_output": "At least 1 CodeCommit repository must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-INR-01/policy_repos.json"
     ],
-    "implementation_summary": "IR procedures documented in CodeCommit (security-governance/procedures/). Effectiveness reviewed via tabletop exercises and actual incident metrics."
+    "implementation_summary": "IR procedures documented in CodeCommit (security-governance/procedures/). Effectiveness reviewed via tabletop exercises and actual incident metrics.",
+    "pass_criteria": "PASS if: At least one GuardDuty detector is active and returning findings, providing automated threat detection for the AWS environment.",
+    "fail_criteria": "FAIL if: No GuardDuty detector exists or GuardDuty is disabled, leaving the environment without automated threat detection."
   },
   "KSI-INR-02": {
     "description": "Persistently review past incidents for patterns or vulnerabilities.",
@@ -812,18 +1000,22 @@
     "cli_commands": [
       {
         "command": "aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, 'security') || contains(logGroupName, 'cloudtrail') || contains(logGroupName, 'audit') || contains(logGroupName, 'incident')]\" --output json",
-        "note": "Validate existence of centralized CloudWatch Log Groups for security events."
+        "note": "Validate existence of centralized CloudWatch Log Groups for security events.",
+        "expected_output": "At least 1 CloudWatch log group must exist"
       },
       {
         "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'log') || contains(Name, 'audit') || contains(Name, 'security')]\" --output json",
-        "note": "Validate existence of immutable S3 storage for long-term incident retention."
+        "note": "Validate existence of immutable S3 storage for long-term incident retention.",
+        "expected_output": "At least 1 matching S3 bucket must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-INR-02/security_log_groups.json",
       "evidence_v2/KSI-INR-02/audit_buckets.json"
     ],
-    "implementation_summary": "Past incidents logged in CloudWatch Logs and S3 audit buckets. GuardDuty findings provide pattern analysis for recurring threats."
+    "implementation_summary": "Past incidents logged in CloudWatch Logs and S3 audit buckets. GuardDuty findings provide pattern analysis for recurring threats.",
+    "pass_criteria": "PASS if: The incident-response-plan.md document exists in CodeCommit defining response procedures, AND GuardDuty is active with at least one detector providing the finding source for incident triggers.",
+    "fail_criteria": "FAIL if: The incident response plan document is missing from CodeCommit, or no GuardDuty detector exists to generate security findings."
   },
   "KSI-INR-03": {
     "description": "Generate incident after action reports and persistently incorporate lessons learned.",
@@ -831,13 +1023,16 @@
     "cli_commands": [
       {
         "command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, 'post-mortem') || contains(repositoryName, 'aar') || contains(repositoryName, 'lessons-learned') || contains(repositoryName, 'incident-reports') || contains(repositoryName, 'reports')]\" --output json",
-        "note": "Validate existence of the designated Post-Mortem/AAR repository."
+        "note": "Validate existence of the designated Post-Mortem/AAR repository.",
+        "expected_output": "At least 1 CodeCommit repository must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-INR-03/post_mortem_repos.json"
     ],
-    "implementation_summary": "After-action reports generated via Lambda function and stored in CodeCommit. Lessons learned incorporated into playbook updates."
+    "implementation_summary": "After-action reports generated via Lambda function and stored in CodeCommit. Lessons learned incorporated into playbook updates.",
+    "pass_criteria": "PASS if: At least one GuardDuty detector is active and configured, providing continuous monitoring for post-incident review and lessons learned analysis.",
+    "fail_criteria": "FAIL if: No GuardDuty detector exists, preventing post-incident analysis and continuous improvement of response procedures."
   },
   "KSI-MLA-01": {
     "description": "Log all activity on all information resources supporting the cloud service offering to a protected audit log.",
@@ -845,15 +1040,18 @@
     "cli_commands": [
       {
         "command": "aws cloudtrail describe-trails --output json",
-        "note": "PRIMARY: Validate existence and configuration of the CloudTrail trail."
+        "note": "PRIMARY: Validate existence and configuration of the CloudTrail trail.",
+        "expected_output": "At least one CloudTrail trail must be configured"
       },
       {
         "command": "aws cloudtrail get-trail-status --name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
-        "note": "STATUS: Confirm CloudTrail is actually 'IsLogging': true. Uses TrailARN to avoid naming conflicts."
+        "note": "STATUS: Confirm CloudTrail is actually 'IsLogging': true. Uses TrailARN to avoid naming conflicts.",
+        "expected_output": "CloudTrail must be actively logging (IsLogging: true)"
       },
       {
         "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'cloudtrail') || contains(Name, 'audit') || contains(Name, 'logs')]\" --output json",
-        "note": "STORAGE: Validate the specific S3 bucket used for audit log retention."
+        "note": "STORAGE: Validate the specific S3 bucket used for audit log retention.",
+        "expected_output": "At least one audit log bucket must exist"
       }
     ],
     "artifact_evidence_paths": [
@@ -861,7 +1059,9 @@
       "evidence_v2/KSI-MLA-01/trail_status.json",
       "evidence_v2/KSI-MLA-01/audit_bucket.json"
     ],
-    "implementation_summary": "All activity logged to CloudTrail (multi-region, S3 delivery). VPC Flow Logs capture network traffic. Log integrity via S3 Object Lock."
+    "implementation_summary": "All activity logged to CloudTrail (multi-region, S3 delivery). VPC Flow Logs capture network traffic. Log integrity via S3 Object Lock.",
+    "pass_criteria": "PASS if: At least one CloudWatch Log Group exists for centralized logging, CloudTrail is enabled for API audit logging, AND at least one CloudWatch alarm exists to monitor log-derived metrics.",
+    "fail_criteria": "FAIL if: No CloudWatch Log Groups exist, CloudTrail is not enabled, or no CloudWatch alarms are configured for monitoring."
   },
   "KSI-MLA-02": {
     "description": "Persistently review and audit logs.",
@@ -869,22 +1069,28 @@
     "cli_commands": [
       {
         "command": "aws logs describe-metric-filters --output json",
-        "note": "PRIMARY: Validate existence of automated log scanning patterns (e.g., 'RootLogin', 'Unauthorized')."
+        "note": "PRIMARY: Validate existence of automated log scanning patterns (e.g., 'RootLogin', 'Unauthorized').",
+        "expected_output": "At least 1 CloudWatch Logs metric filter must exist for automated log scanning"
       },
       {
         "command": "aws securityhub get-insights --output json",
-        "note": "SECONDARY: Validate usage of Security Hub for aggregated security trend analysis."
+        "note": "SECONDARY: Validate usage of Security Hub for aggregated security trend analysis.",
+        "expected_output": "At least 1 Security Hub insight must exist"
       },
       {
         "command": "aws cloudwatch describe-alarms --query \"MetricAlarms[?contains(AlarmName, 'Log') || contains(AlarmName, 'Security') || contains(AlarmName, 'Filter')]\" --output json",
-        "note": "ALERTING: Validate alarms specifically tied to log metric filters."
+        "note": "ALERTING: Validate alarms specifically tied to log metric filters.",
+        "expected_output": "At least 1 CloudWatch alarm tied to log metric filters must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-MLA-02/metric_filters.json",
-      "evidence_v2/KSI-MLA-02/security_insights.json"
+      "evidence_v2/KSI-MLA-02/security_insights.json",
+      "evidence_v2/KSI-MLA-02/cloudwatch_alarms.json"
     ],
-    "implementation_summary": "Log review automated via CloudWatch Metric Filters (root login, unauthorized API calls) and SecurityHub Insights for trend analysis."
+    "implementation_summary": "Log review automated via CloudWatch Metric Filters (root login, unauthorized API calls), SecurityHub Insights for trend analysis, and CloudWatch Alarms for threshold-based alerting on failed logins, log delivery failures, retention violations, and security group changes.",
+    "pass_criteria": "PASS if: At least one CloudWatch Logs metric filter exists for automated log scanning patterns, at least one CloudWatch Log Group exists for log aggregation, AND at least one CloudWatch alarm is tied to log metric filters for automated alerting.",
+    "fail_criteria": "FAIL if: No metric filters exist (no automated log scanning), no Log Groups exist, or no alarms are configured for log-based alerting."
   },
   "KSI-MLA-05": {
     "description": "Persistently evaluate and test the configuration of machine-based information resources, especially infrastructure as code.",
@@ -892,18 +1098,22 @@
     "cli_commands": [
       {
         "command": "aws s3 ls s3://mks-states/ --recursive | grep -E '\\.tfstate|\\.tfplan' || echo 'No State Files Found'",
-        "note": "PRIMARY: Scan the Terraform State bucket. Presence of '.tfplan' proves pre-deployment evaluation; '.tfstate' proves active configuration management."
+        "note": "PRIMARY: Scan the Terraform State bucket. Presence of '.tfplan' proves pre-deployment evaluation; '.tfstate' proves active configuration management.",
+        "expected_output": "Terraform state/plan files must exist in the mks-states bucket"
       },
       {
         "command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, 'infra') || contains(repositoryName, 'terraform')]\" --output json",
-        "note": "SOURCE: Validate existence of the Infrastructure-as-Code repository."
+        "note": "SOURCE: Validate existence of the Infrastructure-as-Code repository.",
+        "expected_output": "At least 1 CodeCommit repository must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-MLA-05/terraform_artifacts.txt",
       "evidence_v2/KSI-MLA-05/iac_repos.json"
     ],
-    "implementation_summary": "IaC evaluated via Checkov in CI pipeline. Terraform plans reviewed pre-apply. Config rules detect drift post-deployment."
+    "implementation_summary": "IaC evaluated via Checkov in CI pipeline. Terraform plans reviewed pre-apply. Config rules detect drift post-deployment.",
+    "pass_criteria": "PASS if: The Terraform state bucket contains .tfplan or .tfstate files proving infrastructure change history, AND the sdlc-policy.md document exists in CodeCommit mandating change validation.",
+    "fail_criteria": "FAIL if: No Terraform state/plan files exist in the state bucket (no change history), or the SDLC policy is missing from CodeCommit."
   },
   "KSI-MLA-07": {
     "description": "Maintain a list of information resources and event types that will be monitored, logged, and audited.",
@@ -911,22 +1121,28 @@
     "cli_commands": [
       {
         "command": "aws configservice describe-configuration-recorders --output json",
-        "note": "INVENTORY: Validate that AWS Config is recording the 'List of Information Resources'."
+        "note": "INVENTORY: Validate that AWS Config is recording the 'List of Information Resources'.",
+        "expected_output": "At least 1 Config recorder must exist"
       },
       {
         "command": "aws cloudtrail describe-trails --output json",
-        "note": "EVENTS: Validate that CloudTrail is defining the 'Event Types' to be logged."
+        "note": "EVENTS: Validate that CloudTrail is defining the 'Event Types' to be logged.",
+        "expected_output": "At least 1 CloudTrail trail must exist"
       },
       {
         "command": "aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, 'security') || contains(logGroupName, 'cloudtrail') || contains(logGroupName, 'audit') || contains(logGroupName, 'flow')]\" --output json",
-        "note": "EXECUTION: Validate that the specific Security/Audit logs are actually being captured."
+        "note": "EXECUTION: Validate that the specific Security/Audit logs are actually being captured.",
+        "expected_output": "At least 1 CloudWatch log group must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-MLA-07/config_recorders.json",
+      "evidence_v2/KSI-MLA-07/cloudtrail_trails.json",
       "evidence_v2/KSI-MLA-07/security_logs.json"
     ],
-    "implementation_summary": "Resource inventory maintained by AWS Config (continuous recording). Event types defined in CloudTrail event selectors (management + data events)."
+    "implementation_summary": "Resource inventory maintained by AWS Config (continuous recording of all supported resource types). Event types defined in CloudTrail event selectors (multi-region, global service events). Security log groups capture audit, incident, VPC flow, and compliance data with 365-731 day retention.",
+    "pass_criteria": "PASS if: At least one CloudTrail trail is actively logging, at least one CloudWatch Log Group exists for log retention, AND the log-management-policy.md document exists in CodeCommit defining retention requirements.",
+    "fail_criteria": "FAIL if: No CloudTrail trail is logging, no Log Groups exist for retention, or the log management policy is missing."
   },
   "KSI-MLA-08": {
     "description": "Use a least-privileged, role and attribute-based, and just-in-time access authorization model for access to log data.",
@@ -935,24 +1151,29 @@
       {
         "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'security') || contains(Name, 'artifacts') || contains(Name, 'audit') || contains(Name, 'logs')]\" --output json",
         "note": "VAULT: Validate existence of compliance/security buckets.",
-        "service": "infrastructure_validation"
+        "service": "infrastructure_validation",
+        "expected_output": "At least 1 matching S3 bucket must exist"
       },
       {
         "command": "aws kms list-aliases --query \"Aliases[?contains(AliasName, 'aws/s3') || contains(AliasName, 'key') || contains(AliasName, 'encrypt')]\" --output json",
         "note": "LOCK: Validate existence of encryption keys.",
-        "service": "infrastructure_validation"
+        "service": "infrastructure_validation",
+        "expected_output": "At least 1 KMS alias must exist"
       },
       {
         "command": "aws iam list-policies --scope Local --query \"Policies[?contains(PolicyName, 'ReadOnly') || contains(PolicyName, 'Audit') || contains(PolicyName, 'Log') || contains(PolicyName, 'View')]\" --output json",
         "note": "PERMIT: Validate existence of access control policies.",
-        "service": "infrastructure_validation"
+        "service": "infrastructure_validation",
+        "expected_output": "Non-empty result required for: PERMIT: Validate existence of access control policies."
       }
     ],
     "outcome_type": "logging",
     "artifact_evidence_paths": [
       "evidence_v2/KSI-MLA-08/governance_infrastructure.json"
     ],
-    "implementation_summary": "Log access controlled via S3 bucket policies (security team read-only), KMS encryption, and CloudTrail access logging. No broad log access."
+    "implementation_summary": "Log access controlled via S3 bucket policies (security team read-only), KMS encryption, and CloudTrail access logging. No broad log access.",
+    "pass_criteria": "PASS if: At least one CloudWatch alarm exists for automated alerting, at least one SNS topic exists for alert delivery, AND the monitoring-alerting-policy.md document exists in CodeCommit defining alerting thresholds and procedures.",
+    "fail_criteria": "FAIL if: No CloudWatch alarms exist, no SNS topics exist for alert delivery, or the monitoring/alerting policy is missing from CodeCommit."
   },
   "KSI-PIY-01": {
     "description": "Use authoritative sources to automatically generate real-time inventories of all information resources when needed.",
@@ -960,22 +1181,27 @@
     "cli_commands": [
       {
         "command": "aws configservice describe-configuration-recorders --output json",
-        "note": "PRIMARY: Validate that the Configuration Recorder is active (The 'Authoritative Source')."
+        "note": "PRIMARY: Validate that the Configuration Recorder is active (The 'Authoritative Source').",
+        "expected_output": "At least 1 Config recorder must exist"
       },
       {
         "command": "aws configservice describe-delivery-channels --output json",
-        "note": "STORAGE: Validate that the inventory data is being delivered to a central S3 bucket."
+        "note": "STORAGE: Validate that the inventory data is being delivered to a central S3 bucket.",
+        "expected_output": "At least 1 Config delivery channel must exist"
       },
       {
         "command": "aws ssm list-inventory-entries --instance-id $(aws ec2 describe-instances --query 'Reservations[0].Instances[0].InstanceId' --output text) --type-name AWS:Application --output json || echo '{\"Entries\": []}'",
-        "note": "os-LEVEL: Sample check for SSM Inventory data (software list) on a live instance."
+        "note": "os-LEVEL: Sample check for SSM Inventory data (software list) on a live instance.",
+        "expected_output": "SSM inventory data must contain software and OS information for managed instances"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-PIY-01/config_recorders.json",
       "evidence_v2/KSI-PIY-01/delivery_channels.json"
     ],
-    "implementation_summary": "Real-time inventory via AWS Config with automatic discovery. SSM Inventory provides OS-level software lists. Delivery to S3 for analysis."
+    "implementation_summary": "Real-time inventory via AWS Config with automatic discovery. SSM Inventory provides OS-level software lists. Delivery to S3 for analysis.",
+    "pass_criteria": "PASS if: AWS Systems Manager reports managed instances (SSM agent active), an SSM inventory association exists for asset tracking, AND SSM inventory data contains software/OS information for at least one instance.",
+    "fail_criteria": "FAIL if: No SSM-managed instances exist, no inventory association is configured, or no inventory data is available for any instance."
   },
   "KSI-PIY-03": {
     "description": "Persistently review the effectiveness of the providers vulnerability disclosure program.",
@@ -983,13 +1209,16 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --output json",
-        "note": "ARTIFACT: Scan the policies folder for the Disclosure Policy (filters for 'disclosure', 'vdp', or 'security' in filenames)."
+        "note": "ARTIFACT: Scan the policies folder for the Disclosure Policy (filters for 'disclosure', 'vdp', or 'security' in filenames).",
+        "expected_output": "At least 1 policy subfolder must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-PIY-03/vdp_files.json"
     ],
-    "implementation_summary": "Vulnerability Disclosure Policy (VDP) published at trust.meridianks.com/security.txt and in CodeCommit governance repo."
+    "implementation_summary": "Vulnerability Disclosure Policy (VDP) published at trust.meridianks.com/security.txt and in CodeCommit governance repo.",
+    "pass_criteria": "PASS if: The data-classification-policy.md document exists in CodeCommit defining data handling categories, sensitivity levels, and handling requirements for federal data.",
+    "fail_criteria": "FAIL if: The data classification policy document is missing from the security-governance repository in CodeCommit."
   },
   "KSI-PIY-04": {
     "description": "Persistently review the effectiveness of building security and privacy considerations into the Software Development Lifecycle and aligning with CISA Secure By Design principles.",
@@ -997,18 +1226,22 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/secure-software-development.md --output json",
-        "note": "GOVERNANCE: Validate existence of the specific Secure SDLC policy document."
+        "note": "GOVERNANCE: Validate existence of the specific Secure SDLC policy document.",
+        "expected_output": "Governance document must exist in CodeCommit"
       },
       {
         "command": "aws codebuild list-projects --query \"projects[?contains(@, 'security') || contains(@, 'scan') || contains(@, 'test') || contains(@, 'lint') || contains(@, 'check') || contains(@, 'compliance')]\" --output json",
-        "note": "MECHANISM: List only build projects dedicated to security scanning or testing (The Quality Control gates)."
+        "note": "MECHANISM: List only build projects dedicated to security scanning or testing (The Quality Control gates).",
+        "expected_output": "At least 1 CodeBuild project must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-PIY-04/sdlc_policy.json",
       "evidence_v2/KSI-PIY-04/security_builds.json"
     ],
-    "implementation_summary": "Secure SDLC enforced via GitHub PR requirements, Checkov scanning, and CodeBuild security projects. CISA Secure by Design principles documented."
+    "implementation_summary": "Secure SDLC enforced via GitHub PR requirements, Checkov scanning, and CodeBuild security projects. CISA Secure by Design principles documented.",
+    "pass_criteria": "PASS if: The compliance S3 bucket enforces server-side encryption (SSE-S3 or SSE-KMS), AND the data-protection-policy.md document exists in CodeCommit defining encryption requirements for data at rest and in transit.",
+    "fail_criteria": "FAIL if: The S3 bucket lacks encryption configuration, or the data protection policy is missing from CodeCommit."
   },
   "KSI-PIY-06": {
     "description": "Persistently review the effectiveness of the organizations investments in achieving security objectives.",
@@ -1016,18 +1249,22 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/security-objectives/security-monitoring-and-alerting-plan.md --output json",
-        "note": "GOVERNANCE: Validate the existence of the specific Security Monitoring Plan document."
+        "note": "GOVERNANCE: Validate the existence of the specific Security Monitoring Plan document.",
+        "expected_output": "Governance document must exist in CodeCommit"
       },
       {
         "command": "aws securityhub get-enabled-standards --output json",
-        "note": "INVESTMENT: Validate that Security Hub Standards (CIS, PCI, FedRAMP) are enabled (The automated mechanism for monitoring effectiveness)."
+        "note": "INVESTMENT: Validate that Security Hub Standards (CIS, PCI, FedRAMP) are enabled (The automated mechanism for monitoring effectiveness).",
+        "expected_output": "At least 1 Security Hub standard must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-PIY-06/monitoring_plan.json",
       "evidence_v2/KSI-PIY-06/security_hub_standards.json"
     ],
-    "implementation_summary": "Security investment effectiveness measured via SecurityHub scores, GuardDuty finding trends, and KSI pass rates over time."
+    "implementation_summary": "Security investment effectiveness measured via SecurityHub scores, GuardDuty finding trends, and KSI pass rates over time.",
+    "pass_criteria": "PASS if: At least one S3 bucket has lifecycle rules configured for data retention management, AND the data-retention-policy.md document exists in CodeCommit defining retention schedules and disposal procedures.",
+    "fail_criteria": "FAIL if: No S3 lifecycle rules exist for data retention, or the data retention policy is missing from CodeCommit."
   },
   "KSI-PIY-08": {
     "description": "Persistently review executive support for achieving the organizations security objectives.",
@@ -1035,22 +1272,27 @@
     "cli_commands": [
       {
         "command": "aws guardduty list-detectors --output json",
-        "note": "INVESTMENT: Validate that GuardDuty is enabled (Paid Threat Detection Service)."
+        "note": "INVESTMENT: Validate that GuardDuty is enabled (Paid Threat Detection Service).",
+        "expected_output": "At least 1 GuardDuty detector must exist"
       },
       {
         "command": "aws securityhub get-enabled-standards --output json",
-        "note": "INVESTMENT: Validate that Security Hub is enabled (Paid Compliance Aggregation Service)."
+        "note": "INVESTMENT: Validate that Security Hub is enabled (Paid Compliance Aggregation Service).",
+        "expected_output": "At least 1 Security Hub standard must exist"
       },
       {
         "command": "aws budgets describe-budgets --account-id $(aws sts get-caller-identity --query Account --output text) --output json",
-        "note": "CONTROL: Validate that a Budget exists to track this security spending."
+        "note": "CONTROL: Validate that a Budget exists to track this security spending.",
+        "expected_output": "At least 1 AWS Budget must exist for security spend tracking"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-PIY-08/paid_security_tools.json",
       "evidence_v2/KSI-PIY-08/budget_controls.json"
     ],
-    "implementation_summary": "Executive support demonstrated via paid security tools (GuardDuty, SecurityHub, Inspector) and dedicated security budget tracked in AWS Budgets."
+    "implementation_summary": "Executive support demonstrated via paid security tools (GuardDuty, SecurityHub, Inspector) and dedicated security budget tracked in AWS Budgets.",
+    "pass_criteria": "PASS if: A dedicated security-spend S3 bucket or prefix exists, the security-budget-policy.md document exists in CodeCommit, AND at least one AWS Budget exists to track and limit security-related spending.",
+    "fail_criteria": "FAIL if: No security spend tracking exists, the security budget policy is missing, or no AWS Budget is configured to monitor security expenditures."
   },
   "KSI-RPL-01": {
     "description": "Persistently review desired Recovery Time Objectives (RTO) and Recovery Point Objectives (RPO).",
@@ -1058,18 +1300,22 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, 'recovery') || contains(absolutePath, 'disaster') || contains(absolutePath, 'continuity') || contains(absolutePath, 'bcp')]\" --output json",
-        "note": "GOVERNANCE: Validate existence of the Disaster Recovery / Business Continuity Plan."
+        "note": "GOVERNANCE: Validate existence of the Disaster Recovery / Business Continuity Plan.",
+        "expected_output": "Repository content must exist"
       },
       {
         "command": "aws backup list-backup-plans --output json",
-        "note": "TECHNICAL: Validate existence of AWS Backup Plans (proof that RPO is being enforced via automated schedules)."
+        "note": "TECHNICAL: Validate existence of AWS Backup Plans (proof that RPO is being enforced via automated schedules).",
+        "expected_output": "At least 1 backup plan must exist"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-RPL-01/dr_plan.json",
       "evidence_v2/KSI-RPL-01/backup_plans.json"
     ],
-    "implementation_summary": "RTO/RPO defined in disaster-recovery-plan.md: RPO=24hrs, RTO=4hrs. AWS Backup enforces daily backups with 30-day retention."
+    "implementation_summary": "RTO/RPO defined in disaster-recovery-plan.md: RPO=24hrs, RTO=4hrs. AWS Backup enforces daily backups with 30-day retention.",
+    "pass_criteria": "PASS if: At least one AWS Backup vault exists for recovery point storage, AND at least one backup plan is configured with defined backup rules and schedules.",
+    "fail_criteria": "FAIL if: No backup vaults exist (no recovery point storage), or no backup plans are configured."
   },
   "KSI-RPL-02": {
     "description": "Persistently review the alignment of recovery plans with defined recovery objectives.",
@@ -1077,18 +1323,22 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/disaster-recovery-plan.md --output json",
-        "note": "GOVERNANCE: Validate existence of the defined Recovery Plan."
+        "note": "GOVERNANCE: Validate existence of the defined Recovery Plan.",
+        "expected_output": "Recovery plan governance document must exist in CodeCommit"
       },
       {
         "command": "aws backup list-backup-jobs --by-state COMPLETED --max-results 5 --output json",
-        "note": "EXECUTION: Validate that backup jobs are successfully completing (Proof of Maintenance)."
+        "note": "EXECUTION: Validate that backup jobs are successfully completing (Proof of Maintenance).",
+        "expected_output": "At least 1 completed backup job must exist proving recovery capability"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-RPL-02/dr_plan.json",
       "evidence_v2/KSI-RPL-02/completed_jobs.json"
     ],
-    "implementation_summary": "Recovery plan alignment validated via successful backup job completion (203 jobs tracked). Failed jobs trigger alerts for review."
+    "implementation_summary": "Recovery plan alignment validated via successful backup job completion (203 jobs tracked). Failed jobs trigger alerts for review.",
+    "pass_criteria": "PASS if: The disaster-recovery-plan.md or equivalent recovery plan exists in CodeCommit, AND AWS Backup reports at least one completed backup job proving recovery capability.",
+    "fail_criteria": "FAIL if: No recovery plan document exists in CodeCommit, or no completed backup jobs exist (recovery capability unproven)."
   },
   "KSI-RPL-03": {
     "description": "Persistently review the alignment of machine-based information resource backups with defined recovery objectives.",
@@ -1096,18 +1346,22 @@
     "cli_commands": [
       {
         "command": "aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json",
-        "note": "TECHNICAL: Validate that Restore Jobs have been successfully executed (Proof of Testing)."
+        "note": "TECHNICAL: Validate that Restore Jobs have been successfully executed (Proof of Testing).",
+        "expected_output": "At least 1 completed restore job must exist proving recovery testing"
       },
       {
         "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, 'dr-test') || contains(absolutePath, 'restore-report') || contains(absolutePath, 'after-action')]\" --output json",
-        "note": "GOVERNANCE: Validate existence of the Disaster Recovery Test Report."
+        "note": "GOVERNANCE: Validate existence of the Disaster Recovery Test Report.",
+        "expected_output": "Disaster recovery test plan document must exist in CodeCommit"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-RPL-03/restore_jobs.json",
       "evidence_v2/KSI-RPL-03/dr_test_report.json"
     ],
-    "implementation_summary": "Backup alignment validated via quarterly restore tests. Restore jobs documented with duration metrics. Current success rate: 92.9%."
+    "implementation_summary": "Backup alignment validated via quarterly restore tests. Restore jobs documented with duration metrics. Current success rate: 92.9%.",
+    "pass_criteria": "PASS if: At least one restore job has been successfully executed (proving recovery testing), AND the disaster-recovery-test-plan.md document exists in CodeCommit defining testing procedures and schedules.",
+    "fail_criteria": "FAIL if: No restore jobs have been executed (recovery never tested), or the DR test plan document is missing from CodeCommit."
   },
   "KSI-RPL-04": {
     "description": "Persistently test the capability to recover from incidents and contingencies, including alignment with defined recovery objectives.",
@@ -1115,18 +1369,22 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, 'incident-response-test') || contains(absolutePath, 'contingency-test') || contains(absolutePath, 'ir-test')]\" --output json",
-        "note": "GOVERNANCE: Validate existence of the Incident Response / Contingency Test Report."
+        "note": "GOVERNANCE: Validate existence of the Incident Response / Contingency Test Report.",
+        "expected_output": "Incident response / continuity plan document must exist in CodeCommit"
       },
       {
         "command": "aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json",
-        "note": "TECHNICAL: Validate that Restore Jobs have been executed (Proof of recovery capability)."
+        "note": "TECHNICAL: Validate that Restore Jobs have been executed (Proof of recovery capability).",
+        "expected_output": "At least 1 restore job must exist proving operational recovery capability"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-RPL-04/ir_test_report.json",
       "evidence_v2/KSI-RPL-04/restore_evidence.json"
     ],
-    "implementation_summary": "Contingency testing via tabletop exercises and actual restore operations. IR test reports stored in CodeCommit with remediation tracking."
+    "implementation_summary": "Contingency testing via tabletop exercises and actual restore operations. IR test reports stored in CodeCommit with remediation tracking.",
+    "pass_criteria": "PASS if: The incident-response-communications.md or equivalent continuity document exists in CodeCommit, AND at least one restore job has been executed proving operational recovery capability during incidents.",
+    "fail_criteria": "FAIL if: No continuity/communications plan exists in CodeCommit, or no restore jobs have been executed to validate recovery during incidents."
   },
   "KSI-SVC-01": {
     "description": "Implement improvements based on persistent evaluation of information resources for opportunities to improve security.",
@@ -1134,15 +1392,18 @@
     "cli_commands": [
       {
         "command": "aws inspector2 list-coverage --output json",
-        "note": "EVALUATION: Validate that Inspector is actively scanning resources (The 'Persistent Evaluation')."
+        "note": "EVALUATION: Validate that Inspector is actively scanning resources (The 'Persistent Evaluation').",
+        "expected_output": "At least 1 Inspector-covered resource must exist"
       },
       {
         "command": "aws ssm describe-patch-baselines --filters \"Key=OWNER,Values=[Self]\" --output json",
-        "note": "IMPROVEMENT: Validate existence of custom Patch Baselines (The mechanism for 'Implementing Improvements')."
+        "note": "IMPROVEMENT: Validate existence of custom Patch Baselines (The mechanism for 'Implementing Improvements').",
+        "expected_output": "At least 1 custom patch baseline must exist (beyond AWS defaults)"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
-        "note": "GOVERNANCE: Validate the policy defining the evaluation and improvement cycle."
+        "note": "GOVERNANCE: Validate the policy defining the evaluation and improvement cycle.",
+        "expected_output": "Governance document must exist in CodeCommit"
       }
     ],
     "artifact_evidence_paths": [
@@ -1150,7 +1411,9 @@
       "evidence_v2/KSI-SVC-01/patch_baselines.json",
       "evidence_v2/KSI-SVC-01/vm_policy.json"
     ],
-    "implementation_summary": "Continuous improvement via Inspector findings \u2192 SSM Patch Manager remediation. Custom patch baselines for security-critical updates."
+    "implementation_summary": "Continuous improvement via Inspector findings \u2192 SSM Patch Manager remediation. Custom patch baselines for security-critical updates.",
+    "pass_criteria": "PASS if: AWS SSM Patch Manager reports compliance data for managed instances, at least one custom patch baseline exists (tailored beyond defaults), AND the patch-management-policy.md document exists in CodeCommit.",
+    "fail_criteria": "FAIL if: No patch compliance data exists (patching not monitored), no custom patch baselines exist, or the patch management policy is missing."
   },
   "KSI-SVC-02": {
     "description": "Encrypt or otherwise secure network traffic.",
@@ -1158,26 +1421,32 @@
     "cli_commands": [
       {
         "command": "aws acm list-certificates --certificate-statuses ISSUED --output json",
-        "note": "KEYS: Validate existence of active, issued TLS certificates."
+        "note": "KEYS: Validate existence of active, issued TLS certificates.",
+        "expected_output": "At least 1 ACM certificate must exist"
       },
       {
         "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Scheme:Scheme}\" --output json",
-        "note": "GATEKEEPERS: List Load Balancers handling traffic."
+        "note": "GATEKEEPERS: List Load Balancers handling traffic.",
+        "expected_output": "At least 1 load balancer must exist"
       },
       {
         "command": "aws cloudfront list-distributions --query \"DistributionList.Items[].{Id:Id, Domain:DomainName, Certificate:ViewerCertificate.Certificate}\" --output json",
-        "note": "EDGE: Validate CloudFront distributions (CDN) are configured with certificates."
+        "note": "EDGE: Validate CloudFront distributions (CDN) are configured with certificates.",
+        "expected_output": "Non-empty response expected"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/encryption-policy.md --output json",
-        "note": "GOVERNANCE: Validate the Encryption Policy document."
+        "note": "GOVERNANCE: Validate the Encryption Policy document.",
+        "expected_output": "Governance document must exist in CodeCommit"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-SVC-02/acm_certs.json",
       "evidence_v2/KSI-SVC-02/encryption_policy.json"
     ],
-    "implementation_summary": "Network traffic encryption enforced via ACM-managed TLS certificates on ALB and CloudFront distributions. Encryption policy documented in CodeCommit governance repo. All external-facing endpoints require HTTPS."
+    "implementation_summary": "Network traffic encryption enforced via ACM-managed TLS certificates on ALB and CloudFront distributions. Encryption policy documented in CodeCommit governance repo. All external-facing endpoints require HTTPS.",
+    "pass_criteria": "PASS if: S3 Block Public Access is enabled at the account level (BlockPublicAcls, BlockPublicPolicy, IgnorePublicAcls, RestrictPublicBuckets all true), the compliance bucket blocks public access, S3 access logging is enabled, AND the s3-security-policy.md exists in CodeCommit.",
+    "fail_criteria": "FAIL if: Account-level S3 Block Public Access is not fully enabled, the compliance bucket allows public access, access logging is disabled, or the S3 security policy is missing."
   },
   "KSI-SVC-04": {
     "description": "Manage configuration of machine-based information resources using automation.",
@@ -1185,15 +1454,18 @@
     "cli_commands": [
       {
         "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'terraform') || contains(Name, 'state') || contains(Name, 'tfstate')]\" --output json",
-        "note": "IAC STATE: Validate existence of the Terraform State S3 bucket (The Proof of Automation)."
+        "note": "IAC STATE: Validate existence of the Terraform State S3 bucket (The Proof of Automation).",
+        "expected_output": "Terraform state S3 bucket must exist with versioning enabled"
       },
       {
         "command": "aws dynamodb list-tables --query \"TableNames[?contains(@, 'terraform') || contains(@, 'lock') || contains(@, 'state')]\" --output json",
-        "note": "CONCURRENCY: Validate existence of the Terraform State Lock table."
+        "note": "CONCURRENCY: Validate existence of the Terraform State Lock table.",
+        "expected_output": "DynamoDB lock table for Terraform state must exist"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json",
-        "note": "GOVERNANCE: Validate the Configuration Management Policy document."
+        "note": "GOVERNANCE: Validate the Configuration Management Policy document.",
+        "expected_output": "Governance document must exist in CodeCommit"
       }
     ],
     "artifact_evidence_paths": [
@@ -1201,7 +1473,9 @@
       "evidence_v2/KSI-SVC-04/lock_tables.json",
       "evidence_v2/KSI-SVC-04/config_policy.json"
     ],
-    "implementation_summary": "Configuration management automated via Terraform with state stored in S3 (mks-states bucket) and DynamoDB state locking for concurrency control. Configuration management policy in CodeCommit mandates IaC-only changes."
+    "implementation_summary": "Configuration management automated via Terraform with state stored in S3 (mks-states bucket) and DynamoDB state locking for concurrency control. Configuration management policy in CodeCommit mandates IaC-only changes.",
+    "pass_criteria": "PASS if: A Terraform state S3 bucket exists with versioning enabled, a DynamoDB lock table exists for state locking, AND at least one running EC2 instance is managed via Terraform.",
+    "fail_criteria": "FAIL if: No Terraform state bucket exists, no DynamoDB lock table exists for concurrency control, or no managed instances can be verified."
   },
   "KSI-SVC-05": {
     "description": "Use cryptographic methods to validate the integrity of machine-based information resources.",
@@ -1209,15 +1483,18 @@
     "cli_commands": [
       {
         "command": "aws cloudtrail describe-trails --query \"trailList[?LogFileValidationEnabled==true]\" --output json",
-        "note": "LOGS: Validate that CloudTrail Log File Validation is enabled (Cryptographic hashing of audit trails)."
+        "note": "LOGS: Validate that CloudTrail Log File Validation is enabled (Cryptographic hashing of audit trails).",
+        "expected_output": "CloudTrail LogFileValidationEnabled must be true"
       },
       {
         "command": "aws s3api get-bucket-versioning --bucket $(aws cloudtrail describe-trails --query 'trailList[0].S3BucketName' --output text) --output json",
-        "note": "STORAGE: Validate that the Audit/Artifact bucket has Versioning enabled (Prevents overwrite tampering)."
+        "note": "STORAGE: Validate that the Audit/Artifact bucket has Versioning enabled (Prevents overwrite tampering).",
+        "expected_output": "Versioning must be enabled"
       },
       {
         "command": "aws ssm describe-instance-information --query \"InstanceInformationList[].{ID:InstanceId, PingStatus:PingStatus, AgentVersion:AgentVersion}\" --output json",
-        "note": "SESSIONS: Validate active SSM Agents, which enforce TLS-encrypted, IAM-signed channels for session integrity (Replacing insecure SSH)."
+        "note": "SESSIONS: Validate active SSM Agents, which enforce TLS-encrypted, IAM-signed channels for session integrity (Replacing insecure SSH).",
+        "expected_output": "At least 1 SSM-managed instance must exist"
       }
     ],
     "artifact_evidence_paths": [
@@ -1225,7 +1502,9 @@
       "evidence_v2/KSI-SVC-05/integrity_bucket.json",
       "evidence_v2/KSI-SVC-05/ssm_integrity.json"
     ],
-    "implementation_summary": "Cryptographic integrity validated via CloudTrail Log File Validation (digest hashing of audit trails), S3 bucket versioning on audit/artifact storage (tamper prevention), and SSM Session Manager for TLS-encrypted, IAM-signed instance access replacing SSH."
+    "implementation_summary": "Cryptographic integrity validated via CloudTrail Log File Validation (digest hashing of audit trails), S3 bucket versioning on audit/artifact storage (tamper prevention), and SSM Session Manager for TLS-encrypted, IAM-signed instance access replacing SSH.",
+    "pass_criteria": "PASS if: CloudTrail log file validation is enabled (LogFileValidationEnabled=true) ensuring tamper-proof logs, S3 server access logging is enabled on the compliance bucket, AND the audit-logging-policy.md exists in CodeCommit.",
+    "fail_criteria": "FAIL if: CloudTrail log file validation is disabled (logs can be tampered with), S3 access logging is not enabled, or the audit logging policy is missing."
   },
   "KSI-SVC-06": {
     "description": "Automate management, protection, and regular rotation of digital keys, certificates, and other secrets.",
@@ -1233,15 +1512,18 @@
     "cli_commands": [
       {
         "command": "aws kms list-keys --limit 10 --output json",
-        "note": "KEYS: Validate existence of KMS Customer Managed Keys (CMKs) for centralized management."
+        "note": "KEYS: Validate existence of KMS Customer Managed Keys (CMKs) for centralized management.",
+        "expected_output": "At least 1 KMS key must exist"
       },
       {
         "command": "aws secretsmanager list-secrets --max-results 5 --output json",
-        "note": "ROTATION: Validate Secrets Manager entries (Look for 'RotationEnabled': true in the output)."
+        "note": "ROTATION: Validate Secrets Manager entries (Look for 'RotationEnabled': true in the output).",
+        "expected_output": "At least 1 secret in Secrets Manager must have RotationEnabled=true"
       },
       {
         "command": "aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json",
-        "note": "CERTIFICATES: Validate active ACM Certificates (Proof of managed renewal)."
+        "note": "CERTIFICATES: Validate active ACM Certificates (Proof of managed renewal).",
+        "expected_output": "At least 1 ACM certificate must exist"
       }
     ],
     "artifact_evidence_paths": [
@@ -1249,7 +1531,9 @@
       "evidence_v2/KSI-SVC-06/rotated_secrets.json",
       "evidence_v2/KSI-SVC-06/acm_certs.json"
     ],
-    "implementation_summary": "Cryptographic operations use AWS KMS with automatic key rotation (annual). Certificate management via ACM with auto-renewal."
+    "implementation_summary": "Cryptographic operations use AWS KMS with automatic key rotation (annual). Certificate management via ACM with auto-renewal.",
+    "pass_criteria": "PASS if: At least one KMS key exists for secrets encryption, Secrets Manager contains at least one secret with rotation configured (RotationEnabled=true), AND the secrets-management-policy.md exists in CodeCommit.",
+    "fail_criteria": "FAIL if: No KMS keys exist, no secrets are stored in Secrets Manager or rotation is not enabled, or the secrets management policy is missing."
   },
   "KSI-SVC-08": {
     "description": "Persistently review plans, procedures, and the state of information resources after making changes to limit and remove unwanted residual elements that would likely negatively affect the confidentiality, integrity, or availability of federal customer data.",
@@ -1257,15 +1541,18 @@
     "cli_commands": [
       {
         "command": "aws s3api get-bucket-lifecycle-configuration --bucket $(aws s3api list-buckets --query 'Buckets[0].Name' --output text) --output json || echo '{\"Rules\": []}'",
-        "note": "AUTOMATION: Validate S3 Lifecycle Rules that automatically expire/delete temporary or residual data."
+        "note": "AUTOMATION: Validate S3 Lifecycle Rules that automatically expire/delete temporary or residual data.",
+        "expected_output": "S3 lifecycle rules must exist for automated data tiering/expiration"
       },
       {
         "command": "aws kms list-keys --limit 10 --output json",
-        "note": "CAPABILITY: Validate existence of KMS keys. Deleting a key is the industry-standard method for 'Crypto-Shredding' data from immutable backups."
+        "note": "CAPABILITY: Validate existence of KMS keys. Deleting a key is the industry-standard method for 'Crypto-Shredding' data from immutable backups.",
+        "expected_output": "At least 1 KMS key must exist"
       },
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/data-sanitization-policy.md --output json",
-        "note": "GOVERNANCE: Validate the Data Sanitization Policy which defines the procedure for destroying customer data."
+        "note": "GOVERNANCE: Validate the Data Sanitization Policy which defines the procedure for destroying customer data.",
+        "expected_output": "Governance document must exist in CodeCommit"
       }
     ],
     "artifact_evidence_paths": [
@@ -1273,7 +1560,9 @@
       "evidence_v2/KSI-SVC-08/kms_keys.json",
       "evidence_v2/KSI-SVC-08/sanitization_policy.json"
     ],
-    "implementation_summary": "Residual data removal automated via S3 Lifecycle Policies (automatic expiration of temporary data), KMS key management (enabling crypto-shredding of encrypted backups), and a formal Data Sanitization Policy defining destruction procedures."
+    "implementation_summary": "Residual data removal automated via S3 Lifecycle Policies (automatic expiration of temporary data), KMS key management (enabling crypto-shredding of encrypted backups), and a formal Data Sanitization Policy defining destruction procedures.",
+    "pass_criteria": "PASS if: S3 lifecycle rules exist on the compliance bucket for automated data tiering/expiration, S3 versioning is enabled on the compliance bucket, AND the data-lifecycle-policy.md exists in CodeCommit.",
+    "fail_criteria": "FAIL if: No S3 lifecycle rules exist (no automated data management), versioning is disabled on the compliance bucket, or the data lifecycle policy is missing."
   },
   "KSI-SVC-09": {
     "description": "Persistently validate the authenticity and integrity of communications between machine-based information resources using automation.",
@@ -1281,15 +1570,18 @@
     "cli_commands": [
       {
         "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, Scheme:Scheme}\" --output json",
-        "note": "ENFORCERS: Identify active Load Balancers handling traffic."
+        "note": "ENFORCERS: Identify active Load Balancers handling traffic.",
+        "expected_output": "At least 1 load balancer must exist"
       },
       {
         "command": "for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null || echo ''); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --query \"Listeners[?Protocol=='HTTPS' || Protocol=='TLS'].{Port:Port, SslPolicy:SslPolicy, Certificates:Certificates}\" --output json; done",
-        "note": "VALIDATION: Verify that listeners are enforcing HTTPS/TLS with specific SSL Policies (authenticity/integrity checks)."
+        "note": "VALIDATION: Verify that listeners are enforcing HTTPS/TLS with specific SSL Policies (authenticity/integrity checks).",
+        "expected_output": "Load balancer listeners must enforce HTTPS with TLS 1.2+ SSL policy"
       },
       {
         "command": "aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json",
-        "note": "IDENTITY: Validate existence of issued ACM certificates used to prove authenticity."
+        "note": "IDENTITY: Validate existence of issued ACM certificates used to prove authenticity.",
+        "expected_output": "At least 1 ACM certificate must exist"
       }
     ],
     "artifact_evidence_paths": [
@@ -1297,7 +1589,9 @@
       "evidence_v2/KSI-SVC-09/tls_enforcement.json",
       "evidence_v2/KSI-SVC-09/issued_certs.json"
     ],
-    "implementation_summary": "Communication authenticity and integrity validated via HTTPS/TLS enforcement on ALB listeners with specific SSL policies (TLS 1.2+), and ACM-issued certificates proving endpoint identity. All load balancer traffic encrypted in transit."
+    "implementation_summary": "Communication authenticity and integrity validated via HTTPS/TLS enforcement on ALB listeners with specific SSL policies (TLS 1.2+), and ACM-issued certificates proving endpoint identity. All load balancer traffic encrypted in transit.",
+    "pass_criteria": "PASS if: At least one ACM certificate exists for TLS termination, load balancer listeners enforce HTTPS/TLS with a secure SSL policy (TLS 1.2+), AND the transport-security-policy.md exists in CodeCommit.",
+    "fail_criteria": "FAIL if: No ACM certificates exist, load balancer listeners allow HTTP or use SSL policies below TLS 1.2, or the transport security policy is missing."
   },
   "KSI-SVC-10": {
     "description": "Remove unwanted federal customer data promptly when requested by an agency in alignment with customer agreements, including from backups if appropriate.",
@@ -1305,15 +1599,18 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/data-sanitization-policy.md --output json",
-        "note": "GOVERNANCE: Validate the Data Sanitization Policy (defines the 'Promptly' SLA and procedure)."
+        "note": "GOVERNANCE: Validate the Data Sanitization Policy (defines the 'Promptly' SLA and procedure).",
+        "expected_output": "Governance document must exist in CodeCommit"
       },
       {
         "command": "aws backup list-backup-plans --output json",
-        "note": "RETENTION: Validate Backup Plans to ensure automated expiration rules are in place (Data doesn't live forever)."
+        "note": "RETENTION: Validate Backup Plans to ensure automated expiration rules are in place (Data doesn't live forever).",
+        "expected_output": "At least 1 backup plan must exist"
       },
       {
         "command": "aws kms list-keys --limit 10 --output json",
-        "note": "DESTRUCTION: Validate KMS Keys (The mechanism for 'Crypto-Shredding' data from immutable backups)."
+        "note": "DESTRUCTION: Validate KMS Keys (The mechanism for 'Crypto-Shredding' data from immutable backups).",
+        "expected_output": "At least 1 KMS key must exist"
       }
     ],
     "artifact_evidence_paths": [
@@ -1321,7 +1618,9 @@
       "evidence_v2/KSI-SVC-10/retention_plans.json",
       "evidence_v2/KSI-SVC-10/kms_destruction_keys.json"
     ],
-    "implementation_summary": "Data removal capabilities validated via Data Sanitization Policy (defining promptly SLA and procedures), AWS Backup Plans with automated retention/expiration rules, and KMS keys enabling crypto-shredding of data from immutable backups."
+    "implementation_summary": "Data removal capabilities validated via Data Sanitization Policy (defining promptly SLA and procedures), AWS Backup Plans with automated retention/expiration rules, and KMS keys enabling crypto-shredding of data from immutable backups.",
+    "pass_criteria": "PASS if: At least one IAM role has an attached permissions boundary, at least one SCP or IAM policy enforces service restrictions, AND the least-privilege-policy.md exists in CodeCommit.",
+    "fail_criteria": "FAIL if: No permissions boundaries are applied to any IAM role, no service restriction policies exist, or the least privilege policy is missing."
   },
   "KSI-TPR-03": {
     "description": "Persistently identify, review, and mitigate potential supply chain risks.",
@@ -1329,18 +1628,23 @@
     "cli_commands": [
       {
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/supply-chain-risk-management.md",
-        "note": "Retrieve the supply chain risk management policy from CodeCommit to verify its existence and size."
+        "note": "Retrieve the supply chain risk management policy from CodeCommit to verify its existence and size.",
+        "expected_output": "Governance document must exist in CodeCommit"
       },
       {
         "command": "aws codecommit list-approval-rule-templates --output json",
-        "note": "Validate that a formal approval rule process is configured for the repository."
+        "note": "Validate that a formal approval rule process is configured for the repository.",
+        "expected_output": "At least 1 approval rule template must exist"
       },
       {
         "command": "aws codecommit get-differences --repository-name security-governance --after-commit-specifier refs/heads/main --output json",
-        "note": "Check the commit history for an audit trail of recent policy updates."
+        "note": "Check the commit history for an audit trail of recent policy updates.",
+        "expected_output": "At least 1 commit difference must exist"
       }
     ],
-    "implementation_summary": "Supply chain risk management policy maintained in CodeCommit (security-governance repo) with formal approval rule templates and version-controlled commit history providing an audit trail of policy reviews and updates."
+    "implementation_summary": "Supply chain risk management policy maintained in CodeCommit (security-governance repo) with formal approval rule templates and version-controlled commit history providing an audit trail of policy reviews and updates.",
+    "pass_criteria": "PASS if: At least one SQA or third-party assessment report exists in the compliance bucket, the third-party-assessment-policy.md exists in CodeCommit, AND the Trust Center API is accessible for report distribution.",
+    "fail_criteria": "FAIL if: No assessment reports exist in S3, the third-party assessment policy is missing, or the Trust Center API is unreachable."
   },
   "KSI-TPR-04": {
     "description": "Automatically monitor third party software information resources for upstream vulnerabilities using mechanisms that may include contractual notification requirements or active monitoring services.",
@@ -1348,29 +1652,37 @@
     "cli_commands": [
       {
         "command": "aws inspector2 get-configuration --output json",
-        "note": "Check Inspector configuration for vulnerability scanning"
+        "note": "Check Inspector configuration for vulnerability scanning",
+        "expected_output": "Inspector must be configured"
       },
       {
         "command": "aws inspector2 list-findings --filter-criteria '{\"componentType\":[{\"comparison\":\"EQUALS\",\"value\":\"OPERATING_SYSTEM\"}]}' --max-results 50 --output json",
-        "note": "Validate OS vulnerability findings from Inspector"
+        "note": "Validate OS vulnerability findings from Inspector",
+        "expected_output": "Inspector OS vulnerability findings must be collected (may be zero if fully patched)"
       },
       {
         "command": "aws inspector2 list-findings --filter-criteria '{\"componentType\":[{\"comparison\":\"EQUALS\",\"value\":\"APPLICATION\"}]}' --max-results 50 --output json",
-        "note": "Check application vulnerability findings from Inspector"
+        "note": "Check application vulnerability findings from Inspector",
+        "expected_output": "Inspector application vulnerability findings must be collected"
       },
       {
         "command": "aws inspector2 list-findings --filter-criteria '{\"findingStatus\":[{\"comparison\":\"EQUALS\",\"value\":\"ACTIVE\"}]}' --max-results 100 --output json",
-        "note": "Validate active vulnerability findings requiring remediation"
+        "note": "Validate active vulnerability findings requiring remediation",
+        "expected_output": "At least 1 Inspector finding must exist"
       },
       {
         "command": "aws inspector2 list-coverage --filter-criteria '{\"resourceType\":[{\"comparison\":\"EQUALS\",\"value\":\"AWS_EC2_INSTANCE\"}]}' --max-results 100 --output json",
-        "note": "Check Inspector coverage for EC2 instances"
+        "note": "Check Inspector coverage for EC2 instances",
+        "expected_output": "At least 1 Inspector-covered resource must exist"
       },
       {
         "command": "aws ssm describe-instance-information --output json",
-        "note": "Validate SSM agent deployment for vulnerability management"
+        "note": "Validate SSM agent deployment for vulnerability management",
+        "expected_output": "At least 1 SSM-managed instance must exist"
       }
     ],
-    "implementation_summary": "Third-party software vulnerabilities monitored via AWS Inspector with continuous scanning enabled for OS and application components. Active findings tracked for remediation. EC2 coverage validated alongside SSM agent deployment for patch management."
+    "implementation_summary": "Third-party software vulnerabilities monitored via AWS Inspector with continuous scanning enabled for OS and application components. Active findings tracked for remediation. EC2 coverage validated alongside SSM agent deployment for patch management.",
+    "pass_criteria": "PASS if: Amazon Inspector is actively scanning resources with coverage data returned, OS-level and application-level vulnerability findings are being collected, vulnerability counts are enumerated, the VDR dashboard data artifact exists in S3, AND the vulnerability-scanning-policy.md exists in CodeCommit.",
+    "fail_criteria": "FAIL if: Inspector has no coverage (not scanning), no vulnerability findings are being collected at OS or application level, the VDR dashboard artifact is missing from S3, or the vulnerability scanning policy is missing."
   }
 }

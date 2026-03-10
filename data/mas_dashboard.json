@@ -1,9 +1,9 @@
 {
   "meta": {
-    "generated_at": "2026-03-09T18:23:31.642044+00:00",
+    "generated_at": "2026-03-10T12:20:45.167332+00:00",
     "compliance_ver": "FedRAMP 20x",
     "scope": "PUBLIC_SAFE",
-    "fingerprint": "b95f7e6de08b"
+    "fingerprint": "ea7db3f766ba"
   },
   "health": {
     "overall": "warning",
@@ -291,12 +291,12 @@
         "C": "Moderate",
         "I": "Low",
         "A": "Low",
-        "rationale": "Commercial content library. Non-FedRAMP - compensating controls via data minimization and SSO."
+        "rationale": "Commercial content library. Non-FedRAMP - compensating controls via data minimization and SSO. Data sensitivity: Moderate per NIST 800-60 D.8."
       },
       "data_source": "xAPI (Outbound)",
       "connection_type": "xAPI",
       "auth_method": "SAML 2.0 (SSO)",
-      "risk": "high",
+      "risk": "elevated",
       "pii_shared": [
         "Email",
         "First Name",
@@ -337,7 +337,7 @@
       "data_source": "SCORM (Outbound)",
       "connection_type": "SCORM 1.2",
       "auth_method": "Direct Launch",
-      "risk": "high",
+      "risk": "elevated",
       "pii_shared": [
         "First Name",
         "Last Name",
@@ -378,7 +378,7 @@
       "data_source": "SCORM (Ingress)",
       "connection_type": "SCORM (Ingress)",
       "auth_method": "Direct Launch",
-      "risk": "high",
+      "risk": "elevated",
       "pii_shared": [
         "First Name",
         "Last Name",
@@ -558,43 +558,182 @@
       "system_type": "integration"
     }
   ],
+  "human_process_resources": {
+    "schema": "FRR-MAS Human and Process Resources",
+    "version": "1.0.0",
+    "last_updated": "2026-03-07",
+    "description": "Supplements the MAS machine resource inventory (KSI-AFR-01) with human and process resources within the FedRAMP authorization boundary. Per FRR-MAS requirements, the Minimum Assessment Scope must account for people, processes, and technology \u2014 not just infrastructure.",
+    "human_resources": {
+      "security_roles": [
+        {
+          "role": "Information System Security Officer (ISSO)",
+          "responsibility": "Maintains the security posture of the Meridian LMS authorization boundary. Responsible for continuous monitoring, POA&M management, and FedRAMP deliverables.",
+          "clearance_required": false,
+          "us_based": true,
+          "assessment_scope": "Annual assessment interviews, control implementation verification, ConMon deliverable review"
+        },
+        {
+          "role": "System Administrator",
+          "responsibility": "Manages AWS infrastructure within the authorization boundary including EC2, RDS, S3, VPC, and IAM configurations.",
+          "clearance_required": false,
+          "us_based": true,
+          "assessment_scope": "Privileged access review, change management verification, configuration baseline compliance"
+        },
+        {
+          "role": "Security Operations / Incident Response",
+          "responsibility": "Monitors security events, responds to incidents per FRR-ICP procedures, and conducts IR/DR training and tabletop exercises.",
+          "clearance_required": false,
+          "us_based": true,
+          "assessment_scope": "Incident response capability testing (KSI-RPL-04), training effectiveness (KSI-CED-04), alert response times"
+        },
+        {
+          "role": "Development Team Lead",
+          "responsibility": "Manages SDLC security practices, code review, and deployment pipeline security for the Meridian LMS application.",
+          "clearance_required": false,
+          "us_based": true,
+          "assessment_scope": "SDLC policy compliance, secure coding practices, change management process adherence"
+        },
+        {
+          "role": "Authorizing Official Designee",
+          "responsibility": "Meridian executive responsible for accepting residual risk and authorizing operation of the system.",
+          "clearance_required": false,
+          "us_based": true,
+          "assessment_scope": "Risk acceptance decisions, POA&M oversight, authorization boundary changes"
+        }
+      ],
+      "staffing_model": {
+        "total_boundary_personnel": 8,
+        "all_us_based": true,
+        "all_us_persons": true,
+        "note": "Meridian Knowledge Solutions is a U.S.-based company with all development and support handled by U.S.-based personnel."
+      }
+    },
+    "process_resources": [
+      {
+        "process": "Continuous Monitoring (ConMon)",
+        "description": "Automated daily KSI validation via CLI pipeline, OAR generation, and QAR reporting. Human review of findings and remediation tracking.",
+        "ksi_coverage": [
+          "KSI-AFR-02",
+          "KSI-MLA-02",
+          "KSI-MLA-07"
+        ],
+        "frequency": "Daily (automated), Monthly (OAR), Quarterly (QAR)",
+        "assessment_scope": "ConMon deliverable accuracy, timeliness, and coverage"
+      },
+      {
+        "process": "Vulnerability Management",
+        "description": "Multi-source vulnerability scanning (Inspector, Security Hub, Aikido, OSV, Bandit, External Scanner) with Jira SEC tracking and VDR reporting.",
+        "ksi_coverage": [
+          "KSI-TPR-04",
+          "KSI-AFR-04"
+        ],
+        "frequency": "Continuous (scanning), 3-day (VDR reports)",
+        "assessment_scope": "Scan coverage, remediation timeliness, VDR accuracy"
+      },
+      {
+        "process": "Incident Response",
+        "description": "Automated incident communication workflow (FRR-ICP) with Jira SEC integration, Lambda notification dispatch, and SLA tracking.",
+        "ksi_coverage": [
+          "KSI-AFR-10",
+          "KSI-RPL-04",
+          "KSI-CED-04"
+        ],
+        "frequency": "Event-driven, tabletop exercises quarterly",
+        "assessment_scope": "SLA compliance, notification accuracy, post-incident review"
+      },
+      {
+        "process": "Change Management",
+        "description": "GitOps-based change management with SCN classification (routine/adaptive/transformative), approval workflows, and security impact assessment.",
+        "ksi_coverage": [
+          "KSI-CMT-01",
+          "KSI-CMT-02"
+        ],
+        "frequency": "Per change event, SCN reporting as needed",
+        "assessment_scope": "Change classification accuracy, notification timeliness, security impact assessment quality"
+      },
+      {
+        "process": "Access Control and Identity Management",
+        "description": "Okta-based federal identity with PIV/CAC support, SAML 2.0 SSO, role-based access control within Meridian LMS and AWS IAM.",
+        "ksi_coverage": [
+          "KSI-IAM-01",
+          "KSI-IAM-02",
+          "KSI-CNA-01"
+        ],
+        "frequency": "Continuous (authentication), Quarterly (access review)",
+        "assessment_scope": "Privileged access inventory, authentication strength, access review completeness"
+      },
+      {
+        "process": "Security Governance",
+        "description": "Policy and procedure management via CodeCommit security-governance repository. Version-controlled policies with attestation tracking.",
+        "ksi_coverage": [
+          "KSI-CED-01",
+          "KSI-CED-02",
+          "KSI-CED-03"
+        ],
+        "frequency": "Annual review, event-driven updates",
+        "assessment_scope": "Policy currency, attestation completeness, governance repository integrity"
+      }
+    ],
+    "data_classification": {
+      "nist_800_60_alignment": {
+        "information_types": [
+          {
+            "type": "Training and Education Management",
+            "nist_id": "D.8",
+            "confidentiality_impact": "Moderate",
+            "integrity_impact": "Moderate",
+            "availability_impact": "Low"
+          },
+          {
+            "type": "Federal Employee PII (Learning Records)",
+            "nist_id": "C.2.8.12",
+            "confidentiality_impact": "Moderate",
+            "integrity_impact": "Moderate",
+            "availability_impact": "Low"
+          }
+        ],
+        "overall_impact_level": "Moderate",
+        "justification": "Federal employee PII (names, emails, learning progress) processed for training management purposes. No classified or law enforcement data."
+      }
+    }
+  },
   "aws_services": {
-    "AWS CloudTrail": 0.71,
-    "AWS Config": 4.99,
-    "AWS Cost Explorer": 0.89,
-    "AWS Directory Service": 63.33,
-    "AWS Key Management Service": 4.69,
+    "AWS CloudTrail": 0.68,
+    "AWS Config": 4.74,
+    "AWS Cost Explorer": 0.85,
+    "AWS Directory Service": 60.25,
+    "AWS Key Management Service": 4.47,
     "AWS Lambda": 0.0,
-    "AWS Network Firewall": 417.12,
-    "AWS Secrets Manager": 1.1,
-    "AWS Security Hub": 6.09,
-    "AWS Systems Manager": 1.22,
-    "AWS Transfer Family": 158.4,
-    "AWS WAF": 15.74,
-    "EC2 - Other": 102.13,
-    "Amazon Elastic Compute Cloud - Compute": 172.55,
+    "AWS Network Firewall": 398.16,
+    "AWS Secrets Manager": 1.05,
+    "AWS Security Hub": 5.83,
+    "AWS Systems Manager": 1.17,
+    "AWS Transfer Family": 151.2,
+    "AWS WAF": 15.03,
+    "EC2 - Other": 97.48,
+    "Amazon Elastic Compute Cloud - Compute": 164.71,
     "Amazon Elastic Load Balancing": 0.0,
-    "Amazon FSx": 224.68,
-    "Amazon GuardDuty": 1.64,
-    "Amazon Inspector": 4.21,
-    "Amazon Relational Database Service": 523.08,
-    "Amazon Simple Storage Service": 0.35,
-    "Amazon Virtual Private Cloud": 48.59,
-    "AmazonCloudWatch": 9.1
+    "Amazon FSx": 214.46,
+    "Amazon GuardDuty": 1.57,
+    "Amazon Inspector": 4.03,
+    "Amazon Relational Database Service": 499.31,
+    "Amazon Simple Storage Service": 0.34,
+    "Amazon Virtual Private Cloud": 46.67,
+    "AmazonCloudWatch": 9.07
   },
   "drift_summary": [
     {
       "source": "aws",
       "type": "directory_service",
       "severity": "warning",
-      "description": "'AWS Directory Service' billing ($63.33/mo) but 0 resources in us-east-1.",
+      "description": "'AWS Directory Service' billing ($60.25/mo) but 0 resources in us-east-1.",
       "delta": 1
     },
     {
       "source": "aws",
       "type": "transfer",
       "severity": "warning",
-      "description": "'AWS Transfer Family' billing ($158.4/mo) but 0 resources in us-east-1.",
+      "description": "'AWS Transfer Family' billing ($151.2/mo) but 0 resources in us-east-1.",
       "delta": 1
     }
   ]
