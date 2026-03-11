@@ -1,63 +1,92 @@
 {
   "metadata": {
-    "generated_at": "2026-03-11T00:26:55.873135Z",
-    "total_ksis": 10,
-    "passed": 5,
-    "failed": 5,
-    "pass_rate": "50.0%",
+    "generated_at": "2026-03-11T03:52:46.025658Z",
+    "total_ksis": 31,
+    "passed": 15,
+    "failed": 16,
+    "pass_rate": "48.4%",
     "global_status": "CIRCUIT_BROKEN",
     "circuit_breaker": {
       "state": "OPEN",
       "global_status": "CIRCUIT_BROKEN",
       "config": {
-        "failure_threshold": 0.3,
-        "min_samples": 10,
+        "failure_threshold": 0.5,
+        "min_samples": 20,
         "consecutive_failure_limit": 5
       },
       "stats": {
-        "total_executed": 10,
-        "total_failed": 5,
-        "total_passed": 5,
-        "consecutive_failures": 1,
-        "failure_rate": 0.5,
-        "last_failure_time": "2026-03-11T00:26:55.872271+00:00",
-        "circuit_broken_at": "2026-03-11T00:26:55.872382+00:00"
+        "total_executed": 31,
+        "total_failed": 16,
+        "total_passed": 15,
+        "consecutive_failures": 4,
+        "failure_rate": 0.5161,
+        "last_failure_time": "2026-03-11T03:52:46.023979+00:00",
+        "circuit_broken_at": "2026-03-11T03:52:46.024070+00:00"
       }
     },
     "critical_findings": {
       "summary": {
-        "total": 0,
-        "by_severity": {},
-        "by_ksi": {},
-        "by_resource_type": {},
-        "critical_count": 0,
+        "total": 1,
+        "by_severity": {
+          "CRITICAL": 1
+        },
+        "by_ksi": {
+          "KSI-CNA-02": 1
+        },
+        "by_resource_type": {
+          "security_group/ec2": 1
+        },
+        "critical_count": 1,
         "high_count": 0
       },
-      "findings": [],
-      "by_ksi": {}
+      "findings": [
+        {
+          "ksi_id": "KSI-CNA-02",
+          "resource_id": "sg-0c6e8245d58934a84",
+          "resource_type": "security_group/ec2",
+          "severity": "CRITICAL",
+          "cia_impact": [
+            "C",
+            "I"
+          ],
+          "title": "Open ingress (0.0.0.0/0) on EC2",
+          "description": "Security group allows unrestricted inbound access from any IP. This is critical on EC2 resources as it exposes compute/data resources to the entire internet.",
+          "evidence": {
+            "cidr": "0.0.0.0/0",
+            "protocol": "tcp",
+            "from_port": 443,
+            "to_port": 443
+          },
+          "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
+          "detected_at": "2026-03-11T03:52:13.645780+00:00"
+        }
+      ],
+      "by_ksi": {
+        "KSI-CNA-02": [
+          {
+            "ksi_id": "KSI-CNA-02",
+            "resource_id": "sg-0c6e8245d58934a84",
+            "resource_type": "security_group/ec2",
+            "severity": "CRITICAL",
+            "cia_impact": [
+              "C",
+              "I"
+            ],
+            "title": "Open ingress (0.0.0.0/0) on EC2",
+            "description": "Security group allows unrestricted inbound access from any IP. This is critical on EC2 resources as it exposes compute/data resources to the entire internet.",
+            "evidence": {
+              "cidr": "0.0.0.0/0",
+              "protocol": "tcp",
+              "from_port": 443,
+              "to_port": 443
+            },
+            "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
+            "detected_at": "2026-03-11T03:52:13.645780+00:00"
+          }
+        ]
+      }
     },
     "ksis_skipped": [
-      "KSI-AFR-11",
-      "KSI-CED-01",
-      "KSI-CED-02",
-      "KSI-CED-03",
-      "KSI-CED-04",
-      "KSI-CMT-01",
-      "KSI-CMT-02",
-      "KSI-CMT-03",
-      "KSI-CMT-04",
-      "KSI-CNA-01",
-      "KSI-CNA-02",
-      "KSI-CNA-03",
-      "KSI-CNA-04",
-      "KSI-CNA-05",
-      "KSI-CNA-06",
-      "KSI-CNA-07",
-      "KSI-CNA-08",
-      "KSI-IAM-01",
-      "KSI-IAM-02",
-      "KSI-IAM-03",
-      "KSI-IAM-04",
       "KSI-IAM-05",
       "KSI-IAM-06",
       "KSI-IAM-07",
@@ -91,10 +120,34 @@
     ],
     "category_summary": {
       "KSI-AFR": {
-        "total": 10,
+        "total": 11,
         "passed": 5,
-        "failed": 5,
+        "failed": 6,
         "long_name": "Authorization by FedRAMP"
+      },
+      "KSI-CED": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "long_name": "Cybersecurity Education"
+      },
+      "KSI-CMT": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "long_name": "Change Management"
+      },
+      "KSI-CNA": {
+        "total": 8,
+        "passed": 4,
+        "failed": 4,
+        "long_name": "Cloud Native Architecture"
+      },
+      "KSI-IAM": {
+        "total": 4,
+        "passed": 0,
+        "failed": 4,
+        "long_name": "Identity and Access Management"
       }
     }
   },
@@ -113,9 +166,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws ec2 describe-vpcs --filters Name=isDefault,Values=false --output json; aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json; aws rds describe-db-instances --query \"DBInstances[*].{ID:DBInstanceIdentifier, Engine:Engine, VPC:DBSubnetGroup.VpcId}\" --output json; aws s3api list-buckets --output json; aws elbv2 describe-load-balancers --query \"LoadBalancers[*].{ARN:LoadBalancerArn, DNS:DNSName, VPC:VpcId}\" --output json; aws iam list-users --query \"Users[*].{UserName:UserName, CreateDate:CreateDate, PasswordLastUsed:PasswordLastUsed}\" --output json; aws iam list-roles --query \"Roles[?contains(RoleName, 'Admin') || contains(RoleName, 'Security') || contains(RoleName, 'Incident')]\" --output json; aws codecommit get-folder --repository-name security-governance --folder-path procedures/ --output json",
-      "timestamp": "2026-03-11T00:26:55.872872Z",
+      "timestamp": "2026-03-11T03:52:46.024734Z",
       "score": 46,
-      "evidence_path": "evidence_v2/KSI-AFR-01/ec2_002621_1652.json",
+      "evidence_path": "evidence_v2/KSI-AFR-01/ec2_035113_4473.json",
       "total_category_controls": 1,
       "resources_scanned": 32,
       "resources_passed": 15,
@@ -290,7 +343,7 @@
           "command": "aws ec2 describe-vpcs --filters Name=isDefault,Values=false --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.30s",
+          "execution_time": "1.06s",
           "error_message": null
         },
         {
@@ -299,7 +352,7 @@
           "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.49s",
+          "execution_time": "1.11s",
           "error_message": null
         },
         {
@@ -308,7 +361,7 @@
           "command": "aws rds describe-db-instances --query \"DBInstances[*].{ID:DBInstanceIdentifier, Engine:Engine, VPC:DBSubnetGroup.VpcId}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.23s",
+          "execution_time": "0.93s",
           "error_message": null
         },
         {
@@ -317,7 +370,7 @@
           "command": "aws s3api list-buckets --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.82s",
           "error_message": null
         },
         {
@@ -326,7 +379,7 @@
           "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[*].{ARN:LoadBalancerArn, DNS:DNSName, VPC:VpcId}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.07s",
+          "execution_time": "0.79s",
           "error_message": null
         },
         {
@@ -335,7 +388,7 @@
           "command": "aws iam list-users --query \"Users[*].{UserName:UserName, CreateDate:CreateDate, PasswordLastUsed:PasswordLastUsed}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.86s",
           "error_message": null
         },
         {
@@ -344,7 +397,7 @@
           "command": "aws iam list-roles --query \"Roles[?contains(RoleName, 'Admin') || contains(RoleName, 'Security') || contains(RoleName, 'Incident')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.36s",
+          "execution_time": "0.89s",
           "error_message": null
         },
         {
@@ -353,7 +406,7 @@
           "command": "aws codecommit get-folder --repository-name security-governance --folder-path procedures/ --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.16s",
+          "execution_time": "0.83s",
           "error_message": null
         }
       ],
@@ -374,9 +427,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/unified_ksi_validations.json --output json; aws securityhub describe-hub --output json",
-      "timestamp": "2026-03-11T00:26:55.872912Z",
+      "timestamp": "2026-03-11T03:52:46.024773Z",
       "score": 50,
-      "evidence_path": "evidence_v2/KSI-AFR-02/s3api_002621_9812.json",
+      "evidence_path": "evidence_v2/KSI-AFR-02/s3api_035113_3501.json",
       "total_category_controls": 2,
       "resources_scanned": 2,
       "resources_passed": 1,
@@ -401,7 +454,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/unified_ksi_validations.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.00s",
+          "execution_time": "0.84s",
           "error_message": null
         },
         {
@@ -410,7 +463,7 @@
           "command": "aws securityhub describe-hub --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.05s",
+          "execution_time": "0.87s",
           "error_message": null
         }
       ],
@@ -431,9 +484,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/meridian-authorization-package-LATEST.zip --output json; curl -s -o /dev/null -w \"%{http_code}\" https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/status || echo \"000\"",
-      "timestamp": "2026-03-11T00:26:55.872935Z",
+      "timestamp": "2026-03-11T03:52:46.024795Z",
       "score": 100,
-      "evidence_path": "evidence_v2/KSI-AFR-03/s3api_002621_6223.json",
+      "evidence_path": "evidence_v2/KSI-AFR-03/s3api_035113_1374.json",
       "total_category_controls": 3,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -458,7 +511,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/meridian-authorization-package-LATEST.zip --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.08s",
+          "execution_time": "0.90s",
           "error_message": null
         },
         {
@@ -467,7 +520,7 @@
           "command": "curl -s -o /dev/null -w \"%{http_code}\" https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/status || echo \"000\"",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.92s",
+          "execution_time": "4.76s",
           "error_message": null
         }
       ],
@@ -488,9 +541,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/assessed_vulnerabilities_integrated.json --output json; aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/vdr_vulnerability_status.json --output json; aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
-      "timestamp": "2026-03-11T00:26:55.872958Z",
+      "timestamp": "2026-03-11T03:52:46.024817Z",
       "score": 100,
-      "evidence_path": "evidence_v2/KSI-AFR-04/s3api_002621_1982.json",
+      "evidence_path": "evidence_v2/KSI-AFR-04/s3api_035113_559.json",
       "total_category_controls": 4,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -520,7 +573,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/assessed_vulnerabilities_integrated.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.89s",
           "error_message": null
         },
         {
@@ -529,7 +582,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/vdr_vulnerability_status.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.82s",
           "error_message": null
         },
         {
@@ -538,7 +591,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.18s",
+          "execution_time": "0.87s",
           "error_message": null
         }
       ],
@@ -559,9 +612,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')]\" --output json; aws s3api list-objects-v2 --bucket $(aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')].Name\" --output text | head -n 1) --prefix scn-flow-validation.html --output json; aws s3api list-objects-v2 --bucket $(aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')].Name\" --output text | head -n 1) --prefix audit_trail --output json",
-      "timestamp": "2026-03-11T00:26:55.872980Z",
+      "timestamp": "2026-03-11T03:52:46.024838Z",
       "score": 100,
-      "evidence_path": "evidence_v2/KSI-AFR-05/s3api_002621_3498.json",
+      "evidence_path": "evidence_v2/KSI-AFR-05/s3api_035113_5166.json",
       "total_category_controls": 5,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -591,7 +644,7 @@
           "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.02s",
+          "execution_time": "0.87s",
           "error_message": null
         },
         {
@@ -600,7 +653,7 @@
           "command": "aws s3api list-objects-v2 --bucket $(aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')].Name\" --output text | head -n 1) --prefix scn-flow-validation.html --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.01s",
+          "execution_time": "1.62s",
           "error_message": null
         },
         {
@@ -609,7 +662,7 @@
           "command": "aws s3api list-objects-v2 --bucket $(aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')].Name\" --output text | head -n 1) --prefix audit_trail --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.11s",
+          "execution_time": "1.64s",
           "error_message": null
         }
       ],
@@ -630,9 +683,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/3pao_audit_report.json --output json; curl -s -o /dev/null -w \"%{http_code}\" https://meridian-knowledge-solutions.github.io/fedramp-trust-center/ || echo \"000\"",
-      "timestamp": "2026-03-11T00:26:55.873000Z",
+      "timestamp": "2026-03-11T03:52:46.024857Z",
       "score": 100,
-      "evidence_path": "evidence_v2/KSI-AFR-06/s3api_002621_7030.json",
+      "evidence_path": "evidence_v2/KSI-AFR-06/s3api_035113_2239.json",
       "total_category_controls": 6,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -657,7 +710,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/3pao_audit_report.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.06s",
+          "execution_time": "0.81s",
           "error_message": null
         },
         {
@@ -687,9 +740,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "curl -s https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/config",
-      "timestamp": "2026-03-11T00:26:55.873019Z",
+      "timestamp": "2026-03-11T03:52:46.024876Z",
       "score": 0,
-      "evidence_path": "evidence_v2/KSI-AFR-07/apidocumentation_002621_7540.json",
+      "evidence_path": "evidence_v2/KSI-AFR-07/apidocumentation_035113_189.json",
       "total_category_controls": 7,
       "resources_scanned": 1,
       "resources_passed": 0,
@@ -709,7 +762,7 @@
           "command": "curl -s https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/config",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.25s",
+          "execution_time": "1.17s",
           "error_message": null
         }
       ],
@@ -730,9 +783,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path procedures/security-inbox-procedures.md --output json; aws sns list-topics --query \"Topics[?contains(TopicArn, 'security') || contains(TopicArn, 'alert') || contains(TopicArn, 'admin')]\" --output json",
-      "timestamp": "2026-03-11T00:26:55.873059Z",
+      "timestamp": "2026-03-11T03:52:46.024915Z",
       "score": 25,
-      "evidence_path": "evidence_v2/KSI-AFR-08/codecommit_002621_3221.json",
+      "evidence_path": "evidence_v2/KSI-AFR-08/codecommit_035113_5822.json",
       "total_category_controls": 8,
       "resources_scanned": 4,
       "resources_passed": 1,
@@ -767,7 +820,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/security-inbox-procedures.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.18s",
+          "execution_time": "0.86s",
           "error_message": null
         },
         {
@@ -776,7 +829,7 @@
           "command": "aws sns list-topics --query \"Topics[?contains(TopicArn, 'security') || contains(TopicArn, 'alert') || contains(TopicArn, 'admin')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.06s",
+          "execution_time": "0.80s",
           "error_message": null
         }
       ],
@@ -797,9 +850,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path authorization_by_fedramp/fedramp-phase2-validation-architecture.mmd --output json; aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/unified_ksi_validations.json --output json",
-      "timestamp": "2026-03-11T00:26:55.873082Z",
+      "timestamp": "2026-03-11T03:52:46.024937Z",
       "score": 100,
-      "evidence_path": "evidence_v2/KSI-AFR-09/codecommit_002621_1011.json",
+      "evidence_path": "evidence_v2/KSI-AFR-09/codecommit_035113_8479.json",
       "total_category_controls": 9,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -824,7 +877,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path authorization_by_fedramp/fedramp-phase2-validation-architecture.mmd --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.17s",
+          "execution_time": "0.89s",
           "error_message": null
         },
         {
@@ -833,7 +886,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/unified_ksi_validations.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.81s",
           "error_message": null
         }
       ],
@@ -854,9 +907,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path procedures/icp_playbook.md --output json; aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json; aws sns list-topics --query \"Topics[?contains(TopicArn, 'security') || contains(TopicArn, 'incident') || contains(TopicArn, 'alert')]\" --output json; aws sns list-subscriptions --query \"Subscriptions[?contains(TopicArn, 'security') || contains(TopicArn, 'incident') || contains(TopicArn, 'alert')]\" --output json",
-      "timestamp": "2026-03-11T00:26:55.873106Z",
+      "timestamp": "2026-03-11T03:52:46.024960Z",
       "score": 33,
-      "evidence_path": "evidence_v2/KSI-AFR-10/codecommit_002621_8939.json",
+      "evidence_path": "evidence_v2/KSI-AFR-10/codecommit_035113_1624.json",
       "total_category_controls": 10,
       "resources_scanned": 6,
       "resources_passed": 2,
@@ -901,7 +954,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/icp_playbook.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.23s",
+          "execution_time": "0.91s",
           "error_message": null
         },
         {
@@ -910,7 +963,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.21s",
+          "execution_time": "0.89s",
           "error_message": null
         },
         {
@@ -919,7 +972,7 @@
           "command": "aws sns list-topics --query \"Topics[?contains(TopicArn, 'security') || contains(TopicArn, 'incident') || contains(TopicArn, 'alert')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.79s",
           "error_message": null
         },
         {
@@ -928,12 +981,2735 @@
           "command": "aws sns list-subscriptions --query \"Subscriptions[?contains(TopicArn, 'security') || contains(TopicArn, 'incident') || contains(TopicArn, 'alert')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.14s",
+          "execution_time": "0.88s",
           "error_message": null
         }
       ],
       "commands_executed": 4,
       "successful_commands": 4
+    },
+    {
+      "ksi_id": "KSI-AFR-11",
+      "validation_id": "KSI-AFR-11",
+      "assertion": false,
+      "assertion_reason": "\u274c Insufficient (22%): Ensure that cryptographic modules are selected and used in alignment with the FedRAMP 20x Using Cryptographic Modules... | 2/9 resources compliant. | Verified: Resource 'saas' is Encrypted at Rest.; Verified: Governance document 'security-governance' is substantive (6522 bytes, 25 sections). | Failures: Critical: Resource 'None' is NOT Encrypted at Rest.; Critical: Resource 'None' is NOT Encrypted at Rest.; Critical: Resource 'None' is NOT Encrypted at Rest. |   ...and 4 more failure(s)",
+      "recommended_action": "ACTION: Remediate 7 non-compliant resources. Review resource configurations against FedRAMP requirements. Current compliance: 22% (Target: \u226580%)",
+      "requirement": "Ensure that cryptographic modules are selected and used in alignment with the FedRAMP 20x Using Cryptographic Modules (UCM) policy.",
+      "implementation_summary": "Cryptography uses AWS KMS with AES-256 for data at rest (S3, RDS, EBS). TLS 1.2+ enforced on ALB listeners. FIPS 140-2 validated modules via AWS GovCloud-compatible services.",
+      "justification": "Validates Applied Cryptography. Checks for: 1) Active KMS Keys (Key Management), 2) S3 Encryption on the Compliance Bucket (Data at Rest), 3) RDS Encryption (Data at Rest), and 4) Active Load Balancer Listeners enforcing TLS 1.2+ (Data in Transit/FIPS alignment).",
+      "pass_criteria": "PASS if: At least one KMS key exists for cryptographic operations, the compliance S3 bucket enforces server-side encryption (SSE-S3 or SSE-KMS), all RDS instances have StorageEncrypted=true, load balancer listeners enforce TLS 1.2+ via secure SSL policies, AND the cryptographic-modules-policy.md exists in CodeCommit.",
+      "fail_criteria": "FAIL if: No KMS keys exist, the compliance bucket lacks encryption configuration, any RDS instance has StorageEncrypted=false, load balancer listeners allow TLS below 1.2 or use insecure SSL policies, or the UCM policy document is missing.",
+      "long_name": "Authorization by FedRAMP",
+      "category_prefix": "KSI-AFR",
+      "cli_command": "aws kms list-keys --limit 5 --output json; aws s3api get-bucket-encryption --bucket fedramp-compliance-893894210484 --output json; aws rds describe-db-instances --output json; aws elbv2 describe-listeners --load-balancer-arn $(aws elbv2 describe-load-balancers --query \"LoadBalancers[0].LoadBalancerArn\" --output text) --output json || echo \"[]\"; aws codecommit get-file --repository-name security-governance --file-path policies/cryptographic-modules-policy.md --output json",
+      "timestamp": "2026-03-11T03:52:46.024986Z",
+      "score": 22,
+      "evidence_path": "evidence_v2/KSI-AFR-11/kms_035113_4399.json",
+      "total_category_controls": 11,
+      "resources_scanned": 9,
+      "resources_passed": 2,
+      "resources_unverified": 0,
+      "resources_failed": 7,
+      "resource_evaluations": [
+        {
+          "resource": null,
+          "status": "FAIL",
+          "reason": "Critical: Resource 'None' is NOT Encrypted at Rest."
+        },
+        {
+          "resource": null,
+          "status": "FAIL",
+          "reason": "Critical: Resource 'None' is NOT Encrypted at Rest."
+        },
+        {
+          "resource": null,
+          "status": "FAIL",
+          "reason": "Critical: Resource 'None' is NOT Encrypted at Rest."
+        },
+        {
+          "resource": null,
+          "status": "FAIL",
+          "reason": "Critical: Resource 'None' is NOT Encrypted at Rest."
+        },
+        {
+          "resource": null,
+          "status": "FAIL",
+          "reason": "Critical: Resource 'None' is NOT Encrypted at Rest."
+        },
+        {
+          "resource": null,
+          "status": "FAIL",
+          "reason": "Critical: Resource 'None' is NOT Encrypted at Rest."
+        },
+        {
+          "resource": "saas",
+          "status": "PASS",
+          "reason": "Resource 'saas' is Encrypted at Rest."
+        },
+        {
+          "resource": "arn:aws:elasticloadbalancing:us-east-1:893894210484:loadbalancer/app/PROD-LB1/f0f8011042dcdd72",
+          "status": "FAIL",
+          "reason": "Critical: Resource 'arn:aws:elasticloadbalancing:us-east-1:893894210484:loadbalancer/app/PROD-LB1/f0f8011042dcdd72' is NOT Encrypted at Rest."
+        },
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Verified: Governance document 'security-governance' is substantive (6522 bytes, 25 sections)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "KEY MANAGEMENT: Validate that KMS keys exist and are available for cryptographic operations.",
+          "command": "aws kms list-keys --limit 5 --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.79s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "DATA AT REST (STORAGE): Validate that the Compliance Artifact Bucket enforces server-side encryption (SSE-S3 or SSE-KMS).",
+          "command": "aws s3api get-bucket-encryption --bucket fedramp-compliance-893894210484 --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.79s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "DATA AT REST (DATABASE): Validate that all RDS instances have 'StorageEncrypted' set to true.",
+          "command": "aws rds describe-db-instances --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.92s",
+          "error_message": null
+        },
+        {
+          "index": 3,
+          "description": "DATA IN TRANSIT: Validate that Load Balancer Listeners are configured with secure SSL Policies (TLS 1.2+).",
+          "command": "aws elbv2 describe-listeners --load-balancer-arn $(aws elbv2 describe-load-balancers --query \"LoadBalancers[0].LoadBalancerArn\" --output text) --output json || echo \"[]\"",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.65s",
+          "error_message": null
+        },
+        {
+          "index": 4,
+          "description": "GOVERNANCE: Validate the existence of the Cryptographic Modules (UCM) Policy.",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path policies/cryptographic-modules-policy.md --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.89s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 5,
+      "successful_commands": 5
+    },
+    {
+      "ksi_id": "KSI-CED-01",
+      "validation_id": "KSI-CED-01",
+      "assertion": true,
+      "assertion_reason": "\u2705 Excellent (100%): Persistently review the effectiveness of training given to all employees on policies, procedures, and security-relate... | 2/2 resources compliant. | Verified: Training register 'security-governance' contains 1 attestation(s) with fields: user, date. Training effectiveness evidenced by completion records.; Training curriculum 'security-governance' is substantive: 1991 bytes, 4 sections. Structured training material verified.",
+      "recommended_action": "\u2705 No action required - excellent compliance maintained.",
+      "requirement": "Persistently review the effectiveness of training given to all employees on policies, procedures, and security-related topics.",
+      "implementation_summary": "Training tracked via GitOps - employees commit signed attestations to training/register.json after completing security awareness modules. CTF-style challenge tokens prove active engagement.",
+      "justification": "Validates 'GitOps' Security Training. Instead of passive LMS logs, this validates the 'training/register.json' in the governance repo. This proves staff have actively attested to security training by decoding a challenge token (CTF style) and committing it to the immutable version control history.",
+      "pass_criteria": "PASS if: The training/register.json file exists in CodeCommit containing at least one signed attestation entry with a decoded challenge token, AND the training/security-refresh.md curriculum document exists.",
+      "fail_criteria": "FAIL if: The training register is missing or contains zero attestation entries, or the training curriculum document does not exist in CodeCommit.",
+      "long_name": "Cybersecurity Education",
+      "category_prefix": "KSI-CED",
+      "cli_command": "aws codecommit get-file --repository-name security-governance --file-path training/register.json --output json; aws codecommit get-file --repository-name security-governance --file-path training/security-refresh.md --output json",
+      "timestamp": "2026-03-11T03:52:46.025007Z",
+      "score": 100,
+      "evidence_path": "evidence_v2/KSI-CED-01/codecommit_035113_3756.json",
+      "total_category_controls": 1,
+      "resources_scanned": 2,
+      "resources_passed": 2,
+      "resources_unverified": 0,
+      "resources_failed": 0,
+      "resource_evaluations": [
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Training register 'security-governance' contains 1 attestation(s) with fields: user, date. Training effectiveness evidenced by completion records."
+        },
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Training curriculum 'security-governance' is substantive: 1991 bytes, 4 sections. Structured training material verified."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "EVIDENCE: Validate the Training Register. The file must contain user commits with the correct decoded flag, proving active engagement.",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path training/register.json --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.01s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "CURRICULUM: Validate the existence of the Training Challenge Instructions (The 'Lesson Plan').",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path training/security-refresh.md --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.92s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 2,
+      "successful_commands": 2
+    },
+    {
+      "ksi_id": "KSI-CED-02",
+      "validation_id": "KSI-CED-02",
+      "assertion": true,
+      "assertion_reason": "\u2705 Excellent (100%): Persistently review the effectiveness of role-specific training given to employees in high risk roles, including at l... | 2/2 resources compliant. | Verified: Training register 'security-governance' contains 1 attestation(s) with fields: user, date. Training effectiveness evidenced by completion records.; Training curriculum 'security-governance' is substantive: 1641 bytes, 5 sections. Structured training material verified.",
+      "recommended_action": "\u2705 No action required - excellent compliance maintained.",
+      "requirement": "Persistently review the effectiveness of role-specific training given to employees in high risk roles, including at least roles with privileged access.",
+      "implementation_summary": "Privileged user training requires completion of AWS Skill Builder IAM Deep Dive course. Attestations stored in training/privileged_register.json with commit signatures.",
+      "justification": "Validates 'GitOps' Privileged User Training. Checks the 'training/privileged_register.json' file, which serves as a segregated training record for high-risk roles. Presence of signed commits here proves that privileged users have completed the 'Deep Dive with Security: IAM' module and attested to the responsibilities defined in the Privileged Access Guide.",
+      "pass_criteria": "PASS if: The training/privileged_register.json file exists in CodeCommit with signed attestations from privileged users confirming IAM Deep Dive completion, AND the privileged-access-guide.md exists with the mandatory AWS Skill Builder course link.",
+      "fail_criteria": "FAIL if: The privileged user training register is missing or empty, or the privileged access guide document does not exist in CodeCommit.",
+      "long_name": "Cybersecurity Education",
+      "category_prefix": "KSI-CED",
+      "cli_command": "aws codecommit get-file --repository-name security-governance --file-path training/privileged_register.json --output json; aws codecommit get-file --repository-name security-governance --file-path training/privileged-access-guide.md --output json",
+      "timestamp": "2026-03-11T03:52:46.025024Z",
+      "score": 100,
+      "evidence_path": "evidence_v2/KSI-CED-02/codecommit_035113_1901.json",
+      "total_category_controls": 2,
+      "resources_scanned": 2,
+      "resources_passed": 2,
+      "resources_unverified": 0,
+      "resources_failed": 0,
+      "resource_evaluations": [
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Training register 'security-governance' contains 1 attestation(s) with fields: user, date. Training effectiveness evidenced by completion records."
+        },
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Training curriculum 'security-governance' is substantive: 1641 bytes, 5 sections. Structured training material verified."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "EVIDENCE: Validate the Privileged User Training Register. Entries here confirm acknowledgement of high-risk responsibilities and completion of the IAM Deep Dive.",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path training/privileged_register.json --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.93s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "CURRICULUM: Validate the existence of the Privileged Access Guide containing the link to the mandatory AWS Skill Builder IAM course.",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path training/privileged-access-guide.md --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.83s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 2,
+      "successful_commands": 2
+    },
+    {
+      "ksi_id": "KSI-CED-03",
+      "validation_id": "KSI-CED-03",
+      "assertion": true,
+      "assertion_reason": "\u2705 Excellent (100%): Persistently review the effectiveness of role-specific training given to development and engineering staff that cover... | 2/2 resources compliant. | Verified: Training register 'security-governance' contains 1 attestation(s) with fields: user, date. Training effectiveness evidenced by completion records.; Training curriculum 'security-governance' is substantive: 5247 bytes, 16 sections. Structured training material verified.",
+      "recommended_action": "\u2705 No action required - excellent compliance maintained.",
+      "requirement": "Persistently review the effectiveness of role-specific training given to development and engineering staff that covers best practices for delivering secure software.",
+      "implementation_summary": "Developer security training covers OWASP Top 10, secure coding in Python/TypeScript, and Checkov IaC scanning. Attestations in training/developer_register.json.",
+      "justification": "Validates 'GitOps' Developer Security Training. Checks the 'training/developer_register.json' file. This proves engineering staff have reviewed the existing 'secure-software-development.md' policy and attested to understanding secure delivery practices via version control.",
+      "pass_criteria": "PASS if: The training/developer_register.json file exists in CodeCommit with signed attestations from engineering staff, AND the secure-software-development.md policy exists in the policies directory.",
+      "fail_criteria": "FAIL if: The developer training register is missing or contains no attestations, or the secure software development policy document is absent.",
+      "long_name": "Cybersecurity Education",
+      "category_prefix": "KSI-CED",
+      "cli_command": "aws codecommit get-file --repository-name security-governance --file-path training/developer_register.json --output json; aws codecommit get-file --repository-name security-governance --file-path policies/secure-software-development.md --output json",
+      "timestamp": "2026-03-11T03:52:46.025041Z",
+      "score": 100,
+      "evidence_path": "evidence_v2/KSI-CED-03/codecommit_035113_9510.json",
+      "total_category_controls": 3,
+      "resources_scanned": 2,
+      "resources_passed": 2,
+      "resources_unverified": 0,
+      "resources_failed": 0,
+      "resource_evaluations": [
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Training register 'security-governance' contains 1 attestation(s) with fields: user, date. Training effectiveness evidenced by completion records."
+        },
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Training curriculum 'security-governance' is substantive: 5247 bytes, 16 sections. Structured training material verified."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "EVIDENCE: Validate the Developer Training Register. Entries here confirm engineering staff have acknowledged the secure software development policy.",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path training/developer_register.json --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.94s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "CURRICULUM: Validate the existence of the Secure Software Development policy.",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path policies/secure-software-development.md --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.86s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 2,
+      "successful_commands": 2
+    },
+    {
+      "ksi_id": "KSI-CED-04",
+      "validation_id": "KSI-CED-04",
+      "assertion": true,
+      "assertion_reason": "\u2705 Excellent (100%): Persistently review the effectiveness of role-specific training given to staff involved with incident response or dis... | 2/2 resources compliant. | Verified: Training register 'security-governance' contains 1 attestation(s) with fields: user, date. Training effectiveness evidenced by completion records.; Training curriculum 'security-governance' is substantive: 5730 bytes, 9 sections. Structured training material verified.",
+      "recommended_action": "\u2705 No action required - excellent compliance maintained.",
+      "requirement": "Persistently review the effectiveness of role-specific training given to staff involved with incident response or disaster recovery.",
+      "implementation_summary": "IR/DR training requires review of incident-response-plan.md and participation in tabletop exercises. Attestations tracked in training/ir_dr_register.json.",
+      "justification": "Validates 'GitOps' IR/DR Training. Checks the 'training/ir_dr_register.json' file. This proves that designated Incident Responders have reviewed the Incident Response Plan and attested to their readiness via version control commits, satisfying the requirement for role-specific IR/DR training effectiveness monitoring.",
+      "pass_criteria": "PASS if: The training/ir_dr_register.json file exists in CodeCommit with attestations from designated incident responders, AND the incident-response-plan.md exists as the core training material.",
+      "fail_criteria": "FAIL if: The IR/DR training register is missing or empty, or the incident response plan document does not exist in CodeCommit.",
+      "long_name": "Cybersecurity Education",
+      "category_prefix": "KSI-CED",
+      "cli_command": "aws codecommit get-file --repository-name security-governance --file-path training/ir_dr_register.json --output json; aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json",
+      "timestamp": "2026-03-11T03:52:46.025057Z",
+      "score": 100,
+      "evidence_path": "evidence_v2/KSI-CED-04/codecommit_035113_4161.json",
+      "total_category_controls": 4,
+      "resources_scanned": 2,
+      "resources_passed": 2,
+      "resources_unverified": 0,
+      "resources_failed": 0,
+      "resource_evaluations": [
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Training register 'security-governance' contains 1 attestation(s) with fields: user, date. Training effectiveness evidenced by completion records."
+        },
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Training curriculum 'security-governance' is substantive: 5730 bytes, 9 sections. Structured training material verified."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "EVIDENCE: Validate the IR/DR Training Register. Entries here confirm the IR team has reviewed the active response procedures.",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path training/ir_dr_register.json --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.85s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "CURRICULUM: Validate the existence of the Incident Response Plan (The core training material).",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.87s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 2,
+      "successful_commands": 2
+    },
+    {
+      "ksi_id": "KSI-CMT-01",
+      "validation_id": "KSI-CMT-01",
+      "assertion": false,
+      "assertion_reason": "\u274c Insufficient (75%): Log and monitor modifications to the cloud service offering. | 3/4 resources compliant. | Verified: Trail is Secure (Multi-Region, Validated, Encrypted); Trail captures management events (1 selectors configured).; Verified: Governance document 'security-governance' is substantive (764 bytes, 5 sections). | Warnings: Service check for 'None': unable to determine specific compliance (manual review).",
+      "recommended_action": "ACTION: Remediate 1 non-compliant resource. Review resource configurations against FedRAMP requirements. Current compliance: 75% (Target: \u226580%)",
+      "requirement": "Log and monitor modifications to the cloud service offering.",
+      "implementation_summary": "All modifications logged via CloudTrail (management events) and AWS Config (resource state). Change management policy requires Terraform-only changes with PR approval.",
+      "justification": "Validates Change Logging. Checks for: 1) Active CloudTrail (Logs the API calls/modifications), 2) Active AWS Config Recorder (Logs the resource state changes), and 3) The Change Management Policy.",
+      "pass_criteria": "PASS if: At least one CloudTrail trail exists and is logging, event selectors are configured to record Management Events (Read/Write API calls), AWS Config recorder is actively recording (recording=true), AND the change-management-policy.md exists in CodeCommit.",
+      "fail_criteria": "FAIL if: No CloudTrail trail exists, no event selectors are configured, the Config recorder is not recording, or the change management policy is missing.",
+      "long_name": "Change Management",
+      "category_prefix": "KSI-CMT",
+      "cli_command": "aws cloudtrail describe-trails --output json; aws cloudtrail get-event-selectors --trail-name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json; aws configservice describe-configuration-recorder-status --output json; aws codecommit get-file --repository-name security-governance --file-path policies/change-management-policy.md --output json",
+      "timestamp": "2026-03-11T03:52:46.025078Z",
+      "score": 75,
+      "evidence_path": "evidence_v2/KSI-CMT-01/cloudtrail_035113_4312.json",
+      "total_category_controls": 1,
+      "resources_scanned": 4,
+      "resources_passed": 3,
+      "resources_unverified": 0,
+      "resources_failed": 1,
+      "resource_evaluations": [
+        {
+          "resource": "meridianks-Management-events",
+          "status": "PASS",
+          "reason": "Trail is Secure (Multi-Region, Validated, Encrypted)"
+        },
+        {
+          "resource": "meridianks-Management-events",
+          "status": "PASS",
+          "reason": "Trail captures management events (1 selectors configured)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Service check for 'None': unable to determine specific compliance (manual review)."
+        },
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Verified: Governance document 'security-governance' is substantive (764 bytes, 5 sections)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "AUDIT: Validate existence of CloudTrail trails (The primary change logger).",
+          "command": "aws cloudtrail describe-trails --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.82s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "SCOPE: Validate that the trail is recording 'Management Events' (Read/Write API calls).",
+          "command": "aws cloudtrail get-event-selectors --trail-name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.71s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "TRACKING: Validate that AWS Config is actively recording resource changes (Recording: true).",
+          "command": "aws configservice describe-configuration-recorder-status --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.84s",
+          "error_message": null
+        },
+        {
+          "index": 3,
+          "description": "GOVERNANCE: Validate the Change Management Policy document.",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path policies/change-management-policy.md --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.95s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 4,
+      "successful_commands": 4
+    },
+    {
+      "ksi_id": "KSI-CMT-02",
+      "validation_id": "KSI-CMT-02",
+      "assertion": true,
+      "assertion_reason": "\u2705 Good (83%): Execute changes to machine-based information resources through redeployment of version controlled immutable resources... | 5/6 resources compliant. | Verified: IMDSv2 Enforced: Instance 'MKSFR-CA' requires HttpTokens.; IMDSv2 Enforced: Instance 'SAAS-KI22LBA' requires HttpTokens.; IMDSv2 Enforced: Instance 'SAAS-RS22' requires HttpTokens. |   ...and 2 more verification(s) | Failures: Risk: Instance 'MKSFR-UTIL1' allows IMDSv1 (Legacy Metadata). Enforce v2.",
+      "recommended_action": "\u2705 Good compliance. Consider remediating 1 non-compliant resource to reach excellent status (\u226590%).",
+      "requirement": "Execute changes to machine-based information resources through redeployment of version controlled immutable resources rather than direct modification wherever possible.",
+      "implementation_summary": "Infrastructure deployed exclusively via Terraform with state stored in S3 (mks-states bucket) and DynamoDB locking. No console changes permitted in production.",
+      "justification": "Validates Infrastructure as Code (IaC). Since ASGs are not used, this validates that changes are managed via Terraform State (Version Control) and State Locking (Concurrency Control), ensuring changes are tracked in code rather than manual console actions.",
+      "pass_criteria": "PASS if: A Terraform state S3 bucket exists (containing 'terraform', 'state', or 'tfstate' in the name), a DynamoDB lock table exists for state locking, at least one running EC2 instance is managed by Terraform, AND the configuration-management-policy.md mandating IaC exists in CodeCommit.",
+      "fail_criteria": "FAIL if: No Terraform state bucket exists (infrastructure not managed as code), no DynamoDB lock table exists (no concurrency control), no managed EC2 instances exist, or the IaC policy document is missing.",
+      "long_name": "Change Management",
+      "category_prefix": "KSI-CMT",
+      "cli_command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'terraform') || contains(Name, 'state') || contains(Name, 'tfstate')]\" --output json; aws dynamodb list-tables --query \"TableNames[?contains(@, 'terraform') || contains(@, 'lock') || contains(@, 'state')]\" --output json; aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json; aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json",
+      "timestamp": "2026-03-11T03:52:46.025102Z",
+      "score": 83,
+      "evidence_path": "evidence_v2/KSI-CMT-02/ec2_035113_9162.json",
+      "total_category_controls": 2,
+      "resources_scanned": 6,
+      "resources_passed": 5,
+      "resources_unverified": 0,
+      "resources_failed": 1,
+      "resource_evaluations": [
+        {
+          "resource": "MKSFR-CA",
+          "status": "PASS",
+          "reason": "IMDSv2 Enforced: Instance 'MKSFR-CA' requires HttpTokens."
+        },
+        {
+          "resource": "MKSFR-UTIL1",
+          "status": "FAIL",
+          "reason": "Risk: Instance 'MKSFR-UTIL1' allows IMDSv1 (Legacy Metadata). Enforce v2."
+        },
+        {
+          "resource": "SAAS-KI22LBA",
+          "status": "PASS",
+          "reason": "IMDSv2 Enforced: Instance 'SAAS-KI22LBA' requires HttpTokens."
+        },
+        {
+          "resource": "SAAS-RS22",
+          "status": "PASS",
+          "reason": "IMDSv2 Enforced: Instance 'SAAS-RS22' requires HttpTokens."
+        },
+        {
+          "resource": "MKSFR-PROXY1",
+          "status": "PASS",
+          "reason": "IMDSv2 Enforced: Instance 'MKSFR-PROXY1' requires HttpTokens."
+        },
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Verified: Governance document 'security-governance' is substantive (1070 bytes, 4 sections)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "VERSION CONTROL: Validate existence of the Terraform State bucket (Proof that infrastructure is defined as code).",
+          "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'terraform') || contains(Name, 'state') || contains(Name, 'tfstate')]\" --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.86s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "MANAGEMENT: Validate existence of the Terraform Lock Table (Proof of active, safe IaC workflows).",
+          "command": "aws dynamodb list-tables --query \"TableNames[?contains(@, 'terraform') || contains(@, 'lock') || contains(@, 'state')]\" --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.80s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "INVENTORY: List the active EC2 instances managed by this Terraform state.",
+          "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.07s",
+          "error_message": null
+        },
+        {
+          "index": 3,
+          "description": "GOVERNANCE: Validate the policy that mandates Terraform usage for all production changes.",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.94s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 4,
+      "successful_commands": 4
+    },
+    {
+      "ksi_id": "KSI-CMT-03",
+      "validation_id": "KSI-CMT-03",
+      "assertion": false,
+      "assertion_reason": "\u274c Insufficient (50%): Automate persistent testing and validation of changes throughout deployment. | 1/2 resources compliant. | Verified: Verified: Governance document 'security-governance' is substantive (5023 bytes, 21 sections). | Warnings: Service check for 'None': unable to determine specific compliance (manual review).",
+      "recommended_action": "ACTION: Remediate 1 non-compliant resource. Review resource configurations against FedRAMP requirements. Current compliance: 50% (Target: \u226580%)",
+      "requirement": "Automate persistent testing and validation of changes throughout deployment.",
+      "implementation_summary": "Changes validated by Checkov scans in CI pipeline before deployment. AWS Config rules provide continuous drift detection post-deployment.",
+      "justification": "Validates the Hybrid Compliance Strategy. Checks for: 1) Active AWS Config Recorder (The Persistent Monitor), 2) Active Config Rules (The Validation Logic), and 3) The Testing Policy (Governance of the CI/CD pipeline).",
+      "pass_criteria": "PASS if: AWS Config recorder is actively recording, at least one active Config Rule exists enforcing security policies on live resources, AND the sdlc-policy.md mandating automated testing (Checkov) exists in CodeCommit.",
+      "fail_criteria": "FAIL if: Config recorder is not active, no Config Rules are in ACTIVE state, or the SDLC policy document is missing from CodeCommit.",
+      "long_name": "Change Management",
+      "category_prefix": "KSI-CMT",
+      "cli_command": "aws configservice describe-configuration-recorder-status --output json; aws configservice describe-config-rules --query \"ConfigRules[?RuleState=='ACTIVE']\" --max-items 5 --output json; aws codecommit get-file --repository-name security-governance --file-path policies/sdlc-policy.md --output json",
+      "timestamp": "2026-03-11T03:52:46.025123Z",
+      "score": 50,
+      "evidence_path": "evidence_v2/KSI-CMT-03/configservice_035113_7889.json",
+      "total_category_controls": 3,
+      "resources_scanned": 2,
+      "resources_passed": 1,
+      "resources_unverified": 0,
+      "resources_failed": 1,
+      "resource_evaluations": [
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Service check for 'None': unable to determine specific compliance (manual review)."
+        },
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Verified: Governance document 'security-governance' is substantive (5023 bytes, 21 sections)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation).",
+          "command": "aws configservice describe-configuration-recorder-status --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.81s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources.",
+          "command": "aws configservice describe-config-rules --query \"ConfigRules[?RuleState=='ACTIVE']\" --max-items 5 --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.81s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "GOVERNANCE: Validate the SDLC Policy which mandates 'Automated Testing' (Checkov) before deployment.",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path policies/sdlc-policy.md --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.97s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 3,
+      "successful_commands": 3
+    },
+    {
+      "ksi_id": "KSI-CMT-04",
+      "validation_id": "KSI-CMT-04",
+      "assertion": true,
+      "assertion_reason": "\u2705 Excellent (100%): Persistently review the effectiveness of documented change management procedures. | 2/2 resources compliant. | Verified: Verified: Governance document 'security-governance' is substantive (3747 bytes, 13 sections).; Change notification artifact 'None' exists.",
+      "recommended_action": "\u2705 No action required - excellent compliance maintained.",
+      "requirement": "Persistently review the effectiveness of documented change management procedures.",
+      "implementation_summary": "Change management effectiveness measured via Terraform state version history and CloudTrail event analysis. All changes traceable to specific PRs and approvers.",
+      "justification": "Validates Adherence to Procedure via State History. Checks for: 1) The Change Management Procedure Document (Governance) and 2) Terraform State File Version History (Technical proof of sequential, tracked changes to infrastructure).",
+      "pass_criteria": "PASS if: The change-management-procedure.md document exists in CodeCommit, AND the Terraform state file exists in S3 with version history proving sequential, tracked infrastructure changes.",
+      "fail_criteria": "FAIL if: The change management procedure document is missing, or no Terraform state file exists in the mks-states bucket.",
+      "long_name": "Change Management",
+      "category_prefix": "KSI-CMT",
+      "cli_command": "aws codecommit get-file --repository-name security-governance --file-path procedures/change-management-procedure.md --output json; aws s3api list-objects-v2 --bucket mks-states --prefix terraform.tfstate --max-items 1 --output json",
+      "timestamp": "2026-03-11T03:52:46.025140Z",
+      "score": 100,
+      "evidence_path": "evidence_v2/KSI-CMT-04/codecommit_035113_6600.json",
+      "total_category_controls": 4,
+      "resources_scanned": 2,
+      "resources_passed": 2,
+      "resources_unverified": 0,
+      "resources_failed": 0,
+      "resource_evaluations": [
+        {
+          "resource": "security-governance",
+          "status": "PASS",
+          "reason": "Verified: Governance document 'security-governance' is substantive (3747 bytes, 13 sections)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Change notification artifact 'None' exists."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "GOVERNANCE: Validate the existence of the Change Management Procedure document.",
+          "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/change-management-procedure.md --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.86s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "IMMUTABILITY: List Terraform State file with versioning metadata, proving version-controlled infrastructure changes.",
+          "command": "aws s3api list-objects-v2 --bucket mks-states --prefix terraform.tfstate --max-items 1 --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.81s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 2,
+      "successful_commands": 2
+    },
+    {
+      "ksi_id": "KSI-CNA-01",
+      "validation_id": "KSI-CNA-01",
+      "assertion": true,
+      "assertion_reason": "\u2705 Good (85%): Persistently ensure all machine-based information resources are configured to limit inbound and outbound network traf... | 6/7 resources compliant. | Verified: Compliant: SG 'default' properly limits network traffic with appropriate restrictions.; Compliant: SG 'd-9066328a4b_controllers' properly limits network traffic with appropriate restrictions.; Compliant: SG 'utility-private-sg' properly limits network traffic with appropriate restrictions. |   ...and 3 more verification(s) | Warnings: Best Practice: SG 'launch-wizard-2' uses broad CIDRs (10.0.0.0/8 (TCP 22-22)). Consider more specific ranges or Security Group references for tighter segmentation.",
+      "recommended_action": "\u2705 Good compliance. Consider remediating 1 non-compliant resource to reach excellent status (\u226590%).",
+      "requirement": "Persistently ensure all machine-based information resources are configured to limit inbound and outbound network traffic.",
+      "implementation_summary": "Network traffic limited via Security Groups (default SG empty, specific allow-lists only) and NACLs at subnet boundaries. All ingress flows through ALB.",
+      "justification": "Validates Network Traffic Limiting. Checks for: 1) The 'default' Security Group (Baseline Hygiene - should be empty), 2) Active Security Groups (Specific Ingress/Egress Rules), and 3) Network ACLs (Subnet Boundary Control).",
+      "pass_criteria": "PASS if: The default VPC security group exists with no inbound or outbound rules (empty/unused as best practice), at least one TCP-permitting security group exists with specific port restrictions (not 0.0.0.0/0 on all ports), AND at least one network ACL provides subnet-level filtering.",
+      "fail_criteria": "FAIL if: The default security group has active inbound/outbound rules, security groups allow unrestricted access (0.0.0.0/0 on all ports), or no network ACLs exist.",
+      "long_name": "Cloud Native Architecture",
+      "category_prefix": "KSI-CNA",
+      "cli_command": "aws ec2 describe-security-groups --filters Name=group-name,Values=default --output json; aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=tcp --max-items 5 --output json; aws ec2 describe-network-acls --max-items 5 --output json",
+      "timestamp": "2026-03-11T03:52:46.025165Z",
+      "score": 85,
+      "evidence_path": "evidence_v2/KSI-CNA-01/ec2_035113_876.json",
+      "total_category_controls": 1,
+      "resources_scanned": 7,
+      "resources_passed": 6,
+      "resources_unverified": 0,
+      "resources_failed": 1,
+      "resource_evaluations": [
+        {
+          "resource": "default",
+          "status": "PASS",
+          "reason": "Compliant: SG 'default' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "d-9066328a4b_controllers",
+          "status": "PASS",
+          "reason": "Compliant: SG 'd-9066328a4b_controllers' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "utility-private-sg",
+          "status": "PASS",
+          "reason": "Compliant: SG 'utility-private-sg' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "private_server_sg1",
+          "status": "PASS",
+          "reason": "Compliant: SG 'private_server_sg1' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "launch-wizard-2",
+          "status": "WARNING",
+          "reason": "Best Practice: SG 'launch-wizard-2' uses broad CIDRs (10.0.0.0/8 (TCP 22-22)). Consider more specific ranges or Security Group references for tighter segmentation."
+        },
+        {
+          "resource": "db-private",
+          "status": "PASS",
+          "reason": "Compliant: SG 'db-private' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "acl-0014c04620d89a5ed",
+          "status": "PASS",
+          "reason": "Default Network ACL 'acl-0014c04620d89a5ed' provides baseline subnet filtering."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "BASELINE: Validate that the 'default' VPC Security Group restricts all traffic (Best practice is to leave this empty/unused).",
+          "command": "aws ec2 describe-security-groups --filters Name=group-name,Values=default --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.18s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "ACTIVE CONTROLS: Validate a sample of active Security Groups to verify specific port restrictions (Limit Inbound).",
+          "command": "aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=tcp --max-items 5 --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.05s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "BOUNDARY: Validate Network ACLs which provide a stateless traffic filter at the subnet level.",
+          "command": "aws ec2 describe-network-acls --max-items 5 --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.09s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 3,
+      "successful_commands": 3
+    },
+    {
+      "ksi_id": "KSI-CNA-02",
+      "validation_id": "KSI-CNA-02",
+      "assertion": false,
+      "assertion_reason": "\u274c Good (86%): Persistently ensure machine-based information resources have a minimal attack surface and that lateral movement is mi... | 19/22 resources compliant. CRITICAL OVERRIDE: Open ingress (0.0.0.0/0) on EC2. | Verified: Private Subnet: 'mksfr-private-utility-subnet-a' has public IP mapping disabled (attack surface minimized).; Private Subnet: 'mksfr-private-subnet-a' has public IP mapping disabled (attack surface minimized).; Private Subnet: 'mksfr-firewall-subnet-a' has public IP mapping disabled (attack surface minimized). |   ...and 16 more verification(s) | Failures: \ud83d\udea8 CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2 | Warnings: Best Practice: SG 'launch-wizard-2' uses broad CIDRs (10.0.0.0/8 (TCP 22-22)). Consider more specific ranges or Security Group references for tighter segmentation.; Best Practice: SG 'mksfr-proxy-sg1' uses broad CIDRs (10.0.0.0/8 (TCP 3129-3129), 10.0.0.0/8 (TCP 3128-3128), 10.0.0.0/8 (ICMP -1--1)). Consider more specific ranges or Security Group references for tighter segmentation.",
+      "recommended_action": "\u2705 Good compliance. Consider remediating 3 non-compliant resources to reach excellent status (\u226590%).",
+      "requirement": "Persistently ensure machine-based information resources have a minimal attack surface and that lateral movement is minimized if compromised.",
+      "implementation_summary": "Attack surface minimized via private subnets for compute/database, Security Group references (no IP-based rules), and RDS PubliclyAccessible=false.",
+      "justification": "Validates Network Segmentation and Isolation. Checks for: 1) Private Subnets (Attack Surface Reduction), 2) Security Group References (Prevention of Lateral Movement by binding rules to logical groups, not IPs), and 3) Private Database Placement.",
+      "pass_criteria": "PASS if: At least one private subnet exists (MapPublicIpOnLaunch=false), security groups reference other security groups (tiered access, not broad IP ranges), AND all RDS instances have PubliclyAccessible=false.",
+      "fail_criteria": "FAIL if: No private subnets exist, security groups use only broad IP-based rules instead of security group references, or any RDS instance has PubliclyAccessible=true.",
+      "long_name": "Cloud Native Architecture",
+      "category_prefix": "KSI-CNA",
+      "cli_command": "aws ec2 describe-subnets --filters \"Name=map-public-ip-on-launch,Values=false\" --max-items 5 --output json; aws ec2 describe-security-groups --max-items 20 --output json; aws rds describe-db-instances --output json",
+      "timestamp": "2026-03-11T03:52:46.025209Z",
+      "score": 86,
+      "evidence_path": "evidence_v2/KSI-CNA-02/ec2_035113_5694.json",
+      "total_category_controls": 2,
+      "resources_scanned": 22,
+      "resources_passed": 19,
+      "resources_unverified": 0,
+      "resources_failed": 3,
+      "resource_evaluations": [
+        {
+          "resource": "mksfr-private-utility-subnet-a",
+          "status": "PASS",
+          "reason": "Private Subnet: 'mksfr-private-utility-subnet-a' has public IP mapping disabled (attack surface minimized)."
+        },
+        {
+          "resource": "mksfr-private-subnet-a",
+          "status": "PASS",
+          "reason": "Private Subnet: 'mksfr-private-subnet-a' has public IP mapping disabled (attack surface minimized)."
+        },
+        {
+          "resource": "mksfr-firewall-subnet-a",
+          "status": "PASS",
+          "reason": "Private Subnet: 'mksfr-firewall-subnet-a' has public IP mapping disabled (attack surface minimized)."
+        },
+        {
+          "resource": "mksfr-private-utility-subnet-b",
+          "status": "PASS",
+          "reason": "Private Subnet: 'mksfr-private-utility-subnet-b' has public IP mapping disabled (attack surface minimized)."
+        },
+        {
+          "resource": "mksfr-firewall-subnet-b",
+          "status": "PASS",
+          "reason": "Private Subnet: 'mksfr-firewall-subnet-b' has public IP mapping disabled (attack surface minimized)."
+        },
+        {
+          "resource": "default",
+          "status": "PASS",
+          "reason": "Compliant: SG 'default' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "d-9066328a4b_controllers",
+          "status": "PASS",
+          "reason": "Compliant: SG 'd-9066328a4b_controllers' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "utility-private-sg",
+          "status": "PASS",
+          "reason": "Compliant: SG 'utility-private-sg' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "private_server_sg1",
+          "status": "PASS",
+          "reason": "Compliant: SG 'private_server_sg1' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "launch-wizard-2",
+          "status": "WARNING",
+          "reason": "Best Practice: SG 'launch-wizard-2' uses broad CIDRs (10.0.0.0/8 (TCP 22-22)). Consider more specific ranges or Security Group references for tighter segmentation."
+        },
+        {
+          "resource": "mksfr-outbound-sg1",
+          "status": "PASS",
+          "reason": "Compliant: SG 'mksfr-outbound-sg1' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "db-private",
+          "status": "PASS",
+          "reason": "Compliant: SG 'db-private' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "mksfr-ca-sg1",
+          "status": "PASS",
+          "reason": "Compliant: SG 'mksfr-ca-sg1' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "lms-compliance-broker-lambda-sg",
+          "status": "PASS",
+          "reason": "Compliant: SG 'lms-compliance-broker-lambda-sg' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "mksfr-proxy-sg1",
+          "status": "WARNING",
+          "reason": "Best Practice: SG 'mksfr-proxy-sg1' uses broad CIDRs (10.0.0.0/8 (TCP 3129-3129), 10.0.0.0/8 (TCP 3128-3128), 10.0.0.0/8 (ICMP -1--1)). Consider more specific ranges or Security Group references for tighter segmentation."
+        },
+        {
+          "resource": "fsx-sg1",
+          "status": "PASS",
+          "reason": "Compliant: SG 'fsx-sg1' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "prod-lb1-sg1",
+          "status": "FAIL",
+          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2"
+        },
+        {
+          "resource": "mksfr-outbound-proxy-inet-sg1",
+          "status": "PASS",
+          "reason": "Compliant: SG 'mksfr-outbound-proxy-inet-sg1' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "API Gateway Endpoint SG",
+          "status": "PASS",
+          "reason": "Compliant: SG 'API Gateway Endpoint SG' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "mksfr-outbound-inet-sg1",
+          "status": "PASS",
+          "reason": "Compliant: SG 'mksfr-outbound-inet-sg1' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "mksfr-ca-sg",
+          "status": "PASS",
+          "reason": "Compliant: SG 'mksfr-ca-sg' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "saas",
+          "status": "PASS",
+          "reason": "Resource 'saas' is Encrypted at Rest."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "ATTACK SURFACE: Validate the existence of Private Subnets (where Public IP mapping is disabled).",
+          "command": "aws ec2 describe-subnets --filters \"Name=map-public-ip-on-launch,Values=false\" --max-items 5 --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.08s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "LATERAL MOVEMENT: Validate Security Groups that allow access ONLY from other specific Security Groups (Tiered Security), rather than broad IP ranges.",
+          "command": "aws ec2 describe-security-groups --max-items 20 --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.01s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "ISOLATION: Validate that RDS Databases are configured as 'PubliclyAccessible: false' and reside in defined subnets.",
+          "command": "aws rds describe-db-instances --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.96s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 3,
+      "successful_commands": 3
+    },
+    {
+      "ksi_id": "KSI-CNA-03",
+      "validation_id": "KSI-CNA-03",
+      "assertion": true,
+      "assertion_reason": "\u2705 Good (88%): Use logical networking and related capabilities to enforce traffic flow controls. | 8/9 resources compliant. | Verified: VPC Endpoint 'mksfr-firewall (us-east-1a)' enables private access to com.amazonaws.vpce.us-east-1.vpce-svc-04d831ff83dc58a4e (bypasses public internet).; VPC Endpoint 'mksfr-s3-endpoint' enables private access to com.amazonaws.us-east-1.s3 (bypasses public internet).; VPC Endpoint 'mksfr-firewall (us-east-1b)' enables private access to com.amazonaws.vpce.us-east-1.vpce-svc-0514f300715827d4d (bypasses public internet). |   ...and 5 more verification(s) | Warnings: Service check for 'PROD-LB1': unable to determine specific compliance (manual review).",
+      "recommended_action": "\u2705 Good compliance. Consider remediating 1 non-compliant resource to reach excellent status (\u226590%).",
+      "requirement": "Use logical networking and related capabilities to enforce traffic flow controls.",
+      "implementation_summary": "Traffic flow enforced via VPC Endpoints (S3, DynamoDB), NAT Gateway for egress, and ALB for ingress. No direct internet access from compute tier.",
+      "justification": "Validates Logical Traffic Enforcement. Checks for: 1) VPC Endpoints (Enforces private connectivity to AWS services), 2) NAT Gateways (Enforces centralized egress), and 3) Load Balancer Schemes (Enforces defined entry points).",
+      "pass_criteria": "PASS if: At least one VPC endpoint exists (enforcing private connectivity to AWS services like S3/DynamoDB), at least one NAT gateway is available (centralized egress for private subnets), AND at least one load balancer manages ingress traffic.",
+      "fail_criteria": "FAIL if: No VPC endpoints exist (traffic to AWS services traverses public internet), no NAT gateway is available, or no load balancer exists for ingress management.",
+      "long_name": "Cloud Native Architecture",
+      "category_prefix": "KSI-CNA",
+      "cli_command": "aws ec2 describe-vpc-endpoints --output json; aws ec2 describe-nat-gateways --filter Name=state,Values=available --output json; aws elbv2 describe-load-balancers --output json",
+      "timestamp": "2026-03-11T03:52:46.025242Z",
+      "score": 88,
+      "evidence_path": "evidence_v2/KSI-CNA-03/ec2_035113_1567.json",
+      "total_category_controls": 3,
+      "resources_scanned": 9,
+      "resources_passed": 8,
+      "resources_unverified": 0,
+      "resources_failed": 1,
+      "resource_evaluations": [
+        {
+          "resource": "mksfr-firewall (us-east-1a)",
+          "status": "PASS",
+          "reason": "VPC Endpoint 'mksfr-firewall (us-east-1a)' enables private access to com.amazonaws.vpce.us-east-1.vpce-svc-04d831ff83dc58a4e (bypasses public internet)."
+        },
+        {
+          "resource": "mksfr-s3-endpoint",
+          "status": "PASS",
+          "reason": "VPC Endpoint 'mksfr-s3-endpoint' enables private access to com.amazonaws.us-east-1.s3 (bypasses public internet)."
+        },
+        {
+          "resource": "mksfr-firewall (us-east-1b)",
+          "status": "PASS",
+          "reason": "VPC Endpoint 'mksfr-firewall (us-east-1b)' enables private access to com.amazonaws.vpce.us-east-1.vpce-svc-0514f300715827d4d (bypasses public internet)."
+        },
+        {
+          "resource": "SSM",
+          "status": "PASS",
+          "reason": "VPC Endpoint 'SSM' enables private access to com.amazonaws.us-east-1.ssm (bypasses public internet)."
+        },
+        {
+          "resource": "SSM_messages",
+          "status": "PASS",
+          "reason": "VPC Endpoint 'SSM_messages' enables private access to com.amazonaws.us-east-1.ssmmessages (bypasses public internet)."
+        },
+        {
+          "resource": "Ec2-messaages",
+          "status": "PASS",
+          "reason": "VPC Endpoint 'Ec2-messaages' enables private access to com.amazonaws.us-east-1.ec2messages (bypasses public internet)."
+        },
+        {
+          "resource": "API Gateway VPC Endpoint",
+          "status": "PASS",
+          "reason": "VPC Endpoint 'API Gateway VPC Endpoint' enables private access to com.amazonaws.us-east-1.execute-api (bypasses public internet)."
+        },
+        {
+          "resource": "mksfr-prod-vpc1",
+          "status": "PASS",
+          "reason": "NAT Gateway 'mksfr-prod-vpc1' active (centralized egress control for private subnets)."
+        },
+        {
+          "resource": "PROD-LB1",
+          "status": "WARNING",
+          "reason": "Service check for 'PROD-LB1': unable to determine specific compliance (manual review)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "PRIVATE FLOW: Validate existence of VPC Endpoints, ensuring traffic to services like S3/DynamoDB bypasses the public internet.",
+          "command": "aws ec2 describe-vpc-endpoints --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.03s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "EGRESS CONTROL: Validate active NAT Gateways. This proves instances in private subnets route outbound traffic centrally, rather than having individual Public IPs.",
+          "command": "aws ec2 describe-nat-gateways --filter Name=state,Values=available --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.99s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "INGRESS CONTROL: Validate Load Balancers. The 'Scheme' (internet-facing vs internal) proves that ingress traffic is logically separated and managed.",
+          "command": "aws elbv2 describe-load-balancers --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.87s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 3,
+      "successful_commands": 3
+    },
+    {
+      "ksi_id": "KSI-CNA-04",
+      "validation_id": "KSI-CNA-04",
+      "assertion": false,
+      "assertion_reason": "\u274c Insufficient (2%): Use immutable infrastructure with strictly defined functionality and privileges by default. | 2/77 resources compliant. | Verified: Change notification artifact 'None' exists.; Compliant: SG 'mksfr-outbound-inet-sg1' properly limits network traffic with appropriate restrictions. | Warnings: IAM resource type 'unknown' has no specific evaluation rule (manual review required).; IAM resource type 'unknown' has no specific evaluation rule (manual review required). |   ...and 73 more warning(s)",
+      "recommended_action": "ACTION: Remediate 75 non-compliant resources. Review resource configurations against FedRAMP requirements. Current compliance: 2% (Target: \u226580%)",
+      "requirement": "Use immutable infrastructure with strictly defined functionality and privileges by default.",
+      "implementation_summary": "Immutable infrastructure via Terraform. EC2 instances replaced (not modified) on updates. IAM roles follow least-privilege with no wildcard permissions.",
+      "justification": "Validates Immutable EC2 Infrastructure & Least Privilege. Checks for: 1) Terraform State (Proof of immutable IaC management), 2) Security Groups (Strict network functionality), and 3) Custom IAM Roles (Strictly defined privileges, excluding default AWS service roles).",
+      "pass_criteria": "PASS if: A Terraform state file exists in S3 (proving IaC management), no security groups allow unrestricted 'All Traffic' protocol (-1) to 0.0.0.0/0, AND at least one custom IAM role exists following least-privilege principles (excluding AWS service-linked roles).",
+      "fail_criteria": "FAIL if: No Terraform state exists (infrastructure not immutable), any security group allows 'All Traffic' to 0.0.0.0/0, or no custom IAM roles exist.",
+      "long_name": "Cloud Native Architecture",
+      "category_prefix": "KSI-CNA",
+      "cli_command": "aws s3api list-objects-v2 --bucket mks-states --prefix terraform.tfstate --max-items 1 --output json; aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=-1 --output json; aws iam list-roles --query \"Roles[?!(contains(RoleName, 'AWSServiceRole') || contains(Path, '/aws-service-role/'))]\" --output json",
+      "timestamp": "2026-03-11T03:52:46.025285Z",
+      "score": 2,
+      "evidence_path": "evidence_v2/KSI-CNA-04/s3api_035113_9690.json",
+      "total_category_controls": 4,
+      "resources_scanned": 77,
+      "resources_passed": 2,
+      "resources_unverified": 0,
+      "resources_failed": 75,
+      "resource_evaluations": [
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Change notification artifact 'None' exists."
+        },
+        {
+          "resource": "mksfr-outbound-inet-sg1",
+          "status": "PASS",
+          "reason": "Compliant: SG 'mksfr-outbound-inet-sg1' properly limits network traffic with appropriate restrictions."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "IMMUTABILITY: List Terraform State file with versioning metadata, proving version-controlled infrastructure changes.",
+          "command": "aws s3api list-objects-v2 --bucket mks-states --prefix terraform.tfstate --max-items 1 --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.81s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "FUNCTIONALITY: Check for Security Groups allowing 'All Traffic' (-1). Absence of these proves strictly defined network functionality.",
+          "command": "aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=-1 --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.18s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "PRIVILEGE: Audit Custom IAM Roles. This focuses the scan on roles you created, verifying they follow least-privilege principles.",
+          "command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, 'AWSServiceRole') || contains(Path, '/aws-service-role/'))]\" --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.92s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 3,
+      "successful_commands": 3
+    },
+    {
+      "ksi_id": "KSI-CNA-05",
+      "validation_id": "KSI-CNA-05",
+      "assertion": false,
+      "assertion_reason": "\u274c Insufficient (66%): Persistently review the effectiveness of protection against denial of service attacks and other unwanted activity. | 4/6 resources compliant. | Verified: AWS Shield Standard active on load balancer 'unknown-lb' (Layer 3/4 DDoS protection).; \u26a0\ufe0f Manual Review Required: Unidentified resource. Document 'generic_document' accessible. | Failures: No WAF Web ACLs found. Layer 7 DDoS protection is missing. | Warnings: No Route53 hosted zones found. DNS may not be protected by AWS AnyCast.",
+      "recommended_action": "ACTION: Remediate 2 non-compliant resources. Review resource configurations against FedRAMP requirements. Current compliance: 66% (Target: \u226580%)",
+      "requirement": "Persistently review the effectiveness of protection against denial of service attacks and other unwanted activity.",
+      "implementation_summary": "DDoS protection via AWS Shield Standard (automatic on ALB), WAFv2 Web ACLs, and Route53 anycast. SES handles email with DKIM/SPF validation.",
+      "justification": "Validates DDoS & Spoofing Defense. Checks for: 1) Regional WAF (Layer 7 Defense), 2) Load Balancers (Layer 3/4 Defense via AWS Shield Standard), and 3) Validated Email Identities (Spoofing protection via SES/DKIM).",
+      "pass_criteria": "PASS if: At least one WAFv2 Web ACL exists (Layer 7 protection), at least one load balancer with Shield Standard provides Layer 3/4 protection, at least one Route53 hosted zone exists (DNS resilience), AND if SES is used, verified identities exist with DKIM/SPF.",
+      "fail_criteria": "FAIL if: No WAF Web ACLs exist, no load balancers provide Shield protection, or no Route53 hosted zones exist for DNS resilience.",
+      "long_name": "Cloud Native Architecture",
+      "category_prefix": "KSI-CNA",
+      "cli_command": "aws wafv2 list-web-acls --scope REGIONAL --output json; aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Shield: 'Enabled (Standard)'}\" --output json; aws route53 list-hosted-zones --max-items 5 --output json; aws ses list-identities --max-items 5 --output json",
+      "timestamp": "2026-03-11T03:52:46.025334Z",
+      "score": 66,
+      "evidence_path": "evidence_v2/KSI-CNA-05/wafv2_035113_7994.json",
+      "total_category_controls": 5,
+      "resources_scanned": 6,
+      "resources_passed": 4,
+      "resources_unverified": 0,
+      "resources_failed": 2,
+      "resource_evaluations": [
+        {
+          "resource": null,
+          "status": "FAIL",
+          "reason": "No WAF Web ACLs found. Layer 7 DDoS protection is missing."
+        },
+        {
+          "resource": "unknown-lb",
+          "status": "PASS",
+          "reason": "AWS Shield Standard active on load balancer 'unknown-lb' (Layer 3/4 DDoS protection)."
+        },
+        {
+          "resource": "mksgovcloud.internal.",
+          "status": "WARNING",
+          "reason": "No Route53 hosted zones found. DNS may not be protected by AWS AnyCast."
+        },
+        {
+          "resource": "Unidentified_Item_eb56b317",
+          "status": "PASS",
+          "reason": "\u26a0\ufe0f Manual Review Required: Unidentified resource. Document 'generic_document' accessible."
+        },
+        {
+          "resource": "Unidentified_Item_ea7a918c",
+          "status": "PASS",
+          "reason": "\u26a0\ufe0f Manual Review Required: Unidentified resource. Document 'generic_document' accessible."
+        },
+        {
+          "resource": "Unidentified_Item_d0c48616",
+          "status": "PASS",
+          "reason": "\u26a0\ufe0f Manual Review Required: Unidentified resource. Document 'generic_document' accessible."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "DDOS LAYER 7: Validate existence of Web Application Firewalls (WAF) to block malicious requests.",
+          "command": "aws wafv2 list-web-acls --scope REGIONAL --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.82s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "DDOS LAYER 3/4: Validate Load Balancers. All ALBs act as the perimeter and automatically benefit from AWS Shield Standard.",
+          "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Shield: 'Enabled (Standard)'}\" --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.88s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "DNS RESILIENCE: Validate Route53 usage (AWS AnyCast network provides DNS flood protection).",
+          "command": "aws route53 list-hosted-zones --max-items 5 --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.00s",
+          "error_message": null
+        },
+        {
+          "index": 3,
+          "description": "SPOOFING: Validate SES Identities. If email is sent, this checks for authorized identities (DKIM/SPF managed).",
+          "command": "aws ses list-identities --max-items 5 --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.79s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 4,
+      "successful_commands": 4
+    },
+    {
+      "ksi_id": "KSI-CNA-06",
+      "validation_id": "KSI-CNA-06",
+      "assertion": true,
+      "assertion_reason": "\u2705 Excellent (100%): Appropriately optimize machine-based information resources for high availability and rapid recovery. | 4/4 resources compliant. | Verified: Load Balancer 'PROD-LB1' spans 2 Availability Zones (High Availability).; Backups active (Retention: 7 days), Single-AZ (Warning); Backup Plan 'rds-backup-plan' active (Recovery capability verified). |   ...and 1 more verification(s)",
+      "recommended_action": "\u2705 No action required - excellent compliance maintained.",
+      "requirement": "Appropriately optimize machine-based information resources for high availability and rapid recovery.",
+      "implementation_summary": "High availability via Multi-AZ ALB, Multi-AZ RDS, and AWS Backup plans with 24-hour RPO. RTO target: 4 hours for full recovery.",
+      "justification": "Validates Multi-AZ High Availability. Checks for: 1) Load Balancers spanning multiple AZs (Network HA), 2) RDS instances with Multi-AZ enabled (Database HA), and 3) Active AWS Backup Plans (Recovery Capability).",
+      "pass_criteria": "PASS if: At least one load balancer spans multiple Availability Zones, at least one RDS instance has MultiAZ=true for automatic failover, AND at least one AWS Backup plan exists for data recovery.",
+      "fail_criteria": "FAIL if: Load balancers are in a single AZ, no RDS instance has MultiAZ enabled, or no backup plans exist for recovery.",
+      "long_name": "Cloud Native Architecture",
+      "category_prefix": "KSI-CNA",
+      "cli_command": "aws elbv2 describe-load-balancers --output json; aws rds describe-db-instances --output json; aws backup list-backup-plans --output json",
+      "timestamp": "2026-03-11T03:52:46.025361Z",
+      "score": 100,
+      "evidence_path": "evidence_v2/KSI-CNA-06/elbv2_035113_120.json",
+      "total_category_controls": 6,
+      "resources_scanned": 4,
+      "resources_passed": 4,
+      "resources_unverified": 0,
+      "resources_failed": 0,
+      "resource_evaluations": [
+        {
+          "resource": "PROD-LB1",
+          "status": "PASS",
+          "reason": "Load Balancer 'PROD-LB1' spans 2 Availability Zones (High Availability)."
+        },
+        {
+          "resource": "saas",
+          "status": "PASS",
+          "reason": "Backups active (Retention: 7 days), Single-AZ (Warning)"
+        },
+        {
+          "resource": "rds-backup-plan",
+          "status": "PASS",
+          "reason": "Backup Plan 'rds-backup-plan' active (Recovery capability verified)."
+        },
+        {
+          "resource": "complete-backup-plan",
+          "status": "PASS",
+          "reason": "Backup Plan 'complete-backup-plan' active (Recovery capability verified)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "NETWORK HA: Validate that Load Balancers are configured across multiple Availability Zones.",
+          "command": "aws elbv2 describe-load-balancers --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.84s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "DATABASE HA: Validate that critical RDS instances have Multi-AZ enabled for automatic failover.",
+          "command": "aws rds describe-db-instances --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.89s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "RECOVERY: Validate existence of Backup Plans to support rapid data recovery.",
+          "command": "aws backup list-backup-plans --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.89s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 3,
+      "successful_commands": 3
+    },
+    {
+      "ksi_id": "KSI-CNA-07",
+      "validation_id": "KSI-CNA-07",
+      "assertion": false,
+      "assertion_reason": "\u274c Insufficient (14%): Persistently ensure cloud-native machine-based information resources are implemented based on the host providers best... | 5/34 resources compliant. | Verified: IMDSv2 Enforced: Instance 'MKSFR-CA' requires HttpTokens.; IMDSv2 Enforced: Instance 'SAAS-KI22LBA' requires HttpTokens.; IMDSv2 Enforced: Instance 'SAAS-RS22' requires HttpTokens. |   ...and 2 more verification(s) | Failures: Risk: Instance 'MKSFR-UTIL1' allows IMDSv1 (Legacy Metadata). Enforce v2. | Warnings: Network resource 'None' (type: None) has no specific evaluation rule (manual review required).; Network resource 'None' (type: None) has no specific evaluation rule (manual review required). |   ...and 26 more warning(s)",
+      "recommended_action": "ACTION: Remediate 29 non-compliant resources. Review resource configurations against FedRAMP requirements. Current compliance: 14% (Target: \u226580%)",
+      "requirement": "Persistently ensure cloud-native machine-based information resources are implemented based on the host providers best practices and documented guidance.",
+      "implementation_summary": "Cloud-native architecture: 21 Lambda functions, 1 managed RDS, API Gateway. Legacy EC2 (5 instances) hardened with IMDSv2, no public IPs, VPC-only Lambdas.",
+      "justification": "Validates cloud-native maturity by comparing the ratio of legacy infrastructure (EC2) versus modern managed services (Lambda, RDS, API Gateway, etc).",
+      "pass_criteria": "PASS if: The ratio of managed services (Lambda functions, RDS, API Gateway, ALB, ASG) to legacy EC2 instances demonstrates cloud-native adoption. At least 2 categories of managed services must be in use alongside EC2.",
+      "fail_criteria": "FAIL if: Only EC2 instances exist with no managed service adoption (no Lambda, no managed DB, no API Gateway), indicating failure to follow cloud-native best practices.",
+      "long_name": "Cloud Native Architecture",
+      "category_prefix": "KSI-CNA",
+      "cli_command": "aws ec2 describe-instances --output json; aws lambda list-functions --output json; aws rds describe-db-instances --output json; aws apigateway get-rest-apis --output json; aws elbv2 describe-load-balancers --output json; aws autoscaling describe-auto-scaling-groups --output json",
+      "timestamp": "2026-03-11T03:52:46.025400Z",
+      "score": 14,
+      "evidence_path": "evidence_v2/KSI-CNA-07/ec2_035113_7762.json",
+      "total_category_controls": 7,
+      "resources_scanned": 34,
+      "resources_passed": 5,
+      "resources_unverified": 0,
+      "resources_failed": 29,
+      "resource_evaluations": [
+        {
+          "resource": "MKSFR-CA",
+          "status": "PASS",
+          "reason": "IMDSv2 Enforced: Instance 'MKSFR-CA' requires HttpTokens."
+        },
+        {
+          "resource": "MKSFR-UTIL1",
+          "status": "FAIL",
+          "reason": "Risk: Instance 'MKSFR-UTIL1' allows IMDSv1 (Legacy Metadata). Enforce v2."
+        },
+        {
+          "resource": "SAAS-KI22LBA",
+          "status": "PASS",
+          "reason": "IMDSv2 Enforced: Instance 'SAAS-KI22LBA' requires HttpTokens."
+        },
+        {
+          "resource": "SAAS-RS22",
+          "status": "PASS",
+          "reason": "IMDSv2 Enforced: Instance 'SAAS-RS22' requires HttpTokens."
+        },
+        {
+          "resource": "MKSFR-PROXY1",
+          "status": "PASS",
+          "reason": "IMDSv2 Enforced: Instance 'MKSFR-PROXY1' requires HttpTokens."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Network resource 'None' (type: None) has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "saas",
+          "status": "PASS",
+          "reason": "Resource 'saas' is Encrypted at Rest."
+        },
+        {
+          "resource": "30r7mtjz87",
+          "status": "WARNING",
+          "reason": "Service check for '30r7mtjz87': unable to determine specific compliance (manual review)."
+        },
+        {
+          "resource": "7d7pdwb9t3",
+          "status": "WARNING",
+          "reason": "Service check for '7d7pdwb9t3': unable to determine specific compliance (manual review)."
+        },
+        {
+          "resource": "b27ytd5qrg",
+          "status": "WARNING",
+          "reason": "Service check for 'b27ytd5qrg': unable to determine specific compliance (manual review)."
+        },
+        {
+          "resource": "PROD-LB1",
+          "status": "WARNING",
+          "reason": "Service check for 'PROD-LB1': unable to determine specific compliance (manual review)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "BASELINE: Measure legacy compute footprint (Denominator) to compare against managed service adoption.",
+          "command": "aws ec2 describe-instances --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.08s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "ACCELERATOR: Validate adoption of serverless compute (High Impact).",
+          "command": "aws lambda list-functions --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.97s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "ACCELERATOR: Validate use of fully managed databases vs self-hosted DBs.",
+          "command": "aws rds describe-db-instances --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.89s",
+          "error_message": null
+        },
+        {
+          "index": 3,
+          "description": "ACCELERATOR: Validate use of managed API hosting infrastructure.",
+          "command": "aws apigateway get-rest-apis --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.90s",
+          "error_message": null
+        },
+        {
+          "index": 4,
+          "description": "ACCELERATOR: Validate use of managed application networking.",
+          "command": "aws elbv2 describe-load-balancers --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.78s",
+          "error_message": null
+        },
+        {
+          "index": 5,
+          "description": "ACCELERATOR: Validate use of dynamic scaling/statelessness vs static servers.",
+          "command": "aws autoscaling describe-auto-scaling-groups --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.88s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 6,
+      "successful_commands": 6
+    },
+    {
+      "ksi_id": "KSI-CNA-08",
+      "validation_id": "KSI-CNA-08",
+      "assertion": true,
+      "assertion_reason": "\u2705 Excellent (96%): Use automated services to persistently assess the security posture of all machine-based information resources and aut... | 32/33 resources compliant. | Verified: \u26a0\ufe0f Manual Review Required: Unidentified resource. Document 'generic_document' accessible.; No SES identities (email not used by service). Anti-spoofing N/A.; Inspector findings collected: 0 finding(s) (lower is better). | Warnings: Service check for 'None': unable to determine specific compliance (manual review).",
+      "recommended_action": "\u2705 No action required - excellent compliance maintained.",
+      "requirement": "Use automated services to persistently assess the security posture of all machine-based information resources and automatically enforce their intended operational state.",
+      "implementation_summary": "Security posture assessed by SecurityHub (CIS/FedRAMP standards), GuardDuty (threat detection), AWS Config (compliance rules), and Inspector (vulnerability scanning).",
+      "justification": "Validates that the 'Immune System' of the cloud is active by checking for enabled Security Hub Standards, GuardDuty Detectors, and Config Recorders.",
+      "pass_criteria": "PASS if: At least one Security Hub compliance standard is enabled (CIS, FedRAMP, PCI), at least one GuardDuty detector is active, at least one AWS Config recorder exists, AND at least one resource is covered by Amazon Inspector scanning.",
+      "fail_criteria": "FAIL if: No Security Hub standards are enabled, no GuardDuty detector exists, no Config recorder is configured, or no Inspector coverage exists.",
+      "long_name": "Cloud Native Architecture",
+      "category_prefix": "KSI-CNA",
+      "cli_command": "aws securityhub get-enabled-standards --output json; aws guardduty list-detectors --output json; aws configservice describe-configuration-recorders --output json; aws inspector2 list-coverage --output json",
+      "timestamp": "2026-03-11T03:52:46.025442Z",
+      "score": 96,
+      "evidence_path": "evidence_v2/KSI-CNA-08/securityhub_035113_3769.json",
+      "total_category_controls": 8,
+      "resources_scanned": 33,
+      "resources_passed": 32,
+      "resources_unverified": 0,
+      "resources_failed": 1,
+      "resource_evaluations": [
+        {
+          "resource": null,
+          "status": "WARNING",
+          "reason": "Service check for 'None': unable to determine specific compliance (manual review)."
+        },
+        {
+          "resource": "Unidentified_Item_80ba5403",
+          "status": "PASS",
+          "reason": "\u26a0\ufe0f Manual Review Required: Unidentified resource. Document 'generic_document' accessible."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "No SES identities (email not used by service). Anti-spoofing N/A."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        },
+        {
+          "resource": null,
+          "status": "PASS",
+          "reason": "Inspector findings collected: 0 finding(s) (lower is better)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "Validate that Security Hub is active and enforcing specific compliance standards (CIS, PCI, etc).",
+          "command": "aws securityhub get-enabled-standards --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.08s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "Validate that GuardDuty is enabled (Detector ID exists) for automated threat detection.",
+          "command": "aws guardduty list-detectors --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.86s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "Validate that AWS Config is actively recording resource changes for persistent assessment.",
+          "command": "aws configservice describe-configuration-recorders --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.82s",
+          "error_message": null
+        },
+        {
+          "index": 3,
+          "description": "Validate that Amazon Inspector is actively scanning resources (EC2/ECR/Lambda).",
+          "command": "aws inspector2 list-coverage --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.15s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 4,
+      "successful_commands": 4
+    },
+    {
+      "ksi_id": "KSI-IAM-01",
+      "validation_id": "KSI-IAM-01",
+      "assertion": false,
+      "assertion_reason": "\u274c Insufficient (0%): Enforce multi-factor authentication (MFA) using methods that are difficult to intercept or impersonate (phishing-resi... | 0/1 resources compliant. | Warnings: IAM resource type 'unknown' has no specific evaluation rule (manual review required).",
+      "recommended_action": "ACTION: Remediate 1 non-compliant resource. Review resource configurations against FedRAMP requirements. Current compliance: 0% (Target: \u226580%)",
+      "requirement": "Enforce multi-factor authentication (MFA) using methods that are difficult to intercept or impersonate (phishing-resistant MFA) for all user authentication.",
+      "implementation_summary": "MFA enforced for all human users via AWS Identity Center with FIDO2/WebAuthn support. Break-glass IAM users require hardware tokens.",
+      "justification": "Validates MFA compliance by filtering for users who actively log in via password (Humans) and verifying Identity Center usage. Excludes API-only service accounts.",
+      "pass_criteria": "PASS if: All IAM users with active password usage (console access) have MFA enabled, AWS Identity Center is configured as the primary identity platform, AND virtual MFA devices are inventoried with no unprotected human accounts.",
+      "fail_criteria": "FAIL if: Any IAM user with console access lacks MFA, Identity Center is not configured, or human accounts exist without any MFA device assigned.",
+      "long_name": "Identity and Access Management",
+      "category_prefix": "KSI-IAM",
+      "cli_command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json; aws sso-admin list-instances --output json; aws iam list-virtual-mfa-devices --output json",
+      "timestamp": "2026-03-11T03:52:46.025475Z",
+      "score": 0,
+      "evidence_path": "evidence_v2/KSI-IAM-01/ssoadmin_035113_5296.json",
+      "total_category_controls": 1,
+      "resources_scanned": 1,
+      "resources_passed": 0,
+      "resources_unverified": 0,
+      "resources_failed": 1,
+      "resource_evaluations": [
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "FILTERED: Retrieve only IAM Users who have active password usage (Humans).",
+          "command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.83s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "Verify that AWS Identity Center is the primary identity platform.",
+          "command": "aws sso-admin list-instances --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.84s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "Get list of all Virtual MFA devices to validate protection (replaces list-mfa-devices which requires user).",
+          "command": "aws iam list-virtual-mfa-devices --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.81s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 3,
+      "successful_commands": 3
+    },
+    {
+      "ksi_id": "KSI-IAM-02",
+      "validation_id": "KSI-IAM-02",
+      "assertion": false,
+      "assertion_reason": "\u274c Insufficient (0%): Use secure passwordless methods for user authentication and authorization when feasible, otherwise enforce strong pas... | 0/3 resources compliant. | Warnings: IAM resource type 'unknown' has no specific evaluation rule (manual review required).; IAM resource type 'unknown' has no specific evaluation rule (manual review required). |   ...and 1 more warning(s)",
+      "recommended_action": "ACTION: Remediate 3 non-compliant resources. Review resource configurations against FedRAMP requirements. Current compliance: 0% (Target: \u226580%)",
+      "requirement": "Use secure passwordless methods for user authentication and authorization when feasible, otherwise enforce strong passwords with MFA.",
+      "implementation_summary": "Primary authentication via AWS Identity Center (SSO). Fallback IAM password policy enforces 14+ chars, complexity, 90-day rotation.",
+      "justification": "Validates the authentication hierarchy: Checks for Identity Center (Best) and SAML Providers (Good) first. If those are absent, it validates the IAM Password Policy (Fallback) to ensure strong controls are in place.",
+      "pass_criteria": "PASS if: AWS Identity Center (SSO) is configured as the primary authentication method. If SAML providers exist, they provide federated access. If IAM passwords are used as fallback, the password policy enforces minimum 14 characters, complexity requirements, and 90-day rotation.",
+      "fail_criteria": "FAIL if: No Identity Center instance exists AND no SAML providers are configured (no centralized auth), or the IAM password policy allows passwords shorter than 14 characters or lacks complexity/rotation requirements.",
+      "long_name": "Identity and Access Management",
+      "category_prefix": "KSI-IAM",
+      "cli_command": "aws sso-admin list-instances --output json; aws iam list-saml-providers --output json; aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
+      "timestamp": "2026-03-11T03:52:46.025493Z",
+      "score": 0,
+      "evidence_path": "evidence_v2/KSI-IAM-02/ssoadmin_035113_5296.json",
+      "total_category_controls": 2,
+      "resources_scanned": 3,
+      "resources_passed": 0,
+      "resources_unverified": 0,
+      "resources_failed": 3,
+      "resource_evaluations": [
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "MODERN: Validate presence of AWS Identity Center (Single Sign-On).",
+          "command": "aws sso-admin list-instances --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.82s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "LEGACY/FEDERATED: Validate presence of external Identity Providers (Okta, Azure AD).",
+          "command": "aws iam list-saml-providers --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.81s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "FALLBACK: Validate that if passwords ARE used, the policy enforces complexity and rotation.",
+          "command": "aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.87s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 3,
+      "successful_commands": 3
+    },
+    {
+      "ksi_id": "KSI-IAM-03",
+      "validation_id": "KSI-IAM-03",
+      "assertion": false,
+      "assertion_reason": "\u274c Insufficient (0%): Enforce appropriately secure authentication methods for non-user accounts and services. | 0/76 resources compliant. | Warnings: IAM resource type 'unknown' has no specific evaluation rule (manual review required).; IAM resource type 'unknown' has no specific evaluation rule (manual review required). |   ...and 74 more warning(s)",
+      "recommended_action": "ACTION: Remediate 76 non-compliant resources. Review resource configurations against FedRAMP requirements. Current compliance: 0% (Target: \u226580%)",
+      "requirement": "Enforce appropriately secure authentication methods for non-user accounts and services.",
+      "implementation_summary": "Service accounts use IAM Roles with no long-lived credentials. Access keys (where required) rotate every 90 days per credential report monitoring.",
+      "justification": "Validates the security of machine identities. Filters out AWS-managed roles to focus strictly on Customer Roles (Trust Policies) and Service Accounts (Access Keys).",
+      "pass_criteria": "PASS if: All custom IAM roles have trust policies scoped to specific services or accounts (no wildcard principals), service accounts (users without console access) rely on roles or have access keys rotated within 90 days per the credential report.",
+      "fail_criteria": "FAIL if: Any custom role has a wildcard (*) principal in its trust policy, or the credential report shows access keys older than 90 days for service accounts.",
+      "long_name": "Identity and Access Management",
+      "category_prefix": "KSI-IAM",
+      "cli_command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, 'AWSServiceRole') || contains(Path, '/aws-service-role/'))]\" --output json; aws iam list-users --query \"Users[?PasswordLastUsed==null]\" --output json; aws iam get-credential-report --output text > /dev/null && aws iam get-credential-report --output json || echo '{\"Content\": \"Permission Denied\"}'",
+      "timestamp": "2026-03-11T03:52:46.025551Z",
+      "score": 0,
+      "evidence_path": "evidence_v2/KSI-IAM-03/iam_035113_1937.json",
+      "total_category_controls": 3,
+      "resources_scanned": 76,
+      "resources_passed": 0,
+      "resources_unverified": 0,
+      "resources_failed": 76,
+      "resource_evaluations": [
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        },
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "Validate Trust Policies for CUSTOMER managed roles only.",
+          "command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, 'AWSServiceRole') || contains(Path, '/aws-service-role/'))]\" --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.92s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "Validate Service Accounts (Bots) that do not have console access (should rely on keys/roles).",
+          "command": "aws iam list-users --query \"Users[?PasswordLastUsed==null]\" --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.79s",
+          "error_message": null
+        },
+        {
+          "index": 2,
+          "description": "Deep inspection of access key rotation status for service accounts.",
+          "command": "aws iam get-credential-report --output text > /dev/null && aws iam get-credential-report --output json || echo '{\"Content\": \"Permission Denied\"}'",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.73s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 3,
+      "successful_commands": 3
+    },
+    {
+      "ksi_id": "KSI-IAM-04",
+      "validation_id": "KSI-IAM-04",
+      "assertion": false,
+      "assertion_reason": "\u274c Insufficient (0%): Require a centralized identity management system. | 0/1 resources compliant. | Warnings: IAM resource type 'unknown' has no specific evaluation rule (manual review required).",
+      "recommended_action": "ACTION: Remediate 1 non-compliant resource. Review resource configurations against FedRAMP requirements. Current compliance: 0% (Target: \u226580%)",
+      "requirement": "Require a centralized identity management system.",
+      "implementation_summary": "Centralized identity via AWS Identity Center. Legacy IAM users audited and minimized (target: 0 human IAM users).",
+      "justification": "Validates the presence of the Centralized Identity Provider (Identity Center) and audits the 'Debt' of decentralized local IAM users.",
+      "pass_criteria": "PASS if: AWS Identity Center (SSO) is configured and active, AND the number of IAM users with direct console access (bypassing centralized identity) is zero or minimal (break-glass only).",
+      "fail_criteria": "FAIL if: No Identity Center instance exists, or multiple IAM users have active console passwords indicating widespread bypass of centralized identity management.",
+      "long_name": "Identity and Access Management",
+      "category_prefix": "KSI-IAM",
+      "cli_command": "aws sso-admin list-instances --output json; aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
+      "timestamp": "2026-03-11T03:52:46.025607Z",
+      "score": 0,
+      "evidence_path": "evidence_v2/KSI-IAM-04/ssoadmin_035113_5296.json",
+      "total_category_controls": 4,
+      "resources_scanned": 1,
+      "resources_passed": 0,
+      "resources_unverified": 0,
+      "resources_failed": 1,
+      "resource_evaluations": [
+        {
+          "resource": "IAM Resource",
+          "status": "WARNING",
+          "reason": "IAM resource type 'unknown' has no specific evaluation rule (manual review required)."
+        }
+      ],
+      "command_executions": [
+        {
+          "index": 0,
+          "description": "PRIMARY: Validate that AWS Identity Center (SSO) is configured and running.",
+          "command": "aws sso-admin list-instances --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.88s",
+          "error_message": null
+        },
+        {
+          "index": 1,
+          "description": "AUDIT: List human users who are bypassing the Centralized System (should be empty or minimal).",
+          "command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "0.79s",
+          "error_message": null
+        }
+      ],
+      "commands_executed": 2,
+      "successful_commands": 2
     }
   ]
 }
