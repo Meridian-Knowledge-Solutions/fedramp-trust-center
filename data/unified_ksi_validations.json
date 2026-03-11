@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generated_at": "2026-03-10T23:39:31.222907Z",
+    "generated_at": "2026-03-11T00:26:55.873135Z",
     "total_ksis": 10,
-    "passed": 4,
-    "failed": 6,
-    "pass_rate": "40.0%",
+    "passed": 5,
+    "failed": 5,
+    "pass_rate": "50.0%",
     "global_status": "CIRCUIT_BROKEN",
     "circuit_breaker": {
       "state": "OPEN",
@@ -16,12 +16,12 @@
       },
       "stats": {
         "total_executed": 10,
-        "total_failed": 6,
-        "total_passed": 4,
+        "total_failed": 5,
+        "total_passed": 5,
         "consecutive_failures": 1,
-        "failure_rate": 0.6,
-        "last_failure_time": "2026-03-10T23:39:31.222000+00:00",
-        "circuit_broken_at": "2026-03-10T23:39:31.222120+00:00"
+        "failure_rate": 0.5,
+        "last_failure_time": "2026-03-11T00:26:55.872271+00:00",
+        "circuit_broken_at": "2026-03-11T00:26:55.872382+00:00"
       }
     },
     "critical_findings": {
@@ -92,8 +92,8 @@
     "category_summary": {
       "KSI-AFR": {
         "total": 10,
-        "passed": 4,
-        "failed": 6,
+        "passed": 5,
+        "failed": 5,
         "long_name": "Authorization by FedRAMP"
       }
     }
@@ -113,9 +113,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws ec2 describe-vpcs --filters Name=isDefault,Values=false --output json; aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json; aws rds describe-db-instances --query \"DBInstances[*].{ID:DBInstanceIdentifier, Engine:Engine, VPC:DBSubnetGroup.VpcId}\" --output json; aws s3api list-buckets --output json; aws elbv2 describe-load-balancers --query \"LoadBalancers[*].{ARN:LoadBalancerArn, DNS:DNSName, VPC:VpcId}\" --output json; aws iam list-users --query \"Users[*].{UserName:UserName, CreateDate:CreateDate, PasswordLastUsed:PasswordLastUsed}\" --output json; aws iam list-roles --query \"Roles[?contains(RoleName, 'Admin') || contains(RoleName, 'Security') || contains(RoleName, 'Incident')]\" --output json; aws codecommit get-folder --repository-name security-governance --folder-path procedures/ --output json",
-      "timestamp": "2026-03-10T23:39:31.222609Z",
+      "timestamp": "2026-03-11T00:26:55.872872Z",
       "score": 46,
-      "evidence_path": "evidence_v2/KSI-AFR-01/ec2_233903_4476.json",
+      "evidence_path": "evidence_v2/KSI-AFR-01/ec2_002621_1652.json",
       "total_category_controls": 1,
       "resources_scanned": 32,
       "resources_passed": 15,
@@ -290,7 +290,7 @@
           "command": "aws ec2 describe-vpcs --filters Name=isDefault,Values=false --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.12s",
+          "execution_time": "1.30s",
           "error_message": null
         },
         {
@@ -299,7 +299,7 @@
           "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.12s",
+          "execution_time": "1.49s",
           "error_message": null
         },
         {
@@ -308,7 +308,7 @@
           "command": "aws rds describe-db-instances --query \"DBInstances[*].{ID:DBInstanceIdentifier, Engine:Engine, VPC:DBSubnetGroup.VpcId}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.00s",
+          "execution_time": "1.23s",
           "error_message": null
         },
         {
@@ -317,7 +317,7 @@
           "command": "aws s3api list-buckets --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.85s",
+          "execution_time": "1.04s",
           "error_message": null
         },
         {
@@ -326,7 +326,7 @@
           "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[*].{ARN:LoadBalancerArn, DNS:DNSName, VPC:VpcId}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.85s",
+          "execution_time": "1.07s",
           "error_message": null
         },
         {
@@ -335,7 +335,7 @@
           "command": "aws iam list-users --query \"Users[*].{UserName:UserName, CreateDate:CreateDate, PasswordLastUsed:PasswordLastUsed}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.90s",
+          "execution_time": "1.04s",
           "error_message": null
         },
         {
@@ -344,7 +344,7 @@
           "command": "aws iam list-roles --query \"Roles[?contains(RoleName, 'Admin') || contains(RoleName, 'Security') || contains(RoleName, 'Incident')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.00s",
+          "execution_time": "1.36s",
           "error_message": null
         },
         {
@@ -353,7 +353,7 @@
           "command": "aws codecommit get-folder --repository-name security-governance --folder-path procedures/ --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.93s",
+          "execution_time": "1.16s",
           "error_message": null
         }
       ],
@@ -364,7 +364,7 @@
       "ksi_id": "KSI-AFR-02",
       "validation_id": "KSI-AFR-02",
       "assertion": false,
-      "assertion_reason": "\u274c Insufficient (50%): Set security goals and develop automated validation of status and progress. | 1/2 resources compliant. | Verified: Compliance scorecard 'None' exists, size: 95 KB, freshness: current (0d), versioned. | Failures: No Security Hub standards enabled. Automated security posture assessment is missing.",
+      "assertion_reason": "\u274c Insufficient (50%): Set security goals and develop automated validation of status and progress. | 1/2 resources compliant. | Verified: Compliance scorecard 'None' exists, size: 95 KB, freshness: current (0d), versioned. | Warnings: Service check for 'None': unable to determine specific compliance (manual review).",
       "recommended_action": "ACTION: Remediate 1 non-compliant resource. Review resource configurations against FedRAMP requirements. Current compliance: 50% (Target: \u226580%)",
       "requirement": "Set security goals and develop automated validation of status and progress.",
       "implementation_summary": "Security goals are tracked via unified_ksi_validations.json, auto-generated by GitHub Actions and published to our Trust Center API. All 61 KSIs are evaluated daily with results publicly accessible.",
@@ -374,9 +374,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/unified_ksi_validations.json --output json; aws securityhub describe-hub --output json",
-      "timestamp": "2026-03-10T23:39:31.222679Z",
+      "timestamp": "2026-03-11T00:26:55.872912Z",
       "score": 50,
-      "evidence_path": "evidence_v2/KSI-AFR-02/s3api_233903_525.json",
+      "evidence_path": "evidence_v2/KSI-AFR-02/s3api_002621_9812.json",
       "total_category_controls": 2,
       "resources_scanned": 2,
       "resources_passed": 1,
@@ -390,8 +390,8 @@
         },
         {
           "resource": null,
-          "status": "FAIL",
-          "reason": "No Security Hub standards enabled. Automated security posture assessment is missing."
+          "status": "WARNING",
+          "reason": "Service check for 'None': unable to determine specific compliance (manual review)."
         }
       ],
       "command_executions": [
@@ -401,7 +401,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/unified_ksi_validations.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.85s",
+          "execution_time": "1.00s",
           "error_message": null
         },
         {
@@ -410,7 +410,7 @@
           "command": "aws securityhub describe-hub --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.90s",
+          "execution_time": "1.05s",
           "error_message": null
         }
       ],
@@ -421,7 +421,7 @@
       "ksi_id": "KSI-AFR-03",
       "validation_id": "KSI-AFR-03",
       "assertion": true,
-      "assertion_reason": "\u2705 Excellent (100%): Determine how authorization data will be shared in alignment with the ADS standard. | 2/2 resources compliant. | Verified: Compliance artifact 'None' exists, size: 1.9 MB, freshness: current (0d), versioned.; API endpoint responded (delivery mechanism available).",
+      "assertion_reason": "\u2705 Excellent (100%): Determine how authorization data will be shared in alignment with the ADS standard. | 2/2 resources compliant. | Verified: Compliance artifact 'None' exists, size: 1.8 MB, freshness: current (0d), versioned.; API endpoint responded (delivery mechanism available).",
       "recommended_action": "\u2705 No action required - excellent compliance maintained.",
       "requirement": "Determine how authorization data will be shared in alignment with the ADS standard.",
       "implementation_summary": "Authorization data is shared via our public Trust Center (trust.meridianks.com) and API. The authorization package ZIP is auto-compiled from CodeCommit governance artifacts and updated with each pipeline run.",
@@ -431,9 +431,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/meridian-authorization-package-LATEST.zip --output json; curl -s -o /dev/null -w \"%{http_code}\" https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/status || echo \"000\"",
-      "timestamp": "2026-03-10T23:39:31.222703Z",
+      "timestamp": "2026-03-11T00:26:55.872935Z",
       "score": 100,
-      "evidence_path": "evidence_v2/KSI-AFR-03/s3api_233903_184.json",
+      "evidence_path": "evidence_v2/KSI-AFR-03/s3api_002621_6223.json",
       "total_category_controls": 3,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -443,7 +443,7 @@
         {
           "resource": null,
           "status": "PASS",
-          "reason": "Compliance artifact 'None' exists, size: 1.9 MB, freshness: current (0d), versioned."
+          "reason": "Compliance artifact 'None' exists, size: 1.8 MB, freshness: current (0d), versioned."
         },
         {
           "resource": "unknown",
@@ -458,7 +458,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/meridian-authorization-package-LATEST.zip --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.90s",
+          "execution_time": "1.08s",
           "error_message": null
         },
         {
@@ -467,7 +467,7 @@
           "command": "curl -s -o /dev/null -w \"%{http_code}\" https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/status || echo \"000\"",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.56s",
+          "execution_time": "1.92s",
           "error_message": null
         }
       ],
@@ -488,9 +488,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/assessed_vulnerabilities_integrated.json --output json; aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/vdr_vulnerability_status.json --output json; aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
-      "timestamp": "2026-03-10T23:39:31.222727Z",
+      "timestamp": "2026-03-11T00:26:55.872958Z",
       "score": 100,
-      "evidence_path": "evidence_v2/KSI-AFR-04/s3api_233903_9349.json",
+      "evidence_path": "evidence_v2/KSI-AFR-04/s3api_002621_1982.json",
       "total_category_controls": 4,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -520,7 +520,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/assessed_vulnerabilities_integrated.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.85s",
+          "execution_time": "1.04s",
           "error_message": null
         },
         {
@@ -529,7 +529,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/vdr_vulnerability_status.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.85s",
+          "execution_time": "1.01s",
           "error_message": null
         },
         {
@@ -538,7 +538,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.00s",
+          "execution_time": "1.18s",
           "error_message": null
         }
       ],
@@ -559,9 +559,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')]\" --output json; aws s3api list-objects-v2 --bucket $(aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')].Name\" --output text | head -n 1) --prefix scn-flow-validation.html --output json; aws s3api list-objects-v2 --bucket $(aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')].Name\" --output text | head -n 1) --prefix audit_trail --output json",
-      "timestamp": "2026-03-10T23:39:31.222749Z",
+      "timestamp": "2026-03-11T00:26:55.872980Z",
       "score": 100,
-      "evidence_path": "evidence_v2/KSI-AFR-05/s3api_233903_8841.json",
+      "evidence_path": "evidence_v2/KSI-AFR-05/s3api_002621_3498.json",
       "total_category_controls": 5,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -591,7 +591,7 @@
           "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.87s",
+          "execution_time": "1.02s",
           "error_message": null
         },
         {
@@ -600,7 +600,7 @@
           "command": "aws s3api list-objects-v2 --bucket $(aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')].Name\" --output text | head -n 1) --prefix scn-flow-validation.html --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.70s",
+          "execution_time": "2.01s",
           "error_message": null
         },
         {
@@ -609,7 +609,7 @@
           "command": "aws s3api list-objects-v2 --bucket $(aws s3api list-buckets --query \"Buckets[?contains(Name, 'compliance') || contains(Name, 'evidence')].Name\" --output text | head -n 1) --prefix audit_trail --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.70s",
+          "execution_time": "2.11s",
           "error_message": null
         }
       ],
@@ -619,9 +619,9 @@
     {
       "ksi_id": "KSI-AFR-06",
       "validation_id": "KSI-AFR-06",
-      "assertion": false,
-      "assertion_reason": "\u274c Insufficient (0%): Maintain a plan and process for providing Ongoing Authorization Reports and Quarterly Reviews. | 0/2 resources compliant. | Warnings: 3PAO audit report 'None' exists, size: 2 KB, freshness: recent (81d), versioned. Outcome concerns: artifact is unusually small (2149 bytes, expected >10240 bytes for audit_report).; Service check for 'unknown': unable to determine specific compliance (manual review).",
-      "recommended_action": "ACTION: Remediate 2 non-compliant resources. Review resource configurations against FedRAMP requirements. Current compliance: 0% (Target: \u226580%)",
+      "assertion": true,
+      "assertion_reason": "\u2705 Excellent (100%): Maintain a plan and process for providing Ongoing Authorization Reports and Quarterly Reviews. | 2/2 resources compliant. | Verified: 3PAO audit report 'None' exists, size: 2 KB, freshness: recent (81d), versioned.; API endpoint responded (delivery mechanism available).",
+      "recommended_action": "\u2705 No action required - excellent compliance maintained.",
       "requirement": "Maintain a plan and process for providing Ongoing Authorization Reports and Quarterly Reviews.",
       "implementation_summary": "Ongoing authorization reports are auto-generated and published to our Trust Center. 3PAO audit reports are stored in the compliance bucket with quarterly review cadence built into GitHub Actions workflows.",
       "justification": "Validates CCM Evidence. Checks for the '3pao_audit_report.json' artifact. This validates that the continuous monitoring process includes independent assessment data, supporting the 'Collaborative' aspect of the FedRAMP CCM standard.",
@@ -630,24 +630,24 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/3pao_audit_report.json --output json; curl -s -o /dev/null -w \"%{http_code}\" https://meridian-knowledge-solutions.github.io/fedramp-trust-center/ || echo \"000\"",
-      "timestamp": "2026-03-10T23:39:31.222771Z",
-      "score": 0,
-      "evidence_path": "evidence_v2/KSI-AFR-06/s3api_233903_5078.json",
+      "timestamp": "2026-03-11T00:26:55.873000Z",
+      "score": 100,
+      "evidence_path": "evidence_v2/KSI-AFR-06/s3api_002621_7030.json",
       "total_category_controls": 6,
       "resources_scanned": 2,
-      "resources_passed": 0,
+      "resources_passed": 2,
       "resources_unverified": 0,
-      "resources_failed": 2,
+      "resources_failed": 0,
       "resource_evaluations": [
         {
           "resource": null,
-          "status": "WARNING",
-          "reason": "3PAO audit report 'None' exists, size: 2 KB, freshness: recent (81d), versioned. Outcome concerns: artifact is unusually small (2149 bytes, expected >10240 bytes for audit_report)."
+          "status": "PASS",
+          "reason": "3PAO audit report 'None' exists, size: 2 KB, freshness: recent (81d), versioned."
         },
         {
           "resource": "unknown",
-          "status": "WARNING",
-          "reason": "Service check for 'unknown': unable to determine specific compliance (manual review)."
+          "status": "PASS",
+          "reason": "API endpoint responded (delivery mechanism available)."
         }
       ],
       "command_executions": [
@@ -657,7 +657,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/3pao_audit_report.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.85s",
+          "execution_time": "1.06s",
           "error_message": null
         },
         {
@@ -666,7 +666,7 @@
           "command": "curl -s -o /dev/null -w \"%{http_code}\" https://meridian-knowledge-solutions.github.io/fedramp-trust-center/ || echo \"000\"",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.05s",
+          "execution_time": "0.04s",
           "error_message": null
         }
       ],
@@ -677,7 +677,7 @@
       "ksi_id": "KSI-AFR-07",
       "validation_id": "KSI-AFR-07",
       "assertion": false,
-      "assertion_reason": "\u274c Insufficient (0%): Document the secure configuration baseline for the cloud service offering. | 0/1 resources compliant. | Failures: No Security Hub standards enabled. Automated security posture assessment is missing.",
+      "assertion_reason": "\u274c Insufficient (0%): Document the secure configuration baseline for the cloud service offering. | 0/1 resources compliant. | Warnings: No custom patch baselines found. Using AWS defaults only.",
       "recommended_action": "ACTION: Remediate 1 non-compliant resource. Review resource configurations against FedRAMP requirements. Current compliance: 0% (Target: \u226580%)",
       "requirement": "Document the secure configuration baseline for the cloud service offering.",
       "implementation_summary": "Security configuration baseline is documented in CodeCommit (security-governance repo) and served via our /prod/config API endpoint. Baselines cover EC2 hardening, RDS encryption, S3 policies, and network segmentation.",
@@ -687,9 +687,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "curl -s https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/config",
-      "timestamp": "2026-03-10T23:39:31.222791Z",
+      "timestamp": "2026-03-11T00:26:55.873019Z",
       "score": 0,
-      "evidence_path": "evidence_v2/KSI-AFR-07/apidocumentation_233903_4935.json",
+      "evidence_path": "evidence_v2/KSI-AFR-07/apidocumentation_002621_7540.json",
       "total_category_controls": 7,
       "resources_scanned": 1,
       "resources_passed": 0,
@@ -698,8 +698,8 @@
       "resource_evaluations": [
         {
           "resource": "unknown",
-          "status": "FAIL",
-          "reason": "No Security Hub standards enabled. Automated security posture assessment is missing."
+          "status": "WARNING",
+          "reason": "No custom patch baselines found. Using AWS defaults only."
         }
       ],
       "command_executions": [
@@ -709,7 +709,7 @@
           "command": "curl -s https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod/config",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.14s",
+          "execution_time": "1.25s",
           "error_message": null
         }
       ],
@@ -730,9 +730,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path procedures/security-inbox-procedures.md --output json; aws sns list-topics --query \"Topics[?contains(TopicArn, 'security') || contains(TopicArn, 'alert') || contains(TopicArn, 'admin')]\" --output json",
-      "timestamp": "2026-03-10T23:39:31.222831Z",
+      "timestamp": "2026-03-11T00:26:55.873059Z",
       "score": 25,
-      "evidence_path": "evidence_v2/KSI-AFR-08/codecommit_233903_1409.json",
+      "evidence_path": "evidence_v2/KSI-AFR-08/codecommit_002621_3221.json",
       "total_category_controls": 8,
       "resources_scanned": 4,
       "resources_passed": 1,
@@ -767,7 +767,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/security-inbox-procedures.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.86s",
+          "execution_time": "1.18s",
           "error_message": null
         },
         {
@@ -776,7 +776,7 @@
           "command": "aws sns list-topics --query \"Topics[?contains(TopicArn, 'security') || contains(TopicArn, 'alert') || contains(TopicArn, 'admin')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.87s",
+          "execution_time": "1.06s",
           "error_message": null
         }
       ],
@@ -797,9 +797,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path authorization_by_fedramp/fedramp-phase2-validation-architecture.mmd --output json; aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/unified_ksi_validations.json --output json",
-      "timestamp": "2026-03-10T23:39:31.222854Z",
+      "timestamp": "2026-03-11T00:26:55.873082Z",
       "score": 100,
-      "evidence_path": "evidence_v2/KSI-AFR-09/codecommit_233903_1376.json",
+      "evidence_path": "evidence_v2/KSI-AFR-09/codecommit_002621_1011.json",
       "total_category_controls": 9,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -824,7 +824,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path authorization_by_fedramp/fedramp-phase2-validation-architecture.mmd --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.91s",
+          "execution_time": "1.17s",
           "error_message": null
         },
         {
@@ -833,7 +833,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-893894210484 --key data/unified_ksi_validations.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.84s",
+          "execution_time": "1.01s",
           "error_message": null
         }
       ],
@@ -854,9 +854,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path procedures/icp_playbook.md --output json; aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json; aws sns list-topics --query \"Topics[?contains(TopicArn, 'security') || contains(TopicArn, 'incident') || contains(TopicArn, 'alert')]\" --output json; aws sns list-subscriptions --query \"Subscriptions[?contains(TopicArn, 'security') || contains(TopicArn, 'incident') || contains(TopicArn, 'alert')]\" --output json",
-      "timestamp": "2026-03-10T23:39:31.222879Z",
+      "timestamp": "2026-03-11T00:26:55.873106Z",
       "score": 33,
-      "evidence_path": "evidence_v2/KSI-AFR-10/codecommit_233903_366.json",
+      "evidence_path": "evidence_v2/KSI-AFR-10/codecommit_002621_8939.json",
       "total_category_controls": 10,
       "resources_scanned": 6,
       "resources_passed": 2,
@@ -901,7 +901,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/icp_playbook.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.94s",
+          "execution_time": "1.23s",
           "error_message": null
         },
         {
@@ -910,7 +910,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.10s",
+          "execution_time": "1.21s",
           "error_message": null
         },
         {
@@ -919,7 +919,7 @@
           "command": "aws sns list-topics --query \"Topics[?contains(TopicArn, 'security') || contains(TopicArn, 'incident') || contains(TopicArn, 'alert')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.82s",
+          "execution_time": "1.04s",
           "error_message": null
         },
         {
@@ -928,7 +928,7 @@
           "command": "aws sns list-subscriptions --query \"Subscriptions[?contains(TopicArn, 'security') || contains(TopicArn, 'incident') || contains(TopicArn, 'alert')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.90s",
+          "execution_time": "1.14s",
           "error_message": null
         }
       ],
