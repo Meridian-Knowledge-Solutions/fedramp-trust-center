@@ -30,7 +30,7 @@ const PolicyCard = memo(({ policy, isSelected, onClick }) => (
       </div>
       <div className="flex-1 min-w-0">
         <div className="font-medium text-sm tracking-tight">{policy.title}</div>
-        <div className="text-[11px] text-slate-500 mt-1 line-clamp-2">{policy.description}</div>
+        <div className="text-[11px] text-slate-500 mt-1 font-mono">{policy.filename}</div>
       </div>
       <ChevronRight size={14} className={`mt-1 transition-transform ${isSelected ? 'text-blue-400 rotate-90' : 'text-slate-600'}`} />
     </div>
@@ -66,7 +66,7 @@ export const PoliciesTab = memo(() => {
 
   const filteredPolicies = policies.filter(p =>
     !searchQuery || p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    p.path.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   useEffect(() => {

@@ -111,42 +111,68 @@ const ReportCard = memo(({ report, manifestEntry, onViewJson, onViewHtml, onDown
   );
 });
 
-const AssessmentCard = memo(({ assessment, onDownload }) => (
-  <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-5 hover:border-white/20 transition-all`}>
-    <div className="flex items-start gap-4">
-      <div className="p-2.5 rounded-lg border border-cyan-500/20 bg-cyan-500/10">
-        <Shield size={18} className="text-cyan-400" />
-      </div>
-      <div className="flex-1">
-        <div className="text-white font-medium text-sm">{assessment.title}</div>
-        <p className="text-slate-500 text-xs mt-1">{assessment.description}</p>
-        <div className="flex items-center gap-4 mt-3 text-[10px] text-slate-500">
-          <span className="flex items-center gap-1">
-            <Calendar size={10} />
-            {assessment.assessment_date}
-          </span>
-          <span className="font-mono">{assessment.assessor}</span>
-          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-            assessment.result === 'Authorized' || assessment.result?.includes('Pass')
-              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-              : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-          }`}>
-            {assessment.result}
-          </span>
+const AssessmentCard = memo(({ assessment, onDownload }) => {
+  // Handle both string and object formats for assessor/result
+  const assessorName = typeof assessment.assessor === 'object'
+    ? `${assessment.assessor.name} — ${assessment.assessor.organization}`
+    : assessment.assessor;
+  const resultStatus = typeof assessment.result === 'object'
+    ? assessment.result.status
+    : assessment.result;
+  const isPass = resultStatus === 'PASS' || resultStatus === 'Authorized' ||
+    resultStatus === 'COMPLETED' || (typeof resultStatus === 'string' && resultStatus.includes('Pass'));
+  const assessmentDate = assessment.date || assessment.assessment_date;
+  const description = assessment.scope?.description || assessment.description || '';
+
+  return (
+    <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-5 hover:border-white/20 transition-all`}>
+      <div className="flex items-start gap-4">
+        <div className="p-2.5 rounded-lg border border-cyan-500/20 bg-cyan-500/10">
+          <Shield size={18} className="text-cyan-400" />
         </div>
+        <div className="flex-1">
+          <div className="text-white font-medium text-sm">{assessment.title}</div>
+          {description && <p className="text-slate-500 text-xs mt-1">{description}</p>}
+          <div className="flex flex-wrap items-center gap-4 mt-3 text-[10px] text-slate-500">
+            <span className="flex items-center gap-1">
+              <Calendar size={10} />
+              {assessmentDate}
+            </span>
+            <span className="font-mono">{assessorName}</span>
+            <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+              isPass
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+            }`}>
+              {resultStatus}
+            </span>
+          </div>
+          {/* Show result details if available */}
+          {typeof assessment.result === 'object' && assessment.result.passed !== undefined && (
+            <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-600 font-mono">
+              <span>{assessment.result.passed}/{assessment.result.total} passed</span>
+              {assessment.result.observations > 0 && (
+                <span>{assessment.result.observations} observations</span>
+              )}
+              {assessment.result.critical_findings > 0 && (
+                <span className="text-amber-500">{assessment.result.critical_findings} critical finding{assessment.result.critical_findings > 1 ? 's' : ''}</span>
+              )}
+            </div>
+          )}
+        </div>
+        {onDownload && (
+          <button
+            onClick={onDownload}
+            className="p-2 rounded-lg hover:bg-white/10 transition-colors text-slate-500 hover:text-white border border-white/5"
+            title="Download PDF"
+          >
+            <FileDown size={16} />
+          </button>
+        )}
       </div>
-      {onDownload && (
-        <button
-          onClick={onDownload}
-          className="p-2 rounded-lg hover:bg-white/10 transition-colors text-slate-500 hover:text-white border border-white/5"
-          title="Download PDF"
-        >
-          <FileDown size={16} />
-        </button>
-      )}
     </div>
-  </div>
-));
+  );
+});
 
 // Viewer modal for JSON/HTML content
 const ContentViewer = memo(({ content, format, title, onClose }) => {
@@ -196,9 +222,27 @@ export const ReportsTab = memo(() => {
   const [viewerFormat, setViewerFormat] = useState('json');
   const [viewerTitle, setViewerTitle] = useState('');
 
-  // Group reports: JSON reports vs HTML reports
-  const jsonReports = reports.filter(r => r.path.endsWith('.json') && r.report_type);
-  const htmlReports = reports.filter(r => r.format === 'html' || r.path.endsWith('.html'));
+  // Infer report_type from filename for manifest entries that don't have it
+  const inferReportType = (filePath) => {
+    const name = filePath.toLowerCase();
+    if (name.includes('vdr')) return 'vdr';
+    if (name.includes('oar')) return 'oar';
+    if (name.includes('scn')) return 'scn';
+    if (name.includes('qar')) return 'qar';
+    return null;
+  };
+
+  // Get only report-category files (not assessments)
+  const reportFiles = reports.filter(r => r.category === 'reports');
+
+  // Group reports: JSON data reports vs HTML rendered reports
+  const jsonReports = reportFiles.filter(r => {
+    const rt = inferReportType(r.path);
+    return r.path.endsWith('.json') && rt && !r.path.includes('manifest') && !r.path.includes('next_report');
+  }).map(r => ({ ...r, report_type: inferReportType(r.path) }));
+
+  const htmlReports = reportFiles.filter(r => r.path.endsWith('.html'))
+    .map(r => ({ ...r, report_type: inferReportType(r.path) }));
 
   // Deduplicate: show one card per report_type with access to both formats
   const reportTypes = [...new Set(jsonReports.map(r => r.report_type).filter(Boolean))];
@@ -210,7 +254,7 @@ export const ReportsTab = memo(() => {
         const data = await res.json();
         setViewerContent(data);
         setViewerFormat('json');
-        setViewerTitle(report.title);
+        setViewerTitle(report.title || report.path.split('/').pop());
       }
     } catch {
       // Silent fail
@@ -224,7 +268,7 @@ export const ReportsTab = memo(() => {
         const html = await res.text();
         setViewerContent(html);
         setViewerFormat('html');
-        setViewerTitle(htmlReport.title);
+        setViewerTitle(htmlReport.title || htmlReport.path.split('/').pop());
       }
     } catch {
       // Silent fail
@@ -240,13 +284,16 @@ export const ReportsTab = memo(() => {
   }, [getFileUrl]);
 
   const handleAssessmentDownload = useCallback((assessment) => {
-    const fileEntry = reports.find(r => r.path.includes(assessment.file)) ||
-      assessments.find(r => r.path.includes(assessment.file));
+    // Support both old format (assessment.file) and new format (assessment.files.pdf)
+    const pdfFile = assessment.files?.pdf || assessment.file;
+    if (!pdfFile) return;
+    const fileEntry = assessments.find(r => r.path.includes(pdfFile)) ||
+      reports.find(r => r.path.includes(pdfFile));
     if (fileEntry) {
       const url = getFileUrl(fileEntry.path);
       const a = document.createElement('a');
       a.href = url;
-      a.download = assessment.file;
+      a.download = pdfFile;
       a.click();
     }
   }, [reports, assessments, getFileUrl]);
@@ -279,7 +326,10 @@ export const ReportsTab = memo(() => {
     );
   }
 
-  const assessmentItems = assessmentManifest?.assessments || [];
+  // Handle both array format (new) and {assessments: [...]} format (old)
+  const assessmentItems = Array.isArray(assessmentManifest)
+    ? assessmentManifest
+    : (assessmentManifest?.assessments || []);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">

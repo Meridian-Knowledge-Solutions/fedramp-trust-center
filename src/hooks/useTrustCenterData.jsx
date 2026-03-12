@@ -41,7 +41,17 @@ export const TrustCenterDataProvider = ({ children }) => {
       const data = await res.json();
       setManifest(data);
 
-      const files = data.files || [];
+      const rawFiles = data.files || [];
+
+      // Enrich file entries with derived title from path
+      const files = rawFiles.map(f => {
+        const filename = f.path.split('/').pop();
+        const title = f.title || filename
+          .replace(/\.(md|json|pdf|html)$/i, '')
+          .replace(/[-_]/g, ' ')
+          .replace(/\b\w/g, c => c.toUpperCase());
+        return { ...f, title, filename };
+      });
 
       // Categorize files
       setPolicies(files.filter(f => f.category === 'policies'));
