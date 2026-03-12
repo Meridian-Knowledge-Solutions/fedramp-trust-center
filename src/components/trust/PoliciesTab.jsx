@@ -30,7 +30,7 @@ const PolicyCard = memo(({ policy, isSelected, onClick }) => (
       </div>
       <div className="flex-1 min-w-0">
         <div className="font-medium text-sm tracking-tight">{policy.title}</div>
-        <div className="text-[11px] text-slate-500 mt-1 line-clamp-2">{policy.description}</div>
+        <div className="text-[11px] text-slate-500 mt-1 font-mono">{policy.filename}</div>
       </div>
       <ChevronRight size={14} className={`mt-1 transition-transform ${isSelected ? 'text-blue-400 rotate-90' : 'text-slate-600'}`} />
     </div>
@@ -66,37 +66,41 @@ export const PoliciesTab = memo(() => {
 
   const filteredPolicies = policies.filter(p =>
     !searchQuery || p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    p.path.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Stabilize the selected policy path to avoid re-render loops
+  const selectedPolicy = filteredPolicies[selectedIndex] || filteredPolicies[0];
+  const selectedPath = selectedPolicy?.path;
+
   useEffect(() => {
-    if (filteredPolicies.length === 0) {
+    if (!selectedPath) {
       setPolicyContent('');
       return;
     }
 
-    const policy = filteredPolicies[selectedIndex] || filteredPolicies[0];
-    if (!policy) return;
-
+    let cancelled = false;
     const loadContent = async () => {
       setContentLoading(true);
       try {
-        const res = await fetch(getFileUrl(policy.path));
+        const res = await fetch(getFileUrl(selectedPath));
+        if (cancelled) return;
         if (res.ok) {
           const text = await res.text();
-          setPolicyContent(text);
+          if (!cancelled) setPolicyContent(text);
         } else {
-          setPolicyContent('> Policy document could not be loaded.');
+          if (!cancelled) setPolicyContent('> Policy document could not be loaded.');
         }
       } catch {
-        setPolicyContent('> Error loading policy document.');
+        if (!cancelled) setPolicyContent('> Error loading policy document.');
       } finally {
-        setContentLoading(false);
+        if (!cancelled) setContentLoading(false);
       }
     };
 
     loadContent();
-  }, [selectedIndex, filteredPolicies, getFileUrl]);
+    return () => { cancelled = true; };
+  }, [selectedPath, getFileUrl]);
 
   if (loading) {
     return (
@@ -135,9 +139,9 @@ export const PoliciesTab = memo(() => {
       <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6`}>
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-white font-bold text-lg tracking-tight">Security Policies</h2>
+            <h2 className="text-white font-bold text-lg tracking-tight">Policies</h2>
             <p className="text-slate-500 text-xs mt-1 uppercase tracking-wider font-mono">
-              {policies.length} document{policies.length !== 1 ? 's' : ''} from security-governance repository
+              {policies.length} document{policies.length !== 1 ? 's' : ''} from governance repository
             </p>
           </div>
           <div className="flex items-center gap-2">

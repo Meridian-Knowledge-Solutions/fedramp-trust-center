@@ -67,7 +67,7 @@ const SchemaCard = memo(({ schema, isSelected, onClick, schemaData }) => {
               JSON Schema
             </span>
           </div>
-          <div className="text-[11px] text-slate-500 mt-1 line-clamp-2">{schema.description}</div>
+          <div className="text-[11px] text-slate-500 mt-1 font-mono">{schema.filename}</div>
           {schemaData && (
             <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-600 font-mono">
               <span>{Object.keys(schemaData.properties || {}).length} properties</span>
