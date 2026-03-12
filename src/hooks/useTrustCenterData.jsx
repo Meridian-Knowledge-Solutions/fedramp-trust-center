@@ -74,16 +74,31 @@ export const TrustCenterDataProvider = ({ children }) => {
         }
       }
 
-      // Fetch next_report_date if available
+      // Fetch next_report_date — try trust-center first, fall back to public/data
       const nextDateFile = files.find(f => f.path.includes('next_report_date.json'));
+      const dataBasePath = import.meta.env.BASE_URL.endsWith('/')
+        ? `${import.meta.env.BASE_URL}data`
+        : `${import.meta.env.BASE_URL}/data`;
+      let nextDateLoaded = false;
       if (nextDateFile) {
         try {
           const ndRes = await fetch(getFileUrl(nextDateFile.path) + `?t=${cacheBuster}`);
           if (ndRes.ok) {
             setNextReportDate(await ndRes.json());
+            nextDateLoaded = true;
           }
         } catch (e) {
-          console.warn('Failed to load next_report_date:', e);
+          console.warn('Failed to load next_report_date from trust-center:', e);
+        }
+      }
+      if (!nextDateLoaded) {
+        try {
+          const ndRes = await fetch(`${dataBasePath}/next_report_date.json?t=${cacheBuster}`);
+          if (ndRes.ok) {
+            setNextReportDate(await ndRes.json());
+          }
+        } catch (e) {
+          console.warn('Failed to load next_report_date fallback:', e);
         }
       }
 
