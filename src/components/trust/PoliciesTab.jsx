@@ -38,20 +38,86 @@ const PolicyCard = memo(({ policy, isSelected, onClick }) => (
 ));
 
 const MarkdownRenderer = memo(({ content }) => (
-  <div className="prose prose-invert prose-sm max-w-none
-    prose-headings:text-white prose-headings:tracking-tight
-    prose-h1:text-2xl prose-h1:font-bold prose-h1:mb-6 prose-h1:pb-3 prose-h1:border-b prose-h1:border-white/10
-    prose-h2:text-lg prose-h2:font-bold prose-h2:mt-8 prose-h2:mb-3
-    prose-h3:text-base prose-h3:font-semibold prose-h3:mt-6
-    prose-p:text-slate-300 prose-p:leading-relaxed
-    prose-li:text-slate-300 prose-li:marker:text-slate-500
-    prose-strong:text-white
-    prose-code:text-blue-400 prose-code:bg-blue-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:border prose-code:border-blue-500/20
-    prose-table:border-collapse
-    prose-th:bg-white/5 prose-th:text-slate-300 prose-th:text-xs prose-th:uppercase prose-th:tracking-wider prose-th:p-3 prose-th:border prose-th:border-white/10
-    prose-td:p-3 prose-td:border prose-td:border-white/10 prose-td:text-slate-400 prose-td:text-sm
-  ">
-    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize]}>
+  <div className="max-w-none text-slate-300 text-sm leading-relaxed">
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      rehypePlugins={[rehypeRaw, rehypeSanitize]}
+      components={{
+        h1: ({ children }) => (
+          <h1 className="text-2xl font-bold text-white tracking-tight mb-6 pb-3 border-b border-white/10">{children}</h1>
+        ),
+        h2: ({ children }) => (
+          <h2 className="text-lg font-bold text-white tracking-tight mt-10 mb-4 pb-2 border-b border-white/5">{children}</h2>
+        ),
+        h3: ({ children }) => (
+          <h3 className="text-base font-semibold text-white mt-8 mb-3">{children}</h3>
+        ),
+        h4: ({ children }) => (
+          <h4 className="text-sm font-semibold text-slate-200 mt-6 mb-2">{children}</h4>
+        ),
+        p: ({ children }) => (
+          <p className="text-slate-300 leading-relaxed mb-4">{children}</p>
+        ),
+        ul: ({ children }) => (
+          <ul className="list-disc pl-6 mb-4 space-y-1.5 text-slate-300 marker:text-slate-600">{children}</ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="list-decimal pl-6 mb-4 space-y-1.5 text-slate-300 marker:text-slate-500">{children}</ol>
+        ),
+        li: ({ children }) => (
+          <li className="text-slate-300 leading-relaxed">{children}</li>
+        ),
+        strong: ({ children }) => (
+          <strong className="font-semibold text-white">{children}</strong>
+        ),
+        em: ({ children }) => (
+          <em className="italic text-slate-200">{children}</em>
+        ),
+        a: ({ href, children }) => (
+          <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline underline-offset-2 decoration-blue-500/30 hover:decoration-blue-400/60 transition-colors">{children}</a>
+        ),
+        code: ({ className, children, ...props }) => {
+          const isBlock = className?.includes('language-');
+          if (isBlock) {
+            return (
+              <code className={`block bg-[#09090b] text-emerald-400 text-xs font-mono rounded-lg p-4 my-4 overflow-x-auto border border-white/5 leading-relaxed whitespace-pre ${className || ''}`} {...props}>{children}</code>
+            );
+          }
+          return (
+            <code className="text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded text-xs border border-blue-500/20 font-mono" {...props}>{children}</code>
+          );
+        },
+        pre: ({ children }) => (
+          <pre className="bg-[#09090b] rounded-lg my-4 overflow-x-auto border border-white/5">{children}</pre>
+        ),
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-2 border-blue-500/40 pl-4 my-4 text-slate-400 italic">{children}</blockquote>
+        ),
+        hr: () => (
+          <hr className="border-white/10 my-8" />
+        ),
+        table: ({ children }) => (
+          <div className="overflow-x-auto my-4 rounded-lg border border-white/10">
+            <table className="w-full border-collapse text-sm">{children}</table>
+          </div>
+        ),
+        thead: ({ children }) => (
+          <thead className="bg-white/5">{children}</thead>
+        ),
+        th: ({ children }) => (
+          <th className="text-left text-slate-300 text-xs uppercase tracking-wider font-bold p-3 border-b border-white/10">{children}</th>
+        ),
+        td: ({ children }) => (
+          <td className="p-3 border-b border-white/5 text-slate-400">{children}</td>
+        ),
+        tr: ({ children }) => (
+          <tr className="hover:bg-white/[0.02] transition-colors">{children}</tr>
+        ),
+        img: ({ src, alt }) => (
+          <img src={src} alt={alt} className="rounded-lg border border-white/10 my-4 max-w-full" />
+        ),
+      }}
+    >
       {content}
     </ReactMarkdown>
   </div>
