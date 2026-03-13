@@ -467,6 +467,7 @@ export const TrustCenterView = () => {
     const [masHistory, setMasHistory] = useState([]);
     const [scnHistory, setScnHistory] = useState([]);
     const [plannedChanges, setPlannedChanges] = useState([]);
+    const [nextReportDate, setNextReportDate] = useState(null);
     const [csoInfo, setCsoInfo] = useState(null);
     const [feedbackEntries, setFeedbackEntries] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -479,11 +480,12 @@ export const TrustCenterView = () => {
         const fetchData = async () => {
             const ts = Date.now();
             try {
-                const [boundRes, archRes, histRes, plannedRes] = await Promise.all([
+                const [boundRes, archRes, histRes, plannedRes, dateRes] = await Promise.all([
                     fetch(`${BASE_PATH}mas_boundary.json?t=${ts}`),
                     fetch(`${BASE_PATH}mas_architecture_map.json?t=${ts}`),
                     fetch(`${BASE_PATH}mas_history.jsonl?t=${ts}`),
-                    fetch(`${BASE_PATH}planned_changes.json?t=${ts}`)
+                    fetch(`${BASE_PATH}planned_changes.json?t=${ts}`),
+                    fetch(`${BASE_PATH}next_report_date.json?t=${ts}`)
                 ]);
 
                 // Try public_scn_history.jsonl first, fallback to scn_history.jsonl
@@ -527,6 +529,10 @@ export const TrustCenterView = () => {
                         .filter(entry => entry.change_id && entry.change_id !== 'SYS-INIT') // Filter out placeholder entries
                         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort newest first
                     setScnHistory(lines.slice(0, 10)); // Show last 10 entries
+                }
+
+                if (dateRes.ok) {
+                    try { setNextReportDate(await dateRes.json()); } catch {}
                 }
 
             } catch (e) {
@@ -660,6 +666,43 @@ export const TrustCenterView = () => {
                         </div>
                     )}
                 </div>
+
+                {/* --- NEXT REPORT DATES --- */}
+                {nextReportDate && (
+                    <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-6 shadow-lg`}>
+                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                                    <Calendar className="w-4 h-4 text-blue-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Report Schedule</h3>
+                                    <p className="text-[10px] text-slate-500 font-medium">View full details in Organization &rarr; Reports</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4 px-4 py-2.5 rounded-lg bg-[#09090b] border border-white/5">
+                                <div className="text-center">
+                                    <div className="text-[9px] text-slate-600 uppercase tracking-wider font-bold">Next OAR</div>
+                                    <div className="text-white font-mono text-sm font-bold">{nextReportDate.next_ongoing_report || 'TBD'}</div>
+                                </div>
+                                <div className="w-px h-8 bg-white/10" />
+                                <div className="text-center">
+                                    <div className="text-[9px] text-slate-600 uppercase tracking-wider font-bold">Next Review</div>
+                                    <div className="text-white font-mono text-sm font-bold">{nextReportDate.next_quarterly_review || 'TBD'}</div>
+                                </div>
+                                {nextReportDate.vdr_cadence && (
+                                    <>
+                                        <div className="w-px h-8 bg-white/10" />
+                                        <div className="text-center">
+                                            <div className="text-[9px] text-slate-600 uppercase tracking-wider font-bold">VDR Cadence</div>
+                                            <div className="text-white font-mono text-sm font-bold">{nextReportDate.vdr_cadence}</div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* --- CHANGE PIPELINE (SCN Tracking) --- */}
                 <PlannedChangesSection scnHistory={scnHistory} />
