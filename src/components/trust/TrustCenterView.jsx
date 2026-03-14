@@ -2,19 +2,19 @@ import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../contexts/ModalContext';
 import { useSystemStatus } from '../../hooks/useSystemStatus';
-import { API_CONFIG, QUARTERLY_REGISTRATION_URL } from '../../config/api';
+import { API_CONFIG } from '../../config/api';
 import {
     Shield, Download, FileText, ExternalLink,
     Clock, CheckCircle2, Mail, Globe, Lock, Server, Activity,
     XCircle, CheckCircle, Layers, Database, Users, BarChart, BookOpen,
     Bell, Code, Settings, Info, Zap, MessageSquare,
     TrendingUp, BarChart3, Landmark, Network, Cloud, ArrowDown, ChevronDown, ChevronRight,
-    AlertTriangle, GitCommit, RefreshCw, Hash, FileJson, Cpu, Key, Radio, CheckSquare, FileCheck,
-    PieChart, Layout, Monitor, HardDrive, Ticket, AlertCircle, Calendar, Video,
+    AlertTriangle, GitCommit, RefreshCw, Hash, FileJson, Cpu, Key, Radio, CheckSquare,
+    PieChart, Layout, Monitor, HardDrive, Ticket, AlertCircle, Calendar,
     ArrowRight, User, ShieldCheck, Send, Eye as EyeIcon
 } from 'lucide-react';
-import { ReportsHub } from './ReportsHub';
 // Recharts imports removed — charts now in UnifiedMasDashboard
+// ReportsHub removed — reports & compliance now in Organization tabs
 
 // --- CONFIGURATION ---
 const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
@@ -95,162 +95,8 @@ const PlannedChangesSection = ({ scnHistory }) => {
     );
 };
 
-// --- SUB-COMPONENT: Quarterly Review Card ---
-const QuarterlyReviewCard = ({ meeting }) => {
-    if (!meeting) return null;
-
-    // Use the locally-maintained URL so pipeline data syncs cannot overwrite it
-    const registrationUrl = QUARTERLY_REGISTRATION_URL || meeting.registrationUrl;
-
-    // Dynamically resolve the path based on the environment BASE_URL to prevent GitHub Pages 404s
-    const reportsPath = import.meta.env.BASE_URL.endsWith('/')
-        ? `${import.meta.env.BASE_URL}reports/`
-        : `${import.meta.env.BASE_URL}/reports/`;
-
-    const downloadICS = () => {
-        const icsContent = [
-            'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
-            `SUMMARY:${meeting.meetingTitle || 'FedRAMP Quarterly Review'}`,
-            `DTSTART:${(meeting.nextDate || '').replace(/-/g, '')}T190000Z`,
-            `DURATION:PT${meeting.durationMinutes || 60}M`,
-            `DESCRIPTION:${meeting.description || 'Synchronous review session.'}\\n\\nRegister: ${registrationUrl}`,
-            `LOCATION:Microsoft Teams (Registration Required)`,
-            'END:VEVENT', 'END:VCALENDAR'
-        ].join('\n');
-
-        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.setAttribute('download', `FedRAMP_Review_${meeting.nextDate}.ics`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
-    return (
-        <div className="bg-indigo-600 rounded-[2rem] p-8 text-white shadow-xl shadow-indigo-500/10 relative overflow-hidden h-full">
-            <div className="relative z-10 flex flex-col h-full justify-between">
-                <div>
-                    <div className="flex justify-between items-start mb-6">
-                        <div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-200">Synchronous Review</span>
-                            <h3 className="text-xl font-bold mt-1 tracking-tight">Quarterly Session</h3>
-                        </div>
-                        <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10">
-                            <Video className="w-5 h-5 text-white" />
-                        </div>
-                    </div>
-
-                    <div className="mb-8">
-                        <p className="text-[10px] font-black text-indigo-100 uppercase tracking-widest mb-1">Target Review Date</p>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-black font-mono tracking-tighter">{meeting.nextDate || 'TBD'}</span>
-                            <span className="text-indigo-200 text-sm font-semibold">{meeting.time || '14:00 EST'}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="space-y-3">
-                    {/* Primary Link: Grouped with governance data to ensure context */}
-                    <a href={`${reportsPath}QUARTERLY_AUTHORIZATION_REPORT.html`} target="_blank" rel="noreferrer"
-                        className="flex items-center justify-center gap-2 w-full py-3.5 bg-white text-indigo-600 rounded-2xl font-bold text-xs hover:bg-indigo-50 transition-all shadow-lg">
-                        <FileText className="w-4 h-4" /> View Quarterly QAR 
-                    </a>
-
-                    <button onClick={() => window.open(registrationUrl, '_blank', 'noopener')}
-                        className="flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-500 text-white rounded-2xl font-bold text-xs hover:bg-indigo-400 transition-all border border-indigo-400 cursor-pointer">
-                        <Video className="w-4 h-4" /> Register for Session
-                    </button>
-
-                    <button onClick={downloadICS}
-                        className="flex items-center justify-center gap-2 w-full py-2 bg-indigo-700/40 text-indigo-100 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-colors border border-indigo-400/20">
-                        <Download className="w-3.5 h-3.5" /> Add to Calendar
-                    </button>
-                </div>
-            </div>
-            <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
-        </div>
-    );
-};
-
-// --- SUB-COMPONENT: Ongoing Authorization Report Card ---
-const OngoingAuthorizationReportCard = () => {
-    const reportsPath = import.meta.env.BASE_URL.endsWith('/')
-        ? `${import.meta.env.BASE_URL}reports/`
-        : `${import.meta.env.BASE_URL}/reports/`;
-
-    // Calculate next OAR date (dynamically based on quarterly schedule: Feb 15, May 15, Aug 15, Nov 15)
-    const getNextOARDate = () => {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth() + 1; // 0-indexed
-
-        const oarMonths = [2, 5, 8, 11]; // Feb, May, Aug, Nov
-        const nextMonth = oarMonths.find(m => m > month) || oarMonths[0];
-        const nextYear = nextMonth > month ? year : year + 1;
-
-        return `${nextYear}-${String(nextMonth).padStart(2, '0')}-15`;
-    };
-
-    return (
-        <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-[2rem] p-8 text-white shadow-xl shadow-emerald-500/10 relative overflow-hidden h-full">
-            <div className="relative z-10 flex flex-col h-full justify-between">
-                <div>
-                    <div className="flex justify-between items-start mb-6">
-                        <div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-100">Continuous Monitoring</span>
-                            <h3 className="text-xl font-bold mt-1 tracking-tight">Ongoing Authorization</h3>
-                        </div>
-                        <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10">
-                            <Shield className="w-5 h-5 text-white" />
-                        </div>
-                    </div>
-
-                    <div className="mb-8">
-                        <p className="text-[10px] font-black text-emerald-100 uppercase tracking-widest mb-1">Next Report Date</p>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-black font-mono tracking-tighter">{getNextOARDate()}</span>
-                        </div>
-                        <p className="text-emerald-100 text-xs mt-2 font-medium">Quarterly cycle: Feb 15, May 15, Aug 15, Nov 15</p>
-                    </div>
-                </div>
-
-                <div className="space-y-3">
-                    <a href={`${reportsPath}COMPLIANCE_VALIDATION_REPORT.html`} target="_blank" rel="noreferrer"
-                        className="flex items-center justify-center gap-2 w-full py-3.5 bg-white text-emerald-600 rounded-2xl font-bold text-xs hover:bg-emerald-50 transition-all shadow-lg">
-                        <FileCheck className="w-4 h-4" /> View Latest OAR
-                    </a>
-
-                    <div className="grid grid-cols-3 gap-2 text-center">
-                        <div className="bg-white/10 backdrop-blur-md rounded-xl py-2 border border-white/20">
-                            <div className="text-lg font-black font-mono">100%</div>
-                            <div className="text-[9px] uppercase tracking-wider text-emerald-100 font-bold">Compliance</div>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-md rounded-xl py-2 border border-white/20">
-                            <div className="text-lg font-black font-mono">0</div>
-                            <div className="text-[9px] uppercase tracking-wider text-emerald-100 font-bold">Gaps</div>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-md rounded-xl py-2 border border-white/20">
-                            <div className="text-lg font-black font-mono">101</div>
-                            <div className="text-[9px] uppercase tracking-wider text-emerald-100 font-bold">Days</div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white/5 backdrop-blur-md rounded-xl p-3 border border-white/10">
-                        <div className="text-[9px] uppercase tracking-wider text-emerald-100 font-bold mb-2">Includes</div>
-                        <div className="grid grid-cols-2 gap-1 text-[10px] text-emerald-50">
-                            <div className="flex items-center gap-1"><CheckSquare className="w-3 h-3" /> Accepted Vulns</div>
-                            <div className="flex items-center gap-1"><CheckSquare className="w-3 h-3" /> Planned Changes</div>
-                            <div className="flex items-center gap-1"><CheckSquare className="w-3 h-3" /> Recommendations</div>
-                            <div className="flex items-center gap-1"><CheckSquare className="w-3 h-3" /> SCN Summary</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
-        </div>
-    );
-};
+// QuarterlyReviewCard removed — now in Organization tabs (ReportsHub)
+// OngoingAuthorizationReportCard removed — now in Organization tabs (ReportsHub)
 
 // DriftAlert removed — now in UnifiedMasDashboard
 
@@ -620,9 +466,8 @@ export const TrustCenterView = () => {
     const [masArch, setMasArch] = useState(null);
     const [masHistory, setMasHistory] = useState([]);
     const [scnHistory, setScnHistory] = useState([]);
-    const [nextReportDate, setNextReportDate] = useState(null);
     const [plannedChanges, setPlannedChanges] = useState([]);
-    const [meetingData, setMeetingData] = useState(null);
+    const [nextReportDate, setNextReportDate] = useState(null);
     const [csoInfo, setCsoInfo] = useState(null);
     const [feedbackEntries, setFeedbackEntries] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -635,13 +480,12 @@ export const TrustCenterView = () => {
         const fetchData = async () => {
             const ts = Date.now();
             try {
-                const [boundRes, archRes, histRes, dateRes, plannedRes, meetingRes] = await Promise.all([
+                const [boundRes, archRes, histRes, plannedRes, dateRes] = await Promise.all([
                     fetch(`${BASE_PATH}mas_boundary.json?t=${ts}`),
                     fetch(`${BASE_PATH}mas_architecture_map.json?t=${ts}`),
                     fetch(`${BASE_PATH}mas_history.jsonl?t=${ts}`),
-                    fetch(`${BASE_PATH}next_report_date.json?t=${ts}`),
                     fetch(`${BASE_PATH}planned_changes.json?t=${ts}`),
-                    fetch(`${BASE_PATH}quarterly_meetings.json?t=${ts}`)
+                    fetch(`${BASE_PATH}next_report_date.json?t=${ts}`)
                 ]);
 
                 // Try public_scn_history.jsonl first, fallback to scn_history.jsonl
@@ -653,7 +497,6 @@ export const TrustCenterView = () => {
                 if (boundRes.ok) setMasBoundary(await boundRes.json());
                 if (archRes.ok) setMasArch(await archRes.json());
                 if (plannedRes.ok) setPlannedChanges(await plannedRes.json());
-                if (meetingRes.ok) setMeetingData(await meetingRes.json());
 
                 // Load CSO public info
                 try {
@@ -689,9 +532,9 @@ export const TrustCenterView = () => {
                 }
 
                 if (dateRes.ok) {
-                    const data = await dateRes.json();
-                    setNextReportDate(new Date(data.next_ongoing_report));
+                    try { setNextReportDate(await dateRes.json()); } catch {}
                 }
+
             } catch (e) {
                 console.error("Data fetch error:", e);
             } finally {
@@ -723,30 +566,6 @@ export const TrustCenterView = () => {
             openModal('markdown', { title: 'Secure Configuration', markdown: text });
         } catch (e) { alert('Load failed.'); }
     };
-
-    const viewQuarterlyReport = async () => {
-        if (!handleAction('View Quarterly Report')) return;
-        // Try current OAR report first, fallback to legacy
-        try {
-            const reportsBase = `${BASE_PATH}reports/samples/`;
-            const res = await fetch(`${reportsBase}oar-report.json`);
-            if (res.ok) {
-                const data = await res.json();
-                const markdown = `# Ongoing Authorization Report\n\n**Report ID:** ${data.report_id || 'N/A'}\n**Period:** ${data.reporting_period?.start_date} to ${data.reporting_period?.end_date}\n**Generated:** ${data.reporting_period?.generated_at}\n\n## Executive Summary\n\n- **Compliance Rate:** ${data.executive_summary?.compliance_rate}%\n- **Total KSIs:** ${data.executive_summary?.total_ksis}\n- **Active Gaps:** ${data.executive_summary?.active_gaps}\n\n${data.executive_summary?.narrative || ''}\n\n## Compliance Attestations\n\n${Object.entries(data.compliance_attestations || {}).map(([k, v]) => `- **${k.toUpperCase()}**: ${v.description} ${v.compliant ? '✓' : '✗'}`).join('\n')}\n\n---\n*Machine-readable JSON available at reports/samples/oar-report.json*`;
-                openModal('markdown', { title: 'Ongoing Authorization Report', subtitle: `${data.report_id} | Live Production Data`, markdown });
-                return;
-            }
-        } catch { /* fallback below */ }
-        // Legacy fallback
-        try {
-            const res = await fetch(`${BASE_PATH}ongoing_authorization_report_Q4_2025.md`);
-            if (!res.ok) throw new Error('Failed');
-            const text = await res.text();
-            openModal('markdown', { title: 'Ongoing Authorization Report', subtitle: 'Automated Continuous Monitoring', markdown: text });
-        } catch (e) { alert('Failed to load report.'); }
-    };
-
-    const downloadQuarterlyReport = () => { if (!handleAction('Download Quarterly Report')) return; window.open(`${BASE_PATH}reports/samples/oar-report.json`, '_blank'); };
 
     const handleDownloadPackage = async () => {
         if (!handleAction('Download Authorization Package')) return;
@@ -848,8 +667,42 @@ export const TrustCenterView = () => {
                     )}
                 </div>
 
-                {/* --- REPORTS & COMPLIANCE HUB --- */}
-                <ReportsHub meeting={meetingData} />
+                {/* --- NEXT REPORT DATES --- */}
+                {nextReportDate && (
+                    <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-6 shadow-lg`}>
+                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                                    <Calendar className="w-4 h-4 text-blue-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Report Schedule</h3>
+                                    <p className="text-[10px] text-slate-500 font-medium">View full details in Organization &rarr; Reports</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4 px-4 py-2.5 rounded-lg bg-[#09090b] border border-white/5">
+                                <div className="text-center">
+                                    <div className="text-[9px] text-slate-600 uppercase tracking-wider font-bold">Next OAR</div>
+                                    <div className="text-white font-mono text-sm font-bold">{nextReportDate.next_ongoing_report || 'TBD'}</div>
+                                </div>
+                                <div className="w-px h-8 bg-white/10" />
+                                <div className="text-center">
+                                    <div className="text-[9px] text-slate-600 uppercase tracking-wider font-bold">Next Review</div>
+                                    <div className="text-white font-mono text-sm font-bold">{nextReportDate.next_quarterly_review || 'TBD'}</div>
+                                </div>
+                                {nextReportDate.vdr_cadence && (
+                                    <>
+                                        <div className="w-px h-8 bg-white/10" />
+                                        <div className="text-center">
+                                            <div className="text-[9px] text-slate-600 uppercase tracking-wider font-bold">VDR Cadence</div>
+                                            <div className="text-white font-mono text-sm font-bold">{nextReportDate.vdr_cadence}</div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* --- CHANGE PIPELINE (SCN Tracking) --- */}
                 <PlannedChangesSection scnHistory={scnHistory} />
