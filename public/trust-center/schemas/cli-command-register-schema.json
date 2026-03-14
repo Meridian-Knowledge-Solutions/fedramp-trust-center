@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meridianks.com/fedramp/schemas/cli-command-register",
+  "title": "CLI Command Register Schema",
+  "description": "JSON Schema for FedRAMP 20x CLI command registration entries — defines the structure of validation commands, their KSI mappings, and execution metadata.",
+  "type": "object",
+  "required": ["commands"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Schema version identifier"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the command register was generated"
+    },
+    "provider": {
+      "type": "string",
+      "description": "CSO provider name"
+    },
+    "commands": {
+      "type": "array",
+      "description": "Array of registered CLI validation commands",
+      "items": {
+        "type": "object",
+        "required": ["command_id", "ksi_id", "command"],
+        "properties": {
+          "command_id": {
+            "type": "string",
+            "description": "Unique identifier for the CLI command"
+          },
+          "ksi_id": {
+            "type": "string",
+            "description": "KSI control identifier this command validates (e.g., KSI-IAM-01)"
+          },
+          "ksi_category": {
+            "type": "string",
+            "description": "Category grouping for the KSI (e.g., Identity & Access Management)"
+          },
+          "command": {
+            "type": "string",
+            "description": "The CLI command string to execute"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of what this command validates"
+          },
+          "service": {
+            "type": "string",
+            "description": "AWS service or system targeted by this command"
+          },
+          "expected_result": {
+            "type": "string",
+            "description": "Expected output or condition for a PASS result"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low", "informational"],
+            "description": "Severity level if this validation fails"
+          },
+          "frequency": {
+            "type": "string",
+            "description": "How often this command should be executed (e.g., daily, hourly, on-change)"
+          },
+          "last_executed": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of last execution"
+          },
+          "last_result": {
+            "type": "string",
+            "enum": ["PASS", "FAIL", "ERROR", "SKIP"],
+            "description": "Result of the last execution"
+          }
+        }
+      }
+    }
+  }
+}

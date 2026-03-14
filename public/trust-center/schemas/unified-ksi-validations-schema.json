@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meridianks.com/fedramp/schemas/unified-ksi-validations",
+  "title": "Unified KSI Validations Schema",
+  "description": "JSON Schema for FedRAMP 20x unified KSI validation results — defines the structure for Key System Indicator validation entries, evidence, and compliance status.",
+  "type": "object",
+  "required": ["validations"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Schema version identifier"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when validations were generated"
+    },
+    "provider": {
+      "type": "string",
+      "description": "CSO provider name"
+    },
+    "summary": {
+      "type": "object",
+      "description": "Aggregate validation summary",
+      "properties": {
+        "total_ksis": {
+          "type": "integer",
+          "description": "Total number of KSI controls evaluated"
+        },
+        "passed": {
+          "type": "integer",
+          "description": "Number of KSIs that passed validation"
+        },
+        "failed": {
+          "type": "integer",
+          "description": "Number of KSIs that failed validation"
+        },
+        "compliance_rate": {
+          "type": "number",
+          "description": "Overall compliance percentage (0-100)"
+        }
+      }
+    },
+    "validations": {
+      "type": "array",
+      "description": "Array of individual KSI validation results",
+      "items": {
+        "type": "object",
+        "required": ["ksi_id", "status"],
+        "properties": {
+          "ksi_id": {
+            "type": "string",
+            "description": "KSI control identifier (e.g., KSI-IAM-01)"
+          },
+          "ksi_title": {
+            "type": "string",
+            "description": "Human-readable title for the KSI"
+          },
+          "category": {
+            "type": "string",
+            "description": "Security category grouping"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PASS", "FAIL", "ERROR", "SKIP", "N/A"],
+            "description": "Validation result status"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low", "informational"],
+            "description": "Severity level of this control"
+          },
+          "validated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of validation execution"
+          },
+          "evidence": {
+            "type": "object",
+            "description": "Evidence supporting the validation result",
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Source of evidence (e.g., AWS CLI, API, manual)"
+              },
+              "command": {
+                "type": "string",
+                "description": "CLI command used to collect evidence"
+              },
+              "output_hash": {
+                "type": "string",
+                "description": "SHA-256 hash of the evidence output"
+              },
+              "narrative": {
+                "type": "string",
+                "description": "Human-readable explanation of the evidence"
+              }
+            }
+          },
+          "remediation": {
+            "type": "object",
+            "description": "Remediation details if status is FAIL",
+            "properties": {
+              "description": {
+                "type": "string",
+                "description": "Description of required remediation"
+              },
+              "due_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Target remediation date"
+              },
+              "owner": {
+                "type": "string",
+                "description": "Responsible party for remediation"
+              }
+            }
+          },
+          "frr_requirements": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "FRR requirement identifiers this KSI satisfies"
+          }
+        }
+      }
+    }
+  }
+}

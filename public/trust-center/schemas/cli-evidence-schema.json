@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meridianks.com/fedramp/schemas/cli-evidence",
+  "title": "CLI Evidence Schema",
+  "description": "JSON Schema for FedRAMP 20x CLI evidence collection — defines the structure for captured command outputs, integrity hashes, and evidence metadata used in continuous validation.",
+  "type": "object",
+  "required": ["evidence_entries"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Schema version identifier"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when evidence was collected"
+    },
+    "collection_run_id": {
+      "type": "string",
+      "description": "Unique identifier for this evidence collection run"
+    },
+    "provider": {
+      "type": "string",
+      "description": "CSO provider name"
+    },
+    "environment": {
+      "type": "object",
+      "description": "Execution environment metadata",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "description": "AWS account ID where evidence was collected"
+        },
+        "region": {
+          "type": "string",
+          "description": "AWS region"
+        },
+        "collector_version": {
+          "type": "string",
+          "description": "Version of the evidence collection tool"
+        }
+      }
+    },
+    "evidence_entries": {
+      "type": "array",
+      "description": "Array of individual evidence records",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "ksi_id", "command", "collected_at"],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "description": "Unique identifier for this evidence record"
+          },
+          "ksi_id": {
+            "type": "string",
+            "description": "KSI control this evidence supports"
+          },
+          "command_id": {
+            "type": "string",
+            "description": "Reference to the CLI command register entry"
+          },
+          "command": {
+            "type": "string",
+            "description": "Exact CLI command executed"
+          },
+          "collected_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of evidence collection"
+          },
+          "output": {
+            "type": "object",
+            "description": "Command execution output",
+            "properties": {
+              "stdout": {
+                "type": "string",
+                "description": "Standard output from command execution"
+              },
+              "stderr": {
+                "type": "string",
+                "description": "Standard error output"
+              },
+              "exit_code": {
+                "type": "integer",
+                "description": "Process exit code"
+              },
+              "truncated": {
+                "type": "boolean",
+                "description": "Whether output was truncated for storage"
+              }
+            }
+          },
+          "integrity": {
+            "type": "object",
+            "description": "Integrity verification data",
+            "properties": {
+              "output_hash": {
+                "type": "string",
+                "description": "SHA-256 hash of the raw command output"
+              },
+              "chain_hash": {
+                "type": "string",
+                "description": "Chained hash linking to previous evidence record"
+              },
+              "algorithm": {
+                "type": "string",
+                "default": "SHA-256",
+                "description": "Hash algorithm used"
+              }
+            }
+          },
+          "result": {
+            "type": "string",
+            "enum": ["PASS", "FAIL", "ERROR", "SKIP"],
+            "description": "Validation result derived from this evidence"
+          },
+          "duration_ms": {
+            "type": "integer",
+            "description": "Command execution duration in milliseconds"
+          },
+          "service": {
+            "type": "string",
+            "description": "AWS service queried"
+          }
+        }
+      }
+    }
+  }
+}
