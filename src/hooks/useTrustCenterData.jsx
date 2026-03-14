@@ -44,12 +44,14 @@ export const TrustCenterDataProvider = ({ children }) => {
       const rawFiles = data.files || [];
 
       // Enrich file entries with derived title from path
+      const ACRONYMS = ['cli', 'ksi', 'vdr', 'oar', 'scn', 'qar', 'api', 'sso', 'pii', 'mfa'];
       const files = rawFiles.map(f => {
         const filename = f.path.split('/').pop();
         const title = f.title || filename
           .replace(/\.(md|json|pdf|html)$/i, '')
           .replace(/[-_]/g, ' ')
-          .replace(/\b\w/g, c => c.toUpperCase());
+          .replace(/\b\w/g, c => c.toUpperCase())
+          .replace(/\b\w+\b/g, w => ACRONYMS.includes(w.toLowerCase()) ? w.toUpperCase() : w);
         return { ...f, title, filename };
       });
 
