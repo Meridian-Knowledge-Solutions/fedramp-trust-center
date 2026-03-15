@@ -1,125 +1,278 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://meridianks.com/fedramp/schemas/unified-ksi-validations",
-  "title": "Unified KSI Validations Schema",
-  "description": "JSON Schema for FedRAMP 20x unified KSI validation results — defines the structure for Key System Indicator validation entries, evidence, and compliance status.",
+  "$id": "https://meridianks.com/fedramp/schemas/unified-ksi-validations-v1.0.json",
+  "title": "FedRAMP 20x Unified KSI Validations",
+  "description": "Machine-readable schema for the unified KSI validation results produced by the System 2.5 validation engine. Published to the Trust Center as the master compliance scorecard.",
   "type": "object",
-  "required": ["validations"],
+  "required": ["metadata", "validations"],
   "properties": {
-    "schema_version": {
-      "type": "string",
-      "description": "Schema version identifier"
-    },
-    "generated_at": {
-      "type": "string",
-      "format": "date-time",
-      "description": "Timestamp when validations were generated"
-    },
-    "provider": {
-      "type": "string",
-      "description": "CSO provider name"
-    },
-    "summary": {
+    "metadata": {
       "type": "object",
-      "description": "Aggregate validation summary",
+      "required": [
+        "generated_at",
+        "total_ksis",
+        "passed",
+        "failed",
+        "pass_rate",
+        "global_status"
+      ],
       "properties": {
+        "generated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "UTC timestamp when this validation run was generated"
+        },
         "total_ksis": {
           "type": "integer",
-          "description": "Total number of KSI controls evaluated"
+          "minimum": 0,
+          "description": "Total number of KSIs evaluated"
         },
         "passed": {
           "type": "integer",
+          "minimum": 0,
           "description": "Number of KSIs that passed validation"
         },
         "failed": {
           "type": "integer",
+          "minimum": 0,
           "description": "Number of KSIs that failed validation"
         },
-        "compliance_rate": {
-          "type": "number",
-          "description": "Overall compliance percentage (0-100)"
+        "pass_rate": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+%$",
+          "description": "Overall pass rate as a percentage string (e.g. '100.0%')"
+        },
+        "global_status": {
+          "type": "string",
+          "enum": ["OPERATIONAL", "DEGRADED", "CIRCUIT_BROKEN"],
+          "description": "Overall system health status"
+        },
+        "circuit_breaker": {
+          "type": "object",
+          "description": "Circuit breaker state protecting against cascading failures",
+          "properties": {
+            "state": {
+              "type": "string",
+              "enum": ["CLOSED", "OPEN", "HALF_OPEN"],
+              "description": "Circuit breaker state (CLOSED = healthy)"
+            },
+            "global_status": {
+              "type": "string",
+              "enum": ["OPERATIONAL", "DEGRADED", "CIRCUIT_BROKEN"]
+            },
+            "config": {
+              "type": "object",
+              "properties": {
+                "failure_threshold": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Failure rate threshold to trip the breaker"
+                },
+                "min_samples": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Minimum samples before breaker evaluation"
+                },
+                "consecutive_failure_limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Consecutive failures before immediate trip"
+                }
+              }
+            },
+            "stats": {
+              "type": "object",
+              "properties": {
+                "total_executed": { "type": "integer", "minimum": 0 },
+                "total_failed": { "type": "integer", "minimum": 0 },
+                "total_passed": { "type": "integer", "minimum": 0 },
+                "consecutive_failures": { "type": "integer", "minimum": 0 },
+                "failure_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+                "last_failure_time": { "type": ["string", "null"], "format": "date-time" },
+                "circuit_broken_at": { "type": ["string", "null"], "format": "date-time" }
+              }
+            }
+          }
+        },
+        "critical_findings": {
+          "type": "object",
+          "description": "Summary of critical security findings detected during validation",
+          "properties": {
+            "summary": {
+              "type": "object",
+              "properties": {
+                "total": { "type": "integer", "minimum": 0 },
+                "by_severity": { "type": "object" },
+                "by_ksi": { "type": "object" },
+                "by_resource_type": { "type": "object" },
+                "critical_count": { "type": "integer", "minimum": 0 },
+                "high_count": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "findings": {
+              "type": "array",
+              "items": { "type": "object" }
+            },
+            "by_ksi": { "type": "object" }
+          }
+        },
+        "ksis_skipped": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "KSI IDs skipped during this validation run (e.g. due to circuit breaker)"
+        },
+        "category_summary": {
+          "type": "object",
+          "description": "Per-category rollup of KSI results",
+          "patternProperties": {
+            "^KSI-[A-Z]{2,4}$": {
+              "type": "object",
+              "required": ["total", "passed", "failed", "long_name"],
+              "properties": {
+                "total": { "type": "integer", "minimum": 0 },
+                "passed": { "type": "integer", "minimum": 0 },
+                "failed": { "type": "integer", "minimum": 0 },
+                "long_name": {
+                  "type": "string",
+                  "description": "Human-readable category name (e.g. 'Authorization by FedRAMP')"
+                }
+              }
+            }
+          }
         }
       }
     },
     "validations": {
       "type": "array",
-      "description": "Array of individual KSI validation results",
+      "description": "Individual KSI validation results",
       "items": {
         "type": "object",
-        "required": ["ksi_id", "status"],
+        "required": [
+          "ksi_id",
+          "validation_id",
+          "assertion",
+          "assertion_reason",
+          "requirement",
+          "timestamp"
+        ],
         "properties": {
           "ksi_id": {
             "type": "string",
-            "description": "KSI control identifier (e.g., KSI-IAM-01)"
+            "pattern": "^KSI-[A-Z]{2,4}-\\d{2}$",
+            "description": "Key Security Indicator identifier"
           },
-          "ksi_title": {
+          "validation_id": {
             "type": "string",
-            "description": "Human-readable title for the KSI"
+            "description": "Validation run identifier (typically matches ksi_id)"
           },
-          "category": {
+          "assertion": {
+            "type": "boolean",
+            "description": "true = PASS, false = FAIL"
+          },
+          "assertion_reason": {
             "type": "string",
-            "description": "Security category grouping"
+            "description": "Human-readable explanation of the validation outcome"
           },
-          "status": {
+          "recommended_action": {
             "type": "string",
-            "enum": ["PASS", "FAIL", "ERROR", "SKIP", "N/A"],
-            "description": "Validation result status"
+            "description": "Suggested remediation or maintenance action"
           },
-          "severity": {
+          "requirement": {
             "type": "string",
-            "enum": ["critical", "high", "medium", "low", "informational"],
-            "description": "Severity level of this control"
+            "description": "The KSI requirement description being validated"
           },
-          "validated_at": {
+          "implementation_summary": {
+            "type": "string",
+            "description": "How the control is implemented in production"
+          },
+          "justification": {
+            "type": "string",
+            "description": "Why this validation approach satisfies the KSI"
+          },
+          "pass_criteria": {
+            "type": "string",
+            "description": "Conditions for a PASS result"
+          },
+          "fail_criteria": {
+            "type": "string",
+            "description": "Conditions for a FAIL result"
+          },
+          "long_name": {
+            "type": "string",
+            "description": "Human-readable KSI category name"
+          },
+          "category_prefix": {
+            "type": "string",
+            "pattern": "^KSI-[A-Z]{2,4}$",
+            "description": "KSI category prefix"
+          },
+          "cli_command": {
+            "type": "string",
+            "description": "Semicolon-delimited CLI commands that were executed"
+          },
+          "timestamp": {
             "type": "string",
             "format": "date-time",
-            "description": "Timestamp of validation execution"
+            "description": "UTC timestamp of this individual validation"
           },
-          "evidence": {
-            "type": "object",
-            "description": "Evidence supporting the validation result",
-            "properties": {
-              "source": {
-                "type": "string",
-                "description": "Source of evidence (e.g., AWS CLI, API, manual)"
-              },
-              "command": {
-                "type": "string",
-                "description": "CLI command used to collect evidence"
-              },
-              "output_hash": {
-                "type": "string",
-                "description": "SHA-256 hash of the evidence output"
-              },
-              "narrative": {
-                "type": "string",
-                "description": "Human-readable explanation of the evidence"
-              }
-            }
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Compliance score (0-100) based on resource-level evaluation"
           },
-          "remediation": {
-            "type": "object",
-            "description": "Remediation details if status is FAIL",
-            "properties": {
-              "description": {
-                "type": "string",
-                "description": "Description of required remediation"
-              },
-              "due_date": {
-                "type": "string",
-                "format": "date",
-                "description": "Target remediation date"
-              },
-              "owner": {
-                "type": "string",
-                "description": "Responsible party for remediation"
-              }
-            }
+          "evidence_path": {
+            "type": "string",
+            "description": "Path to the primary evidence artifact for this validation"
           },
-          "frr_requirements": {
+          "total_category_controls": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Total controls in this KSI's category"
+          },
+          "resources_scanned": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of resources evaluated"
+          },
+          "resources_passed": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of resources that passed"
+          },
+          "resources_unverified": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of resources that could not be verified"
+          },
+          "resources_failed": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of resources that failed"
+          },
+          "resource_evaluations": {
             "type": "array",
-            "items": { "type": "string" },
-            "description": "FRR requirement identifiers this KSI satisfies"
+            "description": "Per-resource evaluation results",
+            "items": {
+              "type": "object",
+              "required": ["resource", "status", "reason"],
+              "properties": {
+                "resource": {
+                  "type": "string",
+                  "description": "Resource identifier (may be redacted)"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["PASS", "FAIL", "UNVERIFIED"],
+                  "description": "Individual resource evaluation result"
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "Explanation of the resource evaluation outcome"
+                }
+              }
+            }
           }
         }
       }

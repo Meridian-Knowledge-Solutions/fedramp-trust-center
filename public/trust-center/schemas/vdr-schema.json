@@ -1,29 +1,39 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://meridianks.com/fedramp/schemas/vdr-v1.0.json",
-  "title": "FedRAMP 20x Vulnerability Detection and Response (VDR) Report",
-  "description": "Machine-readable schema for Vulnerability Detection and Response reports per FedRAMP VDR Release 25.09A requirements.",
+  "$id": "https://meridianks.com/fedramp/schemas/vdr-v2.0.json",
+  "title": "FedRAMP 20x Vulnerability Detection and Response (VDR) Public Report",
+  "description": "Machine-readable schema for aggregate VDR public reports per FedRAMP VDR Release 25.09A. Contains ONLY aggregate counts - no CVE identifiers, vulnerability descriptions, resource IDs, or other data that could identify specific vulnerabilities.",
   "type": "object",
   "required": [
     "schema_version",
     "report_id",
+    "data_classification",
     "provider",
     "reporting_period",
     "scan_summary",
-    "vulnerabilities",
+    "vulnerability_summary",
     "methodology",
     "compliance_status"
   ],
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "1.0.0",
-      "description": "Version of this VDR schema"
+      "const": "2.0.0",
+      "description": "Version of this VDR schema (2.0.0 = aggregate public format)"
     },
     "report_id": {
       "type": "string",
       "pattern": "^VDR-\\d{8}-[a-f0-9]{8}$",
       "description": "Unique report identifier"
+    },
+    "data_classification": {
+      "type": "string",
+      "const": "PUBLIC",
+      "description": "Data classification - this report contains only aggregate public-safe data"
+    },
+    "privacy_notice": {
+      "type": "string",
+      "description": "Notice that no CVEs, resource IDs, or identifiable vulnerability data is included"
     },
     "provider": {
       "type": "object",
@@ -47,8 +57,8 @@
         "generated_at": { "type": "string", "format": "date-time" },
         "cadence": {
           "type": "string",
-          "enum": ["3-day", "weekly", "monthly", "quarterly"],
-          "description": "Reporting cadence (3-day for items critical to government data)"
+          "enum": ["daily", "3-day", "weekly", "monthly", "quarterly"],
+          "description": "Reporting cadence (daily for continuous monitoring)"
         }
       }
     },
@@ -83,146 +93,121 @@
           "properties": {
             "total_assets": { "type": "integer" },
             "scanned_assets": { "type": "integer" },
-            "coverage_percentage": { "type": "number", "minimum": 0, "maximum": 100 },
-            "unscanned_justification": { "type": "string" }
+            "coverage_percentage": { "type": "number", "minimum": 0, "maximum": 100 }
           },
           "description": "Asset scan coverage metrics"
         }
       }
     },
-    "vulnerabilities": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "tracking_id",
-          "title",
-          "severity",
-          "status",
-          "detection_timestamp",
-          "internet_reachable",
-          "exploitability",
-          "adverse_impact"
-        ],
-        "properties": {
-          "tracking_id": {
-            "type": "string",
-            "description": "Unique tracking identifier for this vulnerability"
-          },
-          "cve_id": {
-            "type": "string",
-            "pattern": "^CVE-\\d{4}-\\d{4,}$",
-            "description": "CVE identifier if applicable"
-          },
-          "title": { "type": "string" },
-          "description": { "type": "string" },
-          "severity": {
-            "type": "string",
-            "enum": ["Critical", "High", "Medium", "Low", "Informational"]
-          },
-          "cvss_score": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 10,
-            "description": "CVSS v3.1 base score"
-          },
-          "cvss_vector": {
-            "type": "string",
-            "description": "CVSS v3.1 vector string"
-          },
-          "status": {
-            "type": "string",
-            "enum": ["Open", "In_Progress", "Remediated", "Accepted", "False_Positive", "Mitigated"],
-            "description": "Current vulnerability status"
-          },
-          "detection_timestamp": {
-            "type": "string",
-            "format": "date-time",
-            "description": "When the vulnerability was first detected"
-          },
-          "remediation_timestamp": {
-            "type": "string",
-            "format": "date-time",
-            "description": "When the vulnerability was remediated (if applicable)"
-          },
-          "internet_reachable": {
-            "type": "boolean",
-            "description": "Whether the affected component is reachable from the internet"
-          },
-          "exploitability": {
-            "type": "object",
-            "required": ["rating"],
-            "properties": {
-              "rating": {
-                "type": "string",
-                "enum": ["active_exploitation", "proof_of_concept", "theoretical", "none_known"],
-                "description": "Current exploitability assessment"
-              },
-              "kev_listed": {
-                "type": "boolean",
-                "description": "Whether listed in CISA Known Exploited Vulnerabilities catalog"
-              },
-              "epss_score": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1,
-                "description": "EPSS probability score"
-              }
-            }
-          },
-          "adverse_impact": {
-            "type": "object",
-            "required": ["rating"],
-            "properties": {
-              "rating": {
-                "type": "string",
-                "enum": ["critical", "significant", "moderate", "minimal", "none"],
-                "description": "Potential adverse impact to federal customer data or mission"
-              },
-              "description": { "type": "string" },
-              "federal_data_affected": { "type": "boolean" }
-            }
-          },
-          "affected_components": {
-            "type": "array",
-            "items": {
+    "vulnerability_summary": {
+      "type": "object",
+      "description": "Aggregate vulnerability counts - NO individual CVEs or identifiable details",
+      "required": ["total_findings", "severity_breakdown", "status_breakdown", "risk_classification"],
+      "properties": {
+        "total_findings": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of vulnerability findings"
+        },
+        "unique_cve_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of unique CVEs (no identifiers disclosed)"
+        },
+        "severity_breakdown": {
+          "type": "object",
+          "description": "Count of vulnerabilities by severity level",
+          "properties": {
+            "critical": { "type": "integer" },
+            "high": { "type": "integer" },
+            "medium": { "type": "integer" },
+            "low": { "type": "integer" },
+            "informational": { "type": "integer" }
+          }
+        },
+        "status_breakdown": {
+          "type": "object",
+          "description": "Count of vulnerabilities by current status",
+          "properties": {
+            "open": { "type": "integer" },
+            "in_progress": { "type": "integer" },
+            "remediated": { "type": "integer" },
+            "accepted": { "type": "integer" },
+            "mitigated": { "type": "integer" }
+          }
+        },
+        "risk_classification": {
+          "type": "object",
+          "description": "VDR Release 25.09A risk classification counts",
+          "properties": {
+            "n_rating_distribution": {
               "type": "object",
+              "description": "Count by N-rating (N1=negligible through N5=catastrophic)",
               "properties": {
-                "component_type": { "type": "string" },
-                "component_name": { "type": "string" },
-                "version_affected": { "type": "string" },
-                "version_fixed": { "type": "string" }
+                "n5_catastrophic": { "type": "integer" },
+                "n4_serious": { "type": "integer" },
+                "n3_moderate": { "type": "integer" },
+                "n2_minor": { "type": "integer" },
+                "n1_negligible": { "type": "integer" },
+                "unrated": { "type": "integer" }
               }
-            }
-          },
-          "remediation": {
-            "type": "object",
-            "properties": {
-              "plan": { "type": "string" },
-              "target_date": { "type": "string", "format": "date" },
-              "sla_status": {
-                "type": "string",
-                "enum": ["within_sla", "approaching_sla", "exceeded_sla"]
-              }
-            }
-          },
-          "acceptance": {
-            "type": "object",
-            "description": "For accepted vulnerabilities (replacing traditional POA&M)",
-            "properties": {
-              "justification": { "type": "string" },
-              "accepted_by": { "type": "string" },
-              "accepted_date": { "type": "string", "format": "date" },
-              "review_date": { "type": "string", "format": "date" },
-              "compensating_controls": {
-                "type": "array",
-                "items": { "type": "string" }
-              }
+            },
+            "lev_count": {
+              "type": "integer",
+              "description": "Count of Likely Exploitable Vulnerabilities"
+            },
+            "irv_count": {
+              "type": "integer",
+              "description": "Count of Internet-Reachable Vulnerabilities"
+            },
+            "kev_count": {
+              "type": "integer",
+              "description": "Count matching CISA Known Exploited Vulnerabilities catalog"
+            },
+            "lev_irv_combined": {
+              "type": "integer",
+              "description": "Count of vulnerabilities that are both LEV and IRV"
             }
           }
+        },
+        "vdr_acceptance": {
+          "type": "object",
+          "description": "VDR acceptance tracking per FRR-VDR-TF-03",
+          "properties": {
+            "acceptance_threshold_days": { "type": "integer" },
+            "total_accepted": { "type": "integer" },
+            "total_active": { "type": "integer" },
+            "compliance_rate": { "type": "number", "minimum": 0, "maximum": 100 }
+          }
         }
-      },
-      "description": "All vulnerabilities detected and tracked during the reporting period"
+      }
+    },
+    "trends": {
+      "type": "object",
+      "description": "Historical trend data from daily pipeline runs",
+      "properties": {
+        "data_points": {
+          "type": "integer",
+          "description": "Number of daily data points included"
+        },
+        "daily": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": { "type": "string", "format": "date" },
+              "total_vulnerabilities": { "type": "integer" },
+              "n5_count": { "type": "integer" },
+              "n4_count": { "type": "integer" },
+              "lev_count": { "type": "integer" },
+              "irv_count": { "type": "integer" },
+              "accepted_count": { "type": "integer" },
+              "active_count": { "type": "integer" }
+            }
+          },
+          "description": "Daily aggregate vulnerability counts (last 30 days)"
+        }
+      }
     },
     "methodology": {
       "type": "object",
@@ -235,15 +220,15 @@
         },
         "prioritization_framework": {
           "type": "string",
-          "description": "Framework used for vulnerability prioritization (e.g., SSVC, CVSS+context)"
+          "description": "Framework used for vulnerability prioritization"
         },
         "sla_definitions": {
           "type": "object",
           "properties": {
-            "critical": { "type": "string", "description": "SLA for critical vulnerabilities" },
-            "high": { "type": "string", "description": "SLA for high vulnerabilities" },
-            "medium": { "type": "string", "description": "SLA for medium vulnerabilities" },
-            "low": { "type": "string", "description": "SLA for low vulnerabilities" }
+            "critical": { "type": "string" },
+            "high": { "type": "string" },
+            "medium": { "type": "string" },
+            "low": { "type": "string" }
           }
         },
         "scanning_frequency": {
@@ -259,14 +244,12 @@
     },
     "metrics": {
       "type": "object",
-      "description": "VDR performance metrics",
+      "description": "VDR performance metrics (aggregate only)",
       "properties": {
         "total_detected": { "type": "integer" },
         "total_remediated": { "type": "integer" },
         "total_accepted": { "type": "integer" },
         "total_open": { "type": "integer" },
-        "mean_time_to_detect_days": { "type": "number" },
-        "mean_time_to_remediate_days": { "type": "number" },
         "sla_compliance_rate": { "type": "number", "minimum": 0, "maximum": 100 },
         "severity_breakdown": {
           "type": "object",
