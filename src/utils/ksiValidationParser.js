@@ -275,10 +275,11 @@ export const parseKsiValidation = (ksi) => {
     requirement: ksi.requirement || ksi.description,
     longName: ksi.long_name,
     
-    // Status
+    // Status — preserve the pre-computed status (from Sanitizer) if available,
+    // since it distinguishes warning/info from simple pass/fail
     assertion: ksi.assertion,
     score: ksi.score ?? reasonParsed.score,
-    status: ksi.assertion ? 'passed' : 'failed',
+    status: ksi.status || (ksi.assertion ? 'passed' : 'failed'),
     statusLabel: reasonParsed.label,
     
     // Resources
