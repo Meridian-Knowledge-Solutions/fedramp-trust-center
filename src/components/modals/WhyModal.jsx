@@ -217,7 +217,6 @@ export const WhyModal = () => {
               <div className="flex items-start gap-3">
                 <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-amber-400" />
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  <span className="font-semibold text-amber-300">Warnings: </span>
                   {Sanitizer.sanitizeReason(parsed.assertionReason)}
                 </p>
               </div>
@@ -305,7 +304,6 @@ export const WhyModal = () => {
             <div className="flex items-start gap-3">
               <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-amber-400" />
               <p className="text-sm text-gray-300 leading-relaxed">
-                <span className="font-semibold text-amber-300">Warnings: </span>
                 {parsed.assertionReason}
               </p>
             </div>
