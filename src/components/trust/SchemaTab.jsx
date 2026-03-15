@@ -70,9 +70,17 @@ const SchemaCard = memo(({ schema, isSelected, onClick, schemaData }) => {
           <div className="text-[11px] text-slate-500 mt-1 font-mono">{schema.filename}</div>
           {schemaData && (
             <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-600 font-mono">
-              <span>{Object.keys(schemaData.properties || schemaData.items?.properties || schemaData.$defs || schemaData.definitions || {}).length} properties</span>
+              <span>{Object.keys(
+                schemaData.properties || schemaData.items?.properties ||
+                (schemaData.patternProperties && Object.values(schemaData.patternProperties)[0]?.properties) ||
+                schemaData.$defs || schemaData.definitions || {}
+              ).length} properties</span>
               <span className="text-slate-700">|</span>
-              <span>{(schemaData.required || schemaData.items?.required || []).length} required</span>
+              <span>{(
+                schemaData.required || schemaData.items?.required ||
+                (schemaData.patternProperties && Object.values(schemaData.patternProperties)[0]?.required) ||
+                []
+              ).length} required</span>
             </div>
           )}
         </div>
@@ -275,14 +283,26 @@ export const SchemaTab = memo(() => {
                 </div>
               ) : viewMode === 'tree' ? (
                 (() => {
-                  // Resolve properties from various schema structures
-                  const topProps = currentData.properties
+                  // Resolve properties from various schema structures:
+                  // - standard: { properties: {...} }
+                  // - array type: { type: "array", items: { properties: {...} } }
+                  // - patternProperties: { patternProperties: { "^pattern$": { properties: {...} } } }
+                  // - $defs / definitions
+                  let topProps = currentData.properties
                     || currentData.items?.properties
-                    || currentData.$defs
-                    || currentData.definitions
                     || null;
+
+                  // For patternProperties schemas, extract the first pattern's properties
+                  if (!topProps && currentData.patternProperties) {
+                    const firstPattern = Object.values(currentData.patternProperties)[0];
+                    topProps = firstPattern?.properties || null;
+                  }
+
+                  topProps = topProps || currentData.$defs || currentData.definitions || null;
+
                   const topRequired = currentData.required
                     || currentData.items?.required
+                    || (currentData.patternProperties && Object.values(currentData.patternProperties)[0]?.required)
                     || [];
 
                   if (!topProps || Object.keys(topProps).length === 0) {

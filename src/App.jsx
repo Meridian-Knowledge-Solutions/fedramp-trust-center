@@ -94,10 +94,11 @@ const SidebarItem = memo(({ icon: Icon, label, badge, isActive, onClick }) => (
   </button>
 ));
 
-const StatsCard = memo(({ title, value, contextMetric, statusLabel, statusColor }) => (
+const StatsCard = memo(({ title, value, contextMetric, statusLabel, statusColor, subtitle }) => (
   <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-5 group hover:border-white/20 transition-all shadow-sm`}>
     <div className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">{title}</div>
     <div className="text-2xl font-bold text-white mb-2 tracking-tight font-mono tabular-nums">{value}</div>
+    {subtitle && <div className="text-slate-500 text-[10px] mb-2 leading-snug">{subtitle}</div>}
     <div className="flex items-center justify-between text-[10px]">
       <span className={`font-medium ${statusColor}`}>{statusLabel}</span>
       <span className="text-slate-400 font-mono tabular-nums">{contextMetric}</span>
@@ -418,7 +419,7 @@ const DashboardContent = memo(() => {
       ? { label: 'Minor Issues', color: 'text-amber-400' }
       : { label: 'Needs Attention', color: 'text-rose-400' };
 
-  const warningStatus = parseInt(metrics.warning) === 0 ? { label: 'All Clear', color: 'text-emerald-400' } : { label: 'Active', color: 'text-amber-400' };
+  const warningStatus = parseInt(metrics.warning) === 0 ? { label: 'All Clear', color: 'text-emerald-400' } : { label: 'Monitoring', color: 'text-amber-400' };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4">
@@ -430,6 +431,7 @@ const DashboardContent = memo(() => {
           contextMetric={complianceTarget}
           statusLabel={complianceStatus.label}
           statusColor={complianceStatus.color}
+          subtitle="Overall assessment score across all controls"
         />
         <StatsCard
           title="Passing Controls"
@@ -437,6 +439,7 @@ const DashboardContent = memo(() => {
           contextMetric={`${passingPercent}% of ${totalControls}`}
           statusLabel={passingStatus.label}
           statusColor={passingStatus.color}
+          subtitle="Controls that fully meet FedRAMP requirements"
         />
         <StatsCard
           title="Failing Controls"
@@ -444,13 +447,15 @@ const DashboardContent = memo(() => {
           contextMetric={`${failingPercent}% of ${totalControls}`}
           statusLabel={failingStatus.label}
           statusColor={failingStatus.color}
+          subtitle="Controls requiring corrective action"
         />
         <StatsCard
-          title="Warnings"
+          title="Conditional Controls"
           value={metrics.warning}
           contextMetric={`${warningsPercent}% of ${totalControls}`}
           statusLabel={warningStatus.label}
           statusColor={warningStatus.color}
+          subtitle="Compliant controls with conditions or constraints requiring monitoring"
         />
       </div>
       <ComplianceChart />
@@ -767,7 +772,6 @@ const AppShell = () => {
           <div className="flex items-center space-x-3 lg:space-x-6">
             <button className="relative cursor-pointer group p-2 rounded-full hover:bg-white/5 transition-colors">
               <Bell size={16} className="text-slate-400 group-hover:text-white transition-colors" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e] animate-pulse"></span>
             </button>
             <div className="h-4 w-px bg-white/10"></div>
             <div className="flex items-center gap-3">

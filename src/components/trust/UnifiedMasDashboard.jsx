@@ -707,7 +707,8 @@ const SystemTooltip = ({ system, x, y, awsServices, onMouseEnter, onMouseLeave }
     const padding = 32; // p-4 top+bottom
     const tooltipHeight = baseHeight + servicesHeight + ciaHeight + gridHeight + hintHeight + padding + 20;
 
-    const tooltipY = y > 320 ? y - tooltipHeight - 10 : y + 70;
+    let tooltipY = y > 320 ? y - tooltipHeight - 10 : y + 70;
+    if (tooltipY < 10) tooltipY = 10;
     const tooltipX = x > 600 ? x - 300 : x < 200 ? x + 20 : x - 150;
 
     // Get top services by cost for AWS
@@ -857,9 +858,9 @@ const SystemDetailPanel = ({ system, awsServices, driftSummary, onClose }) => {
     }, {});
 
     return (
-        <div className="absolute inset-0 z-30 flex items-start justify-center pt-8 pb-8" onClick={onClose}>
+        <div className="fixed inset-0 z-[60] flex items-start justify-center pt-20 pb-8 bg-black/40 backdrop-blur-sm" onClick={onClose}>
             <div
-                className="bg-[#13131a] border border-white/15 rounded-xl shadow-2xl w-[460px] max-h-[85%] overflow-hidden flex flex-col"
+                className="bg-[#13131a] border border-white/15 rounded-xl shadow-2xl w-[460px] max-h-[80vh] overflow-hidden flex flex-col"
                 onClick={(e) => e.stopPropagation()}
                 style={{ boxShadow: '0 0 80px rgba(0,0,0,0.8), 0 0 40px rgba(59,130,246,0.08)' }}
             >
@@ -1459,9 +1460,9 @@ export const UnifiedMasDashboard = () => {
                 <svg
                     width="100%"
                     height={svgHeight}
-                    viewBox={`0 0 900 ${svgHeight}`}
+                    viewBox={`-20 -20 940 ${svgHeight + 40}`}
                     className="relative z-10"
-                    style={{ minHeight: `${svgHeight}px` }}
+                    style={{ minHeight: `${svgHeight}px`, overflow: 'visible' }}
                 >
                     <defs>
                         {/* Hub gradient */}

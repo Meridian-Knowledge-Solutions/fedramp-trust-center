@@ -146,8 +146,8 @@ ${minorKsis.map(k => `### ${k.id}
         </div>
         <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
           <div className="text-3xl font-bold text-amber-600">{warningKsis.length}</div>
-          <div className="text-xs text-amber-600 font-medium">Low Risk Findings</div>
-          <div className="text-xs text-amber-500 mt-1">60-day tracking</div>
+          <div className="text-xs text-amber-600 font-medium">Conditional Controls</div>
+          <div className="text-xs text-amber-500 mt-1">Compliant with conditions — 60-day monitoring</div>
         </div>
         <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
           <div className="text-3xl font-bold text-blue-600">{infoKsis.length}</div>

@@ -91,7 +91,7 @@ export const KSIGrid = () => {
           <FilterTab label="All" count={statusCounts.all} active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
           <FilterTab label="Compliant" count={statusCounts.passed} active={statusFilter === 'passed'} onClick={() => setStatusFilter('passed')} />
           <FilterTab label="Failed" count={statusCounts.failed} active={statusFilter === 'failed'} onClick={() => setStatusFilter('failed')} />
-          <FilterTab label="Low Risk" count={statusCounts.warning} active={statusFilter === 'warning'} onClick={() => setStatusFilter('warning')} />
+          <FilterTab label="Conditional" count={statusCounts.warning} active={statusFilter === 'warning'} onClick={() => setStatusFilter('warning')} />
         </div>
       </div>
 
@@ -222,9 +222,19 @@ const KSICard = ({ ksi, openModal }) => {
         </span>
       </div>
 
-      <h4 className="pl-3 text-sm font-medium text-gray-200 mb-4 group-hover:text-blue-400 transition-colors leading-relaxed flex-1">
+      <h4 className="pl-3 text-sm font-medium text-gray-200 mb-2 group-hover:text-blue-400 transition-colors leading-relaxed flex-1">
         {ksi.description}
       </h4>
+      {ksi.status === 'warning' && (
+        <p className="pl-3 text-[10px] text-amber-400/70 mb-2 leading-snug">
+          Passes validation but has conditions requiring ongoing monitoring
+        </p>
+      )}
+      {ksi.status === 'failed' && (
+        <p className="pl-3 text-[10px] text-red-400/70 mb-2 leading-snug">
+          Failed validation — corrective action required
+        </p>
+      )}
 
       <div className="pl-3 pt-3 border-t border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">

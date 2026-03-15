@@ -196,11 +196,15 @@ export const WhyModal = () => {
               <StatusIcon className={`mt-1 ${config.color}`} size={24} />
               <div>
                 <h4 className={`font-bold ${config.color} mb-2 uppercase tracking-wide text-base`}>
-                  {parsed.status === 'passed' ? 'Compliant' : 'Attention Required'}
+                  {parsed.status === 'passed' ? 'Compliant' :
+                   parsed.status === 'warning' ? 'Compliant with Conditions' :
+                   parsed.status === 'failed' ? 'Remediation Required' : 'Attention Required'}
                 </h4>
                 <p className="text-sm text-gray-200">
-                  This security control has been assessed against FedRAMP requirements.
-                  {parsed.status !== 'passed' && ' Remediation or tracking may be required.'}
+                  {parsed.status === 'passed' && 'This control fully meets FedRAMP requirements. No action needed.'}
+                  {parsed.status === 'warning' && 'This control passes validation but has conditions or constraints that require ongoing monitoring. No immediate remediation is needed.'}
+                  {parsed.status === 'failed' && 'This control failed validation and requires corrective action per FedRAMP remediation timelines.'}
+                  {parsed.status === 'info' && 'This provides supplementary context about the control. No action required.'}
                 </p>
               </div>
             </div>
@@ -248,8 +252,14 @@ export const WhyModal = () => {
               <div className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Status</div>
               <div className={`font-bold text-xl flex items-center gap-2 ${config.color}`}>
                 <StatusIcon size={20} />
-                {parsed.statusLabel || parsed.status.toUpperCase()}
+                {parsed.status === 'warning' ? 'Conditional' : (parsed.statusLabel || parsed.status.toUpperCase())}
               </div>
+              {parsed.status === 'warning' && (
+                <p className="text-xs text-gray-400 mt-2">Passes with conditions requiring monitoring</p>
+              )}
+              {parsed.status === 'failed' && (
+                <p className="text-xs text-gray-400 mt-2">Corrective action required</p>
+              )}
             </div>
           </div>
           <div className="relative p-5 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
