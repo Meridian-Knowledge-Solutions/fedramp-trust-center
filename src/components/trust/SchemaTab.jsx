@@ -70,9 +70,9 @@ const SchemaCard = memo(({ schema, isSelected, onClick, schemaData }) => {
           <div className="text-[11px] text-slate-500 mt-1 font-mono">{schema.filename}</div>
           {schemaData && (
             <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-600 font-mono">
-              <span>{Object.keys(schemaData.properties || {}).length} properties</span>
+              <span>{Object.keys(schemaData.properties || schemaData.items?.properties || schemaData.$defs || schemaData.definitions || {}).length} properties</span>
               <span className="text-slate-700">|</span>
-              <span>{(schemaData.required || []).length} required</span>
+              <span>{(schemaData.required || schemaData.items?.required || []).length} required</span>
             </div>
           )}
         </div>
@@ -274,25 +274,49 @@ export const SchemaTab = memo(() => {
                   <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
                 </div>
               ) : viewMode === 'tree' ? (
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-white/10 bg-[#09090b]">
-                      <th className="px-4 py-2.5 text-left text-[9px] text-slate-500 uppercase tracking-wider font-bold">Property</th>
-                      <th className="px-4 py-2.5 text-left text-[9px] text-slate-500 uppercase tracking-wider font-bold">Type</th>
-                      <th className="px-4 py-2.5 text-left text-[9px] text-slate-500 uppercase tracking-wider font-bold">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentData.properties && Object.entries(currentData.properties).map(([name, prop]) => (
-                      <SchemaPropertyRow
-                        key={name}
-                        name={name}
-                        prop={prop}
-                        required={(currentData.required || []).includes(name)}
-                      />
-                    ))}
-                  </tbody>
-                </table>
+                (() => {
+                  // Resolve properties from various schema structures
+                  const topProps = currentData.properties
+                    || currentData.items?.properties
+                    || currentData.$defs
+                    || currentData.definitions
+                    || null;
+                  const topRequired = currentData.required
+                    || currentData.items?.required
+                    || [];
+
+                  if (!topProps || Object.keys(topProps).length === 0) {
+                    return (
+                      <div className="flex flex-col items-center justify-center h-64 text-slate-500">
+                        <Code2 size={24} className="mb-3 opacity-40" />
+                        <p className="text-xs font-medium">No properties to display in tree view</p>
+                        <p className="text-[10px] text-slate-600 mt-1">Switch to Raw view to inspect the full schema</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-white/10 bg-[#09090b]">
+                          <th className="px-4 py-2.5 text-left text-[9px] text-slate-500 uppercase tracking-wider font-bold">Property</th>
+                          <th className="px-4 py-2.5 text-left text-[9px] text-slate-500 uppercase tracking-wider font-bold">Type</th>
+                          <th className="px-4 py-2.5 text-left text-[9px] text-slate-500 uppercase tracking-wider font-bold">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(topProps).map(([name, prop]) => (
+                          <SchemaPropertyRow
+                            key={name}
+                            name={name}
+                            prop={prop}
+                            required={Array.isArray(topRequired) && topRequired.includes(name)}
+                          />
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+                })()
               ) : (
                 <pre
                   className="p-4 text-xs font-mono leading-relaxed overflow-x-auto"
