@@ -10,7 +10,7 @@ import { Sanitizer } from '../../utils/sanitizer';
 import {
   AlertTriangle, CheckCircle, Info, FileText, Terminal, Shield,
   ChevronDown, ChevronRight, Database, Cpu, Lock, Layers,
-  Target, GitBranch, Zap, AlertCircle, Server, Key, Network,
+  Target, GitBranch, Zap, Server, Key, Network,
   Globe, Activity, Eye, Settings, Archive, Users, Search, Cloud
 } from 'lucide-react';
 
@@ -211,28 +211,15 @@ export const WhyModal = () => {
             </div>
           </div>
 
-          {/* Condition/Failure reason — public-safe summary of why this status */}
-          {parsed.status !== 'passed' && parsed.assertionReason && (
-            <div className={`p-4 rounded-xl border ${
-              parsed.status === 'warning' ? 'border-amber-500/20 bg-amber-500/5' :
-              parsed.status === 'failed' ? 'border-red-500/20 bg-red-500/5' :
-              'border-blue-500/20 bg-blue-500/5'
-            }`}>
+          {/* Warnings — simple reason text for non-passing controls */}
+          {parsed.status === 'warning' && parsed.assertionReason && (
+            <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
               <div className="flex items-start gap-3">
-                <AlertCircle size={18} className={`mt-0.5 flex-shrink-0 ${
-                  parsed.status === 'warning' ? 'text-amber-400' :
-                  parsed.status === 'failed' ? 'text-red-400' : 'text-blue-400'
-                }`} />
-                <div>
-                  <h4 className={`font-semibold text-sm mb-1 ${
-                    parsed.status === 'warning' ? 'text-amber-300' :
-                    parsed.status === 'failed' ? 'text-red-300' : 'text-blue-300'
-                  }`}>
-                    {parsed.status === 'warning' ? 'Condition Details' :
-                     parsed.status === 'failed' ? 'Failure Details' : 'Details'}
-                  </h4>
-                  <p className="text-sm text-gray-300 leading-relaxed">{Sanitizer.sanitizeReason(parsed.assertionReason)}</p>
-                </div>
+                <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-amber-400" />
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  <span className="font-semibold text-amber-300">Warnings: </span>
+                  {Sanitizer.sanitizeReason(parsed.assertionReason)}
+                </p>
               </div>
             </div>
           )}
@@ -312,46 +299,15 @@ export const WhyModal = () => {
           </div>
         </div>
 
-        {/* Condition / Failure Reason — explains WHY this control has its status */}
-        {parsed.status !== 'passed' && parsed.assertionReason && (
-          <div className={`p-4 rounded-xl border ${
-            parsed.status === 'warning' ? 'border-amber-500/30 bg-amber-500/5' :
-            parsed.status === 'failed' ? 'border-red-500/30 bg-red-500/5' :
-            'border-blue-500/30 bg-blue-500/5'
-          }`}>
+        {/* Warnings — simple reason text for warning-status controls */}
+        {parsed.status === 'warning' && parsed.assertionReason && (
+          <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
             <div className="flex items-start gap-3">
-              <AlertCircle size={18} className={`mt-0.5 flex-shrink-0 ${
-                parsed.status === 'warning' ? 'text-amber-400' :
-                parsed.status === 'failed' ? 'text-red-400' : 'text-blue-400'
-              }`} />
-              <div>
-                <h4 className={`font-semibold text-sm mb-2 ${
-                  parsed.status === 'warning' ? 'text-amber-300' :
-                  parsed.status === 'failed' ? 'text-red-300' : 'text-blue-300'
-                }`}>
-                  {parsed.status === 'warning' ? 'Why This Control Is Conditional' :
-                   parsed.status === 'failed' ? 'Why This Control Failed' : 'Additional Context'}
-                </h4>
-                <p className="text-sm text-gray-300 leading-relaxed">{parsed.assertionReason}</p>
-                {parsed.reasonParsed.details.length > 1 && (
-                  <ul className="mt-3 space-y-1.5">
-                    {parsed.reasonParsed.details.map((detail, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-400">
-                        <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                          detail.includes('✅') || detail.toLowerCase().includes('pass') || detail.toLowerCase().includes('verified')
-                            ? 'bg-green-500'
-                            : detail.includes('❌') || detail.toLowerCase().includes('fail')
-                              ? 'bg-red-500'
-                              : detail.includes('⚠') || detail.toLowerCase().includes('warning')
-                                ? 'bg-amber-500'
-                                : 'bg-gray-500'
-                        }`} />
-                        <span>{detail}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-amber-400" />
+              <p className="text-sm text-gray-300 leading-relaxed">
+                <span className="font-semibold text-amber-300">Warnings: </span>
+                {parsed.assertionReason}
+              </p>
             </div>
           </div>
         )}
@@ -470,30 +426,6 @@ export const WhyModal = () => {
           </CollapsibleSection>
         )}
 
-        {/* Assertion Reason Details */}
-        {parsed.reasonParsed.details.length > 0 && (
-          <CollapsibleSection
-            title="Assessment Findings"
-            icon={FileText}
-            defaultOpen={false}
-            badge={`${parsed.reasonParsed.details.length} items`}
-          >
-            <ul className="space-y-2">
-              {parsed.reasonParsed.details.map((detail, idx) => (
-                <li key={idx} className="flex gap-3 text-sm text-gray-200 p-2 rounded bg-black/20">
-                  <div className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${
-                    detail.includes('✅') || detail.toLowerCase().includes('pass') || detail.toLowerCase().includes('verified')
-                      ? 'bg-green-500'
-                      : detail.includes('❌') || detail.toLowerCase().includes('fail')
-                        ? 'bg-red-500'
-                        : 'bg-blue-500'
-                  }`} />
-                  <span className="leading-relaxed">{detail}</span>
-                </li>
-              ))}
-            </ul>
-          </CollapsibleSection>
-        )}
 
         {/* Recommended Action */}
         {parsed.recommendedAction && (
