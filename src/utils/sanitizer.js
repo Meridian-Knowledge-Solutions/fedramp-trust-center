@@ -27,11 +27,11 @@ export const Sanitizer = {
     // Used by the Grid to determine colors/icons
     mapStatus: (status) => {
         const map = {
-            'passed': { label: 'Compliant', icon: 'CheckCircle2', color: 'text-green-600', bg: 'bg-green-50' },
-            'failed': { label: 'Remediation', icon: 'XCircle', color: 'text-red-600', bg: 'bg-red-50' },
-            'warning': { label: 'Low Risk', icon: 'AlertTriangle', color: 'text-amber-600', bg: 'bg-amber-50' },
-            'info': { label: 'Context', icon: 'Info', color: 'text-blue-600', bg: 'bg-blue-50' },
-            'unknown': { label: 'Unknown', icon: 'HelpCircle', color: 'text-slate-400', bg: 'bg-slate-100' }
+            'passed': { label: 'Compliant', icon: 'CheckCircle2', color: 'text-green-600', bg: 'bg-green-50', description: 'Control fully meets FedRAMP requirements' },
+            'failed': { label: 'Remediation Required', icon: 'XCircle', color: 'text-red-600', bg: 'bg-red-50', description: 'Control failed validation and requires corrective action' },
+            'warning': { label: 'Compliant with Conditions', icon: 'AlertTriangle', color: 'text-amber-600', bg: 'bg-amber-50', description: 'Control passes but has conditions or constraints that require ongoing monitoring' },
+            'info': { label: 'Informational', icon: 'Info', color: 'text-blue-600', bg: 'bg-blue-50', description: 'Supplementary context — no action required' },
+            'unknown': { label: 'Pending Review', icon: 'HelpCircle', color: 'text-slate-400', bg: 'bg-slate-100', description: 'Control status has not been determined' }
         };
 
         // Returns the config object. The Component will render the actual Icon.
