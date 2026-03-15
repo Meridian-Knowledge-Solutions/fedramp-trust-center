@@ -767,7 +767,6 @@ const AppShell = () => {
           <div className="flex items-center space-x-3 lg:space-x-6">
             <button className="relative cursor-pointer group p-2 rounded-full hover:bg-white/5 transition-colors">
               <Bell size={16} className="text-slate-400 group-hover:text-white transition-colors" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e] animate-pulse"></span>
             </button>
             <div className="h-4 w-px bg-white/10"></div>
             <div className="flex items-center gap-3">
