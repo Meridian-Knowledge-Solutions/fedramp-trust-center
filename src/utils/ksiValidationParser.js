@@ -103,6 +103,71 @@ export const extractServiceFromCommand = (command) => {
 };
 
 /**
+ * Parse individual findings from the assertion_reason into structured items.
+ *
+ * Handles formats like:
+ *   "✅ Excellent 10/10 (100%): ✅ [Technical] Inspector active.; ❌ [Evidence] No issues found."
+ *   "Good (85%): ... | 6/7 resources compliant. | Verified: Compliant: SG ... | Warnings: Best Practice: ..."
+ *
+ * Returns an array of { status: 'pass'|'fail'|'warning'|'info', category: string, message: string }
+ */
+export const parseStructuredFindings = (reason) => {
+  if (!reason) return [];
+
+  // Strip the leading headline/score prefix (everything before the first finding emoji or bracket)
+  // e.g. "✅ Excellent 10/10 (100%): ✅ [Technical] ..." → start at the findings
+  let body = reason;
+  const headerCut = body.match(/^[^:]*\(\d+%\)\s*:\s*/);
+  if (headerCut) {
+    body = body.slice(headerCut[0].length);
+  }
+
+  // Split on semicolons or pipes (the two common delimiters)
+  const rawSegments = body.split(/[;|]/).map(s => s.trim()).filter(s => s.length > 0);
+
+  const results = [];
+  for (const seg of rawSegments) {
+    // Skip noise segments
+    const lower = seg.toLowerCase();
+    if (lower.match(/^\d+\/\d+\s+resources?\s+compliant/)) continue;
+    if (lower.match(/^\.\.\.and\s+\d+\s+more/)) continue;
+    if (lower.match(/^verified:\s*$/)) continue;
+
+    // Determine status from leading emoji
+    let status = 'info';
+    let cleaned = seg;
+    if (seg.startsWith('✅')) { status = 'pass'; cleaned = seg.replace(/^✅\s*/, ''); }
+    else if (seg.startsWith('❌')) { status = 'fail'; cleaned = seg.replace(/^❌\s*/, ''); }
+    else if (seg.startsWith('⚠️')) { status = 'warning'; cleaned = seg.replace(/^⚠️\s*/, ''); }
+    else if (seg.startsWith('ℹ️')) { status = 'info'; cleaned = seg.replace(/^ℹ️\s*/, ''); }
+    // Also detect via keywords when no emoji present
+    else if (lower.startsWith('warnings:') || lower.startsWith('warning:') || lower.startsWith('best practice:')) {
+      status = 'warning';
+      cleaned = seg.replace(/^Warnings:\s*/i, '');
+    }
+    else if (lower.startsWith('verified:') || lower.startsWith('compliant:')) {
+      status = 'pass';
+    }
+
+    // Extract [Category] tag if present
+    let category = '';
+    const catMatch = cleaned.match(/^\[([^\]]+)\]\s*/);
+    if (catMatch) {
+      category = catMatch[1];
+      cleaned = cleaned.slice(catMatch[0].length);
+    }
+
+    // Skip empty or pure-noise leftovers
+    const trimmed = cleaned.replace(/[✅❌⚠️ℹ️]/g, '').trim();
+    if (!trimmed || trimmed.length < 3) continue;
+
+    results.push({ status, category, message: trimmed });
+  }
+
+  return results;
+};
+
+/**
  * Parse assertion_reason to extract structured findings
  * Example: "✅ Excellent (100%): 3 items: 3 verified"
  * Example: "❌ Insufficient (60%): 5 items: 3 verified, 2 failed"
@@ -149,12 +214,18 @@ export const parseAssertionReason = (reason) => {
   // Split by semicolons or bullets for detailed findings
   const parts = reason.split(/[;•]/).map(s => s.trim()).filter(s => s.length > 0);
   
+  // Parse individual structured findings from the semicolon/pipe-separated reason text
+  const structuredFindings = parseStructuredFindings(reason);
+
   return {
     status: hasPass && !hasFail ? 'pass' : hasFail ? 'fail' : 'unknown',
     label,
     score,
     findings,
     details: parts,
+    structuredFindings,
+    // Convenience: condition messages are the warning/info findings
+    conditionMessages: structuredFindings.filter(f => f.status === 'warning' || f.status === 'info'),
   };
 };
 
@@ -295,6 +366,10 @@ export const parseKsiValidation = (ksi) => {
     checksSummary: outcomeSummary,
     serviceGroups,
     
+    // Structured findings parsed from assertion_reason
+    structuredFindings: reasonParsed.structuredFindings || [],
+    conditionMessages: reasonParsed.conditionMessages || [],
+
     // Raw data for fallback
     assertionReason: ksi.assertion_reason,
     recommendedAction: ksi.recommended_action,
@@ -340,6 +415,7 @@ export const generateCriteriaText = (parsed) => {
 
 export default {
   extractServiceFromCommand,
+  parseStructuredFindings,
   parseAssertionReason,
   parseCommandExecutions,
   getKsiCategory,

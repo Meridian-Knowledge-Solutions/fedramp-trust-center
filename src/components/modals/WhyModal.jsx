@@ -156,6 +156,85 @@ const ServiceGroupCard = ({ group }) => {
   );
 };
 
+// Structured finding row — renders a single parsed finding as a clean line item
+const FindingItem = ({ finding, compact = false }) => {
+  const statusStyles = {
+    pass: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20' },
+    fail: { icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20' },
+    warning: { icon: AlertTriangle, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+    info: { icon: Info, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+  };
+  const style = statusStyles[finding.status] || statusStyles.info;
+  const Icon = style.icon;
+
+  if (compact) {
+    return (
+      <div className="flex items-start gap-2 py-1">
+        <Icon size={14} className={`mt-0.5 flex-shrink-0 ${style.color}`} />
+        <span className="text-sm text-gray-300 leading-snug">
+          {finding.category && (
+            <span className="font-medium text-gray-200">{finding.category}: </span>
+          )}
+          {finding.message}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`flex items-start gap-3 p-3 rounded-lg border ${style.border} ${style.bg}`}>
+      <Icon size={16} className={`mt-0.5 flex-shrink-0 ${style.color}`} />
+      <div className="flex-1 min-w-0">
+        {finding.category && (
+          <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-0.5">{finding.category}</span>
+        )}
+        <p className="text-sm text-gray-200 leading-relaxed">{finding.message}</p>
+      </div>
+    </div>
+  );
+};
+
+// Findings list — groups and presents structured findings intelligently
+const FindingsList = ({ findings, maxVisible = 4, compact = false }) => {
+  const [showAll, setShowAll] = useState(false);
+
+  if (!findings || findings.length === 0) return null;
+
+  // Separate by status: show conditions/failures prominently, collapse passing items
+  const conditions = findings.filter(f => f.status === 'warning' || f.status === 'info');
+  const failures = findings.filter(f => f.status === 'fail');
+  const passes = findings.filter(f => f.status === 'pass');
+
+  // Prioritized order: failures first, then conditions, then passes
+  const prioritized = [...failures, ...conditions, ...passes];
+  const visible = showAll ? prioritized : prioritized.slice(0, maxVisible);
+  const hiddenCount = prioritized.length - maxVisible;
+
+  return (
+    <div className="space-y-2">
+      {visible.map((finding, idx) => (
+        <FindingItem key={idx} finding={finding} compact={compact} />
+      ))}
+      {!showAll && hiddenCount > 0 && (
+        <button
+          onClick={() => setShowAll(true)}
+          className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors pl-1"
+        >
+          Show {hiddenCount} more finding{hiddenCount !== 1 ? 's' : ''}
+        </button>
+      )}
+      {showAll && hiddenCount > 0 && (
+        <button
+          onClick={() => setShowAll(false)}
+          className="text-xs text-gray-500 hover:text-gray-300 font-medium transition-colors pl-1"
+        >
+          Show less
+        </button>
+      )}
+    </div>
+  );
+};
+
 export const WhyModal = () => {
   const { modals, closeModal, openModal } = useModal();
   const { isAuthenticated } = useAuth();
@@ -211,15 +290,15 @@ export const WhyModal = () => {
             </div>
           </div>
 
-          {/* Warnings — simple reason text for non-passing controls */}
-          {parsed.status === 'warning' && parsed.assertionReason && (
-            <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
-              <div className="flex items-start gap-3">
-                <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-amber-400" />
-                <p className="text-sm text-gray-300 leading-relaxed">
-                  {Sanitizer.sanitizeReason(parsed.assertionReason)}
-                </p>
-              </div>
+          {/* Structured condition findings for warning-status controls (public view) */}
+          {parsed.status === 'warning' && parsed.conditionMessages.length > 0 && (
+            <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 space-y-2">
+              {parsed.conditionMessages.map((f, idx) => (
+                <FindingItem key={idx} finding={{
+                  ...f,
+                  message: Sanitizer.sanitizeReason(f.message),
+                }} compact />
+              ))}
             </div>
           )}
 
@@ -298,16 +377,26 @@ export const WhyModal = () => {
           </div>
         </div>
 
-        {/* Warnings — simple reason text for warning-status controls */}
-        {parsed.status === 'warning' && parsed.assertionReason && (
-          <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
-            <div className="flex items-start gap-3">
-              <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-amber-400" />
-              <p className="text-sm text-gray-300 leading-relaxed">
-                {parsed.assertionReason}
-              </p>
-            </div>
-          </div>
+        {/* Structured findings — all parsed items from assertion_reason */}
+        {parsed.structuredFindings.length > 0 && (
+          <CollapsibleSection
+            title="Assessment Findings"
+            icon={Eye}
+            defaultOpen={parsed.status !== 'passed'}
+            badge={(() => {
+              const fails = parsed.structuredFindings.filter(f => f.status === 'fail').length;
+              const warns = parsed.structuredFindings.filter(f => f.status === 'warning').length;
+              if (fails > 0) return `${fails} issue${fails !== 1 ? 's' : ''}`;
+              if (warns > 0) return `${warns} condition${warns !== 1 ? 's' : ''}`;
+              return `${parsed.structuredFindings.length} checked`;
+            })()}
+            badgeColor={
+              parsed.structuredFindings.some(f => f.status === 'fail') ? 'red' :
+              parsed.structuredFindings.some(f => f.status === 'warning') ? 'yellow' : 'green'
+            }
+          >
+            <FindingsList findings={parsed.structuredFindings} maxVisible={5} />
+          </CollapsibleSection>
         )}
 
         {/* Category & Requirement */}
