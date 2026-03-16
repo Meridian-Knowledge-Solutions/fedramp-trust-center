@@ -207,7 +207,7 @@ export const PoliciesTab = memo(() => {
           <div>
             <h2 className="text-white font-bold text-lg tracking-tight">Policies</h2>
             <p className="text-slate-500 text-xs mt-1 uppercase tracking-wider font-mono">
-              {policies.length} document{policies.length !== 1 ? 's' : ''} from governance repository
+              Governance Documents
             </p>
           </div>
           <div className="flex items-center gap-2">
