@@ -192,7 +192,7 @@ export default function VDRDashboard() {
               <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5, color: "#fafafa" }}>VDR Metrics</span>
               <span style={{ fontSize: 10, background: "#1e3a5f", color: "#60a5fa", padding: "2px 8px", borderRadius: 4, fontWeight: 600, letterSpacing: 0.5 }}>PUBLIC</span>
             </div>
-            <div style={{ fontSize: 12, color: "#52525b" }}>FedRAMP 20x Vulnerability Detection & Response · {derived.vdrStandard || metadata.vdr_standard}</div>
+            <div style={{ fontSize: 12, color: "#52525b" }}>FedRAMP 20x Vulnerability Detection &amp; Response</div>
           </div>
           {posture && (
             <div style={{ textAlign: "right" as const }}>

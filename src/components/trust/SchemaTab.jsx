@@ -206,7 +206,7 @@ export const SchemaTab = memo(() => {
           <div>
             <h2 className="text-white font-bold text-lg tracking-tight">JSON Schemas</h2>
             <p className="text-slate-500 text-xs mt-1 uppercase tracking-wider font-mono">
-              {schemas.length} schema{schemas.length !== 1 ? 's' : ''} — JSON Schema draft/2020-12
+              {schemas.length} schema{schemas.length !== 1 ? 's' : ''}
             </p>
           </div>
           <div className="flex items-center gap-2">

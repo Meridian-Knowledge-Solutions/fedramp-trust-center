@@ -793,6 +793,25 @@ const AppShell = () => {
 
           <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto relative z-10">
             {activeView === 'dashboard' ? <DashboardContent /> :
+              !isAuthenticated ? (
+                <div className="flex items-center justify-center min-h-[60vh]">
+                  <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-10 rounded-2xl border border-gray-700 text-center max-w-md">
+                    <div className="w-16 h-16 mx-auto mb-5 bg-gray-800 rounded-2xl flex items-center justify-center border border-gray-700">
+                      <Shield size={32} className="text-gray-500" />
+                    </div>
+                    <h3 className="font-semibold text-white text-xl mb-3">Federal Access Required</h3>
+                    <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+                      This section is restricted to authorized federal personnel. Request access to view detailed findings, reports, and assessment data.
+                    </p>
+                    <button
+                      onClick={() => openModal('registration')}
+                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-900/30"
+                    >
+                      Request Full Access
+                    </button>
+                  </div>
+                </div>
+              ) :
               activeView === 'trust' ? <TrustCenterView /> :
                 activeView === 'vdr' ? <VDRPublicMetricsDashboard /> :
                   activeView === 'transparency' ? <TransparencyConsole /> :
