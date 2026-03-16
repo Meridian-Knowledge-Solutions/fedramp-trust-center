@@ -211,13 +211,13 @@ export const WhyModal = () => {
             </div>
           </div>
 
-          {/* Warnings — simple reason text for non-passing controls */}
-          {parsed.status === 'warning' && parsed.assertionReason && (
+          {/* Condition note — clean extracted message for warning-status controls */}
+          {parsed.status === 'warning' && parsed.conditionMessage && (
             <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
               <div className="flex items-start gap-3">
                 <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-amber-400" />
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  {Sanitizer.sanitizeReason(parsed.assertionReason)}
+                  {Sanitizer.sanitizeReason(parsed.conditionMessage)}
                 </p>
               </div>
             </div>
@@ -298,13 +298,13 @@ export const WhyModal = () => {
           </div>
         </div>
 
-        {/* Warnings — simple reason text for warning-status controls */}
-        {parsed.status === 'warning' && parsed.assertionReason && (
+        {/* Condition note — clean extracted message for warning-status controls */}
+        {parsed.status === 'warning' && parsed.conditionMessage && (
           <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
             <div className="flex items-start gap-3">
               <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-amber-400" />
               <p className="text-sm text-gray-300 leading-relaxed">
-                {parsed.assertionReason}
+                {parsed.conditionMessage}
               </p>
             </div>
           </div>

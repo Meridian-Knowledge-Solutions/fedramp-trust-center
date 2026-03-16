@@ -149,12 +149,38 @@ export const parseAssertionReason = (reason) => {
   // Split by semicolons or bullets for detailed findings
   const parts = reason.split(/[;•]/).map(s => s.trim()).filter(s => s.length > 0);
   
+  // Extract a clean, short condition/warning message (strip the verbose pipe-delimited noise)
+  let conditionMessage = '';
+  if (reason.includes('|')) {
+    const segments = reason.split('|').map(s => s.trim());
+    // Look for the segment that starts with a meaningful condition (e.g. "Best Practice:", "Warning:")
+    // Skip segments that are just status labels, resource counts, or verification lists
+    for (const seg of segments) {
+      const lower = seg.toLowerCase();
+      // Skip status/score prefix like "Good (85%): ..."
+      if (lower.match(/^(✅|❌|⚠️|ℹ️)?\s*(excellent|good|insufficient|critical|technical failure)/)) continue;
+      // Skip resource compliance counts like "6/7 resources compliant"
+      if (lower.match(/^\d+\/\d+\s+resources?\s+compliant/)) continue;
+      // Skip verification lists like "Verified: Compliant: SG..."
+      if (lower.match(/^verified:/)) continue;
+      // Skip "...and N more" summaries
+      if (lower.match(/^\.\.\.and\s+\d+\s+more/)) continue;
+      // Skip "Warnings:" prefix but keep what follows
+      const warningStripped = seg.replace(/^Warnings:\s*/i, '').trim();
+      if (warningStripped) {
+        conditionMessage = warningStripped;
+        break;
+      }
+    }
+  }
+
   return {
     status: hasPass && !hasFail ? 'pass' : hasFail ? 'fail' : 'unknown',
     label,
     score,
     findings,
     details: parts,
+    conditionMessage,
   };
 };
 
@@ -295,6 +321,9 @@ export const parseKsiValidation = (ksi) => {
     checksSummary: outcomeSummary,
     serviceGroups,
     
+    // Clean condition message (extracted from verbose assertion_reason)
+    conditionMessage: reasonParsed.conditionMessage || '',
+
     // Raw data for fallback
     assertionReason: ksi.assertion_reason,
     recommendedAction: ksi.recommended_action,
