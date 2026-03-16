@@ -5,17 +5,23 @@ export const Sanitizer = {
         if (!validation) return 'unknown';
 
         const assertion = validation.assertion;
-        // Check assertion_reason OR message (some APIs use different keys)
-        const reason = (validation.assertion_reason || validation.message || '').toLowerCase();
+        const reason = validation.assertion_reason || validation.message || '';
 
         // 1. Failures (Explicit False)
         if (assertion === false || assertion === "false") return 'failed';
 
         // 2. Successes (Explicit True)
         if (assertion === true || assertion === "true") {
-            // Check for soft warnings inside the success message
-            if (reason.includes('warning') || reason.includes('⚠️')) return 'warning';
-            if (reason.includes('info') || reason.includes('ℹ️') || reason.includes('context')) return 'info';
+            // Only check the HEADLINE portion for warning/info indicators,
+            // not the individual finding items (which use ⚠️/ℹ️ for sub-items).
+            // Headline format: "✅ Excellent 10/10 (100%): ✅ [Finding1]...; ✅ [Finding2]..."
+            // We extract everything before the first semicolon or the first sub-finding emoji.
+            const headlineEnd = reason.search(/[;]/);
+            const headline = (headlineEnd > 0 ? reason.slice(0, headlineEnd) : reason).toLowerCase();
+
+            // Check headline only for control-level warning/info signals
+            if (headline.includes('warning') || headline.includes('⚠️')) return 'warning';
+            if (headline.includes('ℹ️') || headline.includes('context')) return 'info';
             return 'passed';
         }
 
