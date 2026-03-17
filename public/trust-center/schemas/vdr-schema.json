@@ -80,7 +80,7 @@
               "source_name": { "type": "string" },
               "scan_type": {
                 "type": "string",
-                "enum": ["authenticated", "unauthenticated", "agent_based", "container", "sast", "dast", "sca", "cspm"]
+                "enum": ["authenticated", "unauthenticated", "agent_based", "container", "sast", "dast", "sca", "cspm", "pentest", "audit", "incident"]
               },
               "last_scan": { "type": "string", "format": "date-time" },
               "scan_count": { "type": "integer" }
@@ -170,6 +170,21 @@
             }
           }
         },
+        "detection_source_breakdown": {
+          "type": "object",
+          "description": "Count of vulnerabilities by detection source (all-encompassing vulnerability management)",
+          "properties": {
+            "inspector": { "type": "integer", "description": "AWS Inspector authenticated scanning" },
+            "security_hub": { "type": "integer", "description": "AWS Security Hub findings" },
+            "pentest": { "type": "integer", "description": "Penetration test findings (3PAO, ad-hoc, red team)" },
+            "audit": { "type": "integer", "description": "3PAO annual assessment and internal audit findings" },
+            "incident": { "type": "integer", "description": "Incident-response-discovered vulnerabilities" },
+            "sca": { "type": "integer", "description": "Software Composition Analysis (Aikido, OSV)" },
+            "sast": { "type": "integer", "description": "Static Application Security Testing" },
+            "dast": { "type": "integer", "description": "Dynamic Application Security Testing" },
+            "external": { "type": "integer", "description": "External unauthenticated scanning" }
+          }
+        },
         "vdr_acceptance": {
           "type": "object",
           "description": "VDR acceptance tracking per FRR-VDR-TF-03",
@@ -184,28 +199,22 @@
     },
     "trends": {
       "type": "object",
-      "description": "Historical trend data from daily pipeline runs",
+      "description": "Historical trend data from pipeline runs at daily, weekly, and monthly granularity",
       "properties": {
-        "data_points": {
-          "type": "integer",
-          "description": "Number of daily data points included"
-        },
         "daily": {
           "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "date": { "type": "string", "format": "date" },
-              "total_vulnerabilities": { "type": "integer" },
-              "n5_count": { "type": "integer" },
-              "n4_count": { "type": "integer" },
-              "lev_count": { "type": "integer" },
-              "irv_count": { "type": "integer" },
-              "accepted_count": { "type": "integer" },
-              "active_count": { "type": "integer" }
-            }
-          },
-          "description": "Daily aggregate vulnerability counts (last 30 days)"
+          "items": { "$ref": "#/$defs/trend_point" },
+          "description": "Daily aggregate vulnerability counts (up to 90 days)"
+        },
+        "weekly": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/trend_point" },
+          "description": "Weekly aggregate vulnerability counts"
+        },
+        "monthly": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/trend_point" },
+          "description": "Monthly aggregate vulnerability counts"
         }
       }
     },
@@ -290,6 +299,28 @@
         "generated_at": { "type": "string", "format": "date-time" },
         "generator_version": { "type": "string" },
         "content_hash": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "trend_point": {
+      "type": "object",
+      "description": "A single trend data point with aggregate counts",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "total": { "type": "integer", "description": "Total vulnerabilities" },
+        "critical": { "type": "integer", "description": "N4 + N5 count" },
+        "n5": { "type": "integer" },
+        "n4": { "type": "integer" },
+        "n3": { "type": "integer" },
+        "n2": { "type": "integer" },
+        "n1": { "type": "integer" },
+        "lev": { "type": "integer", "description": "Likely Exploitable Vulnerabilities" },
+        "irv": { "type": "integer", "description": "Internet-Reachable Vulnerabilities" },
+        "accepted": { "type": "integer" },
+        "active": { "type": "integer" },
+        "compliance_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+        "pentest": { "type": "integer", "description": "Penetration test findings count" }
       }
     }
   }
