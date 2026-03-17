@@ -793,6 +793,7 @@ const AppShell = () => {
 
           <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto relative z-10">
             {activeView === 'dashboard' ? <DashboardContent /> :
+              activeView === 'trust' ? <TrustCenterView /> :
               !isAuthenticated ? (
                 <div className="flex items-center justify-center min-h-[60vh]">
                   <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-10 rounded-2xl border border-gray-700 text-center max-w-md">
@@ -812,7 +813,6 @@ const AppShell = () => {
                   </div>
                 </div>
               ) :
-              activeView === 'trust' ? <TrustCenterView /> :
                 activeView === 'vdr' ? <VDRPublicMetricsDashboard /> :
                   activeView === 'transparency' ? <TransparencyConsole /> :
                     activeView === 'metrics' ? <MetricsDashboard /> :
