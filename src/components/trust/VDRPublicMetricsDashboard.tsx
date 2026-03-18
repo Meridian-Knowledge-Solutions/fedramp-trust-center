@@ -421,7 +421,13 @@ export default function VDRDashboard() {
             <RiskGauge label="KEV Rate" value={kpi.kev_count} max={kpi.total_vulnerabilities} />
           </div>
           <div className="text-center mt-3 text-[11px] text-zinc-600">
-            All rates at 0% — no laterally exploitable, internet-reachable, or known-exploited vulnerabilities
+            {kpi.lev_count === 0 && kpi.irv_count === 0 && kpi.kev_count === 0
+              ? "All rates at 0% — no laterally exploitable, internet-reachable, or known-exploited vulnerabilities"
+              : [
+                  kpi.kev_count > 0 && `${kpi.kev_count} known-exploited (KEV)`,
+                  kpi.lev_count > 0 && `${kpi.lev_count} laterally exploitable (LEV)`,
+                  kpi.irv_count > 0 && `${kpi.irv_count} internet-reachable (IRV)`,
+                ].filter(Boolean).join(" · ")}
           </div>
         </div>
 
