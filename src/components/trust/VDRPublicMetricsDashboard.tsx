@@ -106,23 +106,32 @@ export default function VDRDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Normalize: the JSON uses "total" in trends, component uses "total_vulnerabilities"
+  const normalizeTrendEntry = (d: any) => ({
+    ...d,
+    total_vulnerabilities: d.total_vulnerabilities ?? d.total,
+  });
+
   // Derived trend data
   const trendData = useMemo(() => {
     if (!data?.trends) return [];
-    if (trendMode === "daily") return data.trends.daily || [];
+    if (trendMode === "daily") return (data.trends.daily || []).map(normalizeTrendEntry);
     if (trendMode === "weekly") {
-      return (data.trends.weekly || []).map((w: any) => ({
-        date: w.week_start,
-        total_vulnerabilities: w.avg_total,
-        active_count: w.avg_active,
+      return (data.trends.weekly || []).map((w: any) => normalizeTrendEntry({
+        date: w.week_start ?? w.date,
+        total_vulnerabilities: w.avg_total ?? w.total,
+        active_count: w.avg_active ?? w.active,
       }));
     }
-    // monthly
+    // monthly — use monthly array if available, else aggregate from daily
+    if (data.trends.monthly?.length) {
+      return data.trends.monthly.map(normalizeTrendEntry);
+    }
     const grouped: Record<string, number[]> = {};
     (data.trends.daily || []).forEach((d: any) => {
       const m = d.date.slice(0, 7);
       if (!grouped[m]) grouped[m] = [];
-      grouped[m].push(d.total_vulnerabilities);
+      grouped[m].push(d.total ?? d.total_vulnerabilities);
     });
     return Object.entries(grouped).map(([month, vals]) => ({
       date: month,
@@ -130,35 +139,40 @@ export default function VDRDashboard() {
     }));
   }, [data, trendMode]);
 
-  // Severity donut data
+  // Severity donut data — supports both data.severity_distribution and data.snapshot.severity
   const sevDonut = useMemo(() => {
-    if (!data?.severity_distribution) return [];
-    return Object.entries(data.severity_distribution)
+    const sev = data?.severity_distribution ?? data?.snapshot?.severity;
+    if (!sev) return [];
+    return Object.entries(sev)
       .filter(([, v]) => (v as number) > 0)
       .map(([name, value]) => ({ name, value: value as number, fill: SEV_COLORS[name] || "#6b7280" }));
   }, [data]);
 
-  // N-rating bar data
+  // N-rating bar data — supports both data.n_rating_distribution and data.snapshot.n_ratings
   const nRatingData = useMemo(() => {
-    if (!data?.n_rating_distribution) return [];
-    return Object.entries(data.n_rating_distribution).map(([name, value]) => ({
+    const nr = data?.n_rating_distribution ?? data?.snapshot?.n_ratings;
+    if (!nr) return [];
+    return Object.entries(nr).map(([name, value]) => ({
       name, value: value as number
     }));
   }, [data]);
 
-  // Detection sources bar data
+  // Detection sources bar data — supports both {name: {count: N}} and {name: N} formats
   const sourceBarData = useMemo(() => {
-    if (!data?.detection_sources) return [];
-    return Object.entries(data.detection_sources).map(([name, info]: [string, any]) => ({
-      name, count: info.count, color: SOURCE_COLORS[name] || "#6b7280"
-    }));
+    const ds = data?.detection_sources ?? data?.snapshot?.detection_sources;
+    if (!ds) return [];
+    return Object.entries(ds).map(([name, info]: [string, any]) => {
+      const displayName = name.charAt(0).toUpperCase() + name.slice(1);
+      const count = typeof info === "number" ? info : info.count;
+      return { name: displayName, count, color: SOURCE_COLORS[displayName] || "#6b7280" };
+    });
   }, [data]);
 
   // Peak value for trend annotation
   const trendPeak = useMemo(() => {
     const daily = data?.trends?.daily || [];
     if (!daily.length) return 0;
-    return Math.max(...daily.map((d: any) => d.total_vulnerabilities));
+    return Math.max(...daily.map((d: any) => d.total_vulnerabilities ?? d.total));
   }, [data]);
 
   const formatDate = (v: string) => {
@@ -186,13 +200,40 @@ export default function VDRDashboard() {
     );
   }
 
-  const kpi = data.kpi;
+  // Build kpi from either data.kpi (legacy) or data.snapshot (current schema)
+  const snap = data.snapshot || {};
+  const kpi = data.kpi || {
+    total_vulnerabilities: snap.total_vulnerabilities ?? 0,
+    critical_count: snap.critical_findings ?? snap.severity?.CRITICAL ?? 0,
+    lev_count: snap.lev_count ?? 0,
+    irv_count: snap.irv_count ?? 0,
+    kev_count: snap.kev_matches ?? 0,
+    compliance_rate: snap.compliance_rate ?? 0,
+    unique_cves: snap.unique_cves ?? 0,
+  };
   const env = data.environment;
   const atk = data.attack_surface;
   const posture = data.security_posture;
-  const meta = data.metadata;
-  const d7 = kpi.delta_7d;
-  const d30 = kpi.delta_30d;
+  const meta = data.metadata || {};
+
+  // Build deltas from either kpi.delta_7d (legacy) or data.deltas.vs_7d (current)
+  const zeroDelta = { total: 0, critical: 0, lev: 0, irv: 0, compliance: 0, unique_cves: 0 };
+  const buildDelta = (src: any) => {
+    if (!src) return zeroDelta;
+    // If src already has flat numeric fields (legacy format), use directly
+    if (typeof src.total === "number" && !src.total?.change) return src;
+    // Current schema: each field is { change: N, ... }
+    return {
+      total: src.total?.change ?? 0,
+      critical: src.critical?.change ?? 0,
+      lev: src.lev?.change ?? 0,
+      irv: src.irv?.change ?? 0,
+      compliance: src.compliance?.change ?? src.compliance_rate?.change ?? 0,
+      unique_cves: src.unique_cves?.change ?? 0,
+    };
+  };
+  const d7 = kpi.delta_7d ?? buildDelta(data.deltas?.vs_7d);
+  const d30 = kpi.delta_30d ?? buildDelta(data.deltas?.vs_30d);
 
   return (
     <div className="min-h-screen bg-[#09090b] text-zinc-200 font-sans" style={{ fontFamily: "'DM Sans', 'Segoe UI', system-ui, sans-serif" }}>
@@ -205,7 +246,7 @@ export default function VDRDashboard() {
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               <h1 className="text-xl font-extrabold text-white tracking-tight">VDR Metrics</h1>
               <span className="text-[10px] bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded font-semibold tracking-wide">PUBLIC</span>
-              <span className="text-[10px] bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded font-medium">v{data.schema_version}</span>
+              <span className="text-[10px] bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded font-medium">v{data.schema_version ?? meta.schema_version}</span>
             </div>
             <p className="text-xs text-zinc-600">FedRAMP 20x Vulnerability Detection &amp; Response</p>
           </div>
@@ -387,6 +428,7 @@ export default function VDRDashboard() {
         {/* ──────────────────────────────────────────────
             6. ENVIRONMENT OVERVIEW — resource breakdown + posture
            ────────────────────────────────────────────── */}
+        {env && (
         <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
           <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-4">Environment Overview</div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -418,6 +460,7 @@ export default function VDRDashboard() {
             </div>
           </div>
         </div>
+        )}
 
         {/* ──────────────────────────────────────────────
             7. DELTA COMPARISON CARDS — 7d and 30d changes
@@ -463,9 +506,9 @@ export default function VDRDashboard() {
             </div>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-zinc-500 mb-3">
-            <span>Standard: <span className="text-zinc-300 font-semibold">{meta.vdr_standard}</span></span>
-            <span>Pipeline: <span className="text-zinc-300 font-semibold">{meta.pipeline_version}</span></span>
-            <span>SLA Threshold: <span className="text-zinc-300 font-semibold">{meta.sla_threshold}</span></span>
+            {meta.vdr_standard && <span>Standard: <span className="text-zinc-300 font-semibold">{meta.vdr_standard}</span></span>}
+            {meta.pipeline_version && <span>Pipeline: <span className="text-zinc-300 font-semibold">{meta.pipeline_version}</span></span>}
+            {meta.sla_threshold && <span>SLA Threshold: <span className="text-zinc-300 font-semibold">{meta.sla_threshold}</span></span>}
           </div>
           {/* Compliance rate bar */}
           <div className="flex items-center gap-3">
@@ -590,7 +633,7 @@ export default function VDRDashboard() {
 
         {/* Footer */}
         <div className="pt-4 border-t border-white/[0.04] flex justify-between items-center text-[10px] text-zinc-700 flex-wrap gap-2">
-          <span>VDR Public Metrics v{data.schema_version} · {meta.privacy_notice}</span>
+          <span>VDR Public Metrics v{data.schema_version ?? meta.schema_version} · {meta.privacy_notice}</span>
           <span>{meta.vdr_standard} · Generated {meta.generated_at ? new Date(meta.generated_at).toLocaleDateString() : "N/A"}</span>
         </div>
       </div>
