@@ -351,6 +351,7 @@ export const parseKsiValidation = (ksi) => {
     assertion: ksi.assertion,
     score: ksi.score ?? reasonParsed.score,
     status: ksi.status || (ksi.assertion ? 'passed' : 'failed'),
+    displayStatus: ksi.display_status || null,
     statusLabel: reasonParsed.label,
     
     // Resources

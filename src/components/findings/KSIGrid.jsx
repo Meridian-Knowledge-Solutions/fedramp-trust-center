@@ -197,6 +197,7 @@ const KSICard = ({ ksi, openModal }) => {
   // Dark Theme Mapping
   const colors = {
     'passed': { border: 'border-green-500', text: 'text-green-400', bg: 'bg-green-500/10' },
+    'meets_threshold': { border: 'border-emerald-500', text: 'text-emerald-400', bg: 'bg-emerald-500/10' },
     'failed': { border: 'border-red-500', text: 'text-red-400', bg: 'bg-red-500/10' },
     'warning': { border: 'border-yellow-500', text: 'text-yellow-400', bg: 'bg-yellow-500/10' },
     'info': { border: 'border-blue-500', text: 'text-blue-400', bg: 'bg-blue-500/10' }

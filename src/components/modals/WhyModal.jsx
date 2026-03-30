@@ -256,6 +256,7 @@ export const WhyModal = () => {
   // Status configuration
   const statusConfig = {
     passed: { color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20', icon: CheckCircle },
+    meets_threshold: { color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: CheckCircle },
     failed: { color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20', icon: AlertTriangle },
     warning: { color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', icon: Info },
     info: { color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: Info }
@@ -275,12 +276,14 @@ export const WhyModal = () => {
               <StatusIcon className={`mt-1 ${config.color}`} size={24} />
               <div>
                 <h4 className={`font-bold ${config.color} mb-2 uppercase tracking-wide text-base`}>
-                  {parsed.status === 'passed' ? 'Compliant' :
+                  {parsed.status === 'passed' ? 'Operational' :
+                   parsed.status === 'meets_threshold' ? 'Meets Threshold' :
                    parsed.status === 'warning' ? 'Compliant with Conditions' :
                    parsed.status === 'failed' ? 'Remediation Required' : 'Attention Required'}
                 </h4>
                 <p className="text-sm text-gray-200">
                   {parsed.status === 'passed' && 'This control fully meets FedRAMP requirements. No action needed.'}
+                  {parsed.status === 'meets_threshold' && 'This control meets FedRAMP threshold requirements. No action needed.'}
                   {parsed.status === 'warning' && 'This control passes validation but has conditions or constraints that require ongoing monitoring. No immediate remediation is needed.'}
                   {parsed.status === 'failed' && 'This control failed validation and requires corrective action per FedRAMP remediation timelines.'}
                   {parsed.status === 'info' && 'This provides supplementary context about the control. No action required.'}
@@ -320,7 +323,7 @@ export const WhyModal = () => {
               <div className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Status</div>
               <div className={`font-bold text-xl flex items-center gap-2 ${config.color}`}>
                 <StatusIcon size={20} />
-                {parsed.status === 'warning' ? 'Conditional' : (parsed.statusLabel || parsed.status.toUpperCase())}
+                {parsed.status === 'warning' ? 'Conditional' : parsed.status === 'meets_threshold' ? 'Meets Threshold' : (parsed.statusLabel || parsed.status.toUpperCase())}
               </div>
               {parsed.status === 'warning' && (
                 <p className="text-xs text-gray-400 mt-2">Passes with conditions requiring monitoring</p>
@@ -336,7 +339,7 @@ export const WhyModal = () => {
               <div className="font-semibold text-white text-lg">{parsed.score}%</div>
               <div className="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
                 <div 
-                  className={`h-full rounded-full ${parsed.score >= 80 ? 'bg-green-500' : parsed.score >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                  className={`h-full rounded-full ${parsed.status === 'failed' ? 'bg-red-500' : parsed.status === 'meets_threshold' ? 'bg-emerald-500' : 'bg-green-500'}`}
                   style={{ width: `${parsed.score}%` }}
                 />
               </div>

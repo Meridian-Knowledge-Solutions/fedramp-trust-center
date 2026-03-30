@@ -4,6 +4,15 @@ export const Sanitizer = {
         // Handle missing data gracefully
         if (!validation) return 'unknown';
 
+        // Priority 1: Use display_status from pipeline if available
+        if (validation.display_status) {
+            const ds = validation.display_status.toLowerCase();
+            if (ds === 'pass') return 'passed';
+            if (ds === 'meets_threshold') return 'meets_threshold';
+            if (ds === 'fail') return 'failed';
+        }
+
+        // Priority 2: Fall back to assertion-based logic
         const assertion = validation.assertion;
         const reason = validation.assertion_reason || validation.message || '';
 
@@ -33,7 +42,8 @@ export const Sanitizer = {
     // Used by the Grid to determine colors/icons
     mapStatus: (status) => {
         const map = {
-            'passed': { label: 'Compliant', icon: 'CheckCircle2', color: 'text-green-600', bg: 'bg-green-50', description: 'Control fully meets FedRAMP requirements' },
+            'passed': { label: 'Operational', icon: 'CheckCircle2', color: 'text-green-600', bg: 'bg-green-50', description: 'Control fully meets FedRAMP requirements' },
+            'meets_threshold': { label: 'Meets Threshold', icon: 'CheckCircle2', color: 'text-emerald-600', bg: 'bg-emerald-50', description: 'Control meets FedRAMP threshold requirements' },
             'failed': { label: 'Remediation Required', icon: 'XCircle', color: 'text-red-600', bg: 'bg-red-50', description: 'Control failed validation and requires corrective action' },
             'warning': { label: 'Compliant with Conditions', icon: 'AlertTriangle', color: 'text-amber-600', bg: 'bg-amber-50', description: 'Control passes but has conditions or constraints that require ongoing monitoring' },
             'info': { label: 'Informational', icon: 'Info', color: 'text-blue-600', bg: 'bg-blue-50', description: 'Supplementary context — no action required' },

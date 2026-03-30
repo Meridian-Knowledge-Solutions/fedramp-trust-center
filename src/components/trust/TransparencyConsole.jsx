@@ -209,7 +209,7 @@ const ValidationCard = ({ validation }) => {
                     <div className="flex items-center gap-2">
                         <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden max-w-[80px]">
                             <div 
-                                className={`h-full rounded-full ${validation.score >= 80 ? 'bg-emerald-500' : validation.score >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                                className={`h-full rounded-full ${validation.display_status === 'fail' ? 'bg-red-500' : 'bg-emerald-500'}`}
                                 style={{ width: `${validation.score}%` }}
                             />
                         </div>
