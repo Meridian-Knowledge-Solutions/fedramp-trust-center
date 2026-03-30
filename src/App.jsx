@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useCallback, memo, useEffect } from 'react';
 import {
-  LayoutDashboard, ShieldAlert, User, Settings, LogOut,
-  Menu, Bell, Activity, Calendar, Clock,
+  LayoutDashboard, ShieldAlert, User, LogOut,
+  Menu, Activity, Calendar, Clock,
   FileText, RefreshCw, BarChart3, Eye, X, Shield, Layers,
-  BookOpen, Code2, FileBarChart
+  BookOpen, Code2, FileBarChart, Database
 } from 'lucide-react';
 
 import {
@@ -616,7 +616,7 @@ const AppShell = () => {
               onClick={() => { setSettingsOpen(true); setMobileMenuOpen(false); }}
               className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase"
             >
-              <Settings size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> System Settings
+              <Database size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> Manage Data
             </button>
           </div>
         </div>
@@ -730,7 +730,7 @@ const AppShell = () => {
               onClick={() => setSettingsOpen(true)}
               className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase"
             >
-              <Settings size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> System Settings
+              <Database size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> Manage Data
             </button>
           </div>
         </div>
@@ -770,10 +770,6 @@ const AppShell = () => {
           </div>
 
           <div className="flex items-center space-x-3 lg:space-x-6">
-            <button className="relative cursor-pointer group p-2 rounded-full hover:bg-white/5 transition-colors">
-              <Bell size={16} className="text-slate-400 group-hover:text-white transition-colors" />
-            </button>
-            <div className="h-4 w-px bg-white/10"></div>
             <div className="flex items-center gap-3">
               <div className="text-right hidden md:block">
                 <div className="text-xs font-bold text-white">{isAuthenticated ? user.agency : 'Public User'}</div>
