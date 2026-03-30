@@ -174,6 +174,73 @@ const AssessmentCard = memo(({ assessment, onDownload }) => {
   );
 });
 
+// Wrap HTML content with dark-theme styles for iframe rendering
+const wrapHtmlWithStyles = (html) => {
+  const darkThemeCSS = `
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body {
+        margin: 0; padding: 16px; background: #09090b; color: #e2e8f0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 14px; line-height: 1.6;
+      }
+      h1, h2, h3, h4, h5, h6 {
+        color: #f8fafc; margin: 1.5em 0 0.5em; font-weight: 700; letter-spacing: -0.01em;
+      }
+      h1 { font-size: 1.5em; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.3em; }
+      h2 { font-size: 1.25em; }
+      h3 { font-size: 1.1em; }
+      p { margin: 0.75em 0; }
+      a { color: #60a5fa; text-decoration: none; }
+      a:hover { text-decoration: underline; color: #93bbfd; }
+      table {
+        width: 100%; border-collapse: collapse; margin: 1em 0;
+        background: #121217; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;
+      }
+      thead { background: #18181b; }
+      th {
+        padding: 10px 14px; text-align: left; font-size: 10px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+      td {
+        padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #cbd5e1; font-size: 13px;
+      }
+      tr:hover td { background: rgba(255,255,255,0.03); }
+      tr:last-child td { border-bottom: none; }
+      code {
+        background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;
+        font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.9em; color: #e2e8f0;
+        border: 1px solid rgba(255,255,255,0.05);
+      }
+      pre {
+        background: #121217; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+        padding: 16px; overflow-x: auto; margin: 1em 0;
+      }
+      pre code { background: none; border: none; padding: 0; }
+      ul, ol { padding-left: 1.5em; margin: 0.75em 0; }
+      li { margin: 0.3em 0; color: #cbd5e1; }
+      li::marker { color: #475569; }
+      blockquote {
+        margin: 1em 0; padding: 12px 16px; border-left: 3px solid #3b82f6;
+        background: rgba(59,130,246,0.05); border-radius: 0 6px 6px 0; color: #94a3b8;
+      }
+      hr { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 1.5em 0; }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    </style>
+  `;
+  // Inject styles at the beginning of <head> if present, otherwise prepend
+  if (html.includes('<head>')) {
+    return html.replace('<head>', '<head>' + darkThemeCSS);
+  } else if (html.includes('<html>')) {
+    return html.replace('<html>', '<html><head>' + darkThemeCSS + '</head>');
+  }
+  return darkThemeCSS + html;
+};
+
 // Viewer modal for JSON/HTML content
 const ContentViewer = memo(({ content, format, title, onClose }) => {
   if (!content) return null;
@@ -200,8 +267,9 @@ const ContentViewer = memo(({ content, format, title, onClose }) => {
             </pre>
           ) : (
             <iframe
-              srcDoc={content}
-              className="w-full h-full min-h-[600px] bg-white"
+              srcDoc={wrapHtmlWithStyles(content)}
+              className="w-full h-full min-h-[600px]"
+              style={{ background: '#09090b' }}
               title={title}
               sandbox="allow-same-origin"
             />
