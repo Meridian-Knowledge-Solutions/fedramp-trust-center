@@ -209,7 +209,7 @@ export default function VDRDashboard() {
     irv_count: snap.irv_count ?? 0,
     kev_count: snap.kev_matches ?? 0,
     compliance_rate: snap.compliance_rate ?? 0,
-    unique_cves: snap.unique_cves ?? 0,
+    unique_cves: snap.unique_cves ?? snap.total_vulnerabilities ?? 0,
   };
   const env = data.environment;
   const atk = data.attack_surface;
@@ -229,7 +229,7 @@ export default function VDRDashboard() {
       lev: src.lev?.change ?? 0,
       irv: src.irv?.change ?? 0,
       compliance: src.compliance?.change ?? src.compliance_rate?.change ?? 0,
-      unique_cves: src.unique_cves?.change ?? 0,
+      unique_cves: src.unique_cves?.change ?? src.total?.change ?? 0,
     };
   };
   const d7 = kpi.delta_7d ?? buildDelta(data.deltas?.vs_7d);
