@@ -28,7 +28,7 @@ export const DataProvider = ({ children }) => {
   const [masData, setMasData] = useState(null);
   const [metricsData, setMetricsData] = useState(null);
   const [metrics, setMetrics] = useState({
-    score: 0, passed: 0, failed: 0, warning: 0, info: 0
+    score: 0, passed: 0, failed: 0, meets_threshold: 0, warning: 0, info: 0
   });
 
   const previousScore = useRef(null);
@@ -355,6 +355,7 @@ export const DataProvider = ({ children }) => {
         score: score,
         passed: passedCount,
         failed: failedCount,
+        meets_threshold: processed.filter(k => k.status === 'meets_threshold').length,
         warning: processed.filter(k => k.status === 'warning').length,
         info: processed.filter(k => k.status === 'info').length
       });
