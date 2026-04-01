@@ -323,7 +323,11 @@ export const WhyModal = () => {
               <div className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Status</div>
               <div className={`font-bold text-xl flex items-center gap-2 ${config.color}`}>
                 <StatusIcon size={20} />
-                {parsed.status === 'warning' ? 'Conditional' : parsed.status === 'meets_threshold' ? 'Meets Threshold' : (parsed.statusLabel || parsed.status.toUpperCase())}
+                {parsed.status === 'passed' ? 'Operational' :
+                 parsed.status === 'meets_threshold' ? 'Meets Threshold' :
+                 parsed.status === 'warning' ? 'Conditional' :
+                 parsed.status === 'failed' ? 'Fail' :
+                 (parsed.statusLabel || parsed.status.toUpperCase())}
               </div>
               {parsed.status === 'warning' && (
                 <p className="text-xs text-gray-400 mt-2">Passes with conditions requiring monitoring</p>
