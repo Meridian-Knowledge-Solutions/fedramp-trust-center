@@ -30,23 +30,7 @@ import { SchemaTab } from './components/trust/SchemaTab';
 import { ReportsTab } from './components/trust/ReportsTab';
 import { TrustCenterDataProvider } from './hooks/useTrustCenterData';
 
-// --- CONFIGURATION ---
-const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
-  ? `${import.meta.env.BASE_URL}data/`
-  : `${import.meta.env.BASE_URL}/data/`;
-
-// --- THEME ENGINE ---
-const THEME = {
-  bg: 'bg-[#09090b]',
-  panel: 'bg-[#121217]',
-  border: 'border-white/10',
-  hover: 'hover:bg-white/5',
-  active: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  text: {
-    main: 'text-slate-200',
-    muted: 'text-slate-500'
-  }
-};
+import { THEME, BASE_PATH } from './config/theme';
 
 const TRANSITIONS = {
   default: 'transition-all duration-200 ease-out',
@@ -398,78 +382,77 @@ const DashboardContent = memo(() => {
 
   const totalControls = ksis?.length || 0;
   const targetThreshold = parseFloat(metadata?.impact_thresholds?.min || 90);
-  const complianceTarget = `Target: ${targetThreshold}%`;
 
-  const passingPercent = totalControls > 0 ? ((parseInt(metrics.passed) / totalControls) * 100).toFixed(1) : '0.0';
-  const failingPercent = totalControls > 0 ? ((parseInt(metrics.failed) / totalControls) * 100).toFixed(1) : '0.0';
-  const warningsPercent = totalControls > 0 ? ((parseInt(metrics.warning) / totalControls) * 100).toFixed(1) : '0.0';
+  const globalStatus = metadata?.global_status || 'OPERATIONAL';
+  const statusConfig = {
+    OPERATIONAL: { label: 'Operational', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', dot: 'bg-emerald-500' },
+    DEGRADED: { label: 'Degraded', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: 'bg-amber-500' },
+    CIRCUIT_BROKEN: { label: 'Circuit Broken', color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', dot: 'bg-rose-500' },
+  }[globalStatus] || { label: 'Unknown', color: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20', dot: 'bg-slate-500' };
 
-  const complianceScore = parseFloat(metrics.score);
-  const complianceStatus = complianceScore >= targetThreshold
-    ? { label: 'On Target', color: 'text-emerald-400' }
-    : complianceScore >= (targetThreshold - 5)
-      ? { label: 'Near Target', color: 'text-amber-400' }
-      : { label: 'Below Target', color: 'text-rose-400' };
-
-  const passingStatus = parseInt(metrics.passed) > 0 ? { label: 'Active', color: 'text-emerald-400' } : { label: 'No Data', color: 'text-slate-400' };
-
-  const failingStatus = parseInt(metrics.failed) === 0
-    ? { label: 'All Clear', color: 'text-emerald-400' }
-    : parseInt(metrics.failed) <= 5
-      ? { label: 'Minor Issues', color: 'text-amber-400' }
-      : { label: 'Needs Attention', color: 'text-rose-400' };
-
-  const warningStatus = parseInt(metrics.warning) === 0 ? { label: 'All Clear', color: 'text-emerald-400' } : { label: 'Monitoring', color: 'text-amber-400' };
+  const lastRunDate = metadata?.validation_date ? new Date(metadata.validation_date) : null;
+  const controlsAtRisk = parseInt(metrics.failed) + parseInt(metrics.meets_threshold || 0) + parseInt(metrics.warning || 0);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4">
       <ImpactBanner />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard
-          title="Compliance Score"
-          value={`${metrics.score}%`}
-          contextMetric={complianceTarget}
-          statusLabel={complianceStatus.label}
-          statusColor={complianceStatus.color}
-          subtitle="Overall assessment score across all controls"
-        />
-        <StatsCard
-          title="Passing Controls"
-          value={metrics.passed}
-          contextMetric={`${passingPercent}% of ${totalControls}`}
-          statusLabel={passingStatus.label}
-          statusColor={passingStatus.color}
-          subtitle="Controls that fully meet FedRAMP requirements"
-        />
-        <StatsCard
-          title="Failing Controls"
-          value={metrics.failed}
-          contextMetric={`${failingPercent}% of ${totalControls}`}
-          statusLabel={failingStatus.label}
-          statusColor={failingStatus.color}
-          subtitle="Controls requiring corrective action"
-        />
-        <StatsCard
-          title="Conditional Controls"
-          value={metrics.warning}
-          contextMetric={`${warningsPercent}% of ${totalControls}`}
-          statusLabel={warningStatus.label}
-          statusColor={warningStatus.color}
-          subtitle="Compliant controls with conditions or constraints requiring monitoring"
-        />
+
+      {/* Compliance Posture Headline */}
+      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6 shadow-md`}>
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <div className={`p-3 rounded-xl border ${statusConfig.border} ${statusConfig.bg}`}>
+              <div className="relative">
+                <Shield size={28} className={statusConfig.color} />
+                <div className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ${statusConfig.dot} ring-2 ring-[#121217]`} />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center gap-3 mb-1">
+                <h2 className={`text-2xl font-bold ${statusConfig.color} tracking-tight`}>{statusConfig.label}</h2>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${statusConfig.border} ${statusConfig.bg} ${statusConfig.color}`}>
+                  {metadata?.impact_level || 'MODERATE'}
+                </span>
+              </div>
+              <p className="text-slate-400 text-xs">
+                {parseInt(metrics.passed)} of {totalControls} controls passing
+                {lastRunDate && <> &middot; Last validated {getTimeElapsed(lastRunDate)}</>}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6 md:gap-10">
+            <div className="text-center">
+              <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Pass Rate</div>
+              <div className="text-white font-mono font-bold text-2xl tabular-nums">{metrics.score}%</div>
+            </div>
+            <div className="text-center">
+              <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Controls at Risk</div>
+              <div className={`font-mono font-bold text-2xl tabular-nums ${controlsAtRisk === 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{controlsAtRisk}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Target</div>
+              <div className="text-white font-mono font-bold text-2xl tabular-nums">{targetThreshold}%</div>
+            </div>
+          </div>
+        </div>
       </div>
+
       <ComplianceChart />
       <div className={`${THEME.panel} rounded-xl border ${THEME.border} overflow-hidden shadow-sm`}>
         <div className="p-5 border-b border-white/5 flex justify-between items-center bg-[#09090b]">
           <div>
             <h3 className="font-bold text-white text-sm">System Controls Register</h3>
             <p className="text-slate-500 text-[10px] mt-1 font-mono uppercase tracking-wider">
-              Real-time validation of {ksis.length} security controls
+              {totalControls} security controls &middot; {parseInt(metrics.passed)} operational &middot; {parseInt(metrics.failed)} requiring action
             </p>
           </div>
-          <div className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-bold border border-emerald-500/20 tracking-wider">
-            LIVE
-          </div>
+          {lastRunDate && (
+            <div className="flex items-center gap-2 text-[10px] text-slate-400 bg-white/5 px-2.5 py-1 rounded border border-white/5">
+              <Clock size={10} />
+              <span className="font-mono">{lastRunDate.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+          )}
         </div>
         <div className="p-0 bg-[#09090b]">
           <KSIGrid />

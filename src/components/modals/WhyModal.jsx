@@ -256,7 +256,7 @@ export const WhyModal = () => {
   // Status configuration
   const statusConfig = {
     passed: { color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20', icon: CheckCircle },
-    meets_threshold: { color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: CheckCircle },
+    meets_threshold: { color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: CheckCircle },
     failed: { color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20', icon: AlertTriangle },
     warning: { color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', icon: Info },
     info: { color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: Info }
@@ -318,34 +318,31 @@ export const WhyModal = () => {
       <div className="space-y-6">
         {/* Header Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className={`relative p-5 rounded-xl border overflow-hidden ${config.bg} ${config.border}`}>
-            <div className="relative">
-              <div className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Status</div>
-              <div className={`font-bold text-xl flex items-center gap-2 ${config.color}`}>
-                <StatusIcon size={20} />
-                {parsed.status === 'passed' ? 'Operational' :
-                 parsed.status === 'meets_threshold' ? 'Meets Threshold' :
-                 parsed.status === 'warning' ? 'Conditional' :
-                 parsed.status === 'failed' ? 'Fail' :
-                 (parsed.statusLabel || parsed.status.toUpperCase())}
-              </div>
-              {parsed.status === 'warning' && (
-                <p className="text-xs text-gray-400 mt-2">Passes with conditions requiring monitoring</p>
-              )}
-              {parsed.status === 'failed' && (
-                <p className="text-xs text-gray-400 mt-2">Corrective action required</p>
-              )}
-            </div>
-          </div>
-          <div className="relative p-5 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
-            <div className="relative">
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Compliance Score</div>
-              <div className="font-semibold text-white text-lg">{parsed.score}%</div>
-              <div className="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full rounded-full ${parsed.status === 'failed' ? 'bg-red-500' : parsed.status === 'meets_threshold' ? 'bg-emerald-500' : 'bg-green-500'}`}
-                  style={{ width: `${parsed.score}%` }}
-                />
+          <div className={`relative p-5 rounded-xl border overflow-hidden md:col-span-2 ${config.bg} ${config.border}`}>
+            <div className="relative flex items-start gap-4">
+              <StatusIcon className={`mt-0.5 ${config.color}`} size={24} />
+              <div>
+                <div className={`font-bold text-xl ${config.color}`}>
+                  {parsed.status === 'passed' ? 'Operational' :
+                   parsed.status === 'meets_threshold' ? 'Meets Threshold' :
+                   parsed.status === 'warning' ? 'Conditional' :
+                   parsed.status === 'failed' ? 'Fail' :
+                   (parsed.statusLabel || parsed.status.toUpperCase())}
+                </div>
+                <p className="text-sm text-gray-300 mt-1">
+                  {parsed.status === 'passed' && 'This control fully meets FedRAMP requirements.'}
+                  {parsed.status === 'meets_threshold' && 'This control meets the minimum FedRAMP threshold.'}
+                  {parsed.status === 'warning' && 'Passes with conditions requiring ongoing monitoring.'}
+                  {parsed.status === 'failed' && 'This control requires corrective action.'}
+                  {parsed.status === 'info' && 'Supplementary context — no action required.'}
+                </p>
+                <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
+                  <span className="font-mono">{parsed.score}% score</span>
+                  <span className="text-gray-600">&middot;</span>
+                  <span>{parsed.commandsExecuted} checks executed</span>
+                  <span className="text-gray-600">&middot;</span>
+                  <span>{parsed.successfulCommands} passed</span>
+                </div>
               </div>
             </div>
           </div>

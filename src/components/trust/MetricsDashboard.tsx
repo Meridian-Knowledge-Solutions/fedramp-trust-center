@@ -64,16 +64,14 @@ const THEME = {
     }
 };
 
-const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
-    ? `${import.meta.env.BASE_URL}data`
-    : `${import.meta.env.BASE_URL}/data`;
+import { BASE_PATH } from '../../config/theme';
 
 export default function MetricsDashboard() {
     const [history, setHistory] = useState<WeeklyMetrics[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const DATA_URL = `${BASE_PATH}/metrics_history.jsonl`;
+    const DATA_URL = `${BASE_PATH}metrics_history.jsonl`;
 
     useEffect(() => {
         fetch(DATA_URL)

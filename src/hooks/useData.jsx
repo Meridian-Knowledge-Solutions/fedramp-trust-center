@@ -5,9 +5,7 @@ const DataContext = createContext();
 
 // --- CONFIGURATION ---
 // We calculate this once outside the component to ensure consistency
-const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
-  ? `${import.meta.env.BASE_URL}data`
-  : `${import.meta.env.BASE_URL}/data`;
+import { BASE_PATH } from '../config/theme';
 
 const showNotification = (title, body, options = {}) => {
   if ('Notification' in window && Notification.permission === 'granted') {
@@ -122,11 +120,11 @@ export const DataProvider = ({ children }) => {
 
       // Prepare URLs
       const urls = {
-        validations: `${BASE_PATH}/unified_ksi_validations.json?t=${cacheBuster}`,
-        register: `${BASE_PATH}/cli_command_register.json?t=${cacheBuster}`, // Synced from private repo via pipeline
-        history: `${BASE_PATH}/ksi_history.jsonl?t=${cacheBuster}`,
-        mas: `${BASE_PATH}/mas_boundary.json?t=${cacheBuster}`,
-        metricsHistory: `${BASE_PATH}/metrics_history.jsonl?t=${cacheBuster}`
+        validations: `${BASE_PATH}unified_ksi_validations.json?t=${cacheBuster}`,
+        register: `${BASE_PATH}cli_command_register.json?t=${cacheBuster}`, // Synced from private repo via pipeline
+        history: `${BASE_PATH}ksi_history.jsonl?t=${cacheBuster}`,
+        mas: `${BASE_PATH}mas_boundary.json?t=${cacheBuster}`,
+        metricsHistory: `${BASE_PATH}metrics_history.jsonl?t=${cacheBuster}`
       };
 
       // 1. Fetch All Data Sources
@@ -344,11 +342,13 @@ export const DataProvider = ({ children }) => {
       setMetadata({
         validation_date: realDate,
         impact_level: rawMeta.impact_level || 'MODERATE',
+        global_status: rawMeta.global_status || 'OPERATIONAL',
         pass_rate: rawMeta.pass_rate || `${Math.round(score)}%`,
         passed: passedCount,
         total_validated: totalCount,
         failed: failedCount,
-        impact_thresholds: rawMeta.impact_thresholds || { min: '80%' }
+        impact_thresholds: rawMeta.impact_thresholds || { min: '80%' },
+        category_summary: rawMeta.category_summary || {}
       });
 
       setMetrics({

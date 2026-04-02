@@ -9,17 +9,9 @@ import {
 
 import { QUARTERLY_REGISTRATION_URL } from '../../config/api';
 
-// --- CONFIGURATION ---
-const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
-    ? `${import.meta.env.BASE_URL}data/`
-    : `${import.meta.env.BASE_URL}/data/`;
+import { THEME, BASE_PATH } from '../../config/theme';
 
 const REPORTS_PATH = `${BASE_PATH}reports/`;
-
-const THEME = {
-    panel: 'bg-[#121217]',
-    border: 'border-white/5',
-};
 
 // --- REPORT CARD CONFIGURATIONS (4 types) ---
 const REPORT_CONFIGS = {
