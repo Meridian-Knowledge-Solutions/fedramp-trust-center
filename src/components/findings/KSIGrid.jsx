@@ -148,10 +148,7 @@ export const KSIGrid = () => {
 const CategorySection = ({ category, items, openModal }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const passed = items.filter(i => i.assertion === true || i.assertion === "true").length;
   const failed = items.filter(i => i.assertion === false || i.assertion === "false").length;
-  const passRate = Math.round((passed / items.length) * 100);
-  const isPerfect = passRate === 100;
 
   return (
     <div className="border border-gray-700 rounded-xl bg-gray-800 overflow-hidden shadow-lg">
@@ -160,7 +157,7 @@ const CategorySection = ({ category, items, openModal }) => {
         className="w-full flex items-center justify-between p-4 bg-gray-800 hover:bg-gray-750 transition-colors border-b border-gray-700 text-left"
       >
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${failed > 0 ? 'bg-red-500/10 text-red-400' : isPerfect ? 'bg-green-500/10 text-green-400' : 'bg-blue-500/10 text-blue-400'}`}>
+          <div className={`p-2 rounded-lg ${failed > 0 ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
             <Layers size={20} />
           </div>
           <div>
@@ -175,16 +172,7 @@ const CategorySection = ({ category, items, openModal }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-3 w-48">
-            <div className="h-1.5 flex-1 bg-gray-700 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full ${failed > 0 ? 'bg-red-500' : 'bg-green-500'}`}
-                style={{ width: `${passRate}%` }}
-              />
-            </div>
-            <span className="text-xs font-mono font-bold text-gray-300 w-8 text-right">{passRate}%</span>
-          </div>
+        <div className="flex items-center gap-2">
           {isExpanded ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronRight size={18} className="text-gray-500" />}
         </div>
       </button>

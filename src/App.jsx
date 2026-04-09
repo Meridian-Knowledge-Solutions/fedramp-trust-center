@@ -378,86 +378,101 @@ const ComplianceChart = memo(() => {
 });
 
 const DashboardContent = memo(() => {
-  const { metrics, ksis, history, metadata } = useData();
+  const { metrics, ksis, metadata, reload } = useData();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    reload().finally(() => setIsRefreshing(false));
+  }, [reload]);
 
   const totalControls = ksis?.length || 0;
   const targetThreshold = parseFloat(metadata?.impact_thresholds?.min || 90);
 
   const globalStatus = metadata?.global_status || 'OPERATIONAL';
   const statusConfig = {
-    OPERATIONAL: { label: 'Operational', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', dot: 'bg-emerald-500' },
-    DEGRADED: { label: 'Degraded', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: 'bg-amber-500' },
-    CIRCUIT_BROKEN: { label: 'Circuit Broken', color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', dot: 'bg-rose-500' },
-  }[globalStatus] || { label: 'Unknown', color: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20', dot: 'bg-slate-500' };
+    OPERATIONAL: { label: 'Operational', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', dot: 'bg-emerald-500', solid: 'bg-emerald-500' },
+    DEGRADED: { label: 'Degraded', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: 'bg-amber-500', solid: 'bg-amber-500' },
+    CIRCUIT_BROKEN: { label: 'Circuit Broken', color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', dot: 'bg-rose-500', solid: 'bg-rose-500' },
+  }[globalStatus] || { label: 'Unknown', color: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20', dot: 'bg-slate-500', solid: 'bg-slate-500' };
 
   const lastRunDate = metadata?.validation_date ? new Date(metadata.validation_date) : null;
   const controlsAtRisk = parseInt(metrics.failed) + parseInt(metrics.meets_threshold || 0) + parseInt(metrics.warning || 0);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4">
-      <ImpactBanner />
+    <div className="space-y-6 animate-in fade-in duration-500 slide-in-from-bottom-4">
 
-      {/* Compliance Posture Headline */}
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6 shadow-md`}>
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
-            <div className={`p-3 rounded-xl border ${statusConfig.border} ${statusConfig.bg}`}>
-              <div className="relative">
-                <Shield size={28} className={statusConfig.color} />
-                <div className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ${statusConfig.dot} ring-2 ring-[#121217]`} />
-              </div>
+      {/* Single unified header: status + metrics + timestamp */}
+      <div className={`relative overflow-hidden rounded-xl border ${THEME.border} ${THEME.panel} shadow-md`}>
+        <div className={`h-1 w-full ${statusConfig.solid} opacity-80`} />
+        <div className="p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+
+          {/* Left: Status headline */}
+          <div className="flex items-center gap-4">
+            <div className={`p-2.5 rounded-xl border ${statusConfig.border} ${statusConfig.bg}`}>
+              <Shield size={22} className={statusConfig.color} />
             </div>
             <div>
-              <div className="flex items-center gap-3 mb-1">
-                <h2 className={`text-2xl font-bold ${statusConfig.color} tracking-tight`}>{statusConfig.label}</h2>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${statusConfig.border} ${statusConfig.bg} ${statusConfig.color}`}>
+              <div className="flex items-center gap-3 mb-0.5">
+                <h2 className={`text-xl font-bold ${statusConfig.color} tracking-tight`}>{statusConfig.label}</h2>
+                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${statusConfig.border} ${statusConfig.bg} ${statusConfig.color}`}>
                   {metadata?.impact_level || 'MODERATE'}
                 </span>
               </div>
-              <p className="text-slate-400 text-xs">
+              <p className="text-slate-500 text-xs">
                 {parseInt(metrics.passed)} of {totalControls} controls passing
-                {lastRunDate && <> &middot; Last validated {getTimeElapsed(lastRunDate)}</>}
+                {lastRunDate && <> &middot; Validated {getTimeElapsed(lastRunDate)}</>}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-6 md:gap-10">
+          {/* Center: Key metrics */}
+          <div className="flex items-center gap-8 lg:gap-10 px-0 lg:px-6 lg:border-x border-white/5">
             <div className="text-center">
               <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Pass Rate</div>
-              <div className="text-white font-mono font-bold text-2xl tabular-nums">{metrics.score}%</div>
+              <div className="text-white font-mono font-bold text-xl tabular-nums">{metrics.score}%</div>
             </div>
             <div className="text-center">
-              <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Controls at Risk</div>
-              <div className={`font-mono font-bold text-2xl tabular-nums ${controlsAtRisk === 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{controlsAtRisk}</div>
+              <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">At Risk</div>
+              <div className={`font-mono font-bold text-xl tabular-nums ${controlsAtRisk === 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{controlsAtRisk}</div>
             </div>
             <div className="text-center">
               <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Target</div>
-              <div className="text-white font-mono font-bold text-2xl tabular-nums">{targetThreshold}%</div>
+              <div className="text-white font-mono font-bold text-xl tabular-nums">{targetThreshold}%</div>
             </div>
+          </div>
+
+          {/* Right: Timestamp + sync */}
+          <div className="flex items-center gap-3">
+            {lastRunDate && (
+              <div className="flex items-center gap-2 text-[10px] text-slate-400 bg-white/5 px-2.5 py-1.5 rounded border border-white/5">
+                <Calendar size={10} />
+                <span className="font-mono tabular-nums">
+                  {lastRunDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                </span>
+                <Clock size={10} />
+                <span className="font-mono tabular-nums">
+                  {lastRunDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+            )}
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-blue-400 hover:text-blue-300 transition-colors px-2.5 py-1.5 rounded border border-white/5 bg-white/5"
+            >
+              <RefreshCw size={10} className={isRefreshing ? 'animate-spin' : ''} />
+              Sync
+            </button>
           </div>
         </div>
       </div>
 
+      {/* KSI Grid — directly after header, no wrapper chrome */}
+      <KSIGrid />
+
+      {/* Trend chart — below the grid for context, not blocking the controls */}
       <ComplianceChart />
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} overflow-hidden shadow-sm`}>
-        <div className="p-5 border-b border-white/5 flex justify-between items-center bg-[#09090b]">
-          <div>
-            <h3 className="font-bold text-white text-sm">System Controls Register</h3>
-            <p className="text-slate-500 text-[10px] mt-1 font-mono uppercase tracking-wider">
-              {totalControls} security controls &middot; {parseInt(metrics.passed)} operational &middot; {parseInt(metrics.failed)} requiring action
-            </p>
-          </div>
-          {lastRunDate && (
-            <div className="flex items-center gap-2 text-[10px] text-slate-400 bg-white/5 px-2.5 py-1 rounded border border-white/5">
-              <Clock size={10} />
-              <span className="font-mono">{lastRunDate.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-            </div>
-          )}
-        </div>
-        <div className="p-0 bg-[#09090b]">
-          <KSIGrid />
-        </div>
-      </div>
     </div>
   );
 });
