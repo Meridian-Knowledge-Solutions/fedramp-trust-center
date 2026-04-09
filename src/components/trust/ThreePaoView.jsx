@@ -14,10 +14,7 @@ import {
     Tooltip, ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine
 } from 'recharts';
 
-// --- CONFIGURATION ---
-const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
-    ? `${import.meta.env.BASE_URL}data/`
-    : `${import.meta.env.BASE_URL}/data/`;
+import { BASE_PATH } from '../../config/theme';
 
 // --- HELPER: FORCE UTC TIMEZONE ---
 // Fixes "Future Date" bug by appending 'Z' if missing to force UTC interpretation

@@ -38,10 +38,8 @@ const THEME = {
     }
 };
 
-const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
-    ? `${import.meta.env.BASE_URL}data`
-    : `${import.meta.env.BASE_URL}/data`;
-const DATA_URL = `${BASE_PATH}/ksi_failure_tracker.json`;
+import { BASE_PATH } from '../../config/theme';
+const DATA_URL = `${BASE_PATH}ksi_failure_tracker.json`;
 const KSI_ID_PATTERN = /^KSI-[A-Z]{3}-\d{2}$/;
 
 const KSI_CATEGORIES = {

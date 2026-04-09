@@ -12,10 +12,7 @@ import {
     Tooltip, ResponsiveContainer, Cell, LineChart, Line
 } from 'recharts';
 
-// --- CONFIGURATION ---
-const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
-    ? `${import.meta.env.BASE_URL}data/`
-    : `${import.meta.env.BASE_URL}/data/`;
+import { BASE_PATH } from '../../config/theme';
 
 // --- HELPER COMPONENTS ---
 

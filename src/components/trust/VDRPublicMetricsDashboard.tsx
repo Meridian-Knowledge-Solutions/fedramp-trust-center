@@ -4,10 +4,7 @@ import {
   BarChart, Bar, Cell, CartesianGrid, PieChart, Pie, LineChart, Line,
 } from "recharts";
 
-// --- CONFIGURATION ---
-const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
-  ? `${import.meta.env.BASE_URL}data/`
-  : `${import.meta.env.BASE_URL}/data/`;
+import { BASE_PATH } from '../../config/theme';
 
 const SEV_COLORS: Record<string, string> = {
   CRITICAL: "#ef4444", HIGH: "#f97316", MEDIUM: "#eab308", LOW: "#3b82f6", INFO: "#6b7280"

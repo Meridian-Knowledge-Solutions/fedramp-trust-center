@@ -4,9 +4,23 @@ import { useModal } from '../../contexts/ModalContext';
 import { useAuth } from '../../hooks/useAuth';
 import { Sanitizer } from '../../utils/sanitizer';
 import {
-  Search, X, ChevronDown, ChevronRight, TrendingUp,
+  Search, X, ChevronDown, ChevronRight, Clock,
   CheckCircle2, XCircle, AlertTriangle, Info, Terminal, Lock, Layers
 } from 'lucide-react';
+
+const getRelativeTime = (timestamp) => {
+  if (!timestamp) return null;
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays > 0) return `${diffDays}d ago`;
+  if (diffHours > 0) return `${diffHours}h ago`;
+  if (diffMins > 0) return `${diffMins}m ago`;
+  return 'just now';
+};
 
 export const KSIGrid = () => {
   const { ksis, loading } = useData();
@@ -24,15 +38,16 @@ export const KSIGrid = () => {
         ksi.category.toLowerCase().includes(searchTerm.toLowerCase());
 
       let matchesStatus = true;
-      if (statusFilter === 'passed') matchesStatus = ksi.assertion === true || ksi.assertion === "true";
+      if (statusFilter === 'passed') matchesStatus = (ksi.assertion === true || ksi.assertion === "true") && ksi.status !== 'meets_threshold';
       else if (statusFilter === 'failed') matchesStatus = ksi.assertion === false || ksi.assertion === "false";
       else if (statusFilter === 'warning') matchesStatus = ksi.status === 'warning';
+      else if (statusFilter === 'meets_threshold') matchesStatus = ksi.status === 'meets_threshold';
 
       return matchesSearch && matchesStatus;
     });
   }, [ksis, searchTerm, statusFilter]);
 
-  // Group by Category
+  // Group by Category, sort failures to top within each group
   const groupedKsis = useMemo(() => {
     const groups = {};
     filteredKsis.forEach(ksi => {
@@ -40,17 +55,30 @@ export const KSIGrid = () => {
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(ksi);
     });
-    return Object.keys(groups).sort().reduce((acc, key) => {
-      acc[key] = groups[key];
-      return acc;
-    }, {});
+
+    // Sort items within each group: failed first, then meets_threshold, then warning, then passed
+    const statusOrder = { 'failed': 0, 'meets_threshold': 1, 'warning': 2, 'info': 3, 'passed': 4, 'unknown': 5 };
+    for (const cat of Object.keys(groups)) {
+      groups[cat].sort((a, b) => (statusOrder[a.status] ?? 5) - (statusOrder[b.status] ?? 5));
+    }
+
+    // Sort categories: those with failures first, then alphabetical
+    return Object.keys(groups)
+      .sort((a, b) => {
+        const aFailed = groups[a].some(k => k.status === 'failed');
+        const bFailed = groups[b].some(k => k.status === 'failed');
+        if (aFailed !== bFailed) return aFailed ? -1 : 1;
+        return a.localeCompare(b);
+      })
+      .reduce((acc, key) => { acc[key] = groups[key]; return acc; }, {});
   }, [filteredKsis]);
 
   const statusCounts = useMemo(() => {
     return {
       all: ksis.length,
-      passed: ksis.filter(k => k.assertion === true || k.assertion === "true").length,
+      passed: ksis.filter(k => (k.assertion === true || k.assertion === "true") && k.status !== 'meets_threshold').length,
       failed: ksis.filter(k => k.assertion === false || k.assertion === "false").length,
+      meets_threshold: ksis.filter(k => k.status === 'meets_threshold').length,
       warning: ksis.filter(k => k.status === 'warning').length,
     };
   }, [ksis]);
@@ -64,9 +92,8 @@ export const KSIGrid = () => {
 
   return (
     <div className="space-y-6">
-      {/* 1. Dark Toolbar (Matches Screenshot) */}
+      {/* Toolbar */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-gray-900/50 p-2 rounded-xl border border-gray-700/50">
-
         {/* Search */}
         <div className="relative w-full md:w-96 group">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -86,24 +113,24 @@ export const KSIGrid = () => {
           )}
         </div>
 
-        {/* Filter Tabs (Dark Pills) */}
+        {/* Filter Tabs */}
         <div className="flex gap-1 p-1 bg-gray-800 rounded-lg overflow-x-auto w-full md:w-auto no-scrollbar border border-gray-700">
           <FilterTab label="All" count={statusCounts.all} active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
-          <FilterTab label="Compliant" count={statusCounts.passed} active={statusFilter === 'passed'} onClick={() => setStatusFilter('passed')} />
+          <FilterTab label="Operational" count={statusCounts.passed} active={statusFilter === 'passed'} onClick={() => setStatusFilter('passed')} />
           <FilterTab label="Failed" count={statusCounts.failed} active={statusFilter === 'failed'} onClick={() => setStatusFilter('failed')} />
-          <FilterTab label="Conditional" count={statusCounts.warning} active={statusFilter === 'warning'} onClick={() => setStatusFilter('warning')} />
+          {statusCounts.meets_threshold > 0 && (
+            <FilterTab label="Meets Threshold" count={statusCounts.meets_threshold} active={statusFilter === 'meets_threshold'} onClick={() => setStatusFilter('meets_threshold')} />
+          )}
+          {statusCounts.warning > 0 && (
+            <FilterTab label="Conditional" count={statusCounts.warning} active={statusFilter === 'warning'} onClick={() => setStatusFilter('warning')} />
+          )}
         </div>
       </div>
 
-      {/* 2. Category Sections */}
+      {/* Category Sections */}
       <div className="space-y-8">
         {Object.entries(groupedKsis).map(([category, items]) => (
-          <CategorySection
-            key={category}
-            category={category}
-            items={items}
-            openModal={openModal}
-          />
+          <CategorySection key={category} category={category} items={items} openModal={openModal} />
         ))}
 
         {filteredKsis.length === 0 && (
@@ -117,14 +144,11 @@ export const KSIGrid = () => {
   );
 };
 
-// Collapsible Category Section (Dark Mode)
+// Collapsible Category Section
 const CategorySection = ({ category, items, openModal }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const passed = items.filter(i => i.assertion === true || i.assertion === "true").length;
   const failed = items.filter(i => i.assertion === false || i.assertion === "false").length;
-  const passRate = Math.round((passed / items.length) * 100);
-  const isPerfect = passRate === 100;
 
   return (
     <div className="border border-gray-700 rounded-xl bg-gray-800 overflow-hidden shadow-lg">
@@ -133,31 +157,22 @@ const CategorySection = ({ category, items, openModal }) => {
         className="w-full flex items-center justify-between p-4 bg-gray-800 hover:bg-gray-750 transition-colors border-b border-gray-700 text-left"
       >
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${isPerfect ? 'bg-green-500/10 text-green-400' : 'bg-blue-500/10 text-blue-400'}`}>
+          <div className={`p-2 rounded-lg ${failed > 0 ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
             <Layers size={20} />
           </div>
           <div>
             <h3 className="text-base font-bold text-white">{category}</h3>
             <div className="flex items-center gap-3 text-xs font-medium text-gray-400 mt-0.5">
               <span>{items.length} controls</span>
-              <span className="text-gray-600">•</span>
+              <span className="text-gray-600">&middot;</span>
               <span className={failed > 0 ? 'text-red-400' : 'text-green-400'}>
-                {failed > 0 ? `${failed} Attention Items` : 'No Issues'}
+                {failed > 0 ? `${failed} requiring action` : 'All operational'}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-3 w-48">
-            <div className="h-1.5 flex-1 bg-gray-700 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full ${isPerfect ? 'bg-green-500' : 'bg-yellow-500'}`}
-                style={{ width: `${passRate}%` }}
-              ></div>
-            </div>
-            <span className="text-xs font-mono font-bold text-gray-300 w-8 text-right">{passRate}%</span>
-          </div>
+        <div className="flex items-center gap-2">
           {isExpanded ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronRight size={18} className="text-gray-500" />}
         </div>
       </button>
@@ -194,10 +209,10 @@ const KSICard = ({ ksi, openModal }) => {
   const { isAuthenticated } = useAuth();
   const meta = Sanitizer.mapStatus(ksi.status);
 
-  // Dark Theme Mapping
+  // Color mapping — blue for meets_threshold to distinguish from green pass
   const colors = {
     'passed': { border: 'border-green-500', text: 'text-green-400', bg: 'bg-green-500/10' },
-    'meets_threshold': { border: 'border-emerald-500', text: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+    'meets_threshold': { border: 'border-blue-500', text: 'text-blue-400', bg: 'bg-blue-500/10' },
     'failed': { border: 'border-red-500', text: 'text-red-400', bg: 'bg-red-500/10' },
     'warning': { border: 'border-yellow-500', text: 'text-yellow-400', bg: 'bg-yellow-500/10' },
     'info': { border: 'border-blue-500', text: 'text-blue-400', bg: 'bg-blue-500/10' }
@@ -205,6 +220,7 @@ const KSICard = ({ ksi, openModal }) => {
 
   const IconMap = { 'CheckCircle2': CheckCircle2, 'XCircle': XCircle, 'AlertTriangle': AlertTriangle, 'Info': Info };
   const Icon = IconMap[meta.icon] || Info;
+  const relTime = getRelativeTime(ksi.timestamp);
 
   return (
     <div
@@ -238,9 +254,17 @@ const KSICard = ({ ksi, openModal }) => {
       )}
 
       <div className="pl-3 pt-3 border-t border-gray-700 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
-          <TrendingUp size={14} />
+        <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
           <span>{ksi.commands_executed} checks</span>
+          {relTime && (
+            <>
+              <span className="text-gray-700">&middot;</span>
+              <span className="flex items-center gap-1">
+                <Clock size={10} />
+                {relTime}
+              </span>
+            </>
+          )}
         </div>
 
         <button

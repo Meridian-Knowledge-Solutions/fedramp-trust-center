@@ -8,10 +8,7 @@ import {
     CircleDot, Signal, SignalHigh, SignalLow, SignalMedium
 } from 'lucide-react';
 
-// Load from local public/data (same pattern as other components)
-const BASE_PATH = import.meta.env.BASE_URL.endsWith('/')
-    ? `${import.meta.env.BASE_URL}data/`
-    : `${import.meta.env.BASE_URL}/data/`;
+import { BASE_PATH } from '../../config/theme';
 
 const CATEGORY_CONFIG = {
     infrastructure: {
