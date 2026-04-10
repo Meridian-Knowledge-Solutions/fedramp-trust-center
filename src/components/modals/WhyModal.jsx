@@ -10,7 +10,7 @@ import {
   AlertTriangle, CheckCircle, Info, FileText, Terminal, Shield,
   ChevronDown, ChevronRight, Database, Cpu, Lock, Layers,
   Target, GitBranch, Zap, Server, Key, Network,
-  Globe, Activity, Eye, Settings, Archive, Users, Search, Cloud, Clock
+  Globe, Activity, Eye, Settings, Archive, Users, Search, Cloud
 } from 'lucide-react';
 
 // Icon mapping for services
@@ -155,12 +155,6 @@ export const WhyModal = () => {
                 <span className="font-mono">{parsed.score}%</span>
                 <span className="text-gray-700">&middot;</span>
                 <span>{parsed.checksSummary.passedChecks}/{parsed.checksSummary.totalChecks} checks passed</span>
-                {parsed.timestamp && (
-                  <>
-                    <span className="text-gray-700">&middot;</span>
-                    <span className="flex items-center gap-1"><Clock size={10} />{new Date(parsed.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                  </>
-                )}
               </div>
             </div>
           </div>

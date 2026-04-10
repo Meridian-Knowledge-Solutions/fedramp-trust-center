@@ -4,23 +4,9 @@ import { useModal } from '../../contexts/ModalContext';
 import { useAuth } from '../../hooks/useAuth';
 import { Sanitizer } from '../../utils/sanitizer';
 import {
-  Search, X, ChevronDown, ChevronRight, Clock,
+  Search, X, ChevronDown, ChevronRight,
   CheckCircle2, XCircle, AlertTriangle, Info, Terminal, Lock, Layers
 } from 'lucide-react';
-
-const getRelativeTime = (timestamp) => {
-  if (!timestamp) return null;
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diffMs = now - date;
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays > 0) return `${diffDays}d ago`;
-  if (diffHours > 0) return `${diffHours}h ago`;
-  if (diffMins > 0) return `${diffMins}m ago`;
-  return 'just now';
-};
 
 export const KSIGrid = () => {
   const { ksis, loading } = useData();
@@ -220,7 +206,6 @@ const KSICard = ({ ksi, openModal }) => {
 
   const IconMap = { 'CheckCircle2': CheckCircle2, 'XCircle': XCircle, 'AlertTriangle': AlertTriangle, 'Info': Info };
   const Icon = IconMap[meta.icon] || Info;
-  const relTime = getRelativeTime(ksi.timestamp);
 
   return (
     <div
@@ -256,15 +241,6 @@ const KSICard = ({ ksi, openModal }) => {
       <div className="pl-3 pt-3 border-t border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
           <span>{ksi.commands_executed} checks</span>
-          {relTime && (
-            <>
-              <span className="text-gray-700">&middot;</span>
-              <span className="flex items-center gap-1">
-                <Clock size={10} />
-                {relTime}
-              </span>
-            </>
-          )}
         </div>
 
         <button
