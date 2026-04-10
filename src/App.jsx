@@ -397,7 +397,6 @@ const DashboardContent = memo(() => {
   }[globalStatus] || { label: 'Unknown', color: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20', dot: 'bg-slate-500', solid: 'bg-slate-500' };
 
   const lastRunDate = metadata?.validation_date ? new Date(metadata.validation_date) : null;
-  const controlsAtRisk = parseInt(metrics.failed) + parseInt(metrics.meets_threshold || 0) + parseInt(metrics.warning || 0);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 slide-in-from-bottom-4">
@@ -431,10 +430,6 @@ const DashboardContent = memo(() => {
             <div className="text-center">
               <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Pass Rate</div>
               <div className="text-white font-mono font-bold text-xl tabular-nums">{metrics.score}%</div>
-            </div>
-            <div className="text-center">
-              <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">At Risk</div>
-              <div className={`font-mono font-bold text-xl tabular-nums ${controlsAtRisk === 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{controlsAtRisk}</div>
             </div>
             <div className="text-center">
               <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Target</div>
