@@ -1,11 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../hooks/useData';
 import { useModal } from '../../contexts/ModalContext';
-import { useAuth } from '../../hooks/useAuth';
 import { Sanitizer } from '../../utils/sanitizer';
 import {
   Search, X, ChevronDown, ChevronRight,
-  CheckCircle2, XCircle, AlertTriangle, Info, Terminal, Lock, Layers
+  CheckCircle2, XCircle, AlertTriangle, Info, Layers
 } from 'lucide-react';
 
 export const KSIGrid = () => {
@@ -192,7 +191,6 @@ const FilterTab = ({ label, count, active, onClick }) => (
 );
 
 const KSICard = ({ ksi, openModal }) => {
-  const { isAuthenticated } = useAuth();
   const meta = Sanitizer.mapStatus(ksi.status);
 
   // Color mapping — blue for meets_threshold to distinguish from green pass
@@ -238,25 +236,8 @@ const KSICard = ({ ksi, openModal }) => {
         </p>
       )}
 
-      <div className="pl-3 pt-3 border-t border-gray-700 flex items-center justify-between">
-        <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
-          <span>{ksi.commands_executed} checks</span>
-        </div>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!isAuthenticated) {
-              openModal('accessRequired', { featureName: 'CLI Logs', benefits: ['View raw CLI commands'] });
-            } else {
-              openModal('cli', ksi);
-            }
-          }}
-          className="text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1 transition-colors"
-        >
-          {isAuthenticated ? <Terminal size={14} /> : <Lock size={12} />}
-          View CLI
-        </button>
+      <div className="pl-3 pt-3 border-t border-gray-700 flex items-center text-xs text-gray-500 font-medium">
+        <span>{ksi.commands_executed} checks</span>
       </div>
     </div>
   );
