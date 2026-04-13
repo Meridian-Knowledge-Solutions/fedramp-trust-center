@@ -239,7 +239,7 @@ const KSICard = ({ ksi, openModal }) => {
       <div className="pl-3 pt-3 border-t border-gray-700 flex items-center justify-between">
         <span className="text-xs text-gray-500 font-medium">{ksi.commands_executed} checks</span>
         <span className="text-xs font-bold text-gray-500 group-hover:text-blue-400 flex items-center gap-1 transition-colors">
-          View evidence
+          Details
           <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
         </span>
       </div>
