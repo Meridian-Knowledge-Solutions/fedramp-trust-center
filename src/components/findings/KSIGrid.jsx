@@ -3,7 +3,7 @@ import { useData } from '../../hooks/useData';
 import { useModal } from '../../contexts/ModalContext';
 import { Sanitizer } from '../../utils/sanitizer';
 import {
-  Search, X, ChevronDown, ChevronRight,
+  Search, X, ChevronDown, ChevronRight, ArrowRight,
   CheckCircle2, XCircle, AlertTriangle, Info, Layers
 } from 'lucide-react';
 
@@ -208,7 +208,7 @@ const KSICard = ({ ksi, openModal }) => {
   return (
     <div
       onClick={() => openModal('why', ksi)}
-      className={`group bg-gray-800 rounded-lg border border-gray-700 p-5 hover:border-gray-600 transition-all cursor-pointer flex flex-col h-full relative overflow-hidden`}
+      className={`group bg-gray-800 rounded-lg border border-gray-700 p-5 hover:border-blue-500/40 hover:bg-gray-800/80 transition-all cursor-pointer flex flex-col h-full relative overflow-hidden`}
     >
       {/* Colored Accent Line (Left) */}
       <div className={`absolute left-0 top-0 bottom-0 w-1 ${colors.border}`}></div>
@@ -222,7 +222,7 @@ const KSICard = ({ ksi, openModal }) => {
         </span>
       </div>
 
-      <h4 className="pl-3 text-sm font-medium text-gray-200 mb-2 group-hover:text-blue-400 transition-colors leading-relaxed flex-1">
+      <h4 className="pl-3 text-sm font-medium text-gray-200 mb-2 group-hover:text-white transition-colors leading-relaxed flex-1">
         {ksi.description}
       </h4>
       {ksi.status === 'warning' && (
@@ -236,8 +236,12 @@ const KSICard = ({ ksi, openModal }) => {
         </p>
       )}
 
-      <div className="pl-3 pt-3 border-t border-gray-700 flex items-center text-xs text-gray-500 font-medium">
-        <span>{ksi.commands_executed} checks</span>
+      <div className="pl-3 pt-3 border-t border-gray-700 flex items-center justify-between">
+        <span className="text-xs text-gray-500 font-medium">{ksi.commands_executed} checks</span>
+        <span className="text-xs font-bold text-gray-500 group-hover:text-blue-400 flex items-center gap-1 transition-colors">
+          View evidence
+          <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+        </span>
       </div>
     </div>
   );
