@@ -124,7 +124,7 @@ export const WhyModal = () => {
             <Shield size={28} className="text-gray-500 mx-auto mb-3" />
             <h4 className="font-semibold text-white text-lg mb-2">Federal Access Required</h4>
             <p className="text-sm text-gray-400 mb-5 max-w-sm mx-auto">
-              Technical findings and evidence are restricted to authorized personnel.
+              Technical findings and command logs are restricted to authorized personnel.
             </p>
             <button
               onClick={() => { closeModal('why'); openModal('registration'); }}
@@ -185,10 +185,10 @@ export const WhyModal = () => {
           </Section>
         )}
 
-        {/* Validation Checks — the actual evidence */}
+        {/* Validation Checks — which CLI commands ran and their pass/fail */}
         {parsed.checks.length > 0 && (
           <Section
-            title="Validation Evidence"
+            title="Validation Checks"
             icon={Terminal}
             defaultOpen={isFailing}
             badge={`${parsed.checksSummary.passedChecks}/${parsed.checksSummary.totalChecks}`}
