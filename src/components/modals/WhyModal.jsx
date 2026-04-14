@@ -52,12 +52,11 @@ const Section = ({ title, icon: Icon, defaultOpen = false, children, badge, badg
   );
 };
 
-// Single CLI check row
+// Single CLI check row — check name + the CLI command that was run, always visible
 const CheckRow = ({ check }) => {
-  const [showCmd, setShowCmd] = useState(false);
   return (
     <div className={`p-3 rounded-lg border ${check.passed ? 'border-green-500/20 bg-green-500/5' : 'border-red-500/20 bg-red-500/5'}`}>
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 mb-2">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div className={`p-1 rounded ${check.passed ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
             <ServiceIcon name={check.service} size={12} />
@@ -65,22 +64,15 @@ const CheckRow = ({ check }) => {
           <span className="text-sm text-white truncate">{check.name}</span>
           {check.executionTime && <span className="text-[10px] text-gray-500 flex-shrink-0">{check.executionTime}</span>}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <button onClick={() => setShowCmd(!showCmd)} className="text-[10px] text-gray-500 hover:text-gray-300">
-            <Terminal size={12} />
-          </button>
-          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${check.passed ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-            {check.passed ? 'PASS' : 'FAIL'}
-          </span>
-        </div>
+        <span className={`px-2 py-0.5 rounded text-[10px] font-bold flex-shrink-0 ${check.passed ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+          {check.passed ? 'PASS' : 'FAIL'}
+        </span>
       </div>
+      <pre className="text-xs bg-black/40 p-2 rounded border border-gray-800 text-green-300 font-mono overflow-x-auto">
+        <span className="text-blue-400 select-none">$ </span>{check.command}
+      </pre>
       {check.errorMessage && !check.passed && (
         <p className="text-xs text-red-300 mt-2 bg-red-500/10 p-2 rounded">{check.errorMessage}</p>
-      )}
-      {showCmd && (
-        <pre className="mt-2 text-xs bg-black/40 p-2 rounded border border-gray-800 text-green-300 font-mono overflow-x-auto">
-          <span className="text-blue-400 select-none">$ </span>{check.command}
-        </pre>
       )}
     </div>
   );
@@ -185,10 +177,10 @@ export const WhyModal = () => {
           </Section>
         )}
 
-        {/* Validation Checks — which CLI commands ran and their pass/fail */}
+        {/* CLI Validation Commands — each check is an AWS CLI command with its result */}
         {parsed.checks.length > 0 && (
           <Section
-            title="Validation Checks"
+            title="CLI Validation Commands"
             icon={Terminal}
             defaultOpen={isFailing}
             badge={`${parsed.checksSummary.passedChecks}/${parsed.checksSummary.totalChecks}`}
