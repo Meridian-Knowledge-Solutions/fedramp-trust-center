@@ -1,6 +1,5 @@
 export { ModalContainer } from './ModalContainer';
 export { BaseModal } from './BaseModal';
-export { CLIModal } from './CLIModal';
 export { WhyModal } from './WhyModal';
 export { POAMModal } from './POAMModal';
 export { EnhancementModal } from './EnhancementModal';
