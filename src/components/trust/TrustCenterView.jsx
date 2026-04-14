@@ -539,7 +539,20 @@ export const TrustCenterView = () => {
         return true;
     };
 
-    const openApiDocs = () => window.open('https://meridian-knowledge-solutions.github.io/fedramp-20x-public/documentation/api/', '_blank');
+    const API_DOCS_URL = 'https://meridian-knowledge-solutions.github.io/fedramp-20x-public/documentation/api/';
+
+    const openApiDocs = () => window.open(API_DOCS_URL, '_blank');
+
+    const triggerDownload = (blob, filename) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     const viewSecureConfig = async () => {
         if (!handleAction('View Secure Configuration')) return;
@@ -549,6 +562,30 @@ export const TrustCenterView = () => {
             const text = await res.text();
             openModal('markdown', { title: 'Secure Configuration', markdown: text });
         } catch (e) { alert('Load failed.'); }
+    };
+
+    const downloadSecureConfig = async () => {
+        if (!handleAction('Download Secure Configuration')) return;
+        try {
+            const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const text = await res.text();
+            triggerDownload(new Blob([text], { type: 'text/markdown' }), 'secure-configuration.md');
+        } catch (e) { alert(`Download failed: ${e.message}`); }
+    };
+
+    const downloadApiDocs = async () => {
+        if (!handleAction('Download API Documentation')) return;
+        try {
+            const res = await fetch(API_DOCS_URL);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const text = await res.text();
+            triggerDownload(new Blob([text], { type: 'text/html' }), 'fedramp-20x-api-docs.html');
+        } catch (e) {
+            // Fallback: open in new tab if direct download is blocked (e.g., CORS)
+            window.open(API_DOCS_URL, '_blank');
+        }
     };
 
     const handleDownloadPackage = async () => {
@@ -759,8 +796,8 @@ export const TrustCenterView = () => {
 
                 {/* --- FOOTER ACTIONS --- */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-8 mt-8">
-                    <FooterAction title="API Docs" onClick={openApiDocs} />
-                    <FooterAction title="Secure Config" onClick={viewSecureConfig} />
+                    <FooterAction title="API Docs" onClick={openApiDocs} onDownload={downloadApiDocs} downloadLabel="Download API documentation" />
+                    <FooterAction title="Secure Config" onClick={viewSecureConfig} onDownload={downloadSecureConfig} downloadLabel="Download secure configuration" />
                     <FooterAction title="Support" onClick={() => window.location.href = 'mailto:support@meridianks.com'} />
                 </div>
             </div>
@@ -961,8 +998,30 @@ const ArtifactBadge = ({ label }) => (
 
 // ClassificationBadge removed — no longer used
 
-const FooterAction = ({ title, onClick }) => (
-    <button onClick={onClick} className={`${THEME.panel} border ${THEME.border} hover:bg-[#18181b] p-4 rounded-xl flex items-center justify-center gap-2 text-sm font-bold text-slate-300 hover:text-white transition-all group`}>
-        {title}
-    </button>
-);
+const FooterAction = ({ title, onClick, onDownload, downloadLabel }) => {
+    if (!onDownload) {
+        return (
+            <button onClick={onClick} className={`${THEME.panel} border ${THEME.border} hover:bg-[#18181b] p-4 rounded-xl flex items-center justify-center gap-2 text-sm font-bold text-slate-300 hover:text-white transition-all group`}>
+                {title}
+            </button>
+        );
+    }
+    return (
+        <div className={`${THEME.panel} border ${THEME.border} rounded-xl flex items-stretch overflow-hidden transition-all group`}>
+            <button
+                onClick={onClick}
+                className="flex-1 p-4 flex items-center justify-center gap-2 text-sm font-bold text-slate-300 hover:text-white hover:bg-[#18181b] transition-all"
+            >
+                {title}
+            </button>
+            <button
+                onClick={onDownload}
+                aria-label={downloadLabel || `Download ${title}`}
+                title={downloadLabel || `Download ${title}`}
+                className="px-4 flex items-center justify-center text-slate-400 hover:text-white hover:bg-[#18181b] border-l border-white/5 transition-all"
+            >
+                <Download size={16} />
+            </button>
+        </div>
+    );
+};
