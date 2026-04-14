@@ -225,19 +225,9 @@ const KSICard = ({ ksi, openModal }) => {
       <h4 className="pl-3 text-sm font-medium text-gray-200 mb-2 group-hover:text-white transition-colors leading-relaxed flex-1">
         {ksi.description}
       </h4>
-      {ksi.status === 'warning' && (
-        <p className="pl-3 text-[10px] text-amber-400/70 mb-2 leading-snug">
-          Passes validation but has conditions requiring ongoing monitoring
-        </p>
-      )}
-      {ksi.status === 'failed' && (
-        <p className="pl-3 text-[10px] text-red-400/70 mb-2 leading-snug">
-          Failed validation — corrective action required
-        </p>
-      )}
 
       <div className="pl-3 pt-3 border-t border-gray-700 flex items-center justify-between">
-        <span className="text-xs text-gray-500 font-medium">{ksi.commands_executed} checks</span>
+        <span className="text-xs text-gray-500 font-medium">{ksi.commands_executed} CLI checks</span>
         <span className="text-xs font-bold text-gray-500 group-hover:text-blue-400 flex items-center gap-1 transition-colors">
           Details
           <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
