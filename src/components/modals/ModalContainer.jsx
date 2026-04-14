@@ -1,5 +1,4 @@
 import React from 'react';
-import { CLIModal } from './CLIModal';
 import { WhyModal } from './WhyModal';
 import { POAMModal } from './POAMModal';
 import { EnhancementModal } from './EnhancementModal';
@@ -10,7 +9,6 @@ import { MarkdownModal } from './MarkdownModal';
 export const ModalContainer = () => {
   return (
     <>
-      <CLIModal />
       <WhyModal />
       <POAMModal />
       <EnhancementModal />

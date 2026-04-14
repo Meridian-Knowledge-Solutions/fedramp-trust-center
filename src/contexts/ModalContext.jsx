@@ -4,7 +4,6 @@ const ModalContext = createContext(null);
 
 export const ModalProvider = ({ children }) => {
   const [modals, setModals] = useState({
-    cli: { isOpen: false, data: null },
     why: { isOpen: false, data: null },
     poam: { isOpen: false, data: null },
     enhancement: { isOpen: false, data: null },
@@ -31,7 +30,6 @@ export const ModalProvider = ({ children }) => {
 
   const closeAllModals = () => {
     setModals({
-      cli: { isOpen: false, data: null },
       why: { isOpen: false, data: null },
       poam: { isOpen: false, data: null },
       enhancement: { isOpen: false, data: null },
