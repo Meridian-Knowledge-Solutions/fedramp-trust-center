@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 export const KSIGrid = () => {
-  const { ksis, loading } = useData();
+  const { ksis, loading, backlogByKsi } = useData();
   const { openModal } = useModal();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -115,7 +115,7 @@ export const KSIGrid = () => {
       {/* Category Sections */}
       <div className="space-y-8">
         {Object.entries(groupedKsis).map(([category, items]) => (
-          <CategorySection key={category} category={category} items={items} openModal={openModal} />
+          <CategorySection key={category} category={category} items={items} openModal={openModal} backlogByKsi={backlogByKsi} />
         ))}
 
         {filteredKsis.length === 0 && (
@@ -130,7 +130,7 @@ export const KSIGrid = () => {
 };
 
 // Collapsible Category Section
-const CategorySection = ({ category, items, openModal }) => {
+const CategorySection = ({ category, items, openModal, backlogByKsi }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   const failed = items.filter(i => i.assertion === false || i.assertion === "false").length;
@@ -166,7 +166,7 @@ const CategorySection = ({ category, items, openModal }) => {
         <div className="p-6 bg-[#0B0C10] animate-in slide-in-from-top-2 duration-200">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {items.map(ksi => (
-              <KSICard key={ksi.id} ksi={ksi} openModal={openModal} />
+              <KSICard key={ksi.id} ksi={ksi} openModal={openModal} backlogStats={backlogByKsi?.[ksi.id]} />
             ))}
           </div>
         </div>
@@ -217,7 +217,7 @@ const ModeChip = ({ ksi }) => {
   );
 };
 
-const KSICard = ({ ksi, openModal }) => {
+const KSICard = ({ ksi, openModal, backlogStats }) => {
   const meta = Sanitizer.mapStatus(ksi.status);
 
   // Color mapping — blue for meets_threshold to distinguish from green pass
@@ -251,6 +251,11 @@ const KSICard = ({ ksi, openModal }) => {
             {ksi.id}
           </span>
           <ModeChip ksi={ksi} />
+          {backlogStats?.hasRiskAccepted && (
+            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border border-purple-500/30 bg-purple-500/10 text-purple-300">
+              Risk-accepted
+            </span>
+          )}
         </div>
         <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap ${colors.bg} ${colors.text}`}>
           <Icon size={12} /> {meta.label}

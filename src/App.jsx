@@ -3,7 +3,7 @@ import {
   LayoutDashboard, ShieldAlert, User, LogOut,
   Menu, Activity, Calendar, Clock,
   FileText, RefreshCw, BarChart3, Eye, X, Shield, Layers,
-  BookOpen, Code2, FileBarChart, Database
+  BookOpen, Code2, FileBarChart, Database, ListTodo
 } from 'lucide-react';
 
 import {
@@ -28,6 +28,8 @@ import { UnifiedMasDashboard } from './components/trust/UnifiedMasDashboard';
 import { PoliciesTab } from './components/trust/PoliciesTab';
 import { SchemaTab } from './components/trust/SchemaTab';
 import { ReportsTab } from './components/trust/ReportsTab';
+import { RemediationRegister } from './components/trust/RemediationRegister';
+import { RemediationHeatmap } from './components/trust/RemediationHeatmap';
 import { TrustCenterDataProvider } from './hooks/useTrustCenterData';
 
 import { THEME, BASE_PATH } from './config/theme';
@@ -377,7 +379,7 @@ const ComplianceChart = memo(() => {
   );
 });
 
-const DashboardContent = memo(() => {
+const DashboardContent = memo(({ onOpenRegister }) => {
   const { metrics, ksis, metadata, reload } = useData();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -463,6 +465,11 @@ const DashboardContent = memo(() => {
         </div>
       </div>
 
+      {/* Remediation Backlog severity strip — only renders if backlog is published */}
+      <RemediationHeatmap
+        onSelectSeverity={(sev) => onOpenRegister?.(sev ? { severity: sev } : {})}
+      />
+
       {/* KSI Grid — directly after header, no wrapper chrome */}
       <KSIGrid />
 
@@ -478,11 +485,19 @@ const AppShell = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
+  const [registerFilters, setRegisterFilters] = useState({});
   const [settingsOpen, setSettingsOpen] = useState(false);
   const scrollY = useScrollPosition();
 
   const { user, isAuthenticated, logout } = useAuth();
   const { openModal } = useModal();
+
+  // Navigate to the Remediation Register, optionally pre-filtered (e.g. heatmap click).
+  const goToRegister = useCallback((filters = {}) => {
+    setRegisterFilters(filters);
+    setActiveView('register');
+    setMobileMenuOpen(false);
+  }, []);
 
   return (
     <div className={`flex h-screen ${THEME.bg} text-slate-300 font-sans overflow-hidden selection:bg-blue-500/30`}>
@@ -563,6 +578,12 @@ const AppShell = () => {
               label="Failure History"
               isActive={activeView === 'failures'}
               onClick={() => { setActiveView('failures'); setMobileMenuOpen(false); }}
+            />
+            <SidebarItem
+              icon={ListTodo}
+              label="Remediation Register"
+              isActive={activeView === 'register'}
+              onClick={() => goToRegister({})}
             />
             <SidebarItem
               icon={Layers}
@@ -679,6 +700,12 @@ const AppShell = () => {
               onClick={() => setActiveView('failures')}
             />
             <SidebarItem
+              icon={ListTodo}
+              label="Remediation Register"
+              isActive={activeView === 'register'}
+              onClick={() => goToRegister({})}
+            />
+            <SidebarItem
               icon={Layers}
               label="Assessment Scope"
               isActive={activeView === 'mas'}
@@ -754,6 +781,7 @@ const AppShell = () => {
                 {activeView === 'transparency' && 'Platform / Transparency Console'}
                 {activeView === 'metrics' && 'Platform / Pipeline Metrics'}
                 {activeView === 'failures' && 'Platform / Failure History'}
+                {activeView === 'register' && 'Platform / Remediation Register'}
                 {activeView === 'mas' && 'Platform / Assessment Scope'}
                 {activeView === 'policies' && 'Organization / Policies'}
                 {activeView === 'schema' && 'Organization / Schema'}
@@ -781,8 +809,9 @@ const AppShell = () => {
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow" style={{ animationDelay: '1s' }} />
 
           <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto relative z-10">
-            {activeView === 'dashboard' ? <DashboardContent /> :
+            {activeView === 'dashboard' ? <DashboardContent onOpenRegister={goToRegister} /> :
               activeView === 'trust' ? <TrustCenterView /> :
+              activeView === 'register' ? <RemediationRegister initialFilters={registerFilters} /> :
               !isAuthenticated ? (
                 <div className="flex items-center justify-center min-h-[60vh]">
                   <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-10 rounded-2xl border border-gray-700 text-center max-w-md">

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Sanitizer } from '../utils/sanitizer';
 
 const DataContext = createContext();
@@ -25,6 +25,7 @@ export const DataProvider = ({ children }) => {
   const [history, setHistory] = useState([]);
   const [masData, setMasData] = useState(null);
   const [metricsData, setMetricsData] = useState(null);
+  const [backlog, setBacklog] = useState(null);
   const [metrics, setMetrics] = useState({
     score: 0, passed: 0, failed: 0, meets_threshold: 0, warning: 0, info: 0
   });
@@ -124,17 +125,43 @@ export const DataProvider = ({ children }) => {
         register: `${BASE_PATH}cli_command_register.json?t=${cacheBuster}`, // Synced from private repo via pipeline
         history: `${BASE_PATH}ksi_history.jsonl?t=${cacheBuster}`,
         mas: `${BASE_PATH}mas_boundary.json?t=${cacheBuster}`,
-        metricsHistory: `${BASE_PATH}metrics_history.jsonl?t=${cacheBuster}`
+        metricsHistory: `${BASE_PATH}metrics_history.jsonl?t=${cacheBuster}`,
+        backlog: `${BASE_PATH}remediation_backlog.json?t=${cacheBuster}`
       };
 
       // 1. Fetch All Data Sources
-      const [valRes, regRes, histRes, masRes, metricsRes] = await Promise.all([
+      const [valRes, regRes, histRes, masRes, metricsRes, backlogRes] = await Promise.all([
         fetch(urls.validations),
         fetch(urls.register),
         fetch(urls.history),
         fetch(urls.mas),
-        fetch(urls.metricsHistory)
+        fetch(urls.metricsHistory),
+        fetch(urls.backlog)
       ]);
+
+      // --- REMEDIATION BACKLOG (FedRAMP 20x continuous remediation register) ---
+      // Public schema — opaque resource hashes, no owner/plan/risk-acceptance text.
+      if (backlogRes.ok) {
+        try {
+          const text = await backlogRes.text();
+          if (!text.trim().startsWith('<')) {
+            setBacklog(JSON.parse(text));
+            console.log("✅ Remediation Backlog Loaded");
+          } else {
+            console.warn("⚠️ Remediation Backlog returned HTML (likely 404)");
+            setBacklog(null);
+          }
+        } catch (e) {
+          console.warn("⚠️ Failed to parse Remediation Backlog:", e);
+          setBacklog(null);
+        }
+      } else {
+        // Backlog file is optional — engine may not have published it yet.
+        if (backlogRes.status !== 404) {
+          console.warn(`⚠️ Remediation Backlog Fetch Failed: ${backlogRes.status}`);
+        }
+        setBacklog(null);
+      }
 
       // --- MAS DATA PROCESSING (WITH DEBUGGING) ---
       if (masRes.ok) {
@@ -388,6 +415,34 @@ export const DataProvider = ({ children }) => {
     loadData();
   }, [loadData]);
 
+  // Per-KSI backlog index — derived once per backlog change so KSI cards,
+  // the Why modal, and the register can all consume without recomputing.
+  const backlogByKsi = useMemo(() => {
+    const idx = {};
+    if (!backlog?.items) return idx;
+    for (const it of backlog.items) {
+      const k = it.ksi;
+      if (!k) continue;
+      if (!idx[k]) {
+        idx[k] = {
+          items: [],
+          severityCounts: { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 },
+          stateCounts: { OPEN: 0, IN_PROGRESS: 0, RISK_ACCEPTED: 0, CLOSED: 0 },
+          hasRiskAccepted: false,
+          openCount: 0,
+        };
+      }
+      const bucket = idx[k];
+      bucket.items.push(it);
+      if (bucket.severityCounts[it.severity] != null) bucket.severityCounts[it.severity]++;
+      const state = it.tracking?.state || 'OPEN';
+      if (bucket.stateCounts[state] != null) bucket.stateCounts[state]++;
+      if (state === 'RISK_ACCEPTED') bucket.hasRiskAccepted = true;
+      if (state === 'OPEN' || state === 'IN_PROGRESS') bucket.openCount++;
+    }
+    return idx;
+  }, [backlog]);
+
   // Auto-refresh logic
   useEffect(() => {
     const settings = JSON.parse(localStorage.getItem('trustCenterSettings') || '{"autoRefresh": true}');
@@ -407,7 +462,7 @@ export const DataProvider = ({ children }) => {
   }, [loadData]);
 
   return (
-    <DataContext.Provider value={{ ksis, metrics, metadata, history, masData, metricsData, loading, reload: loadData }}>
+    <DataContext.Provider value={{ ksis, metrics, metadata, history, masData, metricsData, backlog, backlogByKsi, loading, reload: loadData }}>
       {children}
     </DataContext.Provider>
   );
