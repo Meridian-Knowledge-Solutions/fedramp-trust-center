@@ -190,6 +190,33 @@ const FilterTab = ({ label, count, active, onClick }) => (
   </button>
 );
 
+// FedRAMP 20x outcome-framework chip: distinguishes Capability-mode KSIs
+// (system presence + capability_status) from Output-mode KSIs (rate vs target).
+const ModeChip = ({ ksi }) => {
+  if (!ksi?.mode) return null;
+
+  if (ksi.mode === 'output') {
+    return (
+      <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border bg-slate-900 text-slate-300 border-gray-700">
+        Output
+      </span>
+    );
+  }
+
+  const cap = ksi.capability_status;
+  const capColor =
+    cap === 'operational' ? 'text-emerald-400'
+    : cap === 'degraded' ? 'text-amber-400'
+    : cap === 'missing' ? 'text-red-400'
+    : 'text-slate-500';
+
+  return (
+    <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border bg-slate-900 text-slate-300 border-gray-700">
+      Capability{cap && <> · <span className={capColor}>{cap}</span></>}
+    </span>
+  );
+};
+
 const KSICard = ({ ksi, openModal }) => {
   const meta = Sanitizer.mapStatus(ksi.status);
 
@@ -205,6 +232,11 @@ const KSICard = ({ ksi, openModal }) => {
   const IconMap = { 'CheckCircle2': CheckCircle2, 'XCircle': XCircle, 'AlertTriangle': AlertTriangle, 'Info': Info };
   const Icon = IconMap[meta.icon] || Info;
 
+  // Output-mode rate display: target is 95% per FedRAMP 20x outcome framework.
+  const isOutputMode = ksi.mode === 'output';
+  const outputTarget = 95;
+  const score = typeof ksi.score === 'number' ? ksi.score : (typeof ksi.score === 'string' ? parseFloat(ksi.score) : null);
+
   return (
     <div
       onClick={() => openModal('why', ksi)}
@@ -213,14 +245,26 @@ const KSICard = ({ ksi, openModal }) => {
       {/* Colored Accent Line (Left) */}
       <div className={`absolute left-0 top-0 bottom-0 w-1 ${colors.border}`}></div>
 
-      <div className="flex justify-between items-start mb-3 pl-3">
-        <span className="font-mono text-[10px] font-bold text-gray-500 bg-gray-900 px-2 py-1 rounded border border-gray-700">
-          {ksi.id}
-        </span>
-        <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 ${colors.bg} ${colors.text}`}>
+      <div className="flex justify-between items-start mb-3 pl-3 gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-mono text-[10px] font-bold text-gray-500 bg-gray-900 px-2 py-1 rounded border border-gray-700">
+            {ksi.id}
+          </span>
+          <ModeChip ksi={ksi} />
+        </div>
+        <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap ${colors.bg} ${colors.text}`}>
           <Icon size={12} /> {meta.label}
         </span>
       </div>
+
+      {isOutputMode && score != null && (
+        <div className="pl-3 mb-2 text-[11px] font-mono">
+          <span className={score >= outputTarget ? 'text-emerald-400' : score === 0 ? 'text-red-400' : 'text-amber-400'}>
+            {score}%
+          </span>
+          <span className="text-gray-500"> (target {outputTarget}%)</span>
+        </div>
+      )}
 
       <h4 className="pl-3 text-sm font-medium text-gray-200 mb-2 group-hover:text-white transition-colors leading-relaxed flex-1">
         {ksi.description}
