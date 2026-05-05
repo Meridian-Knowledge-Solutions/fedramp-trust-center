@@ -12,10 +12,9 @@ import {
   ChevronDown, ChevronRight, Database, Cpu, Lock, Layers,
   Target, GitBranch, Zap, Server, Key, Network,
   Globe, Activity, Eye, Settings, Archive, Users, Search, Cloud,
-  AlertOctagon, AlertCircle, ExternalLink, Hash
+  AlertOctagon, AlertCircle, Hash
 } from 'lucide-react';
 
-const ISSUE_URL = 'https://github.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/issues/238';
 const STALE_DAYS = 30;
 
 const SEVERITY_ICONS = {
@@ -276,17 +275,6 @@ export const WhyModal = () => {
                   Showing 25 of {backlogStats.items.length} items — see Remediation Register for the full list.
                 </p>
               )}
-              <div className="pt-2 border-t border-gray-700/50">
-                <a
-                  href={ISSUE_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-400 hover:text-blue-300"
-                >
-                  <ExternalLink size={11} />
-                  Owner, plan, and risk-acceptance details — see GitHub issue #238
-                </a>
-              </div>
             </div>
           </Section>
         )}

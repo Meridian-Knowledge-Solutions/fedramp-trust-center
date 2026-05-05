@@ -9,18 +9,14 @@
  *   - No raw resource names — only opaque "[r-<6char>]" hashes (stable for grouping)
  *   - No owner, no remediation_plan, no risk_acceptance text
  *   - reason text is either redacted-with-context or a per-KSI category fallback
- *
- * For specifics, deep details live on GitHub issue #238 in the submission repo.
  */
 import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../../hooks/useData';
 import {
   Search, X, ChevronDown, ChevronRight, AlertOctagon,
-  AlertTriangle, AlertCircle, Info, Clock, ExternalLink,
+  AlertTriangle, AlertCircle, Info, Clock,
   Shield, Layers, Hash, Filter
 } from 'lucide-react';
-
-const ISSUE_URL = 'https://github.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/issues/238';
 
 const SEVERITY_ORDER = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
 const STATE_ORDER = { OPEN: 0, IN_PROGRESS: 1, RISK_ACCEPTED: 2, CLOSED: 3 };
@@ -168,17 +164,6 @@ const Row = ({ item }) => {
                   <span className="text-slate-300 font-mono">{item.status || '—'}</span>
                 </div>
               </div>
-              <div className="pt-2 border-t border-white/5">
-                <a
-                  href={ISSUE_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-400 hover:text-blue-300"
-                >
-                  <ExternalLink size={11} />
-                  Owner, plan, and risk-acceptance details — see GitHub issue #238
-                </a>
-              </div>
             </div>
           </td>
         </tr>
@@ -300,15 +285,6 @@ export const RemediationRegister = ({ initialFilters = {} }) => {
               {backlog.generated_at && <> · Generated {formatDate(backlog.generated_at)}</>}
             </p>
           </div>
-          <a
-            href={ISSUE_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-400 hover:text-blue-300 px-3 py-1.5 rounded border border-blue-500/20 bg-blue-500/5"
-          >
-            <ExternalLink size={11} />
-            Operational details
-          </a>
         </div>
         {backlog.note && (
           <p className="text-[11px] text-slate-500 mt-3 pt-3 border-t border-white/5 leading-relaxed">{backlog.note}</p>
