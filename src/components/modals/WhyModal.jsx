@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useModal } from '../../contexts/ModalContext';
 import { useAuth } from '../../hooks/useAuth';
+import { useData } from '../../hooks/useData';
 import { BaseModal } from './BaseModal';
 import {
   parseKsiValidation,
@@ -10,8 +11,71 @@ import {
   AlertTriangle, CheckCircle, Info, FileText, Terminal, Shield,
   ChevronDown, ChevronRight, Database, Cpu, Lock, Layers,
   Target, GitBranch, Zap, Server, Key, Network,
-  Globe, Activity, Eye, Settings, Archive, Users, Search, Cloud
+  Globe, Activity, Eye, Settings, Archive, Users, Search, Cloud,
+  AlertOctagon, AlertCircle, Hash
 } from 'lucide-react';
+
+const STALE_DAYS = 30;
+
+const SEVERITY_ICONS = {
+  CRITICAL: { Icon: AlertOctagon, text: 'text-red-400', dot: 'bg-red-500', bg: 'bg-red-500/10', border: 'border-red-500/30' },
+  HIGH: { Icon: AlertTriangle, text: 'text-orange-400', dot: 'bg-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30' },
+  MEDIUM: { Icon: AlertCircle, text: 'text-yellow-400', dot: 'bg-yellow-500', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30' },
+  LOW: { Icon: Info, text: 'text-blue-400', dot: 'bg-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/30' },
+};
+
+const STATE_LABELS = {
+  OPEN: { label: 'OPEN', text: 'text-slate-300', bg: 'bg-slate-500/10', border: 'border-slate-500/30' },
+  IN_PROGRESS: { label: 'IN PROGRESS', text: 'text-blue-300', bg: 'bg-blue-500/10', border: 'border-blue-500/30' },
+  RISK_ACCEPTED: { label: 'RISK ACCEPTED', text: 'text-purple-300', bg: 'bg-purple-500/10', border: 'border-purple-500/30' },
+  CLOSED: { label: 'CLOSED', text: 'text-emerald-300', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
+};
+
+const daysSince = (iso) => {
+  if (!iso) return null;
+  const ms = Date.now() - new Date(iso).getTime();
+  if (Number.isNaN(ms)) return null;
+  return Math.floor(ms / 86400000);
+};
+
+const BacklogItem = ({ item }) => {
+  const sev = SEVERITY_ICONS[item.severity] || SEVERITY_ICONS.LOW;
+  const state = STATE_LABELS[item.tracking?.state || 'OPEN'] || STATE_LABELS.OPEN;
+  const SevIcon = sev.Icon;
+  const age = daysSince(item.first_seen);
+  const isStale = (item.tracking?.state || 'OPEN') === 'OPEN' && age != null && age >= STALE_DAYS;
+
+  return (
+    <div className={`p-3 rounded-lg border ${sev.border} ${sev.bg}`}>
+      <div className="flex items-start gap-3">
+        <SevIcon size={14} className={`${sev.text} mt-0.5 flex-shrink-0`} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-1.5">
+            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${sev.border} ${sev.text}`}>
+              {item.severity}
+            </span>
+            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${state.border} ${state.bg} ${state.text}`}>
+              {state.label}
+            </span>
+            <span className="text-[10px] font-mono text-slate-500">
+              <Hash size={9} className="inline mr-1" />{item.resource}
+            </span>
+            {age != null && (
+              <span className="text-[10px] text-slate-500 font-mono">{age}d old</span>
+            )}
+            {isStale && (
+              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border border-amber-500/30 bg-amber-500/10 text-amber-300">
+                Stale
+              </span>
+            )}
+            <span className="text-[10px] font-mono text-slate-600 ml-auto">{item.id}</span>
+          </div>
+          <p className="text-[12px] text-slate-300 leading-relaxed font-mono break-words">{item.reason || '—'}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Icon mapping for services
 const ServiceIcon = ({ name, size = 14 }) => {
@@ -81,10 +145,12 @@ const CheckRow = ({ check }) => {
 export const WhyModal = () => {
   const { modals, closeModal, openModal } = useModal();
   const { isAuthenticated } = useAuth();
+  const { backlogByKsi } = useData();
   const { isOpen, data } = modals.why;
 
   const parsed = useMemo(() => data ? parseKsiValidation(data) : null, [data]);
   const criteria = useMemo(() => parsed ? generateCriteriaText(parsed) : null, [parsed]);
+  const backlogStats = parsed ? backlogByKsi?.[parsed.id] : null;
 
   if (!data || !parsed) return null;
 
@@ -174,6 +240,42 @@ export const WhyModal = () => {
                 <span className="font-bold text-gray-400">Justification:</span> {data.justification}
               </p>
             )}
+          </Section>
+        )}
+
+        {/* Remediation Backlog — items linked to this KSI from remediation_backlog.json */}
+        {backlogStats && backlogStats.items.length > 0 && (
+          <Section
+            title="Remediation Backlog"
+            icon={Layers}
+            defaultOpen={isFailing}
+            badge={`${backlogStats.items.length}`}
+            badgeColor={backlogStats.severityCounts.CRITICAL > 0 ? 'red' : backlogStats.severityCounts.HIGH > 0 ? 'yellow' : 'blue'}
+          >
+            <div className="space-y-3">
+              {/* Quick severity breakdown */}
+              <div className="flex flex-wrap gap-2 pb-3 border-b border-gray-700/50">
+                {['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map(sev => {
+                  const count = backlogStats.severityCounts[sev];
+                  if (!count) return null;
+                  const cfg = SEVERITY_ICONS[sev];
+                  return (
+                    <span key={sev} className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${cfg.border} ${cfg.bg} ${cfg.text}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                      {count} {sev}
+                    </span>
+                  );
+                })}
+              </div>
+              {backlogStats.items.slice(0, 25).map(item => (
+                <BacklogItem key={item.id} item={item} />
+              ))}
+              {backlogStats.items.length > 25 && (
+                <p className="text-[11px] text-slate-500 text-center pt-2">
+                  Showing 25 of {backlogStats.items.length} items — see Remediation Register for the full list.
+                </p>
+              )}
+            </div>
           </Section>
         )}
 

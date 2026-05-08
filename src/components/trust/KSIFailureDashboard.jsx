@@ -242,7 +242,18 @@ const DetailDrawer = ({ failure, isActive, onClose, allHistory }) => {
                     <section className="grid grid-cols-3 gap-3">
                         <div className="bg-[#1a1a1f] border border-white/5 rounded-xl p-4 text-center">
                             <div className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">Score</div>
-                            <div className={`text-2xl font-black ${failure.score === 0 ? 'text-red-400' : failure.score < 50 ? 'text-amber-400' : 'text-emerald-400'}`}>{failure.score ?? 'N/A'}{failure.score != null && <span className="text-sm">%</span>}</div>
+                            {(() => {
+                                // Mode-aware threshold: Output-mode KSIs (e.g. KSI-TPR-04) pass at >=95%,
+                                // Capability-mode KSIs are binary 100/0. Without mode, default to capability.
+                                const target = failure.mode === 'output' ? 95 : 100;
+                                const scoreClass = failure.score == null ? 'text-slate-400'
+                                    : failure.score === 0 ? 'text-red-400'
+                                    : failure.score < target ? 'text-amber-400'
+                                    : 'text-emerald-400';
+                                return (
+                                    <div className={`text-2xl font-black ${scoreClass}`}>{failure.score ?? 'N/A'}{failure.score != null && <span className="text-sm">%</span>}</div>
+                                );
+                            })()}
                         </div>
                         <div className="bg-[#1a1a1f] border border-white/5 rounded-xl p-4 text-center">
                             <div className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">Resources Failed</div>
