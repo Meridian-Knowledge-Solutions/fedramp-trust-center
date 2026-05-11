@@ -1,7 +1,7 @@
 {
   "KSI-AFR-01": {
     "description": "Validates the complete FedRAMP Minimum Assessment Scope (MAS) covering machine resources, human resources, and process resources. This rule enforces Structural Boundaries (VPC ID) for compute assets, validates peripheral assets (S3, RDS, ALB), enumerates privileged human access (IAM), and confirms governance processes exist.",
-    "justification": "Validates the Live FedRAMP Boundary (MAS) across all three resource types: 1) Machine resources — the four critical asset classes (VPC boundary, EC2 compute, RDS data, S3 storage, ALB network), 2) Human resources — privileged IAM users/roles with production access, 3) Process resources — governance documentation defining security procedures.",
+    "justification": "Validates the Live FedRAMP Boundary (MAS) across all three resource types: 1) Machine resources \u2014 the four critical asset classes (VPC boundary, EC2 compute, RDS data, S3 storage, ALB network), 2) Human resources \u2014 privileged IAM users/roles with production access, 3) Process resources \u2014 governance documentation defining security procedures.",
     "cli_commands": [
       {
         "command": "aws ec2 describe-vpcs --filters Name=isDefault,Values=false --output json",
@@ -313,6 +313,21 @@
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/cryptographic-modules-policy.md --output json",
         "note": "GOVERNANCE: Validate the existence of the Cryptographic Modules (UCM) Policy.",
         "expected_output": "Governance document must exist in CodeCommit"
+      },
+      {
+        "command": "aws ec2 get-ebs-encryption-by-default --output json",
+        "note": "Phase 4: account-wide EBS encryption-by-default flag (SC-28).",
+        "expected_output": "EbsEncryptionByDefault must be true for FedRAMP Moderate accounts"
+      },
+      {
+        "command": "aws kms list-keys --output json",
+        "note": "Phase 4: list account KMS keys for downstream describe-key inspection.",
+        "expected_output": "At least one customer-managed CMK must exist"
+      },
+      {
+        "command": "aws kms describe-key --key-id $(aws kms list-keys --query 'Keys[0].KeyId' --output text) --output json",
+        "note": "Phase 4: KMS key metadata (KeyManager=CUSTOMER, Origin=AWS_KMS, KeySpec).",
+        "expected_output": "KeyManager must be CUSTOMER and KeySpec must be a FIPS-supported algorithm"
       }
     ],
     "artifact_evidence_paths": [
@@ -498,7 +513,7 @@
         "expected_output": "At least 1 Config recorder must exist"
       },
       {
-        "command": "aws configservice describe-config-rules --query \"ConfigRules[?RuleState=='ACTIVE']\" --max-items 5 --output json",
+        "command": "aws configservice describe-config-rules --query \"ConfigRules[?ConfigRuleState=='ACTIVE']\" --max-items 5 --output json",
         "note": "VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources.",
         "expected_output": "At least 1 active AWS Config rule must exist"
       },
@@ -506,6 +521,11 @@
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/sdlc-policy.md --output json",
         "note": "GOVERNANCE: Validate the SDLC Policy which mandates 'Automated Testing' (Checkov) before deployment.",
         "expected_output": "Governance document must exist in CodeCommit"
+      },
+      {
+        "command": "aws configservice describe-compliance-by-config-rule --output json",
+        "note": "Phase 4: per-rule compliance status \u2014 required by audit #9.",
+        "expected_output": "All AWS Config rules must report COMPLIANT or NON_COMPLIANT (not INSUFFICIENT_DATA)"
       }
     ],
     "artifact_evidence_paths": [
@@ -815,6 +835,16 @@
         "command": "aws iam list-virtual-mfa-devices --output json",
         "note": "Get list of all Virtual MFA devices to validate protection (replaces list-mfa-devices which requires user).",
         "expected_output": "Virtual MFA devices should be assigned to all human users"
+      },
+      {
+        "command": "aws sso-admin list-permission-sets --instance-arn $(aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text) --output json",
+        "note": "Phase 4: SSO permission sets (IA-2(1)) \u2014 required for phishing-resistant MFA verification.",
+        "expected_output": "At least one permission set defined; downstream describe-permission-set must show MFA-required posture"
+      },
+      {
+        "command": "aws identitystore list-users --identity-store-id $(aws sso-admin list-instances --query 'Instances[0].IdentityStoreId' --output text) --output json",
+        "note": "Phase 4: enumerate SSO-managed user identities for IA-2 coverage.",
+        "expected_output": "At least one Identity Center user must exist when SSO is the auth path"
       }
     ],
     "artifact_evidence_paths": [
@@ -1190,7 +1220,7 @@
         "expected_output": "At least 1 Config delivery channel must exist"
       },
       {
-        "command": "aws ssm list-inventory-entries --instance-id $(aws ec2 describe-instances --query 'Reservations[0].Instances[0].InstanceId' --output text) --type-name AWS:Application --output json || echo '{\"Entries\": []}'",
+        "command": "( for id in $(aws ssm describe-instance-information --query 'InstanceInformationList[].InstanceId' --output text 2>/dev/null); do aws ssm list-inventory-entries --instance-id \"$id\" --type-name AWS:Application --output json; done ) | jq -s '{Entries: [.[].Entries // [] | .[]?]}'",
         "note": "os-LEVEL: Sample check for SSM Inventory data (software list) on a live instance.",
         "expected_output": "SSM inventory data must contain software and OS information for managed instances"
       }
@@ -1307,6 +1337,11 @@
         "command": "aws backup list-backup-plans --output json",
         "note": "TECHNICAL: Validate existence of AWS Backup Plans (proof that RPO is being enforced via automated schedules).",
         "expected_output": "At least 1 backup plan must exist"
+      },
+      {
+        "command": "( for id in $(aws backup list-backup-plans --query 'BackupPlansList[].BackupPlanId' --output text 2>/dev/null); do aws backup get-backup-plan --backup-plan-id \"$id\" --output json; done ) | jq -s '{BackupPlans: .}'",
+        "note": "Phase 4: per-plan rule inspection (Schedule, Lifecycle.DeleteAfterDays \u2014 CP-9).",
+        "expected_output": "At least one backup plan with daily-or-better Schedule and DeleteAfterDays >= 30 (per documented DR plan)"
       }
     ],
     "artifact_evidence_paths": [
@@ -1353,6 +1388,11 @@
         "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, 'dr-test') || contains(absolutePath, 'restore-report') || contains(absolutePath, 'after-action')]\" --output json",
         "note": "GOVERNANCE: Validate existence of the Disaster Recovery Test Report.",
         "expected_output": "Disaster recovery test plan document must exist in CodeCommit"
+      },
+      {
+        "command": "aws backup list-restore-jobs --by-status COMPLETED --output json",
+        "note": "Phase 4: completed restore jobs prove recovery capability has been tested (CP-10).",
+        "expected_output": "At least one COMPLETED restore job in the last 365 days"
       }
     ],
     "artifact_evidence_paths": [
@@ -1376,6 +1416,11 @@
         "command": "aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json",
         "note": "TECHNICAL: Validate that Restore Jobs have been executed (Proof of recovery capability).",
         "expected_output": "At least 1 restore job must exist proving operational recovery capability"
+      },
+      {
+        "command": "aws backup list-restore-jobs --by-status COMPLETED --output json",
+        "note": "Phase 4: completed restore jobs prove recovery testing (CP-10).",
+        "expected_output": "At least one COMPLETED restore job in the last 365 days"
       }
     ],
     "artifact_evidence_paths": [
@@ -1438,6 +1483,11 @@
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/encryption-policy.md --output json",
         "note": "GOVERNANCE: Validate the Encryption Policy document.",
         "expected_output": "Governance document must exist in CodeCommit"
+      },
+      {
+        "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
+        "note": "Phase 4: full listener enumeration (was truncated to LoadBalancers[0]) \u2014 TLS policy whitelist enforcement.",
+        "expected_output": "All HTTPS/TLS listeners must use FedRAMP-approved SslPolicy (TLS13-* or TLS-1-2-2021)"
       }
     ],
     "artifact_evidence_paths": [
@@ -1524,6 +1574,16 @@
         "command": "aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json",
         "note": "CERTIFICATES: Validate active ACM Certificates (Proof of managed renewal).",
         "expected_output": "At least 1 ACM certificate must exist"
+      },
+      {
+        "command": "( for arn in $(aws secretsmanager list-secrets --query 'SecretList[].ARN' --output text 2>/dev/null); do aws secretsmanager describe-secret --secret-id \"$arn\" --output json; done ) | jq -s '{SecretList: .}'",
+        "note": "Phase 4: per-secret rotation metadata (RotationEnabled, NextRotationDate).",
+        "expected_output": "Every secret must have RotationEnabled=true (SC-12(c))"
+      },
+      {
+        "command": "( for k in $(aws kms list-keys --query 'Keys[].KeyId' --output text 2>/dev/null); do aws kms get-key-rotation-status --key-id \"$k\" --output json; done ) | jq -s '{KeyRotationStatuses: .}'",
+        "note": "Phase 4: KMS key rotation status \u2014 KeyRotationEnabled must be true for CMKs.",
+        "expected_output": "Every customer-managed KMS key must have KeyRotationEnabled=true"
       }
     ],
     "artifact_evidence_paths": [
@@ -1574,7 +1634,7 @@
         "expected_output": "At least 1 load balancer must exist"
       },
       {
-        "command": "for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null || echo ''); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --query \"Listeners[?Protocol=='HTTPS' || Protocol=='TLS'].{Port:Port, SslPolicy:SslPolicy, Certificates:Certificates}\" --output json; done",
+        "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
         "note": "VALIDATION: Verify that listeners are enforcing HTTPS/TLS with specific SSL Policies (authenticity/integrity checks).",
         "expected_output": "Load balancer listeners must enforce HTTPS with TLS 1.2+ SSL policy"
       },
@@ -1582,6 +1642,11 @@
         "command": "aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json",
         "note": "IDENTITY: Validate existence of issued ACM certificates used to prove authenticity.",
         "expected_output": "At least 1 ACM certificate must exist"
+      },
+      {
+        "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
+        "note": "Phase 4: listener TLS policy validation (legacy 2016-08 / TLS-1-0/1-1 must be rejected).",
+        "expected_output": "All HTTPS/TLS listeners on FedRAMP-approved policies"
       }
     ],
     "artifact_evidence_paths": [

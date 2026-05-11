@@ -1,9 +1,9 @@
 {
   "metadata": {
     "created_at": "2026-01-17T07:22:37.324152+00:00",
-    "last_updated": "2026-05-11T21:00:38.290023+00:00",
+    "last_updated": "2026-05-11T23:48:15.702466+00:00",
     "schema_version": "1.0.0",
-    "total_runs_processed": 1930,
+    "total_runs_processed": 1931,
     "backfill_complete": true,
     "backfill_since": "all time",
     "backfill_commits": 1256
@@ -17,6 +17,46 @@
       "score": 0,
       "resources_failed": 0,
       "requirement": "Unknown requirement"
+    },
+    "KSI-CNA-01": {
+      "ksi_id": "KSI-CNA-01",
+      "failed_at": "2026-05-11T23:48:15.169562+00:00",
+      "failed_commit": "347dea29ffb2add235bcde25a55de977f4c0ecaf",
+      "reason": "Insufficient (0%): Persistently ensure all machine-based information resources are configured to limit inbound and outbound network traf... | 6/9 resources compliant. CRITICAL OVERRIDE: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet. | Verified: SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs.; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs.; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs. |   ...and 2 more verification(s) | Failures:  CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet | Warnings: SG '[resource]' uses broad internal CIDRs ([internal-cidr] ([protocol-ports])). FedRAMP best practice: tighten ranges or use [security-group] references.; Exposure: SG '[resource]' allows TCP 443-443 from a public CIDR (IPv4); review against intended traffic scope.",
+      "score": 0,
+      "resources_failed": 3,
+      "requirement": "Persistently ensure all machine-based information resources are configured to limit inbound and outbound network traffic.",
+      "score_at_failure": 0
+    },
+    "KSI-CNA-02": {
+      "ksi_id": "KSI-CNA-02",
+      "failed_at": "2026-05-11T23:48:15.169562+00:00",
+      "failed_commit": "347dea29ffb2add235bcde25a55de977f4c0ecaf",
+      "reason": "Insufficient (0%): Persistently ensure machine-based information resources have a minimal attack surface and that lateral movement is mi... | 18/27 resources compliant. CRITICAL OVERRIDE: Open ingress (0.0.0.0/0) on EC2; Open ingress (0.0.0.0/0) on EC2. | Verified: Private Subnet: '[resource]' has public IP mapping disabled (attack surface minimized).; Private Subnet: '[resource]' has public IP mapping disabled (attack surface minimized).; Private Subnet: '[resource]' has public IP mapping disabled (attack surface minimized). |   ...and 14 more verification(s) | Failures:  CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2;  CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2;  CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2 |   ...and 1 more failure(s) | Warnings: SG '[resource]' uses broad internal CIDRs ([internal-cidr] ([protocol-ports])). FedRAMP best practice: tighten ranges or use [security-group] references.; SG '[resource]' uses broad internal CIDRs ([internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All)). FedRAMP best practice: tighten ranges or use [security-group] references. |   ...and 3 more warning(s)",
+      "score": 0,
+      "resources_failed": 9,
+      "requirement": "Persistently ensure machine-based information resources have a minimal attack surface and that lateral movement is minimized if compromised.",
+      "score_at_failure": 0
+    },
+    "KSI-CNA-04": {
+      "ksi_id": "KSI-CNA-04",
+      "failed_at": "2026-05-11T23:48:15.169562+00:00",
+      "failed_commit": "347dea29ffb2add235bcde25a55de977f4c0ecaf",
+      "reason": "Insufficient (0%): Use immutable infrastructure with strictly defined functionality and privileges by default. | 83/89 resources compliant. CRITICAL OVERRIDE: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet. | Verified: Change notification artifact '[resource]' exists.; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs.; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs (1 [security-group] reference(s)). |   ...and 1 more verification(s) | Failures:  CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet;  CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet;  CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet |   ...and 2 more failure(s) | Warnings: SG '[resource]' uses broad internal CIDRs ([internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All)). FedRAMP best practice: tighten ranges or use [security-group] references.",
+      "score": 0,
+      "resources_failed": 6,
+      "requirement": "Use immutable infrastructure with strictly defined functionality and privileges by default.",
+      "score_at_failure": 0
+    },
+    "KSI-SVC-05": {
+      "ksi_id": "KSI-SVC-05",
+      "failed_at": "2026-05-11T23:48:15.169562+00:00",
+      "failed_commit": "347dea29ffb2add235bcde25a55de977f4c0ecaf",
+      "reason": "Insufficient (0%): Use cryptographic methods to validate the integrity of machine-based information resources. | 8/9 resources compliant. | Verified: Active: 1 resource(s) verified for '[resource]'.; No SES identities (email not used by service). Anti-spoofing N/A. | Failures: Required infrastructure not found: CloudTrail LogFileValidationEnabled must be true",
+      "score": 0,
+      "resources_failed": 1,
+      "requirement": "Use cryptographic methods to validate the integrity of machine-based information resources.",
+      "score_at_failure": 0
     }
   },
   "failure_history": [
@@ -5377,16 +5417,16 @@
       "last_failure": "2025-06-06T03:48:06.017208Z"
     },
     "KSI-SVC-05": {
-      "total_failures": 5,
+      "total_failures": 6,
       "total_remediations": 5,
       "mttr_hours": 16.66,
-      "last_failure": "2025-06-06T03:48:06.017208Z"
+      "last_failure": "2026-05-11T23:48:15.169562+00:00"
     },
     "KSI-CNA-02": {
-      "total_failures": 8,
+      "total_failures": 9,
       "total_remediations": 8,
       "mttr_hours": 27.38,
-      "last_failure": "2026-03-11T03:52:46.025658Z",
+      "last_failure": "2026-05-11T23:48:15.169562+00:00",
       "longest_outage_hours": 185.46,
       "shortest_outage_hours": 0.29
     },
@@ -5397,10 +5437,10 @@
       "last_failure": "2025-06-06T04:21:09.354677Z"
     },
     "KSI-CNA-01": {
-      "total_failures": 11,
+      "total_failures": 12,
       "total_remediations": 11,
       "mttr_hours": 62.17,
-      "last_failure": "2025-12-28T08:20:43.700384Z"
+      "last_failure": "2026-05-11T23:48:15.169562+00:00"
     },
     "KSI-IAM-01": {
       "total_failures": 9,
@@ -5495,10 +5535,10 @@
       "last_failure": "2025-09-24T02:48:33.199989Z"
     },
     "KSI-CNA-04": {
-      "total_failures": 12,
+      "total_failures": 13,
       "total_remediations": 12,
       "mttr_hours": 18.63,
-      "last_failure": "2026-03-11T03:52:46.025658Z",
+      "last_failure": "2026-05-11T23:48:15.169562+00:00",
       "longest_outage_hours": 81.05,
       "shortest_outage_hours": 0.19
     },
