@@ -524,6 +524,7 @@
       },
       {
         "command": "aws configservice describe-compliance-by-config-rule --output json",
+        "service": "change_metrics",
         "note": "Phase 4: per-rule compliance status \u2014 required by audit #9.",
         "expected_output": "All AWS Config rules must report COMPLIANT or NON_COMPLIANT (not INSUFFICIENT_DATA)"
       }
@@ -1055,10 +1056,17 @@
         "command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, 'post-mortem') || contains(repositoryName, 'aar') || contains(repositoryName, 'lessons-learned') || contains(repositoryName, 'incident-reports') || contains(repositoryName, 'reports')]\" --output json",
         "note": "Validate existence of the designated Post-Mortem/AAR repository.",
         "expected_output": "At least 1 CodeCommit repository must exist"
+      },
+      {
+        "command": "aws securityhub get-findings --max-results 100 --output json",
+        "service": "incident_metrics",
+        "note": "Mode 2 (operational effectiveness) — feeds IncidentMetricsPrimitive. Computes MTTR from Findings[].CreatedAt vs UpdatedAt where WorkflowStatus is RESOLVED/SUPPRESSED. Direct evidence of incident-handling effectiveness for after-action lessons-learned KSI.",
+        "expected_output": "SecurityHub Findings array; primitive computes mttr_hours, resolved_count, open_count"
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-INR-03/post_mortem_repos.json"
+      "evidence_v2/KSI-INR-03/post_mortem_repos.json",
+      "evidence_v2/KSI-INR-03/securityhub_findings.json"
     ],
     "implementation_summary": "After-action reports generated via Lambda function and stored in CodeCommit. Lessons learned incorporated into playbook updates.",
     "pass_criteria": "PASS if: At least one GuardDuty detector is active and configured, providing continuous monitoring for post-incident review and lessons learned analysis.",
@@ -1223,11 +1231,18 @@
         "command": "( for id in $(aws ssm describe-instance-information --query 'InstanceInformationList[].InstanceId' --output text 2>/dev/null); do aws ssm list-inventory-entries --instance-id \"$id\" --type-name AWS:Application --output json; done ) | jq -s '{Entries: [.[].Entries // [] | .[]?]}'",
         "note": "os-LEVEL: Sample check for SSM Inventory data (software list) on a live instance.",
         "expected_output": "SSM inventory data must contain software and OS information for managed instances"
+      },
+      {
+        "command": "aws configservice get-discovered-resource-counts --output json",
+        "service": "inventory_metrics",
+        "note": "Mode 2 (operational effectiveness) — feeds InventoryMetricsPrimitive. Aggregates resourceCounts across all tracked resource types. Direct evidence that the real-time inventory engine is producing population-level data, not just point capability.",
+        "expected_output": "Config discovered-resource-counts response with resourceCounts array; primitive aggregates total_resources and per-type counts"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-PIY-01/config_recorders.json",
-      "evidence_v2/KSI-PIY-01/delivery_channels.json"
+      "evidence_v2/KSI-PIY-01/delivery_channels.json",
+      "evidence_v2/KSI-PIY-01/discovered_resource_counts.json"
     ],
     "implementation_summary": "Real-time inventory via AWS Config with automatic discovery. SSM Inventory provides OS-level software lists. Delivery to S3 for analysis.",
     "pass_criteria": "PASS if: AWS Systems Manager reports managed instances (SSM agent active), an SSM inventory association exists for asset tracking, AND SSM inventory data contains software/OS information for at least one instance.",
