@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generated_at": "2026-05-12T02:07:57Z",
+    "generated_at": "2026-05-12T03:09:21Z",
     "total_ksis": 61,
-    "passed": 53,
-    "failed": 8,
-    "pass_rate": "86.9%",
+    "passed": 51,
+    "failed": 10,
+    "pass_rate": "83.6%",
     "global_status": "OPERATIONAL",
     "circuit_breaker": {
       "state": "CLOSED",
@@ -20,7 +20,7 @@
         "total_passed": 48,
         "consecutive_failures": 0,
         "failure_rate": 0.2131,
-        "last_failure_time": "2026-05-12T02:05:22.951511+00:00",
+        "last_failure_time": "2026-05-12T03:06:26.800278+00:00",
         "circuit_broken_at": null
       }
     },
@@ -36,8 +36,8 @@
           "KSI-CNA-04": 10
         },
         "by_resource_type": {
-          "security_group/ec2": 10,
-          "security_group": 6
+          "security_group": 6,
+          "security_group/ec2": 10
         },
         "critical_count": 16,
         "high_count": 0
@@ -46,41 +46,41 @@
         {
           "ksi_id": "KSI-CNA-01",
           "resource_id": "[sg-id]",
-          "resource_type": "security_group/ec2",
+          "resource_type": "security_group",
           "severity": "CRITICAL",
           "cia_impact": [
             "C",
-            "I"
+            "I",
+            "A"
           ],
-          "title": "Open ingress (0.0.0.0/0) on EC2",
-          "description": "Security group allows unrestricted inbound access from any IP. This is critical on EC2 resources as it exposes compute/data resources to the entire internet.",
+          "title": "All Traffic protocol open to internet",
+          "description": "Security group allows ALL protocols/ports from any IP. This completely bypasses network-level access controls.",
           "evidence": {
-            "cidr": "0.0.0.0/0",
-            "protocol": "-1",
-            "from_port": null,
-            "to_port": null
+            "protocol": "-1 (All Traffic)",
+            "cidr": "0.0.0.0/0"
           },
-          "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-          "detected_at": "2026-05-12T02:02:45.526415+00:00"
+          "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
+          "detected_at": "2026-05-12T03:04:14.289940+00:00"
         },
         {
           "ksi_id": "KSI-CNA-01",
           "resource_id": "[sg-id]",
-          "resource_type": "security_group",
+          "resource_type": "security_group/ec2",
           "severity": "CRITICAL",
           "cia_impact": [
             "C",
-            "I",
-            "A"
+            "I"
           ],
-          "title": "All Traffic protocol open to internet",
-          "description": "Security group allows ALL protocols/ports from any IP. This completely bypasses network-level access controls.",
+          "title": "Open ingress (0.0.0.0/0) on EC2",
+          "description": "Security group allows unrestricted inbound access from any IP. This is critical on EC2 resources as it exposes compute/data resources to the entire internet.",
           "evidence": {
-            "protocol": "-1 (All Traffic)",
-            "cidr": "0.0.0.0/0"
+            "cidr": "0.0.0.0/0",
+            "protocol": "-1",
+            "from_port": null,
+            "to_port": null
           },
-          "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
-          "detected_at": "2026-05-12T02:02:45.526578+00:00"
+          "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
+          "detected_at": "2026-05-12T03:04:14.290112+00:00"
         },
         {
           "ksi_id": "KSI-CNA-02",
@@ -100,7 +100,7 @@
             "to_port": null
           },
           "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-          "detected_at": "2026-05-12T02:02:49.873652+00:00"
+          "detected_at": "2026-05-12T03:04:17.559673+00:00"
         },
         {
           "ksi_id": "KSI-CNA-02",
@@ -120,7 +120,7 @@
             "to_port": null
           },
           "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-          "detected_at": "2026-05-12T02:02:49.873891+00:00"
+          "detected_at": "2026-05-12T03:04:17.559887+00:00"
         },
         {
           "ksi_id": "KSI-CNA-02",
@@ -140,7 +140,7 @@
             "to_port": null
           },
           "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-          "detected_at": "2026-05-12T02:02:49.874043+00:00"
+          "detected_at": "2026-05-12T03:04:17.560009+00:00"
         },
         {
           "ksi_id": "KSI-CNA-02",
@@ -160,7 +160,26 @@
             "to_port": null
           },
           "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-          "detected_at": "2026-05-12T02:02:49.874566+00:00"
+          "detected_at": "2026-05-12T03:04:17.560438+00:00"
+        },
+        {
+          "ksi_id": "KSI-CNA-04",
+          "resource_id": "[sg-id]",
+          "resource_type": "security_group",
+          "severity": "CRITICAL",
+          "cia_impact": [
+            "C",
+            "I",
+            "A"
+          ],
+          "title": "All Traffic protocol open to internet",
+          "description": "Security group allows ALL protocols/ports from any IP. This completely bypasses network-level access controls.",
+          "evidence": {
+            "protocol": "-1 (All Traffic)",
+            "cidr": "0.0.0.0/0"
+          },
+          "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
+          "detected_at": "2026-05-12T03:04:23.505857+00:00"
         },
         {
           "ksi_id": "KSI-CNA-04",
@@ -180,7 +199,7 @@
             "to_port": null
           },
           "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-          "detected_at": "2026-05-12T02:02:57.133998+00:00"
+          "detected_at": "2026-05-12T03:04:23.505999+00:00"
         },
         {
           "ksi_id": "KSI-CNA-04",
@@ -199,7 +218,7 @@
             "cidr": "0.0.0.0/0"
           },
           "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
-          "detected_at": "2026-05-12T02:02:57.134153+00:00"
+          "detected_at": "2026-05-12T03:04:23.506100+00:00"
         },
         {
           "ksi_id": "KSI-CNA-04",
@@ -219,7 +238,7 @@
             "to_port": null
           },
           "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-          "detected_at": "2026-05-12T02:02:57.134273+00:00"
+          "detected_at": "2026-05-12T03:04:23.506150+00:00"
         },
         {
           "ksi_id": "KSI-CNA-04",
@@ -238,7 +257,7 @@
             "cidr": "0.0.0.0/0"
           },
           "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
-          "detected_at": "2026-05-12T02:02:57.134331+00:00"
+          "detected_at": "2026-05-12T03:04:23.506251+00:00"
         },
         {
           "ksi_id": "KSI-CNA-04",
@@ -258,7 +277,7 @@
             "to_port": null
           },
           "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-          "detected_at": "2026-05-12T02:02:57.134468+00:00"
+          "detected_at": "2026-05-12T03:04:23.506298+00:00"
         },
         {
           "ksi_id": "KSI-CNA-04",
@@ -277,7 +296,7 @@
             "cidr": "0.0.0.0/0"
           },
           "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
-          "detected_at": "2026-05-12T02:02:57.134532+00:00"
+          "detected_at": "2026-05-12T03:04:23.506434+00:00"
         },
         {
           "ksi_id": "KSI-CNA-04",
@@ -297,7 +316,7 @@
             "to_port": null
           },
           "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-          "detected_at": "2026-05-12T02:02:57.134685+00:00"
+          "detected_at": "2026-05-12T03:04:23.506490+00:00"
         },
         {
           "ksi_id": "KSI-CNA-04",
@@ -316,7 +335,7 @@
             "cidr": "0.0.0.0/0"
           },
           "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
-          "detected_at": "2026-05-12T02:02:57.134743+00:00"
+          "detected_at": "2026-05-12T03:04:23.506555+00:00"
         },
         {
           "ksi_id": "KSI-CNA-04",
@@ -336,30 +355,30 @@
             "to_port": null
           },
           "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-          "detected_at": "2026-05-12T02:02:57.134837+00:00"
-        },
-        {
-          "ksi_id": "KSI-CNA-04",
-          "resource_id": "[sg-id]",
-          "resource_type": "security_group",
-          "severity": "CRITICAL",
-          "cia_impact": [
-            "C",
-            "I",
-            "A"
-          ],
-          "title": "All Traffic protocol open to internet",
-          "description": "Security group allows ALL protocols/ports from any IP. This completely bypasses network-level access controls.",
-          "evidence": {
-            "protocol": "-1 (All Traffic)",
-            "cidr": "0.0.0.0/0"
-          },
-          "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
-          "detected_at": "2026-05-12T02:02:57.134891+00:00"
+          "detected_at": "2026-05-12T03:04:23.506603+00:00"
         }
       ],
       "by_ksi": {
         "KSI-CNA-01": [
+          {
+            "ksi_id": "KSI-CNA-01",
+            "resource_id": "[sg-id]",
+            "resource_type": "security_group",
+            "severity": "CRITICAL",
+            "cia_impact": [
+              "C",
+              "I",
+              "A"
+            ],
+            "title": "All Traffic protocol open to internet",
+            "description": "Security group allows ALL protocols/ports from any IP. This completely bypasses network-level access controls.",
+            "evidence": {
+              "protocol": "-1 (All Traffic)",
+              "cidr": "0.0.0.0/0"
+            },
+            "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
+            "detected_at": "2026-05-12T03:04:14.289940+00:00"
+          },
           {
             "ksi_id": "KSI-CNA-01",
             "resource_id": "[sg-id]",
@@ -378,26 +397,7 @@
               "to_port": null
             },
             "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-            "detected_at": "2026-05-12T02:02:45.526415+00:00"
-          },
-          {
-            "ksi_id": "KSI-CNA-01",
-            "resource_id": "[sg-id]",
-            "resource_type": "security_group",
-            "severity": "CRITICAL",
-            "cia_impact": [
-              "C",
-              "I",
-              "A"
-            ],
-            "title": "All Traffic protocol open to internet",
-            "description": "Security group allows ALL protocols/ports from any IP. This completely bypasses network-level access controls.",
-            "evidence": {
-              "protocol": "-1 (All Traffic)",
-              "cidr": "0.0.0.0/0"
-            },
-            "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
-            "detected_at": "2026-05-12T02:02:45.526578+00:00"
+            "detected_at": "2026-05-12T03:04:14.290112+00:00"
           }
         ],
         "KSI-CNA-02": [
@@ -419,7 +419,7 @@
               "to_port": null
             },
             "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-            "detected_at": "2026-05-12T02:02:49.873652+00:00"
+            "detected_at": "2026-05-12T03:04:17.559673+00:00"
           },
           {
             "ksi_id": "KSI-CNA-02",
@@ -439,7 +439,7 @@
               "to_port": null
             },
             "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-            "detected_at": "2026-05-12T02:02:49.873891+00:00"
+            "detected_at": "2026-05-12T03:04:17.559887+00:00"
           },
           {
             "ksi_id": "KSI-CNA-02",
@@ -459,7 +459,7 @@
               "to_port": null
             },
             "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-            "detected_at": "2026-05-12T02:02:49.874043+00:00"
+            "detected_at": "2026-05-12T03:04:17.560009+00:00"
           },
           {
             "ksi_id": "KSI-CNA-02",
@@ -479,33 +479,13 @@
               "to_port": null
             },
             "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-            "detected_at": "2026-05-12T02:02:49.874566+00:00"
+            "detected_at": "2026-05-12T03:04:17.560438+00:00"
           }
         ],
         "KSI-CNA-04": [
           {
             "ksi_id": "KSI-CNA-04",
             "resource_id": "[sg-id]",
-            "resource_type": "security_group/ec2",
-            "severity": "CRITICAL",
-            "cia_impact": [
-              "C",
-              "I"
-            ],
-            "title": "Open ingress (0.0.0.0/0) on EC2",
-            "description": "Security group allows unrestricted inbound access from any IP. This is critical on EC2 resources as it exposes compute/data resources to the entire internet.",
-            "evidence": {
-              "cidr": "0.0.0.0/0",
-              "protocol": "-1",
-              "from_port": null,
-              "to_port": null
-            },
-            "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-            "detected_at": "2026-05-12T02:02:57.133998+00:00"
-          },
-          {
-            "ksi_id": "KSI-CNA-04",
-            "resource_id": "[sg-id]",
             "resource_type": "security_group",
             "severity": "CRITICAL",
             "cia_impact": [
@@ -520,7 +500,7 @@
               "cidr": "0.0.0.0/0"
             },
             "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
-            "detected_at": "2026-05-12T02:02:57.134153+00:00"
+            "detected_at": "2026-05-12T03:04:23.505857+00:00"
           },
           {
             "ksi_id": "KSI-CNA-04",
@@ -540,7 +520,7 @@
               "to_port": null
             },
             "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-            "detected_at": "2026-05-12T02:02:57.134273+00:00"
+            "detected_at": "2026-05-12T03:04:23.505999+00:00"
           },
           {
             "ksi_id": "KSI-CNA-04",
@@ -559,7 +539,7 @@
               "cidr": "0.0.0.0/0"
             },
             "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
-            "detected_at": "2026-05-12T02:02:57.134331+00:00"
+            "detected_at": "2026-05-12T03:04:23.506100+00:00"
           },
           {
             "ksi_id": "KSI-CNA-04",
@@ -579,7 +559,7 @@
               "to_port": null
             },
             "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-            "detected_at": "2026-05-12T02:02:57.134468+00:00"
+            "detected_at": "2026-05-12T03:04:23.506150+00:00"
           },
           {
             "ksi_id": "KSI-CNA-04",
@@ -598,7 +578,7 @@
               "cidr": "0.0.0.0/0"
             },
             "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
-            "detected_at": "2026-05-12T02:02:57.134532+00:00"
+            "detected_at": "2026-05-12T03:04:23.506251+00:00"
           },
           {
             "ksi_id": "KSI-CNA-04",
@@ -618,7 +598,7 @@
               "to_port": null
             },
             "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-            "detected_at": "2026-05-12T02:02:57.134685+00:00"
+            "detected_at": "2026-05-12T03:04:23.506298+00:00"
           },
           {
             "ksi_id": "KSI-CNA-04",
@@ -637,7 +617,7 @@
               "cidr": "0.0.0.0/0"
             },
             "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
-            "detected_at": "2026-05-12T02:02:57.134743+00:00"
+            "detected_at": "2026-05-12T03:04:23.506434+00:00"
           },
           {
             "ksi_id": "KSI-CNA-04",
@@ -657,7 +637,7 @@
               "to_port": null
             },
             "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
-            "detected_at": "2026-05-12T02:02:57.134837+00:00"
+            "detected_at": "2026-05-12T03:04:23.506490+00:00"
           },
           {
             "ksi_id": "KSI-CNA-04",
@@ -676,7 +656,27 @@
               "cidr": "0.0.0.0/0"
             },
             "remediation": "Remove the 'All Traffic' rule and replace with specific port/protocol rules restricted to known IP ranges.",
-            "detected_at": "2026-05-12T02:02:57.134891+00:00"
+            "detected_at": "2026-05-12T03:04:23.506555+00:00"
+          },
+          {
+            "ksi_id": "KSI-CNA-04",
+            "resource_id": "[sg-id]",
+            "resource_type": "security_group/ec2",
+            "severity": "CRITICAL",
+            "cia_impact": [
+              "C",
+              "I"
+            ],
+            "title": "Open ingress (0.0.0.0/0) on EC2",
+            "description": "Security group allows unrestricted inbound access from any IP. This is critical on EC2 resources as it exposes compute/data resources to the entire internet.",
+            "evidence": {
+              "cidr": "0.0.0.0/0",
+              "protocol": "-1",
+              "from_port": null,
+              "to_port": null
+            },
+            "remediation": "Restrict inbound rules to specific IP ranges or security groups. For EC2, use private subnets behind ALB/NLB.",
+            "detected_at": "2026-05-12T03:04:23.506603+00:00"
           }
         ]
       }
@@ -697,8 +697,8 @@
       },
       "KSI-CMT": {
         "total": 4,
-        "passed": 3,
-        "failed": 1,
+        "passed": 2,
+        "failed": 2,
         "long_name": "Change Management"
       },
       "KSI-CNA": {
@@ -739,8 +739,8 @@
       },
       "KSI-SVC": {
         "total": 8,
-        "passed": 5,
-        "failed": 3,
+        "passed": 4,
+        "failed": 4,
         "long_name": "Service Configuration Management"
       },
       "KSI-TPR": {
@@ -769,9 +769,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws ec2 describe-vpcs --filters Name=isDefault,Values=false --output json; aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json; aws rds describe-db-instances --query \"DBInstances[*].{ID:DBInstanceIdentifier, Engine:Engine, VPC:DBSubnetGroup.VpcId}\" --output json; aws s3api [s3-bucket] --output json; aws elbv2 describe-load-balancers --query \"LoadBalancers[*].{ARN:LoadBalancerArn, DNS:DNSName, VPC:VpcId}\" --output json; aws iam list-users --query \"Users[*].{UserName:UserName, CreateDate:CreateDate, PasswordLastUsed:PasswordLastUsed}\" --output json; aws iam list-roles --query \"Roles[?contains(RoleName, '[resource]') || contains(RoleName, '[resource]') || contains(RoleName, '[resource]')]\" --output json; aws codecommit get-folder --repository-name security-governance --folder-path procedures/ --output json",
-      "timestamp": "2026-05-12T02:05:48.488428Z",
+      "timestamp": "2026-05-12T03:06:48.148072Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-01/ec2_020127_82f014d5.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-01/ec2_030306_82f014d5.json",
       "total_category_controls": 1,
       "resources_scanned": 41,
       "resources_passed": 40,
@@ -991,7 +991,7 @@
           "command": "aws ec2 describe-vpcs --filters Name=isDefault,Values=false --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.26s",
+          "execution_time": "1.10s",
           "error_message": null
         },
         {
@@ -1000,7 +1000,7 @@
           "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.57s",
+          "execution_time": "1.17s",
           "error_message": null
         },
         {
@@ -1009,7 +1009,7 @@
           "command": "aws rds describe-db-instances --query \"DBInstances[*].{ID:DBInstanceIdentifier, Engine:Engine, VPC:DBSubnetGroup.VpcId}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.27s",
+          "execution_time": "0.98s",
           "error_message": null
         },
         {
@@ -1018,7 +1018,7 @@
           "command": "aws s3api [s3-bucket] --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.93s",
           "error_message": null
         },
         {
@@ -1027,7 +1027,7 @@
           "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[*].{ARN:LoadBalancerArn, DNS:DNSName, VPC:VpcId}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.06s",
+          "execution_time": "0.90s",
           "error_message": null
         },
         {
@@ -1036,7 +1036,7 @@
           "command": "aws iam list-users --query \"Users[*].{UserName:UserName, CreateDate:CreateDate, PasswordLastUsed:PasswordLastUsed}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.86s",
           "error_message": null
         },
         {
@@ -1045,7 +1045,7 @@
           "command": "aws iam list-roles --query \"Roles[?contains(RoleName, '[resource]') || contains(RoleName, '[resource]') || contains(RoleName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.37s",
+          "execution_time": "0.96s",
           "error_message": null
         },
         {
@@ -1054,7 +1054,7 @@
           "command": "aws codecommit get-folder --repository-name security-governance --folder-path procedures/ --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.12s",
+          "execution_time": "0.97s",
           "error_message": null
         }
       ],
@@ -1065,7 +1065,7 @@
       "ksi_id": "KSI-AFR-02",
       "validation_id": "KSI-AFR-02",
       "assertion": true,
-      "assertion_reason": "\u2705 Operational (100%): Set security goals and develop automated validation of status and progress. | 2/2 resources compliant. | Verified: Compliance scorecard '[resource]' exists, size: 389 KB, freshness: current (0d), versioned.; Security Hub enabled (ARN: arn:aws:[redacted]).",
+      "assertion_reason": "\u2705 Operational (100%): Set security goals and develop automated validation of status and progress. | 2/2 resources compliant. | Verified: Compliance scorecard '[resource]' exists, size: 391 KB, freshness: current (0d), versioned.; Security Hub enabled (ARN: arn:aws:[redacted]).",
       "display_status": "pass",
       "mode": "capability",
       "capability_status": "operational",
@@ -1078,9 +1078,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/unified_ksi_validations.json --output json; aws securityhub describe-hub --output json",
-      "timestamp": "2026-05-12T02:05:48.495428Z",
+      "timestamp": "2026-05-12T03:06:48.156828Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-02/s3api_020127_bb02a3ee.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-02/s3api_030306_bb02a3ee.json",
       "total_category_controls": 2,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -1090,7 +1090,7 @@
         {
           "resource": null,
           "status": "PASS",
-          "reason": "Compliance scorecard '[resource]' exists, size: 389 KB, freshness: current (0d), versioned."
+          "reason": "Compliance scorecard '[resource]' exists, size: 391 KB, freshness: current (0d), versioned."
         },
         {
           "resource": "unknown",
@@ -1105,7 +1105,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/unified_ksi_validations.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.87s",
           "error_message": null
         },
         {
@@ -1114,7 +1114,7 @@
           "command": "aws securityhub describe-hub --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.06s",
+          "execution_time": "0.89s",
           "error_message": null
         }
       ],
@@ -1138,9 +1138,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/meridian-authorization-package-LATEST.zip --output json; curl -s -o /dev/null -w \"%{http_code}\" https://7d7pdwb9t3.[fqdn]/prod/status || echo \"000\"",
-      "timestamp": "2026-05-12T02:05:48.496525Z",
+      "timestamp": "2026-05-12T03:06:48.157841Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-03/s3api_020127_5cd5fb53.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-03/s3api_030306_5cd5fb53.json",
       "total_category_controls": 3,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -1165,7 +1165,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/meridian-authorization-package-LATEST.zip --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.00s",
+          "execution_time": "0.88s",
           "error_message": null
         },
         {
@@ -1174,7 +1174,7 @@
           "command": "curl -s -o /dev/null -w \"%{http_code}\" https://7d7pdwb9t3.[fqdn]/prod/status || echo \"000\"",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.81s",
+          "execution_time": "1.93s",
           "error_message": null
         }
       ],
@@ -1198,9 +1198,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/assessed_vulnerabilities_integrated.json --output json; aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/vdr_vulnerability_status.json --output json; aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
-      "timestamp": "2026-05-12T02:05:48.497964Z",
+      "timestamp": "2026-05-12T03:06:48.159159Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-04/s3api_020127_a2e1cd23.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-04/s3api_030306_a2e1cd23.json",
       "total_category_controls": 4,
       "resources_scanned": 3,
       "resources_passed": 2,
@@ -1230,7 +1230,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/assessed_vulnerabilities_integrated.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.84s",
           "error_message": null
         },
         {
@@ -1239,7 +1239,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/vdr_vulnerability_status.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.86s",
           "error_message": null
         },
         {
@@ -1248,7 +1248,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.12s",
+          "execution_time": "0.93s",
           "error_message": null
         }
       ],
@@ -1272,9 +1272,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json; aws s3api list-objects-v2 --bucket $(aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]')].Name\" --output text | head -n 1) --prefix scn-flow-validation.html --output json; aws s3api list-objects-v2 --bucket $(aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]')].Name\" --output text | head -n 1) --prefix audit_trail --output json",
-      "timestamp": "2026-05-12T02:05:48.499659Z",
+      "timestamp": "2026-05-12T03:06:48.160704Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-05/s3api_020127_201d0ddf.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-05/s3api_030306_201d0ddf.json",
       "total_category_controls": 5,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -1304,7 +1304,7 @@
           "command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.98s",
+          "execution_time": "0.88s",
           "error_message": null
         },
         {
@@ -1313,7 +1313,7 @@
           "command": "aws s3api list-objects-v2 --bucket $(aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]')].Name\" --output text | head -n 1) --prefix scn-flow-validation.html --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.00s",
+          "execution_time": "1.69s",
           "error_message": null
         },
         {
@@ -1322,7 +1322,7 @@
           "command": "aws s3api list-objects-v2 --bucket $(aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]')].Name\" --output text | head -n 1) --prefix audit_trail --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.99s",
+          "execution_time": "1.70s",
           "error_message": null
         }
       ],
@@ -1346,9 +1346,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/3pao_audit_report.json --output json; curl -s -o /dev/null -w \"%{http_code}\" https://[fqdn]/fedramp-trust-center/ || echo \"000\"",
-      "timestamp": "2026-05-12T02:05:48.501060Z",
+      "timestamp": "2026-05-12T03:06:48.161980Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-06/s3api_020127_1d624f99.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-06/s3api_030306_1d624f99.json",
       "total_category_controls": 6,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -1373,7 +1373,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/3pao_audit_report.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.99s",
+          "execution_time": "0.87s",
           "error_message": null
         },
         {
@@ -1382,7 +1382,7 @@
           "command": "curl -s -o /dev/null -w \"%{http_code}\" https://[fqdn]/fedramp-trust-center/ || echo \"000\"",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.16s",
+          "execution_time": "0.04s",
           "error_message": null
         }
       ],
@@ -1406,9 +1406,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "curl -s https://7d7pdwb9t3.[fqdn]/prod/config",
-      "timestamp": "2026-05-12T02:05:48.501988Z",
+      "timestamp": "2026-05-12T03:06:48.162758Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-07/apidocumentation_020127_94db2fcc.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-07/apidocumentation_030306_94db2fcc.json",
       "total_category_controls": 7,
       "resources_scanned": 1,
       "resources_passed": 1,
@@ -1428,7 +1428,7 @@
           "command": "curl -s https://7d7pdwb9t3.[fqdn]/prod/config",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.30s",
+          "execution_time": "2.11s",
           "error_message": null
         }
       ],
@@ -1452,9 +1452,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path procedures/security-inbox-procedures.md --output json; aws sns list-topics --query \"Topics[?contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]')]\" --output json",
-      "timestamp": "2026-05-12T02:05:48.502961Z",
+      "timestamp": "2026-05-12T03:06:48.163646Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-08/codecommit_020127_04b3366e.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-08/codecommit_030306_04b3366e.json",
       "total_category_controls": 8,
       "resources_scanned": 4,
       "resources_passed": 4,
@@ -1489,7 +1489,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/security-inbox-procedures.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.18s",
+          "execution_time": "0.96s",
           "error_message": null
         },
         {
@@ -1498,7 +1498,7 @@
           "command": "aws sns list-topics --query \"Topics[?contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.02s",
+          "execution_time": "0.80s",
           "error_message": null
         }
       ],
@@ -1509,7 +1509,7 @@
       "ksi_id": "KSI-AFR-09",
       "validation_id": "KSI-AFR-09",
       "assertion": true,
-      "assertion_reason": "\u2705 Operational (100%): Persistently validate security posture using automated pipelines. | 2/2 resources compliant. | Verified: Verified: Architecture document '[resource]' (7388 bytes).; Validation artifact '[resource]' exists, size: 389 KB, freshness: current (0d), versioned.",
+      "assertion_reason": "\u2705 Operational (100%): Persistently validate security posture using automated pipelines. | 2/2 resources compliant. | Verified: Verified: Architecture document '[resource]' (7388 bytes).; Validation artifact '[resource]' exists, size: 391 KB, freshness: current (0d), versioned.",
       "display_status": "pass",
       "mode": "capability",
       "capability_status": "operational",
@@ -1522,9 +1522,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path authorization_by_fedramp/fedramp-phase2-validation-architecture.mmd --output json; aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/unified_ksi_validations.json --output json",
-      "timestamp": "2026-05-12T02:05:48.504328Z",
+      "timestamp": "2026-05-12T03:06:48.164882Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-09/codecommit_020127_b2002394.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-09/codecommit_030306_b2002394.json",
       "total_category_controls": 9,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -1539,7 +1539,7 @@
         {
           "resource": null,
           "status": "PASS",
-          "reason": "Validation artifact '[resource]' exists, size: 389 KB, freshness: current (0d), versioned."
+          "reason": "Validation artifact '[resource]' exists, size: 391 KB, freshness: current (0d), versioned."
         }
       ],
       "command_executions": [
@@ -1549,7 +1549,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path authorization_by_fedramp/fedramp-phase2-validation-architecture.mmd --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.19s",
+          "execution_time": "1.00s",
           "error_message": null
         },
         {
@@ -1558,7 +1558,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/unified_ksi_validations.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.89s",
           "error_message": null
         }
       ],
@@ -1582,9 +1582,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path procedures/icp_playbook.md --output json; aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json; aws sns list-topics --query \"Topics[?contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]')]\" --output json; aws sns list-subscriptions --query \"Subscriptions[?contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]')]\" --output json",
-      "timestamp": "2026-05-12T02:05:48.505863Z",
+      "timestamp": "2026-05-12T03:06:48.166276Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-10/codecommit_020127_283e5121.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-10/codecommit_030306_283e5121.json",
       "total_category_controls": 10,
       "resources_scanned": 7,
       "resources_passed": 6,
@@ -1634,7 +1634,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/icp_playbook.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.38s",
+          "execution_time": "1.03s",
           "error_message": null
         },
         {
@@ -1643,7 +1643,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.20s",
+          "execution_time": "1.04s",
           "error_message": null
         },
         {
@@ -1652,7 +1652,7 @@
           "command": "aws sns list-topics --query \"Topics[?contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.98s",
+          "execution_time": "0.83s",
           "error_message": null
         },
         {
@@ -1661,7 +1661,7 @@
           "command": "aws sns list-subscriptions --query \"Subscriptions[?contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.13s",
+          "execution_time": "0.87s",
           "error_message": null
         }
       ],
@@ -1685,9 +1685,9 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws kms list-keys --limit 5 --output json; aws s3api [s3-bucket] --bucket fedramp-compliance-[account-id] --output json; aws rds describe-db-instances --output json; aws elbv2 describe-listeners --load-balancer-arn $(aws elbv2 describe-load-balancers --query \"LoadBalancers[0].LoadBalancerArn\" --output text) --output json || echo \"[]\"; aws codecommit get-file --repository-name security-governance --file-path policies/cryptographic-modules-policy.md --output json; aws ec2 get-ebs-encryption-by-default --output json; aws kms list-keys --output json; aws kms describe-key --key-id $(aws kms list-keys --query 'Keys[0].KeyId' --output text) --output json",
-      "timestamp": "2026-05-12T02:05:48.507520Z",
+      "timestamp": "2026-05-12T03:06:48.168765Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-11/kms_020127_3471c05c.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-11/kms_030306_3471c05c.json",
       "total_category_controls": 11,
       "resources_scanned": 30,
       "resources_passed": 28,
@@ -1852,7 +1852,7 @@
           "command": "aws kms list-keys --limit 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.96s",
+          "execution_time": "0.83s",
           "error_message": null
         },
         {
@@ -1861,7 +1861,7 @@
           "command": "aws s3api [s3-bucket] --bucket fedramp-compliance-[account-id] --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.98s",
+          "execution_time": "0.85s",
           "error_message": null
         },
         {
@@ -1870,7 +1870,7 @@
           "command": "aws rds describe-db-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.24s",
+          "execution_time": "0.99s",
           "error_message": null
         },
         {
@@ -1879,7 +1879,7 @@
           "command": "aws elbv2 describe-listeners --load-balancer-arn $(aws elbv2 describe-load-balancers --query \"LoadBalancers[0].LoadBalancerArn\" --output text) --output json || echo \"[]\"",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.03s",
+          "execution_time": "1.70s",
           "error_message": null
         },
         {
@@ -1888,7 +1888,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/cryptographic-modules-policy.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.12s",
+          "execution_time": "0.92s",
           "error_message": null
         },
         {
@@ -1897,7 +1897,7 @@
           "command": "aws ec2 get-ebs-encryption-by-default --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.18s",
+          "execution_time": "1.05s",
           "error_message": null
         },
         {
@@ -1906,7 +1906,7 @@
           "command": "aws kms list-keys --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.91s",
+          "execution_time": "0.79s",
           "error_message": null
         },
         {
@@ -1915,7 +1915,7 @@
           "command": "aws kms describe-key --key-id $(aws kms list-keys --query 'Keys[0].KeyId' --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.87s",
+          "execution_time": "1.67s",
           "error_message": null
         }
       ],
@@ -1939,9 +1939,9 @@
       "long_name": "Cybersecurity Education",
       "category_prefix": "KSI-CED",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path training/register.json --output json; aws codecommit get-file --repository-name security-governance --file-path training/security-refresh.md --output json",
-      "timestamp": "2026-05-12T02:05:48.510282Z",
+      "timestamp": "2026-05-12T03:06:48.173117Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-CED-01/codecommit_020127_600858a5.json",
+      "evidence_path": "evidence_v2_engine/KSI-CED-01/codecommit_030306_600858a5.json",
       "total_category_controls": 1,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -1966,7 +1966,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path training/register.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.88s",
           "error_message": null
         },
         {
@@ -1975,7 +1975,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path training/security-refresh.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.16s",
+          "execution_time": "0.89s",
           "error_message": null
         }
       ],
@@ -1999,9 +1999,9 @@
       "long_name": "Cybersecurity Education",
       "category_prefix": "KSI-CED",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path training/privileged_register.json --output json; aws codecommit get-file --repository-name security-governance --file-path training/privileged-access-guide.md --output json",
-      "timestamp": "2026-05-12T02:05:48.511065Z",
+      "timestamp": "2026-05-12T03:06:48.174271Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-CED-02/codecommit_020127_78d85dd0.json",
+      "evidence_path": "evidence_v2_engine/KSI-CED-02/codecommit_030306_78d85dd0.json",
       "total_category_controls": 2,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -2026,7 +2026,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path training/privileged_register.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.18s",
+          "execution_time": "1.04s",
           "error_message": null
         },
         {
@@ -2035,7 +2035,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path training/privileged-access-guide.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.20s",
+          "execution_time": "1.02s",
           "error_message": null
         }
       ],
@@ -2059,9 +2059,9 @@
       "long_name": "Cybersecurity Education",
       "category_prefix": "KSI-CED",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path training/developer_register.json --output json; aws codecommit get-file --repository-name security-governance --file-path policies/secure-software-development.md --output json",
-      "timestamp": "2026-05-12T02:05:48.511898Z",
+      "timestamp": "2026-05-12T03:06:48.175118Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-CED-03/codecommit_020127_c25c1835.json",
+      "evidence_path": "evidence_v2_engine/KSI-CED-03/codecommit_030306_c25c1835.json",
       "total_category_controls": 3,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -2086,7 +2086,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path training/developer_register.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.22s",
+          "execution_time": "0.99s",
           "error_message": null
         },
         {
@@ -2095,7 +2095,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/secure-software-development.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.11s",
+          "execution_time": "0.98s",
           "error_message": null
         }
       ],
@@ -2119,9 +2119,9 @@
       "long_name": "Cybersecurity Education",
       "category_prefix": "KSI-CED",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path training/ir_dr_register.json --output json; aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json",
-      "timestamp": "2026-05-12T02:05:48.512692Z",
+      "timestamp": "2026-05-12T03:06:48.175927Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-CED-04/codecommit_020127_034973f3.json",
+      "evidence_path": "evidence_v2_engine/KSI-CED-04/codecommit_030306_034973f3.json",
       "total_category_controls": 4,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -2146,7 +2146,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path training/ir_dr_register.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.14s",
+          "execution_time": "0.90s",
           "error_message": null
         },
         {
@@ -2155,7 +2155,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/incident-response-plan.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.13s",
+          "execution_time": "0.90s",
           "error_message": null
         }
       ],
@@ -2179,9 +2179,9 @@
       "long_name": "Change Management",
       "category_prefix": "KSI-CMT",
       "cli_command": "aws cloudtrail describe-trails --output json; aws cloudtrail get-event-selectors --trail-name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json; aws configservice describe-configuration-recorder-status --output json; aws codecommit get-file --repository-name security-governance --file-path policies/change-management-policy.md --output json",
-      "timestamp": "2026-05-12T02:05:48.513530Z",
+      "timestamp": "2026-05-12T03:06:48.176757Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-CMT-01/cloudtrail_020127_21cac14d.json",
+      "evidence_path": "evidence_v2_engine/KSI-CMT-01/cloudtrail_030306_21cac14d.json",
       "total_category_controls": 1,
       "resources_scanned": 4,
       "resources_passed": 4,
@@ -2216,7 +2216,7 @@
           "command": "aws cloudtrail describe-trails --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.85s",
           "error_message": null
         },
         {
@@ -2225,7 +2225,7 @@
           "command": "aws cloudtrail get-event-selectors --trail-name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.12s",
+          "execution_time": "1.74s",
           "error_message": null
         },
         {
@@ -2234,7 +2234,7 @@
           "command": "aws configservice describe-configuration-recorder-status --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.05s",
+          "execution_time": "0.88s",
           "error_message": null
         },
         {
@@ -2243,7 +2243,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/change-management-policy.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.10s",
+          "execution_time": "0.99s",
           "error_message": null
         }
       ],
@@ -2253,12 +2253,12 @@
     {
       "ksi_id": "KSI-CMT-02",
       "validation_id": "KSI-CMT-02",
-      "assertion": true,
-      "assertion_reason": "\u2705 Operational (100%): Execute changes to machine-based information resources through redeployment of version controlled immutable resources... | 5/10 resources compliant, 2 unverified. | Verified: IMDSv2 Enforced: Instance '[resource]' requires HttpTokens.; IMDSv2 Enforced: Instance '[resource]' requires HttpTokens.; IMDSv2 Enforced: Instance '[resource]' requires HttpTokens. |   ...and 2 more verification(s) | Failures: Risk: Instance '[resource]' allows IMDSv1 (Legacy Metadata). Enforce v2.; Risk: Instance '[resource]' allows IMDSv1 (Legacy Metadata). Enforce v2.; Risk: Instance '[resource]' allows IMDSv1 (Legacy Metadata). Enforce v2.",
-      "display_status": "pass",
-      "mode": "capability",
-      "capability_status": "operational",
-      "recommended_action": "\u2705 Operational capability verified. 3 item(s) recorded in remediation_backlog.json for prioritization.",
+      "assertion": false,
+      "assertion_reason": "\u274c Insufficient (55%): Execute changes to machine-based information resources through redeployment of version controlled immutable resources... | 5/11 resources compliant, 2 unverified. | Verified: IMDSv2 Enforced: Instance '[resource]' requires HttpTokens.; IMDSv2 Enforced: Instance '[resource]' requires HttpTokens.; IMDSv2 Enforced: Instance '[resource]' requires HttpTokens. |   ...and 2 more verification(s) | Failures: Risk: Instance '[resource]' allows IMDSv1 (Legacy Metadata). Enforce v2.; Risk: Instance '[resource]' allows IMDSv1 (Legacy Metadata). Enforce v2.; Risk: Instance '[resource]' allows IMDSv1 (Legacy Metadata). Enforce v2. | Warnings: Pipeline success rate 0% below 95% target (0/50).",
+      "display_status": "fail",
+      "mode": "output",
+      "capability_status": null,
+      "recommended_action": "ACTION: Operational metric below target. 4 non-compliant item(s). Current: 55% (Target: \u2265100%)",
       "requirement": "Execute changes to machine-based information resources through redeployment of version controlled immutable resources rather than direct modification wherever possible.",
       "implementation_summary": "Infrastructure deployed exclusively via Terraform with state stored in S3 (mks-states bucket) and DynamoDB locking. No console changes permitted in production.",
       "justification": "Validates Infrastructure as Code (IaC). Since ASGs are not used, this validates that changes are managed via Terraform State (Version Control) and State Locking (Concurrency Control), ensuring changes are tracked in code rather than manual console actions.",
@@ -2266,15 +2266,15 @@
       "fail_criteria": "FAIL if: No Terraform state bucket exists (infrastructure not managed as code), no DynamoDB lock table exists (no concurrency control), no managed EC2 instances exist, or the IaC policy document is missing.",
       "long_name": "Change Management",
       "category_prefix": "KSI-CMT",
-      "cli_command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json; aws dynamodb list-tables --query \"TableNames[?contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]')]\" --output json; aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json; aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json",
-      "timestamp": "2026-05-12T02:05:48.514877Z",
-      "score": 100,
+      "cli_command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json; aws dynamodb list-tables --query \"TableNames[?contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]')]\" --output json; aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json; aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json; ( for p in $(aws codepipeline list-pipelines --query 'pipelines[].name' --output text 2>/dev/null); do aws codepipeline list-pipeline-executions --pipeline-name \"$p\" --max-results 50 --output json 2>/dev/null; done ) | jq -s '{pipelineExecutionSummaries: [.[].pipelineExecutionSummaries // [] | .[]?]}'",
+      "timestamp": "2026-05-12T03:06:48.178202Z",
+      "score": 55,
       "evidence_path": "evidence_v2_engine/KSI-CMT-02/None",
       "total_category_controls": 2,
-      "resources_scanned": 10,
+      "resources_scanned": 11,
       "resources_passed": 5,
       "resources_unverified": 2,
-      "resources_failed": 3,
+      "resources_failed": 4,
       "resource_evaluations": [
         {
           "resource": "empty_allowed_0",
@@ -2325,6 +2325,11 @@
           "resource": "security-governance",
           "status": "PASS",
           "reason": "Verified: Governance document '[resource]' is substantive (1070 bytes, 4 sections)."
+        },
+        {
+          "resource": "Pipeline Metrics",
+          "status": "WARNING",
+          "reason": "Pipeline success rate 0% below 95% target (0/50)."
         }
       ],
       "command_executions": [
@@ -2334,7 +2339,7 @@
           "command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.02s",
+          "execution_time": "0.86s",
           "error_message": null
         },
         {
@@ -2343,7 +2348,7 @@
           "command": "aws dynamodb list-tables --query \"TableNames[?contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.97s",
+          "execution_time": "0.83s",
           "error_message": null
         },
         {
@@ -2352,7 +2357,7 @@
           "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.68s",
+          "execution_time": "1.14s",
           "error_message": null
         },
         {
@@ -2361,12 +2366,21 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.25s",
+          "execution_time": "1.00s",
+          "error_message": null
+        },
+        {
+          "index": 4,
+          "description": "Mode 2 (operational effectiveness) \u2014 feeds PipelineMetricsPrimitive. Aggregates pipelineExecutionSummaries across every CodePipeline. Computes success_rate = % of executions with status=Succeeded. Direct evidence of the 'redeployment of version-controlled immutable resources' KSI; if pipelines fail, redeployment isn't actually working. Falls back to empty array if no pipelines (CodePipeline-free environments return ACTIVITY rather than crashing).",
+          "command": "( for p in $(aws codepipeline list-pipelines --query 'pipelines[].name' --output text 2>/dev/null); do aws codepipeline list-pipeline-executions --pipeline-name \"$p\" --max-results 50 --output json 2>/dev/null; done ) | jq -s '{pipelineExecutionSummaries: [.[].pipelineExecutionSummaries // [] | .[]?]}'",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.81s",
           "error_message": null
         }
       ],
-      "commands_executed": 4,
-      "successful_commands": 4
+      "commands_executed": 5,
+      "successful_commands": 5
     },
     {
       "ksi_id": "KSI-CMT-03",
@@ -2385,9 +2399,9 @@
       "long_name": "Change Management",
       "category_prefix": "KSI-CMT",
       "cli_command": "aws configservice describe-configuration-recorder-status --output json; aws configservice describe-config-rules --query \"ConfigRules[?ConfigRuleState=='[resource]']\" --max-items 5 --output json; aws codecommit get-file --repository-name security-governance --file-path policies/sdlc-policy.md --output json; aws configservice describe-compliance-by-config-rule --output json",
-      "timestamp": "2026-05-12T02:05:48.516452Z",
+      "timestamp": "2026-05-12T03:06:48.180164Z",
       "score": 87,
-      "evidence_path": "evidence_v2_engine/KSI-CMT-03/configservice_020127_af9b602f.json",
+      "evidence_path": "evidence_v2_engine/KSI-CMT-03/configservice_030306_af9b602f.json",
       "total_category_controls": 3,
       "resources_scanned": 8,
       "resources_passed": 7,
@@ -2442,7 +2456,7 @@
           "command": "aws configservice describe-configuration-recorder-status --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.82s",
           "error_message": null
         },
         {
@@ -2451,7 +2465,7 @@
           "command": "aws configservice describe-config-rules --query \"ConfigRules[?ConfigRuleState=='[resource]']\" --max-items 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.09s",
+          "execution_time": "0.87s",
           "error_message": null
         },
         {
@@ -2460,7 +2474,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/sdlc-policy.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.29s",
+          "execution_time": "0.96s",
           "error_message": null
         },
         {
@@ -2469,7 +2483,7 @@
           "command": "aws configservice describe-compliance-by-config-rule --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "4.80s",
+          "execution_time": "4.39s",
           "error_message": null
         }
       ],
@@ -2493,9 +2507,9 @@
       "long_name": "Change Management",
       "category_prefix": "KSI-CMT",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path procedures/change-management-procedure.md --output json; aws s3api list-objects-v2 --bucket mks-states --prefix terraform.tfstate --max-items 1 --output json",
-      "timestamp": "2026-05-12T02:05:48.517664Z",
+      "timestamp": "2026-05-12T03:06:48.181345Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-CMT-04/codecommit_020127_3cccf39c.json",
+      "evidence_path": "evidence_v2_engine/KSI-CMT-04/codecommit_030306_3cccf39c.json",
       "total_category_controls": 4,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -2520,7 +2534,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path procedures/change-management-procedure.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.22s",
+          "execution_time": "1.11s",
           "error_message": null
         },
         {
@@ -2529,7 +2543,7 @@
           "command": "aws s3api list-objects-v2 --bucket mks-states --prefix terraform.tfstate --max-items 1 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.94s",
           "error_message": null
         }
       ],
@@ -2540,7 +2554,7 @@
       "ksi_id": "KSI-CNA-01",
       "validation_id": "KSI-CNA-01",
       "assertion": false,
-      "assertion_reason": "\u274c Insufficient (0%): Persistently ensure all machine-based information resources are configured to limit inbound and outbound network traf... | 6/9 resources compliant. CRITICAL OVERRIDE: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet. | Verified: SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs.; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs.; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs. |   ...and 2 more verification(s) | Failures: \ud83d\udea8 CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet | Warnings: SG '[resource]' uses broad internal CIDRs ([internal-cidr] ([protocol-ports])). FedRAMP best practice: tighten ranges or use [security-group] references.; Exposure: SG '[resource]' allows TCP 443-443 from a public CIDR (IPv4); review against intended traffic scope.",
+      "assertion_reason": "\u274c Insufficient (0%): Persistently ensure all machine-based information resources are configured to limit inbound and outbound network traf... | 6/9 resources compliant. CRITICAL OVERRIDE: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) on EC2. | Verified: SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs.; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs.; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs. |   ...and 2 more verification(s) | Failures: \ud83d\udea8 CRITICAL: Critical findings detected: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) on EC2 | Warnings: SG '[resource]' uses broad internal CIDRs ([internal-cidr] ([protocol-ports])). FedRAMP best practice: tighten ranges or use [security-group] references.; Exposure: SG '[resource]' allows TCP 443-443 from a public CIDR (IPv4); review against intended traffic scope.",
       "display_status": "fail",
       "mode": "capability",
       "capability_status": "degraded",
@@ -2553,9 +2567,9 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws ec2 describe-security-groups --filters Name=group-name,Values=default --output json; aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=tcp --max-items 5 --output json; aws ec2 describe-network-acls --max-items 5 --output json",
-      "timestamp": "2026-05-12T02:05:48.518734Z",
+      "timestamp": "2026-05-12T03:06:48.182426Z",
       "score": 0,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-01/ec2_020127_6ec405b1.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-01/ec2_030306_6ec405b1.json",
       "total_category_controls": 1,
       "resources_scanned": 9,
       "resources_passed": 6,
@@ -2580,7 +2594,7 @@
         {
           "resource": "[security-group]",
           "status": "FAIL",
-          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet"
+          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) on EC2"
         },
         {
           "resource": "[security-group]",
@@ -2615,7 +2629,7 @@
           "command": "aws ec2 describe-security-groups --filters Name=group-name,Values=default --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.34s",
+          "execution_time": "1.17s",
           "error_message": null
         },
         {
@@ -2624,7 +2638,7 @@
           "command": "aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=tcp --max-items 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.39s",
+          "execution_time": "1.07s",
           "error_message": null
         },
         {
@@ -2633,7 +2647,7 @@
           "command": "aws ec2 describe-network-acls --max-items 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.28s",
+          "execution_time": "1.02s",
           "error_message": null
         }
       ],
@@ -2657,9 +2671,9 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws ec2 describe-subnets --filters \"Name=map-public-ip-on-launch,Values=false\" --max-items 5 --output json; aws ec2 describe-security-groups --max-items 20 --output json; aws rds describe-db-instances --output json",
-      "timestamp": "2026-05-12T02:05:48.520579Z",
+      "timestamp": "2026-05-12T03:06:48.184242Z",
       "score": 0,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-02/ec2_020127_abe26689.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-02/ec2_030306_abe26689.json",
       "total_category_controls": 2,
       "resources_scanned": 27,
       "resources_passed": 18,
@@ -2809,7 +2823,7 @@
           "command": "aws ec2 describe-subnets --filters \"Name=map-public-ip-on-launch,Values=false\" --max-items 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.52s",
+          "execution_time": "1.11s",
           "error_message": null
         },
         {
@@ -2818,7 +2832,7 @@
           "command": "aws ec2 describe-security-groups --max-items 20 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.55s",
+          "execution_time": "1.13s",
           "error_message": null
         },
         {
@@ -2827,7 +2841,7 @@
           "command": "aws rds describe-db-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.28s",
+          "execution_time": "1.07s",
           "error_message": null
         }
       ],
@@ -2851,9 +2865,9 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws ec2 [vpc]-endpoints --output json; aws ec2 describe-nat-gateways --filter Name=state,Values=available --output json; aws elbv2 describe-load-balancers --output json",
-      "timestamp": "2026-05-12T02:05:48.523380Z",
+      "timestamp": "2026-05-12T03:06:48.186918Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-03/ec2_020127_e1ef11db.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-03/ec2_030306_e1ef11db.json",
       "total_category_controls": 3,
       "resources_scanned": 15,
       "resources_passed": 15,
@@ -2943,7 +2957,7 @@
           "command": "aws ec2 [vpc]-endpoints --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.39s",
+          "execution_time": "1.04s",
           "error_message": null
         },
         {
@@ -2952,7 +2966,7 @@
           "command": "aws ec2 describe-nat-gateways --filter Name=state,Values=available --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.22s",
+          "execution_time": "1.08s",
           "error_message": null
         },
         {
@@ -2961,7 +2975,7 @@
           "command": "aws elbv2 describe-load-balancers --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.83s",
           "error_message": null
         }
       ],
@@ -2972,7 +2986,7 @@
       "ksi_id": "KSI-CNA-04",
       "validation_id": "KSI-CNA-04",
       "assertion": false,
-      "assertion_reason": "\u274c Insufficient (0%): Use immutable infrastructure with strictly defined functionality and privileges by default. | 83/89 resources compliant. CRITICAL OVERRIDE: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet. | Verified: Change notification artifact '[resource]' exists.; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs.; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs (1 [security-group] reference(s)). |   ...and 1 more verification(s) | Failures: \ud83d\udea8 CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet; \ud83d\udea8 CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet; \ud83d\udea8 CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet |   ...and 2 more failure(s) | Warnings: SG '[resource]' uses broad internal CIDRs ([internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All)). FedRAMP best practice: tighten ranges or use [security-group] references.",
+      "assertion_reason": "\u274c Insufficient (0%): Use immutable infrastructure with strictly defined functionality and privileges by default. | 83/89 resources compliant. CRITICAL OVERRIDE: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) on EC2. | Verified: Change notification artifact '[resource]' exists.; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs.; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs (1 [security-group] reference(s)). |   ...and 1 more verification(s) | Failures: \ud83d\udea8 CRITICAL: Critical findings detected: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) on EC2; \ud83d\udea8 CRITICAL: Critical findings detected: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) on EC2; \ud83d\udea8 CRITICAL: Critical findings detected: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) on EC2 |   ...and 2 more failure(s) | Warnings: SG '[resource]' uses broad internal CIDRs ([internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All)). FedRAMP best practice: tighten ranges or use [security-group] references.",
       "display_status": "fail",
       "mode": "capability",
       "capability_status": "degraded",
@@ -2985,9 +2999,9 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws s3api list-objects-v2 --bucket mks-states --prefix terraform.tfstate --max-items 1 --output json; aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=-1 --output json; aws iam list-roles --query \"Roles[?!(contains(RoleName, '[resource]') || contains(Path, '[resource]'))]\" --output json",
-      "timestamp": "2026-05-12T02:05:48.525828Z",
+      "timestamp": "2026-05-12T03:06:48.189247Z",
       "score": 0,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-04/s3api_020127_8ba99feb.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-04/s3api_030306_8ba99feb.json",
       "total_category_controls": 4,
       "resources_scanned": 89,
       "resources_passed": 83,
@@ -3007,12 +3021,12 @@
         {
           "resource": "[security-group]",
           "status": "FAIL",
-          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet"
+          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) on EC2"
         },
         {
           "resource": "[security-group]",
           "status": "FAIL",
-          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet"
+          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) on EC2"
         },
         {
           "resource": "[security-group]",
@@ -3022,7 +3036,7 @@
         {
           "resource": "TEST",
           "status": "FAIL",
-          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet"
+          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) on EC2"
         },
         {
           "resource": "[security-group]",
@@ -3032,12 +3046,12 @@
         {
           "resource": "db-[private-resource]",
           "status": "FAIL",
-          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet"
+          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) on EC2"
         },
         {
           "resource": "TEST-stage",
           "status": "FAIL",
-          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: Open ingress (0.0.0.0/0) on EC2; All Traffic protocol open to internet"
+          "reason": "\ud83d\udea8 CRITICAL: Critical findings detected: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) on EC2"
         },
         {
           "resource": "access-revocation-lambda-role",
@@ -3447,7 +3461,7 @@
           "command": "aws s3api list-objects-v2 --bucket mks-states --prefix terraform.tfstate --max-items 1 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.91s",
           "error_message": null
         },
         {
@@ -3456,7 +3470,7 @@
           "command": "aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=-1 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.33s",
+          "execution_time": "1.01s",
           "error_message": null
         },
         {
@@ -3465,7 +3479,7 @@
           "command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, '[resource]') || contains(Path, '[resource]'))]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.32s",
+          "execution_time": "0.94s",
           "error_message": null
         }
       ],
@@ -3489,9 +3503,9 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws wafv2 list-web-acls --scope REGIONAL --output json; aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Shield: 'Enabled (Standard)'}\" --output json; aws route53 list-hosted-zones --max-items 5 --output json; aws ses list-identities --max-items 5 --output json",
-      "timestamp": "2026-05-12T02:05:48.531533Z",
+      "timestamp": "2026-05-12T03:06:48.194707Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-05/wafv2_020127_710b255e.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-05/wafv2_030306_710b255e.json",
       "total_category_controls": 5,
       "resources_scanned": 5,
       "resources_passed": 5,
@@ -3531,7 +3545,7 @@
           "command": "aws wafv2 list-web-acls --scope REGIONAL --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.02s",
+          "execution_time": "0.88s",
           "error_message": null
         },
         {
@@ -3540,7 +3554,7 @@
           "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Shield: 'Enabled (Standard)'}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.81s",
           "error_message": null
         },
         {
@@ -3549,7 +3563,7 @@
           "command": "aws route53 list-hosted-zones --max-items 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.07s",
+          "execution_time": "0.97s",
           "error_message": null
         },
         {
@@ -3558,7 +3572,7 @@
           "command": "aws ses list-identities --max-items 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.95s",
+          "execution_time": "0.90s",
           "error_message": null
         }
       ],
@@ -3582,9 +3596,9 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws elbv2 describe-load-balancers --output json; aws rds describe-db-instances --output json; aws backup list-backup-plans --output json",
-      "timestamp": "2026-05-12T02:05:48.532788Z",
+      "timestamp": "2026-05-12T03:06:48.195947Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-06/elbv2_020127_8eb7095a.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-06/elbv2_030306_8eb7095a.json",
       "total_category_controls": 6,
       "resources_scanned": 6,
       "resources_passed": 4,
@@ -3629,7 +3643,7 @@
           "command": "aws elbv2 describe-load-balancers --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.06s",
+          "execution_time": "0.80s",
           "error_message": null
         },
         {
@@ -3638,7 +3652,7 @@
           "command": "aws rds describe-db-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.26s",
+          "execution_time": "1.10s",
           "error_message": null
         },
         {
@@ -3647,7 +3661,7 @@
           "command": "aws backup list-backup-plans --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.89s",
           "error_message": null
         }
       ],
@@ -3671,9 +3685,9 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws ec2 describe-instances --output json; aws lambda list-functions --output json; aws rds describe-db-instances --output json; aws apigateway get-rest-apis --output json; aws elbv2 describe-load-balancers --output json; aws autoscaling describe-auto-scaling-groups --output json",
-      "timestamp": "2026-05-12T02:05:48.533834Z",
+      "timestamp": "2026-05-12T03:06:48.196974Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-07/ec2_020127_0216bef6.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-07/ec2_030306_0216bef6.json",
       "total_category_controls": 7,
       "resources_scanned": 40,
       "resources_passed": 40,
@@ -3888,7 +3902,7 @@
           "command": "aws ec2 describe-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.83s",
+          "execution_time": "1.13s",
           "error_message": null
         },
         {
@@ -3897,7 +3911,7 @@
           "command": "aws lambda list-functions --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.24s",
+          "execution_time": "1.02s",
           "error_message": null
         },
         {
@@ -3906,7 +3920,7 @@
           "command": "aws rds describe-db-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.36s",
+          "execution_time": "0.96s",
           "error_message": null
         },
         {
@@ -3915,7 +3929,7 @@
           "command": "aws apigateway get-rest-apis --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.87s",
           "error_message": null
         },
         {
@@ -3924,7 +3938,7 @@
           "command": "aws elbv2 describe-load-balancers --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.82s",
           "error_message": null
         },
         {
@@ -3933,7 +3947,7 @@
           "command": "aws autoscaling describe-auto-scaling-groups --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.05s",
+          "execution_time": "0.91s",
           "error_message": null
         }
       ],
@@ -3957,9 +3971,9 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws securityhub get-enabled-standards --output json; aws guardduty list-detectors --output json; aws configservice describe-configuration-recorders --output json; aws inspector2 list-coverage --output json",
-      "timestamp": "2026-05-12T02:05:48.536676Z",
+      "timestamp": "2026-05-12T03:06:48.199726Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-08/securityhub_020127_dc424601.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-08/securityhub_030306_dc424601.json",
       "total_category_controls": 8,
       "resources_scanned": 37,
       "resources_passed": 37,
@@ -4159,7 +4173,7 @@
           "command": "aws securityhub get-enabled-standards --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.25s",
+          "execution_time": "1.17s",
           "error_message": null
         },
         {
@@ -4168,7 +4182,7 @@
           "command": "aws guardduty list-detectors --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.00s",
+          "execution_time": "0.82s",
           "error_message": null
         },
         {
@@ -4177,7 +4191,7 @@
           "command": "aws configservice describe-configuration-recorders --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.02s",
+          "execution_time": "0.79s",
           "error_message": null
         },
         {
@@ -4186,7 +4200,7 @@
           "command": "aws inspector2 list-coverage --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.42s",
+          "execution_time": "1.30s",
           "error_message": null
         }
       ],
@@ -4197,11 +4211,11 @@
       "ksi_id": "KSI-IAM-01",
       "validation_id": "KSI-IAM-01",
       "assertion": true,
-      "assertion_reason": "\u2705 Operational (100%): Enforce multi-factor authentication (MFA) using methods that are difficult to intercept or impersonate (phishing-resi... | 11/13 resources compliant, 2 unverified. | Verified: Modern Identity: AWS Identity Center is active.; Inspector scanning 1 resource(s) for vulnerabilities.",
+      "assertion_reason": "\u2705 Excellent (100%): Enforce multi-factor authentication (MFA) using methods that are difficult to intercept or impersonate (phishing-resi... | 11/13 resources compliant, 2 unverified. | Verified: Modern Identity: AWS Identity Center is active.; Inspector scanning 1 resource(s) for vulnerabilities.",
       "display_status": "pass",
-      "mode": "capability",
-      "capability_status": "operational",
-      "recommended_action": "\u2705 Operational capability verified.",
+      "mode": "output",
+      "capability_status": null,
+      "recommended_action": "\u2705 Operational metric meets target with margin.",
       "requirement": "Enforce multi-factor authentication (MFA) using methods that are difficult to intercept or impersonate (phishing-resistant MFA) for all user authentication.",
       "implementation_summary": "MFA enforced for all human users via AWS Identity Center with FIDO2/WebAuthn support. Break-glass IAM users require hardware tokens.",
       "justification": "Validates MFA compliance by filtering for users who actively log in via password (Humans) and verifying Identity Center usage. Excludes API-only service accounts.",
@@ -4209,8 +4223,8 @@
       "fail_criteria": "FAIL if: Any IAM user with console access lacks MFA, Identity Center is not configured, or human accounts exist without any MFA device assigned.",
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
-      "cli_command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json; aws sso-admin list-instances --output json; aws iam list-virtual-mfa-devices --output json; aws sso-admin list-permission-sets --instance-arn $(aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text) --output json; aws identitystore list-users --identity-store-id $(aws sso-admin list-instances --query 'Instances[0].IdentityStoreId' --output text) --output json",
-      "timestamp": "2026-05-12T02:05:48.539139Z",
+      "cli_command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json; aws sso-admin list-instances --output json; aws iam list-virtual-mfa-devices --output json; echo '{}' | jq --argjson users \"$(aws iam list-users --output json | jq '.Users // []')\" --argjson mfa \"$(aws iam list-virtual-mfa-devices --output json | jq '.VirtualMFADevices // []')\" '{HumanUsers: ($users | map(select(.PasswordLastUsed != null))), VirtualMFADevices: $mfa}'; aws sso-admin list-permission-sets --instance-arn $(aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text) --output json; aws identitystore list-users --identity-store-id $(aws sso-admin list-instances --query 'Instances[0].IdentityStoreId' --output text) --output json",
+      "timestamp": "2026-05-12T03:06:48.202186Z",
       "score": 100,
       "evidence_path": "evidence_v2_engine/KSI-IAM-01/None",
       "total_category_controls": 1,
@@ -4230,7 +4244,7 @@
           "reason": "Modern Identity: AWS Identity Center is active."
         },
         {
-          "resource": "unverified_3",
+          "resource": "unverified_4",
           "status": "ACTIVITY",
           "reason": "Command did not execute successfully: \naws: [ERROR]: An error occurred (AccessDeniedException) when calling the ListPermissionSets operation: User: arn:aws:[redacted] is not a"
         },
@@ -4322,7 +4336,7 @@
           "command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.84s",
           "error_message": null
         },
         {
@@ -4331,7 +4345,7 @@
           "command": "aws sso-admin list-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.07s",
+          "execution_time": "0.89s",
           "error_message": null
         },
         {
@@ -4340,30 +4354,39 @@
           "command": "aws iam list-virtual-mfa-devices --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.05s",
+          "execution_time": "0.90s",
           "error_message": null
         },
         {
           "index": 3,
+          "description": "Mode 2 (operational effectiveness) \u2014 cross-source correlator. Combines list-users (filtered to human users via PasswordLastUsed!=null) with list-virtual-mfa-devices into a single response. IAMMFAMetricsPrimitive computes mfa_enrollment_rate as % of human IAM console users with MFA assigned. KSI-IAM-01 target is 95% (FedRAMP IA-2(1); 5% slack for break-glass accounts during provisioning).",
+          "command": "echo '{}' | jq --argjson users \"$(aws iam list-users --output json | jq '.Users // []')\" --argjson mfa \"$(aws iam list-virtual-mfa-devices --output json | jq '.VirtualMFADevices // []')\" '{HumanUsers: ($users | map(select(.PasswordLastUsed != null))), VirtualMFADevices: $mfa}'",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.73s",
+          "error_message": null
+        },
+        {
+          "index": 4,
           "description": "Phase 4: SSO permission sets (IA-2(1)) \u2014 required for phishing-resistant MFA verification.",
           "command": "aws sso-admin list-permission-sets --instance-arn $(aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text) --output json",
           "status": "failed",
           "exit_code": 254,
-          "execution_time": "2.09s",
+          "execution_time": "1.60s",
           "error_message": "\naws: [ERROR]: An error occurred (AccessDeniedException) when calling the ListPermissionSets operation: User: arn:aws:[redacted] is not a"
         },
         {
-          "index": 4,
+          "index": 5,
           "description": "Phase 4: enumerate SSO-managed user identities for IA-2 coverage.",
           "command": "aws identitystore list-users --identity-store-id $(aws sso-admin list-instances --query 'Instances[0].IdentityStoreId' --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.08s",
+          "execution_time": "1.76s",
           "error_message": null
         }
       ],
-      "commands_executed": 5,
-      "successful_commands": 4
+      "commands_executed": 6,
+      "successful_commands": 5
     },
     {
       "ksi_id": "KSI-IAM-02",
@@ -4382,9 +4405,9 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws sso-admin list-instances --output json; aws iam list-saml-providers --output json; aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
-      "timestamp": "2026-05-12T02:05:48.540591Z",
+      "timestamp": "2026-05-12T03:06:48.203962Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-IAM-02/ssoadmin_020127_2ee16596.json",
+      "evidence_path": "evidence_v2_engine/KSI-IAM-02/ssoadmin_030306_2ee16596.json",
       "total_category_controls": 2,
       "resources_scanned": 3,
       "resources_passed": 2,
@@ -4414,7 +4437,7 @@
           "command": "aws sso-admin list-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.08s",
+          "execution_time": "0.91s",
           "error_message": null
         },
         {
@@ -4423,7 +4446,7 @@
           "command": "aws iam list-saml-providers --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.83s",
           "error_message": null
         },
         {
@@ -4432,7 +4455,7 @@
           "command": "aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.82s",
           "error_message": null
         }
       ],
@@ -4456,9 +4479,9 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, '[resource]') || contains(Path, '[resource]'))]\" --output json; aws iam list-users --query \"Users[?PasswordLastUsed==null]\" --output json; aws iam get-credential-report --output text > /dev/null && aws iam get-credential-report --output json || echo '{\"Content\": \"Permission Denied\"}'",
-      "timestamp": "2026-05-12T02:05:48.541429Z",
+      "timestamp": "2026-05-12T03:06:48.204772Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-IAM-03/iam_020127_9b153fd6.json",
+      "evidence_path": "evidence_v2_engine/KSI-IAM-03/iam_030306_9b153fd6.json",
       "total_category_controls": 3,
       "resources_scanned": 82,
       "resources_passed": 80,
@@ -4883,7 +4906,7 @@
           "command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, '[resource]') || contains(Path, '[resource]'))]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.31s",
+          "execution_time": "0.97s",
           "error_message": null
         },
         {
@@ -4892,7 +4915,7 @@
           "command": "aws iam list-users --query \"Users[?PasswordLastUsed==null]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.02s",
+          "execution_time": "0.87s",
           "error_message": null
         },
         {
@@ -4901,7 +4924,7 @@
           "command": "aws iam get-credential-report --output text > /dev/null && aws iam get-credential-report --output json || echo '{\"Content\": \"Permission Denied\"}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.18s",
+          "execution_time": "1.88s",
           "error_message": null
         }
       ],
@@ -4925,9 +4948,9 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws sso-admin list-instances --output json; aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
-      "timestamp": "2026-05-12T02:05:48.546291Z",
+      "timestamp": "2026-05-12T03:06:48.209344Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-IAM-04/ssoadmin_020127_2ee16596.json",
+      "evidence_path": "evidence_v2_engine/KSI-IAM-04/ssoadmin_030306_2ee16596.json",
       "total_category_controls": 4,
       "resources_scanned": 2,
       "resources_passed": 1,
@@ -4952,7 +4975,7 @@
           "command": "aws sso-admin list-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.93s",
           "error_message": null
         },
         {
@@ -4961,7 +4984,7 @@
           "command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.07s",
+          "execution_time": "0.85s",
           "error_message": null
         }
       ],
@@ -4985,9 +5008,9 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws sso-admin list-instances --output json; aws iam list-virtual-mfa-devices --output json; aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
-      "timestamp": "2026-05-12T02:05:48.546855Z",
+      "timestamp": "2026-05-12T03:06:48.209893Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-IAM-05/ssoadmin_020127_2ee16596.json",
+      "evidence_path": "evidence_v2_engine/KSI-IAM-05/ssoadmin_030306_2ee16596.json",
       "total_category_controls": 5,
       "resources_scanned": 2,
       "resources_passed": 1,
@@ -5012,7 +5035,7 @@
           "command": "aws sso-admin list-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.81s",
           "error_message": null
         },
         {
@@ -5021,7 +5044,7 @@
           "command": "aws iam list-virtual-mfa-devices --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.07s",
+          "execution_time": "0.83s",
           "error_message": null
         },
         {
@@ -5030,7 +5053,7 @@
           "command": "aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.82s",
           "error_message": null
         }
       ],
@@ -5054,9 +5077,9 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws guardduty list-detectors --output json; aws events list-rules --name-prefix GuardDuty --output json",
-      "timestamp": "2026-05-12T02:05:48.547524Z",
+      "timestamp": "2026-05-12T03:06:48.210524Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-IAM-06/guardduty_020127_2d97e55e.json",
+      "evidence_path": "evidence_v2_engine/KSI-IAM-06/guardduty_030306_2d97e55e.json",
       "total_category_controls": 6,
       "resources_scanned": 1,
       "resources_passed": 1,
@@ -5076,7 +5099,7 @@
           "command": "aws guardduty list-detectors --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.86s",
           "error_message": null
         },
         {
@@ -5085,7 +5108,7 @@
           "command": "aws events list-rules --name-prefix GuardDuty --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.85s",
           "error_message": null
         }
       ],
@@ -5109,9 +5132,9 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws iam generate-credential-report > /dev/null && aws iam get-credential-report --output text | base64 --decode || echo 'Permission Denied'; aws iam list-roles --query \"Roles[?CreateDate<='[resource]']\" --output json",
-      "timestamp": "2026-05-12T02:05:48.548167Z",
+      "timestamp": "2026-05-12T03:06:48.211053Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-IAM-07/iam_020127_6900159d.json",
+      "evidence_path": "evidence_v2_engine/KSI-IAM-07/iam_030306_6900159d.json",
       "total_category_controls": 7,
       "resources_scanned": 2,
       "resources_passed": 0,
@@ -5136,7 +5159,7 @@
           "command": "aws iam generate-credential-report > /dev/null && aws iam get-credential-report --output text | base64 --decode || echo 'Permission Denied'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.07s",
+          "execution_time": "1.81s",
           "error_message": null
         },
         {
@@ -5145,7 +5168,7 @@
           "command": "aws iam list-roles --query \"Roles[?CreateDate<='[resource]']\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.30s",
+          "execution_time": "0.95s",
           "error_message": null
         }
       ],
@@ -5169,9 +5192,9 @@
       "long_name": "Incident Response",
       "category_prefix": "KSI-INR",
       "cli_command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]')]\" --output json",
-      "timestamp": "2026-05-12T02:05:48.548825Z",
+      "timestamp": "2026-05-12T03:06:48.211734Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-INR-01/codecommit_020127_757e4d40.json",
+      "evidence_path": "evidence_v2_engine/KSI-INR-01/codecommit_030306_757e4d40.json",
       "total_category_controls": 1,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -5201,7 +5224,7 @@
           "command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.81s",
           "error_message": null
         }
       ],
@@ -5225,9 +5248,9 @@
       "long_name": "Incident Response",
       "category_prefix": "KSI-INR",
       "cli_command": "aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]')]\" --output json; aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json",
-      "timestamp": "2026-05-12T02:05:48.549719Z",
+      "timestamp": "2026-05-12T03:06:48.212608Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-INR-02/logs_020127_143cc321.json",
+      "evidence_path": "evidence_v2_engine/KSI-INR-02/logs_030306_143cc321.json",
       "total_category_controls": 2,
       "resources_scanned": 14,
       "resources_passed": 13,
@@ -5312,7 +5335,7 @@
           "command": "aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.05s",
+          "execution_time": "0.90s",
           "error_message": null
         },
         {
@@ -5321,7 +5344,7 @@
           "command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.87s",
           "error_message": null
         }
       ],
@@ -5345,9 +5368,9 @@
       "long_name": "Incident Response",
       "category_prefix": "KSI-INR",
       "cli_command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]')]\" --output json; aws securityhub get-findings --max-results 100 --output json",
-      "timestamp": "2026-05-12T02:05:48.551582Z",
+      "timestamp": "2026-05-12T03:06:48.214421Z",
       "score": 50,
-      "evidence_path": "evidence_v2_engine/KSI-INR-03/codecommit_020127_14f52d8e.json",
+      "evidence_path": "evidence_v2_engine/KSI-INR-03/codecommit_030306_14f52d8e.json",
       "total_category_controls": 3,
       "resources_scanned": 2,
       "resources_passed": 1,
@@ -5372,7 +5395,7 @@
           "command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.79s",
           "error_message": null
         },
         {
@@ -5381,7 +5404,7 @@
           "command": "aws securityhub get-findings --max-results 100 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.81s",
+          "execution_time": "1.27s",
           "error_message": null
         }
       ],
@@ -5405,9 +5428,9 @@
       "long_name": "Monitoring, Logging, and Auditing",
       "category_prefix": "KSI-MLA",
       "cli_command": "aws cloudtrail describe-trails --output json; aws cloudtrail get-trail-status --name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json; aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json",
-      "timestamp": "2026-05-12T02:05:48.552412Z",
+      "timestamp": "2026-05-12T03:06:48.215208Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-MLA-01/cloudtrail_020127_21cac14d.json",
+      "evidence_path": "evidence_v2_engine/KSI-MLA-01/cloudtrail_030306_21cac14d.json",
       "total_category_controls": 1,
       "resources_scanned": 3,
       "resources_passed": 2,
@@ -5437,7 +5460,7 @@
           "command": "aws cloudtrail describe-trails --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.07s",
+          "execution_time": "0.84s",
           "error_message": null
         },
         {
@@ -5446,7 +5469,7 @@
           "command": "aws cloudtrail get-trail-status --name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.12s",
+          "execution_time": "1.63s",
           "error_message": null
         },
         {
@@ -5455,7 +5478,7 @@
           "command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.85s",
           "error_message": null
         }
       ],
@@ -5479,9 +5502,9 @@
       "long_name": "Monitoring, Logging, and Auditing",
       "category_prefix": "KSI-MLA",
       "cli_command": "aws logs describe-metric-filters --output json; aws securityhub get-insights --output json; aws cloudwatch describe-alarms --query \"MetricAlarms[?contains(AlarmName, '[resource]') || contains(AlarmName, '[resource]') || contains(AlarmName, '[resource]')]\" --output json",
-      "timestamp": "2026-05-12T02:05:48.553435Z",
+      "timestamp": "2026-05-12T03:06:48.216205Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-MLA-02/securityhub_020127_077bf986.json",
+      "evidence_path": "evidence_v2_engine/KSI-MLA-02/securityhub_030306_077bf986.json",
       "total_category_controls": 2,
       "resources_scanned": 6,
       "resources_passed": 1,
@@ -5526,7 +5549,7 @@
           "command": "aws logs describe-metric-filters --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.05s",
+          "execution_time": "0.82s",
           "error_message": null
         },
         {
@@ -5535,7 +5558,7 @@
           "command": "aws securityhub get-insights --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.00s",
+          "execution_time": "0.87s",
           "error_message": null
         },
         {
@@ -5544,7 +5567,7 @@
           "command": "aws cloudwatch describe-alarms --query \"MetricAlarms[?contains(AlarmName, '[resource]') || contains(AlarmName, '[resource]') || contains(AlarmName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.02s",
+          "execution_time": "0.87s",
           "error_message": null
         }
       ],
@@ -5568,9 +5591,9 @@
       "long_name": "Monitoring, Logging, and Auditing",
       "category_prefix": "KSI-MLA",
       "cli_command": "aws s3 ls s3://mks-states/ --recursive | grep -E '\\.tfstate|\\.tfplan' || echo 'No State Files Found'; aws codecommit list-repositories --query \"repositories[?contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]')]\" --output json",
-      "timestamp": "2026-05-12T02:05:48.554508Z",
+      "timestamp": "2026-05-12T03:06:48.217248Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-MLA-05/s3_020127_e55c47c2.json",
+      "evidence_path": "evidence_v2_engine/KSI-MLA-05/s3_030306_e55c47c2.json",
       "total_category_controls": 3,
       "resources_scanned": 12,
       "resources_passed": 12,
@@ -5645,7 +5668,7 @@
           "command": "aws s3 ls s3://mks-states/ --recursive | grep -E '\\.tfstate|\\.tfplan' || echo 'No State Files Found'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.95s",
+          "execution_time": "0.85s",
           "error_message": null
         },
         {
@@ -5654,7 +5677,7 @@
           "command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.78s",
           "error_message": null
         }
       ],
@@ -5678,9 +5701,9 @@
       "long_name": "Monitoring, Logging, and Auditing",
       "category_prefix": "KSI-MLA",
       "cli_command": "aws configservice describe-configuration-recorders --output json; aws cloudtrail describe-trails --output json; aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]')]\" --output json",
-      "timestamp": "2026-05-12T02:05:48.555690Z",
+      "timestamp": "2026-05-12T03:06:48.218397Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-MLA-07/configservice_020127_76741181.json",
+      "evidence_path": "evidence_v2_engine/KSI-MLA-07/configservice_030306_76741181.json",
       "total_category_controls": 4,
       "resources_scanned": 11,
       "resources_passed": 11,
@@ -5750,7 +5773,7 @@
           "command": "aws configservice describe-configuration-recorders --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.78s",
           "error_message": null
         },
         {
@@ -5759,7 +5782,7 @@
           "command": "aws cloudtrail describe-trails --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.05s",
+          "execution_time": "0.82s",
           "error_message": null
         },
         {
@@ -5768,7 +5791,7 @@
           "command": "aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.10s",
+          "execution_time": "0.83s",
           "error_message": null
         }
       ],
@@ -5792,9 +5815,9 @@
       "long_name": "Monitoring, Logging, and Auditing",
       "category_prefix": "KSI-MLA",
       "cli_command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json; aws kms list-aliases --query \"Aliases[?contains(AliasName, '[resource]') || contains(AliasName, '[resource]') || contains(AliasName, '[resource]')]\" --output json; aws iam list-policies --scope Local --query \"Policies[?contains(PolicyName, '[resource]') || contains(PolicyName, '[resource]') || contains(PolicyName, '[resource]') || contains(PolicyName, '[resource]')]\" --output json",
-      "timestamp": "2026-05-12T02:05:48.557418Z",
+      "timestamp": "2026-05-12T03:06:48.220060Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-MLA-08/infrastructurevalidation_020127_23f8e64f.json",
+      "evidence_path": "evidence_v2_engine/KSI-MLA-08/infrastructurevalidation_030306_23f8e64f.json",
       "total_category_controls": 5,
       "resources_scanned": 8,
       "resources_passed": 8,
@@ -5849,7 +5872,7 @@
           "command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.98s",
+          "execution_time": "0.81s",
           "error_message": null
         },
         {
@@ -5858,7 +5881,7 @@
           "command": "aws kms list-aliases --query \"Aliases[?contains(AliasName, '[resource]') || contains(AliasName, '[resource]') || contains(AliasName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.93s",
+          "execution_time": "0.78s",
           "error_message": null
         },
         {
@@ -5867,7 +5890,7 @@
           "command": "aws iam list-policies --scope Local --query \"Policies[?contains(PolicyName, '[resource]') || contains(PolicyName, '[resource]') || contains(PolicyName, '[resource]') || contains(PolicyName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.81s",
           "error_message": null
         }
       ],
@@ -5891,9 +5914,9 @@
       "long_name": "Policy and Inventory",
       "category_prefix": "KSI-PIY",
       "cli_command": "aws configservice describe-configuration-recorders --output json; aws configservice describe-delivery-channels --output json; ( for id in $(aws ssm describe-instance-information --query 'InstanceInformationList[].InstanceId' --output text 2>/dev/null); do aws ssm list-inventory-entries --instance-id \"$id\" --type-name AWS:Application --output json; done ) | jq -s '{Entries: [.[].Entries // [] | .[]?]}'; aws configservice get-discovered-resource-counts --output json",
-      "timestamp": "2026-05-12T02:05:48.558716Z",
+      "timestamp": "2026-05-12T03:06:48.221303Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-PIY-01/configservice_020127_76741181.json",
+      "evidence_path": "evidence_v2_engine/KSI-PIY-01/configservice_030306_76741181.json",
       "total_category_controls": 1,
       "resources_scanned": 3,
       "resources_passed": 2,
@@ -5923,7 +5946,7 @@
           "command": "aws configservice describe-configuration-recorders --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.02s",
+          "execution_time": "0.80s",
           "error_message": null
         },
         {
@@ -5932,7 +5955,7 @@
           "command": "aws configservice describe-delivery-channels --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.77s",
           "error_message": null
         },
         {
@@ -5941,7 +5964,7 @@
           "command": "( for id in $(aws ssm describe-instance-information --query 'InstanceInformationList[].InstanceId' --output text 2>/dev/null); do aws ssm list-inventory-entries --instance-id \"$id\" --type-name AWS:Application --output json; done ) | jq -s '{Entries: [.[].Entries // [] | .[]?]}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "8.34s",
+          "execution_time": "6.36s",
           "error_message": null
         },
         {
@@ -5950,7 +5973,7 @@
           "command": "aws configservice get-discovered-resource-counts --output json",
           "status": "failed",
           "exit_code": 254,
-          "execution_time": "1.01s",
+          "execution_time": "0.81s",
           "error_message": "\naws: [ERROR]: An error occurred (AccessDeniedException) when calling the GetDiscoveredResourceCounts operation: User: arn:aws:[redacted]"
         }
       ],
@@ -5974,9 +5997,9 @@
       "long_name": "Policy and Inventory",
       "category_prefix": "KSI-PIY",
       "cli_command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --output json",
-      "timestamp": "2026-05-12T02:05:48.559775Z",
+      "timestamp": "2026-05-12T03:06:48.222332Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-PIY-03/codecommit_020127_72bde16d.json",
+      "evidence_path": "evidence_v2_engine/KSI-PIY-03/codecommit_030306_72bde16d.json",
       "total_category_controls": 2,
       "resources_scanned": 1,
       "resources_passed": 1,
@@ -5996,7 +6019,7 @@
           "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.20s",
+          "execution_time": "1.07s",
           "error_message": null
         }
       ],
@@ -6020,9 +6043,9 @@
       "long_name": "Policy and Inventory",
       "category_prefix": "KSI-PIY",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path policies/secure-software-development.md --output json; aws codebuild list-projects --query \"projects[?contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]')]\" --output json",
-      "timestamp": "2026-05-12T02:05:48.560345Z",
+      "timestamp": "2026-05-12T03:06:48.222896Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-PIY-04/codecommit_020127_6ef1f7eb.json",
+      "evidence_path": "evidence_v2_engine/KSI-PIY-04/codecommit_030306_6ef1f7eb.json",
       "total_category_controls": 3,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -6047,7 +6070,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/secure-software-development.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.24s",
+          "execution_time": "0.94s",
           "error_message": null
         },
         {
@@ -6056,7 +6079,7 @@
           "command": "aws codebuild list-projects --query \"projects[?contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.00s",
+          "execution_time": "0.84s",
           "error_message": null
         }
       ],
@@ -6080,9 +6103,9 @@
       "long_name": "Policy and Inventory",
       "category_prefix": "KSI-PIY",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path policies/security-objectives/security-monitoring-and-alerting-plan.md --output json; aws securityhub get-enabled-standards --output json",
-      "timestamp": "2026-05-12T02:05:48.561057Z",
+      "timestamp": "2026-05-12T03:06:48.223614Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-PIY-06/codecommit_020127_c4dab3f2.json",
+      "evidence_path": "evidence_v2_engine/KSI-PIY-06/codecommit_030306_c4dab3f2.json",
       "total_category_controls": 4,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -6107,7 +6130,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/security-objectives/security-monitoring-and-alerting-plan.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.15s",
+          "execution_time": "1.12s",
           "error_message": null
         },
         {
@@ -6116,7 +6139,7 @@
           "command": "aws securityhub get-enabled-standards --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.26s",
+          "execution_time": "1.21s",
           "error_message": null
         }
       ],
@@ -6140,9 +6163,9 @@
       "long_name": "Policy and Inventory",
       "category_prefix": "KSI-PIY",
       "cli_command": "aws guardduty list-detectors --output json; aws securityhub get-enabled-standards --output json; aws budgets describe-budgets --account-id $(aws sts get-caller-identity --query Account --output text) --output json",
-      "timestamp": "2026-05-12T02:05:48.561864Z",
+      "timestamp": "2026-05-12T03:06:48.224269Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-PIY-08/guardduty_020127_2d97e55e.json",
+      "evidence_path": "evidence_v2_engine/KSI-PIY-08/guardduty_030306_2d97e55e.json",
       "total_category_controls": 5,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -6172,7 +6195,7 @@
           "command": "aws guardduty list-detectors --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "0.93s",
           "error_message": null
         },
         {
@@ -6181,7 +6204,7 @@
           "command": "aws securityhub get-enabled-standards --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.26s",
+          "execution_time": "1.07s",
           "error_message": null
         },
         {
@@ -6190,7 +6213,7 @@
           "command": "aws budgets describe-budgets --account-id $(aws sts get-caller-identity --query Account --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.02s",
+          "execution_time": "1.72s",
           "error_message": null
         }
       ],
@@ -6214,9 +6237,9 @@
       "long_name": "Recovery Planning",
       "category_prefix": "KSI-RPL",
       "cli_command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]')]\" --output json; aws backup list-backup-plans --output json; ( for id in $(aws backup list-backup-plans --query 'BackupPlansList[].BackupPlanId' --output text 2>/dev/null); do aws backup get-backup-plan --backup-plan-id \"$id\" --output json; done ) | jq -s '{BackupPlans: .}'",
-      "timestamp": "2026-05-12T02:05:48.562890Z",
+      "timestamp": "2026-05-12T03:06:48.225236Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-RPL-01/codecommit_020127_f546a1c8.json",
+      "evidence_path": "evidence_v2_engine/KSI-RPL-01/codecommit_030306_f546a1c8.json",
       "total_category_controls": 1,
       "resources_scanned": 5,
       "resources_passed": 5,
@@ -6256,7 +6279,7 @@
           "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.08s",
+          "execution_time": "0.90s",
           "error_message": null
         },
         {
@@ -6265,7 +6288,7 @@
           "command": "aws backup list-backup-plans --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.99s",
+          "execution_time": "0.84s",
           "error_message": null
         },
         {
@@ -6274,7 +6297,7 @@
           "command": "( for id in $(aws backup list-backup-plans --query 'BackupPlansList[].BackupPlanId' --output text 2>/dev/null); do aws backup get-backup-plan --backup-plan-id \"$id\" --output json; done ) | jq -s '{BackupPlans: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.91s",
+          "execution_time": "2.78s",
           "error_message": null
         }
       ],
@@ -6298,9 +6321,9 @@
       "long_name": "Recovery Planning",
       "category_prefix": "KSI-RPL",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path policies/disaster-recovery-plan.md --output json; aws backup list-backup-jobs --by-state COMPLETED --max-results 5 --output json",
-      "timestamp": "2026-05-12T02:05:48.564104Z",
+      "timestamp": "2026-05-12T03:06:48.226397Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-RPL-02/codecommit_020127_f1073547.json",
+      "evidence_path": "evidence_v2_engine/KSI-RPL-02/codecommit_030306_f1073547.json",
       "total_category_controls": 2,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -6325,7 +6348,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/disaster-recovery-plan.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.10s",
+          "execution_time": "0.93s",
           "error_message": null
         },
         {
@@ -6334,7 +6357,7 @@
           "command": "aws backup list-backup-jobs --by-state COMPLETED --max-results 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.98s",
+          "execution_time": "0.78s",
           "error_message": null
         }
       ],
@@ -6358,9 +6381,9 @@
       "long_name": "Recovery Planning",
       "category_prefix": "KSI-RPL",
       "cli_command": "aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json; aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]')]\" --output json; aws backup list-restore-jobs --by-status COMPLETED --output json",
-      "timestamp": "2026-05-12T02:05:48.564836Z",
+      "timestamp": "2026-05-12T03:06:48.227108Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-RPL-03/backup_020127_d5b08740.json",
+      "evidence_path": "evidence_v2_engine/KSI-RPL-03/backup_030306_d5b08740.json",
       "total_category_controls": 3,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -6390,7 +6413,7 @@
           "command": "aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.96s",
+          "execution_time": "0.81s",
           "error_message": null
         },
         {
@@ -6399,7 +6422,7 @@
           "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.19s",
+          "execution_time": "1.05s",
           "error_message": null
         },
         {
@@ -6408,7 +6431,7 @@
           "command": "aws backup list-restore-jobs --by-status COMPLETED --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.97s",
+          "execution_time": "0.85s",
           "error_message": null
         }
       ],
@@ -6432,9 +6455,9 @@
       "long_name": "Recovery Planning",
       "category_prefix": "KSI-RPL",
       "cli_command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]')]\" --output json; aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json; aws backup list-restore-jobs --by-status COMPLETED --output json",
-      "timestamp": "2026-05-12T02:05:48.565739Z",
+      "timestamp": "2026-05-12T03:06:48.227986Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-RPL-04/codecommit_020127_d27a0d27.json",
+      "evidence_path": "evidence_v2_engine/KSI-RPL-04/codecommit_030306_d27a0d27.json",
       "total_category_controls": 4,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -6464,7 +6487,7 @@
           "command": "aws codecommit get-folder --repository-name security-governance --folder-path policies/ --query \"files[?contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]') || contains(absolutePath, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.12s",
+          "execution_time": "0.91s",
           "error_message": null
         },
         {
@@ -6473,7 +6496,7 @@
           "command": "aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.95s",
+          "execution_time": "0.76s",
           "error_message": null
         },
         {
@@ -6482,7 +6505,7 @@
           "command": "aws backup list-restore-jobs --by-status COMPLETED --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.94s",
+          "execution_time": "0.81s",
           "error_message": null
         }
       ],
@@ -6506,9 +6529,9 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws inspector2 list-coverage --output json; aws ssm describe-patch-baselines --filters \"Key=OWNER,Values=[Self]\" --output json; aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
-      "timestamp": "2026-05-12T02:05:48.566630Z",
+      "timestamp": "2026-05-12T03:06:48.228845Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-01/inspector2_020127_4c6de8c9.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-01/inspector2_030306_4c6de8c9.json",
       "total_category_controls": 1,
       "resources_scanned": 36,
       "resources_passed": 36,
@@ -6703,7 +6726,7 @@
           "command": "aws inspector2 list-coverage --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.47s",
+          "execution_time": "1.19s",
           "error_message": null
         },
         {
@@ -6712,7 +6735,7 @@
           "command": "aws ssm describe-patch-baselines --filters \"Key=OWNER,Values=[Self]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.02s",
+          "execution_time": "0.80s",
           "error_message": null
         },
         {
@@ -6721,7 +6744,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/vulnerability-management-policy.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.22s",
+          "execution_time": "1.00s",
           "error_message": null
         }
       ],
@@ -6745,9 +6768,9 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws acm list-certificates --certificate-statuses ISSUED --output json; aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Scheme:Scheme}\" --output json; aws cloudfront list-distributions --query \"DistributionList.Items[].{Id:Id, Domain:DomainName, Certificate:ViewerCertificate.Certificate}\" --output json; aws codecommit get-file --repository-name security-governance --file-path policies/encryption-policy.md --output json; ( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
-      "timestamp": "2026-05-12T02:05:48.569272Z",
+      "timestamp": "2026-05-12T03:06:48.231416Z",
       "score": 66,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-02/acm_020127_d94e2b67.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-02/acm_030306_d94e2b67.json",
       "total_category_controls": 2,
       "resources_scanned": 7,
       "resources_passed": 4,
@@ -6797,7 +6820,7 @@
           "command": "aws acm list-certificates --certificate-statuses ISSUED --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.95s",
+          "execution_time": "0.77s",
           "error_message": null
         },
         {
@@ -6806,7 +6829,7 @@
           "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Scheme:Scheme}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.05s",
+          "execution_time": "0.82s",
           "error_message": null
         },
         {
@@ -6815,7 +6838,7 @@
           "command": "aws cloudfront list-distributions --query \"DistributionList.Items[].{Id:Id, Domain:DomainName, Certificate:ViewerCertificate.Certificate}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.81s",
           "error_message": null
         },
         {
@@ -6824,7 +6847,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/encryption-policy.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.16s",
+          "execution_time": "1.00s",
           "error_message": null
         },
         {
@@ -6833,7 +6856,7 @@
           "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "3.04s",
+          "execution_time": "2.35s",
           "error_message": null
         }
       ],
@@ -6843,12 +6866,12 @@
     {
       "ksi_id": "KSI-SVC-04",
       "validation_id": "KSI-SVC-04",
-      "assertion": true,
-      "assertion_reason": "\u2705 Operational (100%): Manage configuration of machine-based information resources using automation. | 1/3 resources compliant, 2 unverified. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes, 4 sections).",
-      "display_status": "pass",
-      "mode": "capability",
-      "capability_status": "operational",
-      "recommended_action": "\u2705 Operational capability verified.",
+      "assertion": false,
+      "assertion_reason": "\u274c Insufficient (50%): Manage configuration of machine-based information resources using automation. | 1/4 resources compliant, 2 unverified. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes, 4 sections). | Failures: Patch compliance 0% < target 95% (0 non-compliant).",
+      "display_status": "fail",
+      "mode": "output",
+      "capability_status": null,
+      "recommended_action": "ACTION: Operational metric below target. 1 non-compliant item(s). Current: 50% (Target: \u226580%)",
       "requirement": "Manage configuration of machine-based information resources using automation.",
       "implementation_summary": "Configuration management automated via Terraform with state stored in S3 (mks-states bucket) and DynamoDB state locking for concurrency control. Configuration management policy in CodeCommit mandates IaC-only changes.",
       "justification": "Validates Automated Configuration via Terraform. Checks for the Terraform State Bucket (The Configuration Source), the State Lock Table (Concurrency Control), and the Governance Policy.",
@@ -6856,15 +6879,15 @@
       "fail_criteria": "FAIL if: No Terraform state bucket exists, no DynamoDB lock table exists for concurrency control, or no managed instances can be verified.",
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
-      "cli_command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json; aws dynamodb list-tables --query \"TableNames[?contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]')]\" --output json; aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json",
-      "timestamp": "2026-05-12T02:05:48.570764Z",
-      "score": 100,
+      "cli_command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json; aws dynamodb list-tables --query \"TableNames[?contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]')]\" --output json; aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json; aws ssm describe-instance-patch-states --instance-ids $(aws ssm describe-instance-information --query 'InstanceInformationList[].InstanceId' --output text 2>/dev/null) --output json 2>/dev/null || echo '{\"InstancePatchStates\": []}'",
+      "timestamp": "2026-05-12T03:06:48.233059Z",
+      "score": 50,
       "evidence_path": "evidence_v2_engine/KSI-SVC-04/None",
       "total_category_controls": 3,
-      "resources_scanned": 3,
+      "resources_scanned": 4,
       "resources_passed": 1,
       "resources_unverified": 2,
-      "resources_failed": 0,
+      "resources_failed": 1,
       "resource_evaluations": [
         {
           "resource": "empty_allowed_0",
@@ -6880,6 +6903,11 @@
           "resource": "security-governance",
           "status": "PASS",
           "reason": "Verified: Governance document '[resource]' is substantive (1070 bytes, 4 sections)."
+        },
+        {
+          "resource": "Patch Compliance Metrics",
+          "status": "FAIL",
+          "reason": "Patch compliance 0% < target 95% (0 non-compliant)."
         }
       ],
       "command_executions": [
@@ -6889,7 +6917,7 @@
           "command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.00s",
+          "execution_time": "0.83s",
           "error_message": null
         },
         {
@@ -6898,7 +6926,7 @@
           "command": "aws dynamodb list-tables --query \"TableNames[?contains(@, '[resource]') || contains(@, '[resource]') || contains(@, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.95s",
+          "execution_time": "0.78s",
           "error_message": null
         },
         {
@@ -6907,12 +6935,21 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.08s",
+          "execution_time": "0.94s",
+          "error_message": null
+        },
+        {
+          "index": 3,
+          "description": "Mode 2 (operational effectiveness) \u2014 feeds PatchMetricsPrimitive. Computes compliance_rate as % of SSM-managed instances with MissingCount=0 (fully patched). Configuration management means keeping resources current, not just declaring how they should be configured. Falls back to empty payload if no managed instances (returns ACTIVITY status, not crash).",
+          "command": "aws ssm describe-instance-patch-states --instance-ids $(aws ssm describe-instance-information --query 'InstanceInformationList[].InstanceId' --output text 2>/dev/null) --output json 2>/dev/null || echo '{\"InstancePatchStates\": []}'",
+          "status": "success",
+          "exit_code": 0,
+          "execution_time": "1.68s",
           "error_message": null
         }
       ],
-      "commands_executed": 3,
-      "successful_commands": 3
+      "commands_executed": 4,
+      "successful_commands": 4
     },
     {
       "ksi_id": "KSI-SVC-05",
@@ -6931,7 +6968,7 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws cloudtrail describe-trails --query \"trailList[?LogFileValidationEnabled==true]\" --output json; aws s3api [s3-bucket] --bucket $(aws cloudtrail describe-trails --query 'trailList[0].[s3-bucket]' --output text) --output json; aws ssm describe-instance-information --query \"InstanceInformationList[].{ID:InstanceId, PingStatus:PingStatus, AgentVersion:AgentVersion}\" --output json",
-      "timestamp": "2026-05-12T02:05:48.571779Z",
+      "timestamp": "2026-05-12T03:06:48.234412Z",
       "score": 0,
       "evidence_path": "evidence_v2_engine/KSI-SVC-05/None",
       "total_category_controls": 4,
@@ -6993,7 +7030,7 @@
           "command": "aws cloudtrail describe-trails --query \"trailList[?LogFileValidationEnabled==true]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.80s",
           "error_message": null
         },
         {
@@ -7002,7 +7039,7 @@
           "command": "aws s3api [s3-bucket] --bucket $(aws cloudtrail describe-trails --query 'trailList[0].[s3-bucket]' --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.04s",
+          "execution_time": "1.62s",
           "error_message": null
         },
         {
@@ -7011,7 +7048,7 @@
           "command": "aws ssm describe-instance-information --query \"InstanceInformationList[].{ID:InstanceId, PingStatus:PingStatus, AgentVersion:AgentVersion}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.10s",
+          "execution_time": "0.86s",
           "error_message": null
         }
       ],
@@ -7035,9 +7072,9 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws kms list-keys --limit 10 --output json; aws secretsmanager list-secrets --max-results 5 --output json; aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json; ( for arn in $(aws secretsmanager list-secrets --query 'SecretList[].ARN' --output text 2>/dev/null); do aws secretsmanager describe-secret --secret-id \"$arn\" --output json; done ) | jq -s '{SecretList: .}'; ( for k in $(aws kms list-keys --query 'Keys[].KeyId' --output text 2>/dev/null); do aws kms get-key-rotation-status --key-id \"$k\" --output json; done ) | jq -s '{KeyRotationStatuses: .}'",
-      "timestamp": "2026-05-12T02:05:48.573317Z",
+      "timestamp": "2026-05-12T03:06:48.235879Z",
       "score": 36,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-06/kms_020127_5e8ee543.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-06/kms_030306_5e8ee543.json",
       "total_category_controls": 5,
       "resources_scanned": 36,
       "resources_passed": 13,
@@ -7232,7 +7269,7 @@
           "command": "aws kms list-keys --limit 10 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.92s",
+          "execution_time": "0.75s",
           "error_message": null
         },
         {
@@ -7241,7 +7278,7 @@
           "command": "aws secretsmanager list-secrets --max-results 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.97s",
+          "execution_time": "0.82s",
           "error_message": null
         },
         {
@@ -7250,7 +7287,7 @@
           "command": "aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.95s",
+          "execution_time": "0.85s",
           "error_message": null
         },
         {
@@ -7259,7 +7296,7 @@
           "command": "( for arn in $(aws secretsmanager list-secrets --query 'SecretList[].ARN' --output text 2>/dev/null); do aws secretsmanager describe-secret --secret-id \"$arn\" --output json; done ) | jq -s '{SecretList: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "4.70s",
+          "execution_time": "3.85s",
           "error_message": null
         },
         {
@@ -7268,7 +7305,7 @@
           "command": "( for k in $(aws kms list-keys --query 'Keys[].KeyId' --output text 2>/dev/null); do aws kms get-key-rotation-status --key-id \"$k\" --output json; done ) | jq -s '{KeyRotationStatuses: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "17.61s",
+          "execution_time": "14.91s",
           "error_message": null
         }
       ],
@@ -7292,9 +7329,9 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws s3api [s3-bucket] --bucket $(aws s3api [s3-bucket] --query 'Buckets[0].Name' --output text) --output json || echo '{\"Rules\": []}'; aws kms list-keys --limit 10 --output json; aws codecommit get-file --repository-name security-governance --file-path policies/data-sanitization-policy.md --output json",
-      "timestamp": "2026-05-12T02:05:48.576432Z",
+      "timestamp": "2026-05-12T03:06:48.238897Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-08/s3api_020127_0e39a367.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-08/s3api_030306_0e39a367.json",
       "total_category_controls": 6,
       "resources_scanned": 12,
       "resources_passed": 12,
@@ -7369,7 +7406,7 @@
           "command": "aws s3api [s3-bucket] --bucket $(aws s3api [s3-bucket] --query 'Buckets[0].Name' --output text) --output json || echo '{\"Rules\": []}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.04s",
+          "execution_time": "1.81s",
           "error_message": null
         },
         {
@@ -7378,7 +7415,7 @@
           "command": "aws kms list-keys --limit 10 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.89s",
+          "execution_time": "0.75s",
           "error_message": null
         },
         {
@@ -7387,7 +7424,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/data-sanitization-policy.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.13s",
+          "execution_time": "1.08s",
           "error_message": null
         }
       ],
@@ -7411,9 +7448,9 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, Scheme:Scheme}\" --output json; ( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'; aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json; ( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
-      "timestamp": "2026-05-12T02:05:48.577961Z",
+      "timestamp": "2026-05-12T03:06:48.240432Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-09/elbv2_020127_a92a0b2a.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-09/elbv2_030306_a92a0b2a.json",
       "total_category_controls": 7,
       "resources_scanned": 7,
       "resources_passed": 7,
@@ -7463,7 +7500,7 @@
           "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, Scheme:Scheme}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.81s",
           "error_message": null
         },
         {
@@ -7472,7 +7509,7 @@
           "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "3.07s",
+          "execution_time": "2.48s",
           "error_message": null
         },
         {
@@ -7481,7 +7518,7 @@
           "command": "aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.96s",
+          "execution_time": "0.83s",
           "error_message": null
         },
         {
@@ -7490,7 +7527,7 @@
           "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "3.09s",
+          "execution_time": "2.53s",
           "error_message": null
         }
       ],
@@ -7514,9 +7551,9 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path policies/data-sanitization-policy.md --output json; aws backup list-backup-plans --output json; aws kms list-keys --limit 10 --output json",
-      "timestamp": "2026-05-12T02:05:48.579631Z",
+      "timestamp": "2026-05-12T03:06:48.242045Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-10/codecommit_020127_6b33fb58.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-10/codecommit_030306_6b33fb58.json",
       "total_category_controls": 8,
       "resources_scanned": 13,
       "resources_passed": 11,
@@ -7596,7 +7633,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/data-sanitization-policy.md --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.24s",
+          "execution_time": "1.05s",
           "error_message": null
         },
         {
@@ -7605,7 +7642,7 @@
           "command": "aws backup list-backup-plans --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.97s",
+          "execution_time": "0.82s",
           "error_message": null
         },
         {
@@ -7614,7 +7651,7 @@
           "command": "aws kms list-keys --limit 10 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.91s",
+          "execution_time": "0.76s",
           "error_message": null
         }
       ],
@@ -7638,9 +7675,9 @@
       "long_name": "Third-Party Information Resources",
       "category_prefix": "KSI-TPR",
       "cli_command": "aws codecommit get-file --repository-name security-governance --file-path policies/supply-chain-risk-management.md; aws codecommit list-approval-rule-templates --output json; aws codecommit get-differences --repository-name security-governance --after-commit-specifier refs/heads/main --output json",
-      "timestamp": "2026-05-12T02:05:48.580957Z",
+      "timestamp": "2026-05-12T03:06:48.243318Z",
       "score": 100,
-      "evidence_path": "evidence_v2_engine/KSI-TPR-03/codecommit_020127_4ea81770.json",
+      "evidence_path": "evidence_v2_engine/KSI-TPR-03/codecommit_030306_4ea81770.json",
       "total_category_controls": 1,
       "resources_scanned": 48,
       "resources_passed": 48,
@@ -7895,7 +7932,7 @@
           "command": "aws codecommit get-file --repository-name security-governance --file-path policies/supply-chain-risk-management.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.22s",
+          "execution_time": "0.91s",
           "error_message": null
         },
         {
@@ -7904,7 +7941,7 @@
           "command": "aws codecommit list-approval-rule-templates --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.83s",
           "error_message": null
         },
         {
@@ -7913,7 +7950,7 @@
           "command": "aws codecommit get-differences --repository-name security-governance --after-commit-specifier refs/heads/main --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.13s",
+          "execution_time": "0.92s",
           "error_message": null
         }
       ],
@@ -7937,9 +7974,9 @@
       "long_name": "Third-Party Information Resources",
       "category_prefix": "KSI-TPR",
       "cli_command": "aws inspector2 get-configuration --output json; aws inspector2 list-findings --filter-criteria '{\"componentType\":[{\"comparison\":\"EQUALS\",\"value\":\"OPERATING_SYSTEM\"}]}' --max-results 50 --output json; aws inspector2 list-findings --filter-criteria '{\"componentType\":[{\"comparison\":\"EQUALS\",\"value\":\"APPLICATION\"}]}' --max-results 50 --output json; aws inspector2 list-findings --filter-criteria '{\"findingStatus\":[{\"comparison\":\"EQUALS\",\"value\":\"ACTIVE\"}]}' --max-results 100 --output json; aws inspector2 list-coverage --filter-criteria '{\"resourceType\":[{\"comparison\":\"EQUALS\",\"value\":\"AWS_EC2_INSTANCE\"}]}' --max-results 100 --output json; aws ssm describe-instance-information --output json",
-      "timestamp": "2026-05-12T02:05:48.583899Z",
+      "timestamp": "2026-05-12T03:06:48.246132Z",
       "score": 91,
-      "evidence_path": "evidence_v2_engine/KSI-TPR-04/inspector2_020127_26f5156f.json",
+      "evidence_path": "evidence_v2_engine/KSI-TPR-04/inspector2_030306_26f5156f.json",
       "total_category_controls": 2,
       "resources_scanned": 12,
       "resources_passed": 11,
@@ -8014,7 +8051,7 @@
           "command": "aws inspector2 get-configuration --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.02s",
+          "execution_time": "0.94s",
           "error_message": null
         },
         {
@@ -8023,7 +8060,7 @@
           "command": "aws inspector2 list-findings --filter-criteria '{\"componentType\":[{\"comparison\":\"EQUALS\",\"value\":\"OPERATING_SYSTEM\"}]}' --max-results 50 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.20s",
+          "execution_time": "0.92s",
           "error_message": null
         },
         {
@@ -8032,7 +8069,7 @@
           "command": "aws inspector2 list-findings --filter-criteria '{\"componentType\":[{\"comparison\":\"EQUALS\",\"value\":\"APPLICATION\"}]}' --max-results 50 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.12s",
+          "execution_time": "1.05s",
           "error_message": null
         },
         {
@@ -8041,7 +8078,7 @@
           "command": "aws inspector2 list-findings --filter-criteria '{\"findingStatus\":[{\"comparison\":\"EQUALS\",\"value\":\"ACTIVE\"}]}' --max-results 100 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.29s",
+          "execution_time": "0.99s",
           "error_message": null
         },
         {
@@ -8050,7 +8087,7 @@
           "command": "aws inspector2 list-coverage --filter-criteria '{\"resourceType\":[{\"comparison\":\"EQUALS\",\"value\":\"AWS_EC2_INSTANCE\"}]}' --max-results 100 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.04s",
+          "execution_time": "0.97s",
           "error_message": null
         },
         {
@@ -8059,7 +8096,7 @@
           "command": "aws ssm describe-instance-information --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.12s",
+          "execution_time": "0.88s",
           "error_message": null
         }
       ],

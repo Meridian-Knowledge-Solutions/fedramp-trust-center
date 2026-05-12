@@ -491,13 +491,20 @@
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json",
         "note": "GOVERNANCE: Validate the policy that mandates Terraform usage for all production changes.",
         "expected_output": "Governance document must exist in CodeCommit"
+      },
+      {
+        "command": "( for p in $(aws codepipeline list-pipelines --query 'pipelines[].name' --output text 2>/dev/null); do aws codepipeline list-pipeline-executions --pipeline-name \"$p\" --max-results 50 --output json 2>/dev/null; done ) | jq -s '{pipelineExecutionSummaries: [.[].pipelineExecutionSummaries // [] | .[]?]}'",
+        "service": "pipeline_metrics",
+        "note": "Mode 2 (operational effectiveness) — feeds PipelineMetricsPrimitive. Aggregates pipelineExecutionSummaries across every CodePipeline. Computes success_rate = % of executions with status=Succeeded. Direct evidence of the 'redeployment of version-controlled immutable resources' KSI; if pipelines fail, redeployment isn't actually working. Falls back to empty array if no pipelines (CodePipeline-free environments return ACTIVITY rather than crashing).",
+        "expected_output": "pipelineExecutionSummaries array; primitive computes success_rate, success_count, failure_count"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-CMT-02/terraform_buckets.json",
       "evidence_v2/KSI-CMT-02/lock_tables.json",
       "evidence_v2/KSI-CMT-02/managed_instances.json",
-      "evidence_v2/KSI-CMT-02/iac_policy.json"
+      "evidence_v2/KSI-CMT-02/iac_policy.json",
+      "evidence_v2/KSI-CMT-02/pipeline_executions.json"
     ],
     "implementation_summary": "Infrastructure deployed exclusively via Terraform with state stored in S3 (mks-states bucket) and DynamoDB locking. No console changes permitted in production.",
     "pass_criteria": "PASS if: A Terraform state S3 bucket exists (containing 'terraform', 'state', or 'tfstate' in the name), a DynamoDB lock table exists for state locking, at least one running EC2 instance is managed by Terraform, AND the configuration-management-policy.md mandating IaC exists in CodeCommit.",
@@ -836,6 +843,12 @@
         "command": "aws iam list-virtual-mfa-devices --output json",
         "note": "Get list of all Virtual MFA devices to validate protection (replaces list-mfa-devices which requires user).",
         "expected_output": "Virtual MFA devices should be assigned to all human users"
+      },
+      {
+        "command": "echo '{}' | jq --argjson users \"$(aws iam list-users --output json | jq '.Users // []')\" --argjson mfa \"$(aws iam list-virtual-mfa-devices --output json | jq '.VirtualMFADevices // []')\" '{HumanUsers: ($users | map(select(.PasswordLastUsed != null))), VirtualMFADevices: $mfa}'",
+        "service": "iam_mfa_metrics",
+        "note": "Mode 2 (operational effectiveness) \u2014 cross-source correlator. Combines list-users (filtered to human users via PasswordLastUsed!=null) with list-virtual-mfa-devices into a single response. IAMMFAMetricsPrimitive computes mfa_enrollment_rate as % of human IAM console users with MFA assigned. KSI-IAM-01 target is 95% (FedRAMP IA-2(1); 5% slack for break-glass accounts during provisioning).",
+        "expected_output": "Combined HumanUsers + VirtualMFADevices payload; primitive computes mfa_enrollment_rate"
       },
       {
         "command": "aws sso-admin list-permission-sets --instance-arn $(aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text) --output json",
@@ -1533,12 +1546,19 @@
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/configuration-management-policy.md --output json",
         "note": "GOVERNANCE: Validate the Configuration Management Policy document.",
         "expected_output": "Governance document must exist in CodeCommit"
+      },
+      {
+        "command": "aws ssm describe-instance-patch-states --instance-ids $(aws ssm describe-instance-information --query 'InstanceInformationList[].InstanceId' --output text 2>/dev/null) --output json 2>/dev/null || echo '{\"InstancePatchStates\": []}'",
+        "service": "patch_metrics",
+        "note": "Mode 2 (operational effectiveness) — feeds PatchMetricsPrimitive. Computes compliance_rate as % of SSM-managed instances with MissingCount=0 (fully patched). Configuration management means keeping resources current, not just declaring how they should be configured. Falls back to empty payload if no managed instances (returns ACTIVITY status, not crash).",
+        "expected_output": "InstancePatchStates array; primitive computes compliance_rate, missing_patches, installed_patches"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-SVC-04/terraform_buckets.json",
       "evidence_v2/KSI-SVC-04/lock_tables.json",
-      "evidence_v2/KSI-SVC-04/config_policy.json"
+      "evidence_v2/KSI-SVC-04/config_policy.json",
+      "evidence_v2/KSI-SVC-04/instance_patch_states.json"
     ],
     "implementation_summary": "Configuration management automated via Terraform with state stored in S3 (mks-states bucket) and DynamoDB state locking for concurrency control. Configuration management policy in CodeCommit mandates IaC-only changes.",
     "pass_criteria": "PASS if: A Terraform state S3 bucket exists with versioning enabled, a DynamoDB lock table exists for state locking, AND at least one running EC2 instance is managed via Terraform.",
