@@ -1,9 +1,9 @@
 {
   "metadata": {
     "created_at": "2026-01-17T07:22:37.324152+00:00",
-    "last_updated": "2026-05-12T06:27:58.617839+00:00",
+    "last_updated": "2026-05-12T07:07:28.653147+00:00",
     "schema_version": "1.0.0",
-    "total_runs_processed": 1940,
+    "total_runs_processed": 1941,
     "backfill_complete": true,
     "backfill_since": "all time",
     "backfill_commits": 1256
@@ -78,16 +78,6 @@
       "requirement": "Generate incident after action reports and persistently incorporate lessons learned.",
       "score_at_failure": 50
     },
-    "KSI-SVC-02": {
-      "ksi_id": "KSI-SVC-02",
-      "failed_at": "2026-05-12T02:05:48.594639+00:00",
-      "failed_commit": "710af8e2364f6b7df16166e893acd92fcf106033",
-      "reason": "Insufficient (66%): Encrypt or otherwise secure network traffic. | 4/7 resources compliant, 1 unverified. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; Active: 1 resource(s) verified for '[resource]'.; Verified: Governance document '[resource]' is substantive (594 bytes, 4 sections). | Warnings: Service check for 'ELB TLS Listener Coverage Metrics': unable to determine specific compliance (manual review).; Service check for 'ELB TLS Listener Coverage Metrics': unable to determine specific compliance (manual review).",
-      "score": 66,
-      "resources_failed": 2,
-      "requirement": "Encrypt or otherwise secure network traffic.",
-      "score_at_failure": 66
-    },
     "KSI-SVC-06": {
       "ksi_id": "KSI-SVC-06",
       "failed_at": "2026-05-12T02:05:48.594639+00:00",
@@ -108,26 +98,6 @@
       "requirement": "Execute changes to machine-based information resources through redeployment of version controlled immutable resources rather than direct modification wherever possible.",
       "score_at_failure": 55
     },
-    "KSI-CMT-01": {
-      "ksi_id": "KSI-CMT-01",
-      "failed_at": "2026-05-12T03:32:20.343469+00:00",
-      "failed_commit": "be8e9a4031be878993ed927ae57079736ec6ade2",
-      "reason": "Insufficient (80%): Log and monitor modifications to the cloud service offering. | 4/5 resources compliant. | Verified: Trail is Secure (Multi-Region, Validated, KMS-Encrypted, Global Events); Trail captures management events (1 selectors) (S3 data events captured).; Active: 1 resource(s) verified for '[resource]'. |   ...and 1 more verification(s) | Failures: No Inspector coverage. Vulnerability scanning is not active.",
-      "score": 80,
-      "resources_failed": 1,
-      "requirement": "Log and monitor modifications to the cloud service offering.",
-      "score_at_failure": 80
-    },
-    "KSI-IAM-04": {
-      "ksi_id": "KSI-IAM-04",
-      "failed_at": "2026-05-12T03:32:20.343469+00:00",
-      "failed_commit": "be8e9a4031be878993ed927ae57079736ec6ade2",
-      "reason": "Insufficient (0%): Require a centralized identity management system. | 1/110 resources compliant, 1 unverified. | Verified: Modern Identity: AWS Identity Center is active. | Warnings: No SSM inventory data available for managed instances.; No SSM inventory data available for managed instances. |   ...and 106 more warning(s)",
-      "score": 0,
-      "resources_failed": 108,
-      "requirement": "Require a centralized identity management system.",
-      "score_at_failure": 0
-    },
     "KSI-MLA-01": {
       "ksi_id": "KSI-MLA-01",
       "failed_at": "2026-05-12T03:32:20.343469+00:00",
@@ -137,6 +107,26 @@
       "resources_failed": 13,
       "requirement": "Log all activity on all information resources supporting the cloud service offering to a protected audit log.",
       "score_at_failure": 13
+    },
+    "KSI-AFR-11": {
+      "ksi_id": "KSI-AFR-11",
+      "failed_at": "2026-05-12T07:07:28.125631+00:00",
+      "failed_commit": "a8708b680a60e29a0479d9ccb16ab5bcdfe1a129",
+      "reason": "Excellent (96%): Ensure that cryptographic modules are selected and used in alignment with the FedRAMP 20x Using Cryptographic Modules... | 28/31 resources compliant, 2 unverified. | Verified: KMS key '[resource]' present (FIPS-validated KMS HSM).; S3 bucket '[resource]' encrypted with AES256 (SSE-S3, AWS-managed); BucketKeyEnabled=False.; RDS instance '[resource]' is encrypted with FIPS-validated KMS module (customer-managed CMK): arn:aws:[redacted] |   ...and 3 more verification(s) | Warnings: KMS coverage 7% < target 100% (13/14 buckets on SSE-S3 / AES256 not FIPS-validated CMK path).",
+      "score": 96,
+      "resources_failed": 1,
+      "requirement": "Ensure that cryptographic modules are selected and used in alignment with the FedRAMP 20x Using Cryptographic Modules (UCM) policy.",
+      "score_at_failure": 96
+    },
+    "KSI-MLA-07": {
+      "ksi_id": "KSI-MLA-07",
+      "failed_at": "2026-05-12T07:07:28.125631+00:00",
+      "failed_commit": "a8708b680a60e29a0479d9ccb16ab5bcdfe1a129",
+      "reason": "Excellent (91%): Maintain a list of information resources and event types that will be monitored, logged, and audited. | 11/12 resources compliant. | Verified: SSM inventory: 1 managed instance(s) reporting OS/software data.; Trail is Secure (Multi-Region, Validated, KMS-Encrypted, Global Events); Log group '[resource]': retention 365d meets documented log retention policy (\u2265365d) (AWS-managed FIPS key). |   ...and 8 more verification(s) | Failures: RDS audit-log export rate 50% < target 100% (1/2 DB instances without audit log export \u2014 sample: stage(sqlserver-se)). Bulk message-table reads leave no DB-side audit trail.",
+      "score": 91,
+      "resources_failed": 1,
+      "requirement": "Maintain a list of information resources and event types that will be monitored, logged, and audited.",
+      "score_at_failure": 91
     }
   },
   "failure_history": [
@@ -5383,6 +5373,45 @@
       "remediated_at": "2026-05-12T06:27:58.065457+00:00",
       "remediation_commit": "5d2bff5f403d1480ef802cb63492fec5bafbc888",
       "duration_hours": 3.35
+    },
+    {
+      "ksi_id": "KSI-CMT-01",
+      "failed_at": "2026-05-12T03:32:20.343469+00:00",
+      "failed_commit": "be8e9a4031be878993ed927ae57079736ec6ade2",
+      "reason": "Insufficient (80%): Log and monitor modifications to the cloud service offering. | 4/5 resources compliant. | Verified: Trail is Secure (Multi-Region, Validated, KMS-Encrypted, Global Events); Trail captures management events (1 selectors) (S3 data events captured).; Active: 1 resource(s) verified for '[resource]'. |   ...and 1 more verification(s) | Failures: No Inspector coverage. Vulnerability scanning is not active.",
+      "score": 80,
+      "resources_failed": 1,
+      "requirement": "Log and monitor modifications to the cloud service offering.",
+      "score_at_failure": 80,
+      "remediated_at": "2026-05-12T07:07:28.125631+00:00",
+      "remediation_commit": "a8708b680a60e29a0479d9ccb16ab5bcdfe1a129",
+      "duration_hours": 3.59
+    },
+    {
+      "ksi_id": "KSI-IAM-04",
+      "failed_at": "2026-05-12T03:32:20.343469+00:00",
+      "failed_commit": "be8e9a4031be878993ed927ae57079736ec6ade2",
+      "reason": "Insufficient (0%): Require a centralized identity management system. | 1/110 resources compliant, 1 unverified. | Verified: Modern Identity: AWS Identity Center is active. | Warnings: No SSM inventory data available for managed instances.; No SSM inventory data available for managed instances. |   ...and 106 more warning(s)",
+      "score": 0,
+      "resources_failed": 108,
+      "requirement": "Require a centralized identity management system.",
+      "score_at_failure": 0,
+      "remediated_at": "2026-05-12T07:07:28.125631+00:00",
+      "remediation_commit": "a8708b680a60e29a0479d9ccb16ab5bcdfe1a129",
+      "duration_hours": 3.59
+    },
+    {
+      "ksi_id": "KSI-SVC-02",
+      "failed_at": "2026-05-12T02:05:48.594639+00:00",
+      "failed_commit": "710af8e2364f6b7df16166e893acd92fcf106033",
+      "reason": "Insufficient (66%): Encrypt or otherwise secure network traffic. | 4/7 resources compliant, 1 unverified. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; Active: 1 resource(s) verified for '[resource]'.; Verified: Governance document '[resource]' is substantive (594 bytes, 4 sections). | Warnings: Service check for 'ELB TLS Listener Coverage Metrics': unable to determine specific compliance (manual review).; Service check for 'ELB TLS Listener Coverage Metrics': unable to determine specific compliance (manual review).",
+      "score": 66,
+      "resources_failed": 2,
+      "requirement": "Encrypt or otherwise secure network traffic.",
+      "score_at_failure": 66,
+      "remediated_at": "2026-05-12T07:07:28.125631+00:00",
+      "remediation_commit": "a8708b680a60e29a0479d9ccb16ab5bcdfe1a129",
+      "duration_hours": 5.03
     }
   ],
   "ksi_stats": {
@@ -5408,8 +5437,8 @@
     },
     "KSI-IAM-04": {
       "total_failures": 9,
-      "total_remediations": 8,
-      "mttr_hours": 16.68,
+      "total_remediations": 9,
+      "mttr_hours": 15.22,
       "last_failure": "2026-05-12T03:32:20.343469+00:00",
       "longest_outage_hours": 62.87,
       "shortest_outage_hours": 0.57
@@ -5560,8 +5589,8 @@
     },
     "KSI-CMT-01": {
       "total_failures": 10,
-      "total_remediations": 9,
-      "mttr_hours": 29.6,
+      "total_remediations": 10,
+      "mttr_hours": 27.0,
       "last_failure": "2026-05-12T03:32:20.343469+00:00",
       "longest_outage_hours": 168.91,
       "shortest_outage_hours": 0.57
@@ -5684,9 +5713,11 @@
     },
     "KSI-SVC-02": {
       "total_failures": 3,
-      "total_remediations": 2,
-      "mttr_hours": 56.29,
-      "last_failure": "2026-05-12T02:05:48.594639+00:00"
+      "total_remediations": 3,
+      "mttr_hours": 39.2,
+      "last_failure": "2026-05-12T02:05:48.594639+00:00",
+      "longest_outage_hours": 111.04,
+      "shortest_outage_hours": 1.53
     },
     "KSI-IAM-05": {
       "total_failures": 7,
@@ -5765,10 +5796,10 @@
       "last_failure": "2025-10-12T03:08:36.669011Z"
     },
     "KSI-MLA-07": {
-      "total_failures": 4,
+      "total_failures": 5,
       "total_remediations": 4,
       "mttr_hours": 1.8,
-      "last_failure": "2026-03-11T06:50:28.470258Z",
+      "last_failure": "2026-05-12T07:07:28.125631+00:00",
       "longest_outage_hours": 3.38,
       "shortest_outage_hours": 0.57
     },
@@ -5833,10 +5864,10 @@
       "last_failure": "2025-11-21T02:46:58.182803Z"
     },
     "KSI-AFR-11": {
-      "total_failures": 3,
+      "total_failures": 4,
       "total_remediations": 3,
       "mttr_hours": 18.28,
-      "last_failure": "2026-03-11T03:52:46.025658Z",
+      "last_failure": "2026-05-12T07:07:28.125631+00:00",
       "longest_outage_hours": 49.0,
       "shortest_outage_hours": 2.87
     },
