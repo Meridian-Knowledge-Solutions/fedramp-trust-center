@@ -1083,7 +1083,8 @@
       },
       {
         "command": "aws cloudtrail get-trail-status --name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
-        "note": "STATUS: Confirm CloudTrail is actually 'IsLogging': true. Uses TrailARN to avoid naming conflicts.",
+        "service": "trail_logging_metrics",
+        "note": "STATUS: Confirm CloudTrail is actually 'IsLogging': true. Uses TrailARN to avoid naming conflicts. Mode 2 (operational effectiveness) — TrailLoggingMetricsPrimitive computes logging_rate as % of trails with IsLogging=true; KSI-MLA-01 target is 100%.",
         "expected_output": "CloudTrail must be actively logging (IsLogging: true)"
       },
       {
@@ -1501,7 +1502,8 @@
       },
       {
         "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
-        "note": "Phase 4: full listener enumeration (was truncated to LoadBalancers[0]) \u2014 TLS policy whitelist enforcement.",
+        "service": "tls_listener_metrics",
+        "note": "Phase 4: full listener enumeration (was truncated to LoadBalancers[0]) \u2014 TLS policy whitelist enforcement. Mode 2 (operational effectiveness) \u2014 TLSListenerMetricsPrimitive computes tls_rate as % of listeners using HTTPS/TLS protocol vs HTTP/TCP plaintext; KSI-SVC-02 target is 100% (no plaintext listeners on production load balancers).",
         "expected_output": "All HTTPS/TLS listeners must use FedRAMP-approved SslPolicy (TLS13-* or TLS-1-2-2021)"
       }
     ],
@@ -1597,7 +1599,8 @@
       },
       {
         "command": "( for k in $(aws kms list-keys --query 'Keys[].KeyId' --output text 2>/dev/null); do aws kms get-key-rotation-status --key-id \"$k\" --output json; done ) | jq -s '{KeyRotationStatuses: .}'",
-        "note": "Phase 4: KMS key rotation status \u2014 KeyRotationEnabled must be true for CMKs.",
+        "service": "kms_rotation_metrics",
+        "note": "Phase 4: KMS key rotation status \u2014 KeyRotationEnabled must be true for CMKs. Mode 2 (operational effectiveness) \u2014 KMSRotationMetricsPrimitive computes rotation_rate as % of CMKs with KeyRotationEnabled=true; KSI-SVC-06 target is 100% (FedRAMP SC-12 expectation).",
         "expected_output": "Every customer-managed KMS key must have KeyRotationEnabled=true"
       }
     ],
