@@ -328,6 +328,12 @@
         "command": "aws kms describe-key --key-id $(aws kms list-keys --query 'Keys[0].KeyId' --output text) --output json",
         "note": "Phase 4: KMS key metadata (KeyManager=CUSTOMER, Origin=AWS_KMS, KeySpec).",
         "expected_output": "KeyManager must be CUSTOMER and KeySpec must be a FIPS-supported algorithm"
+      },
+      {
+        "command": "( for b in $(aws s3api list-buckets --query 'Buckets[].Name' --output text 2>/dev/null); do (aws s3api get-bucket-encryption --bucket \"$b\" --output json 2>/dev/null || echo '{}') | jq --arg b \"$b\" '. + {Bucket: $b}'; done ) | jq -s '{BucketEncryption: .}'",
+        "service": "bucket_encryption_type_metrics",
+        "note": "Mode 2 \u2014 BucketEncryptionTypeMetrics computes kms_rate as % of S3 buckets using SSE-KMS (FIPS-validated CMK path) vs SSE-S3 (AES256). Target 100% on customer-data buckets (vector 6). Unencrypted buckets force FAIL; SSE-S3 buckets surface as WARNING (FIPS gap).",
+        "expected_output": "Bucket encryption configurations; primitive computes kms_rate, lists non_kms_buckets"
       }
     ],
     "artifact_evidence_paths": [
@@ -335,7 +341,8 @@
       "evidence_v2/KSI-AFR-11/s3_encryption.json",
       "evidence_v2/KSI-AFR-11/rds_encryption.json",
       "evidence_v2/KSI-AFR-11/lb_listeners.json",
-      "evidence_v2/KSI-AFR-11/crypto_policy.json"
+      "evidence_v2/KSI-AFR-11/crypto_policy.json",
+      "evidence_v2/KSI-AFR-11/bucket_encryption_types.json"
     ],
     "implementation_summary": "Cryptography uses AWS KMS with AES-256 for data at rest (S3, RDS, EBS). TLS 1.2+ enforced on ALB listeners. FIPS 140-2 validated modules via AWS GovCloud-compatible services.",
     "pass_criteria": "PASS if: At least one KMS key exists for cryptographic operations, the compliance S3 bucket enforces server-side encryption (SSE-S3 or SSE-KMS), all RDS instances have StorageEncrypted=true, load balancer listeners enforce TLS 1.2+ via secure SSL policies, AND the cryptographic-modules-policy.md exists in CodeCommit.",
@@ -456,13 +463,20 @@
         "command": "aws codecommit get-file --repository-name security-governance --file-path policies/change-management-policy.md --output json",
         "note": "GOVERNANCE: Validate the Change Management Policy document.",
         "expected_output": "Governance document must exist in CodeCommit"
+      },
+      {
+        "command": "( for arn in $(aws cloudtrail describe-trails --query 'trailList[].TrailARN' --output text 2>/dev/null); do aws cloudtrail get-event-selectors --trail-name \"$arn\" --output json 2>/dev/null; done ) | jq -s '{TrailEventSelectors: .}'",
+        "service": "s3_data_event_coverage_metrics",
+        "note": "Mode 2 \u2014 S3DataEventCoverageMetrics counts trails capturing S3 object-level data events (vectors 3, 6). Without data events, mass exfiltration via legitimate credentials leaves no audit trail. Target: at least 1 trail with S3 data events enabled.",
+        "expected_output": "Per-trail event selector configurations; primitive checks for AWS::S3::Object data resources"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-CMT-01/trails.json",
       "evidence_v2/KSI-CMT-01/event_selectors.json",
       "evidence_v2/KSI-CMT-01/config_status.json",
-      "evidence_v2/KSI-CMT-01/change_policy.json"
+      "evidence_v2/KSI-CMT-01/change_policy.json",
+      "evidence_v2/KSI-CMT-01/s3_data_event_selectors.json"
     ],
     "implementation_summary": "All modifications logged via CloudTrail (management events) and AWS Config (resource state). Change management policy requires Terraform-only changes with PR approval.",
     "pass_criteria": "PASS if: At least one CloudTrail trail exists and is logging, event selectors are configured to record Management Events (Read/Write API calls), AWS Config recorder is actively recording (recording=true), AND the change-management-policy.md exists in CodeCommit.",
@@ -495,7 +509,7 @@
       {
         "command": "( for p in $(aws codepipeline list-pipelines --query 'pipelines[].name' --output text 2>/dev/null); do aws codepipeline list-pipeline-executions --pipeline-name \"$p\" --max-results 50 --output json 2>/dev/null; done ) | jq -s '{pipelineExecutionSummaries: [.[].pipelineExecutionSummaries // [] | .[]?]}'",
         "service": "pipeline_metrics",
-        "note": "Mode 2 (operational effectiveness) — feeds PipelineMetricsPrimitive. Aggregates pipelineExecutionSummaries across every CodePipeline. Computes success_rate = % of executions with status=Succeeded. Direct evidence of the 'redeployment of version-controlled immutable resources' KSI; if pipelines fail, redeployment isn't actually working. Falls back to empty array if no pipelines (CodePipeline-free environments return ACTIVITY rather than crashing).",
+        "note": "Mode 2 (operational effectiveness) \u2014 feeds PipelineMetricsPrimitive. Aggregates pipelineExecutionSummaries across every CodePipeline. Computes success_rate = % of executions with status=Succeeded. Direct evidence of the 'redeployment of version-controlled immutable resources' KSI; if pipelines fail, redeployment isn't actually working. Falls back to empty array if no pipelines (CodePipeline-free environments return ACTIVITY rather than crashing).",
         "expected_output": "pipelineExecutionSummaries array; primitive computes success_rate, success_count, failure_count"
       }
     ],
@@ -708,13 +722,20 @@
         "command": "aws ses list-identities --max-items 5 --output json",
         "note": "SPOOFING: Validate SES Identities. If email is sent, this checks for authorized identities (DKIM/SPF managed).",
         "expected_output": "SES identities should exist if email is used (validates DKIM/SPF anti-spoofing)"
+      },
+      {
+        "command": "( for id in $(aws apigateway get-rest-apis --query 'items[].id' --output text 2>/dev/null); do aws apigateway get-stages --rest-api-id \"$id\" --output json 2>/dev/null | jq --arg id \"$id\" '(.item // []) | map(. + {restApiId: $id})'; done ) | jq -s '{Stages: [.[][]?]}'",
+        "service": "api_throttle_metrics",
+        "note": "Mode 2 \u2014 APIThrottleCoverageMetrics computes throttle_rate as % of API Gateway stages with non-zero throttle limits configured (vector 5). Without per-stage throttling, a valid token can be used to enumerate /api/v1/* at line rate. Target 100%.",
+        "expected_output": "Per-stage throttle configurations; primitive computes throttle_rate, lists unthrottled_stages"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-CNA-05/waf_acls.json",
       "evidence_v2/KSI-CNA-05/shield_lbs.json",
       "evidence_v2/KSI-CNA-05/route53_zones.json",
-      "evidence_v2/KSI-CNA-05/ses_identities.json"
+      "evidence_v2/KSI-CNA-05/ses_identities.json",
+      "evidence_v2/KSI-CNA-05/api_gateway_throttle.json"
     ],
     "implementation_summary": "DDoS protection via AWS Shield Standard (automatic on ALB), WAFv2 Web ACLs, and Route53 anycast. SES handles email with DKIM/SPF validation.",
     "pass_criteria": "PASS if: At least one WAFv2 Web ACL exists (Layer 7 protection), at least one load balancer with Shield Standard provides Layer 3/4 protection, at least one Route53 hosted zone exists (DNS resilience), AND if SES is used, verified identities exist with DKIM/SPF.",
@@ -859,10 +880,17 @@
         "command": "aws identitystore list-users --identity-store-id $(aws sso-admin list-instances --query 'Instances[0].IdentityStoreId' --output text) --output json",
         "note": "Phase 4: enumerate SSO-managed user identities for IA-2 coverage.",
         "expected_output": "At least one Identity Center user must exist when SSO is the auth path"
+      },
+      {
+        "command": "( IN=$(aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text 2>/dev/null); for ps in $(aws sso-admin list-permission-sets --instance-arn \"$IN\" --query 'PermissionSets[]' --output text 2>/dev/null); do aws sso-admin describe-permission-set --instance-arn \"$IN\" --permission-set-arn \"$ps\" --output json 2>/dev/null | jq '.PermissionSet'; done ) | jq -s '{PermissionSets: .}'",
+        "service": "sso_session_duration_metrics",
+        "note": "Mode 2 (operational effectiveness) \u2014 SSOSessionDurationMetrics computes within_target_rate as % of permission sets with SessionDuration <= 8h. Long-lived sessions extend the LMS session-theft attack window (vector 1). Target 100%.",
+        "expected_output": "Permission sets with SessionDuration; primitive computes within_target_rate; auditor reviews exceeding_sets"
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-IAM-01/iam_users.json"
+      "evidence_v2/KSI-IAM-01/iam_users.json",
+      "evidence_v2/KSI-IAM-01/sso_session_durations.json"
     ],
     "implementation_summary": "MFA enforced for all human users via AWS Identity Center with FIDO2/WebAuthn support. Break-glass IAM users require hardware tokens.",
     "pass_criteria": "PASS if: All IAM users with active password usage (console access) have MFA enabled, AWS Identity Center is configured as the primary identity platform, AND virtual MFA devices are inventoried with no unprotected human accounts.",
@@ -937,11 +965,18 @@
         "command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
         "note": "AUDIT: List human users who are bypassing the Centralized System (should be empty or minimal).",
         "expected_output": "Zero or minimal IAM users with PasswordLastUsed (target: 0 human IAM users)"
+      },
+      {
+        "command": "aws iam list-roles --output json | jq '{Roles: .Roles | map({RoleName, AssumeRolePolicyDocument})}'",
+        "service": "cross_account_trust_metrics",
+        "note": "Mode 1 capability + audit inventory \u2014 CrossAccountTrustMetrics counts roles whose trust policy admits external (non-account-owner) principals. Surfaces OIDC providers, SAML federations, foreign accounts, and contractor cross-account trusts (vectors 3, 10). Auditor reviews surfaced list against contractor inventory.",
+        "expected_output": "Roles with parsed AssumeRolePolicyDocument; primitive computes cross_account_role_count and surfaces names"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-IAM-04/sso_instances.json",
-      "evidence_v2/KSI-IAM-04/legacy_users.json"
+      "evidence_v2/KSI-IAM-04/legacy_users.json",
+      "evidence_v2/KSI-IAM-04/cross_account_trusts.json"
     ],
     "implementation_summary": "Centralized identity via AWS Identity Center. Legacy IAM users audited and minimized (target: 0 human IAM users).",
     "pass_criteria": "PASS if: AWS Identity Center (SSO) is configured and active, AND the number of IAM users with direct console access (bypassing centralized identity) is zero or minimal (break-glass only).",
@@ -1073,7 +1108,7 @@
       {
         "command": "aws securityhub get-findings --max-results 100 --output json",
         "service": "incident_metrics",
-        "note": "Mode 2 (operational effectiveness) — feeds IncidentMetricsPrimitive. Computes MTTR from Findings[].CreatedAt vs UpdatedAt where WorkflowStatus is RESOLVED/SUPPRESSED. Direct evidence of incident-handling effectiveness for after-action lessons-learned KSI.",
+        "note": "Mode 2 (operational effectiveness) \u2014 feeds IncidentMetricsPrimitive. Computes MTTR from Findings[].CreatedAt vs UpdatedAt where WorkflowStatus is RESOLVED/SUPPRESSED. Direct evidence of incident-handling effectiveness for after-action lessons-learned KSI.",
         "expected_output": "SecurityHub Findings array; primitive computes mttr_hours, resolved_count, open_count"
       }
     ],
@@ -1097,19 +1132,33 @@
       {
         "command": "aws cloudtrail get-trail-status --name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
         "service": "trail_logging_metrics",
-        "note": "STATUS: Confirm CloudTrail is actually 'IsLogging': true. Uses TrailARN to avoid naming conflicts. Mode 2 (operational effectiveness) — TrailLoggingMetricsPrimitive computes logging_rate as % of trails with IsLogging=true; KSI-MLA-01 target is 100%.",
+        "note": "STATUS: Confirm CloudTrail is actually 'IsLogging': true. Uses TrailARN to avoid naming conflicts. Mode 2 (operational effectiveness) \u2014 TrailLoggingMetricsPrimitive computes logging_rate as % of trails with IsLogging=true; KSI-MLA-01 target is 100%.",
         "expected_output": "CloudTrail must be actively logging (IsLogging: true)"
       },
       {
         "command": "aws s3api list-buckets --query \"Buckets[?contains(Name, 'cloudtrail') || contains(Name, 'audit') || contains(Name, 'logs')]\" --output json",
         "note": "STORAGE: Validate the specific S3 bucket used for audit log retention.",
         "expected_output": "At least one audit log bucket must exist"
+      },
+      {
+        "command": "( for b in $(aws s3api list-buckets --query 'Buckets[].Name' --output text 2>/dev/null); do (aws s3api get-bucket-logging --bucket \"$b\" --output json 2>/dev/null || echo '{}') | jq --arg b \"$b\" '. + {Bucket: $b}'; done ) | jq -s '{BucketLoggingStatus: .}'",
+        "service": "s3_logging_coverage_metrics",
+        "note": "Mode 2 \u2014 S3LoggingCoverageMetrics computes logging_rate as % of S3 buckets with server access logging enabled (vector 6). Target 100%. KSI-MLA-01's outcome (log all activity) requires every bucket to log; gaps are blind spots for object-read attacks.",
+        "expected_output": "BucketLoggingStatus list; primitive computes logging_rate, lists unlogged_buckets"
+      },
+      {
+        "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-load-balancer-attributes --load-balancer-arn \"$arn\" --output json 2>/dev/null | jq --arg arn \"$arn\" '. + {LoadBalancerArn: $arn}'; done ) | jq -s '{LoadBalancerAttributes: .}'",
+        "service": "alb_access_log_metrics",
+        "note": "Mode 2 \u2014 ALBAccessLogCoverageMetrics computes logging_rate as % of ALBs exporting access_logs.s3 to S3 (vectors 5, 6). Without ALB access logs, request-level visibility into the LMS edge depends solely on application logs (which an attacker may suppress). Target 100%.",
+        "expected_output": "LoadBalancer attribute list; primitive checks access_logs.s3.enabled"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-MLA-01/cloudtrail_config.json",
       "evidence_v2/KSI-MLA-01/trail_status.json",
-      "evidence_v2/KSI-MLA-01/audit_bucket.json"
+      "evidence_v2/KSI-MLA-01/audit_bucket.json",
+      "evidence_v2/KSI-MLA-01/bucket_logging_coverage.json",
+      "evidence_v2/KSI-MLA-01/alb_access_log_coverage.json"
     ],
     "implementation_summary": "All activity logged to CloudTrail (multi-region, S3 delivery). VPC Flow Logs capture network traffic. Log integrity via S3 Object Lock.",
     "pass_criteria": "PASS if: At least one CloudWatch Log Group exists for centralized logging, CloudTrail is enabled for API audit logging, AND at least one CloudWatch alarm exists to monitor log-derived metrics.",
@@ -1185,12 +1234,19 @@
         "command": "aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, 'security') || contains(logGroupName, 'cloudtrail') || contains(logGroupName, 'audit') || contains(logGroupName, 'flow')]\" --output json",
         "note": "EXECUTION: Validate that the specific Security/Audit logs are actually being captured.",
         "expected_output": "At least 1 CloudWatch log group must exist"
+      },
+      {
+        "command": "aws rds describe-db-instances --output json | jq '{DBInstances: (.DBInstances // []) | map({DBInstanceIdentifier, Engine, EnabledCloudwatchLogsExports, DeletionProtection})}'",
+        "service": "rds_audit_log_metrics",
+        "note": "Mode 2 \u2014 RDSAuditLogCoverageMetrics computes audit_log_rate as % of RDS instances exporting audit-relevant log types to CloudWatch (vector 9). Engine-aware: checks audit/general/slowquery for MySQL/MariaDB; postgresql/audit for Postgres; etc. Target 100%.",
+        "expected_output": "DB instance log-export configurations; primitive computes audit_log_rate, lists db_without_audit"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-MLA-07/config_recorders.json",
       "evidence_v2/KSI-MLA-07/cloudtrail_trails.json",
-      "evidence_v2/KSI-MLA-07/security_logs.json"
+      "evidence_v2/KSI-MLA-07/security_logs.json",
+      "evidence_v2/KSI-MLA-07/rds_audit_log_exports.json"
     ],
     "implementation_summary": "Resource inventory maintained by AWS Config (continuous recording of all supported resource types). Event types defined in CloudTrail event selectors (multi-region, global service events). Security log groups capture audit, incident, VPC flow, and compliance data with 365-731 day retention.",
     "pass_criteria": "PASS if: At least one CloudTrail trail is actively logging, at least one CloudWatch Log Group exists for log retention, AND the log-management-policy.md document exists in CodeCommit defining retention requirements.",
@@ -1249,7 +1305,7 @@
       {
         "command": "aws configservice get-discovered-resource-counts --output json",
         "service": "inventory_metrics",
-        "note": "Mode 2 (operational effectiveness) — feeds InventoryMetricsPrimitive. Aggregates resourceCounts across all tracked resource types. Direct evidence that the real-time inventory engine is producing population-level data, not just point capability.",
+        "note": "Mode 2 (operational effectiveness) \u2014 feeds InventoryMetricsPrimitive. Aggregates resourceCounts across all tracked resource types. Direct evidence that the real-time inventory engine is producing population-level data, not just point capability.",
         "expected_output": "Config discovered-resource-counts response with resourceCounts array; primitive aggregates total_resources and per-type counts"
       }
     ],
@@ -1550,7 +1606,7 @@
       {
         "command": "aws ssm describe-instance-patch-states --instance-ids $(aws ssm describe-instance-information --query 'InstanceInformationList[].InstanceId' --output text 2>/dev/null) --output json 2>/dev/null || echo '{\"InstancePatchStates\": []}'",
         "service": "patch_metrics",
-        "note": "Mode 2 (operational effectiveness) — feeds PatchMetricsPrimitive. Computes compliance_rate as % of SSM-managed instances with MissingCount=0 (fully patched). Configuration management means keeping resources current, not just declaring how they should be configured. Falls back to empty payload if no managed instances (returns ACTIVITY status, not crash).",
+        "note": "Mode 2 (operational effectiveness) \u2014 feeds PatchMetricsPrimitive. Computes compliance_rate as % of SSM-managed instances with MissingCount=0 (fully patched). Configuration management means keeping resources current, not just declaring how they should be configured. Falls back to empty payload if no managed instances (returns ACTIVITY status, not crash).",
         "expected_output": "InstancePatchStates array; primitive computes compliance_rate, missing_patches, installed_patches"
       }
     ],
@@ -1622,12 +1678,26 @@
         "service": "kms_rotation_metrics",
         "note": "Phase 4: KMS key rotation status \u2014 KeyRotationEnabled must be true for CMKs. Mode 2 (operational effectiveness) \u2014 KMSRotationMetricsPrimitive computes rotation_rate as % of CMKs with KeyRotationEnabled=true; KSI-SVC-06 target is 100% (FedRAMP SC-12 expectation).",
         "expected_output": "Every customer-managed KMS key must have KeyRotationEnabled=true"
+      },
+      {
+        "command": "( for arn in $(aws acm list-certificates --certificate-statuses ISSUED --query 'CertificateSummaryList[].CertificateArn' --output text 2>/dev/null); do aws acm describe-certificate --certificate-arn \"$arn\" --output json 2>/dev/null | jq '.Certificate | {CertificateArn, NotAfter, DomainName, Status}'; done ) | jq -s '{Certificates: .}'",
+        "service": "cert_expiry_metrics",
+        "note": "Mode 2 \u2014 CertExpiryCoverageMetrics computes healthy_rate as % of ACM certs >30d from expiry (vectors 1, 8). Expired cert FAILs immediately; certs <30d trigger WARNING. Target 100%.",
+        "expected_output": "Per-cert NotAfter timestamps; primitive computes healthy_rate, lists certs_at_risk"
+      },
+      {
+        "command": "( for arn in $(aws secretsmanager list-secrets --query 'SecretList[].ARN' --output text 2>/dev/null); do aws secretsmanager describe-secret --secret-id \"$arn\" --output json 2>/dev/null | jq '{ARN, Name, RotationEnabled, RotationRules}'; done ) | jq -s '{Secrets: .}'",
+        "service": "secret_rotation_metrics",
+        "note": "Mode 2 \u2014 SecretRotationMetrics computes rotation_rate as % of Secrets Manager secrets with RotationEnabled=true (vector 7 / supply-chain hygiene). Target 100% on secrets feeding production CI/CD and DB credentials.",
+        "expected_output": "Per-secret rotation status; primitive computes rotation_rate, lists secrets_without_rotation"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-SVC-06/kms_keys.json",
       "evidence_v2/KSI-SVC-06/rotated_secrets.json",
-      "evidence_v2/KSI-SVC-06/acm_certs.json"
+      "evidence_v2/KSI-SVC-06/acm_certs.json",
+      "evidence_v2/KSI-SVC-06/cert_expiry.json",
+      "evidence_v2/KSI-SVC-06/secret_rotation.json"
     ],
     "implementation_summary": "Cryptographic operations use AWS KMS with automatic key rotation (annual). Certificate management via ACM with auto-renewal.",
     "pass_criteria": "PASS if: At least one KMS key exists for secrets encryption, Secrets Manager contains at least one secret with rotation configured (RotationEnabled=true), AND the secrets-management-policy.md exists in CodeCommit.",
