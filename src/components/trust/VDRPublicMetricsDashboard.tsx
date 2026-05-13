@@ -252,6 +252,12 @@ export default function VDRDashboard() {
     overall_rating: data.posture.overall_rating ?? data.posture.rating,
   } : null);
   const meta = data.metadata || {};
+  const cspm = data.cspm;
+  const vdrAcceptance = data.vdr_acceptance;
+  const vdrOutcome = data.vdr_outcome;
+  const hasDeltas = !!(data.kpi?.delta_7d || data.kpi?.delta_30d || data.deltas);
+  const hasScanSources = Array.isArray(data.scan_sources) && data.scan_sources.length > 0;
+  const hasDetectionSources = !!(data.detection_sources ?? data.snapshot?.detection_sources);
 
   // Build deltas from either kpi.delta_7d (legacy) or data.deltas.vs_7d (current)
   const zeroDelta = { total: 0, critical: 0, lev: 0, irv: 0, compliance: 0, unique_cves: 0 };
@@ -321,6 +327,169 @@ export default function VDRDashboard() {
             </div>
           ))}
         </div>
+
+        {/* ──────────────────────────────────────────────
+            1b. VDR OUTCOME PANEL — Mode 1/2/3 capability/output/override verdicts
+           ────────────────────────────────────────────── */}
+        {vdrOutcome && (() => {
+          const verdictStyle = (v?: string) => {
+            const key = (v || "unknown").toLowerCase();
+            if (["pass", "passing", "clean", "operational", "met"].includes(key))
+              return { color: "#10b981", bg: "bg-emerald-900/20", border: "border-emerald-800/30", label: key.toUpperCase() };
+            if (["fail", "failing", "missing", "breached"].includes(key))
+              return { color: "#ef4444", bg: "bg-rose-900/20", border: "border-rose-800/30", label: key.toUpperCase() };
+            if (["partial", "degraded", "warning"].includes(key))
+              return { color: "#eab308", bg: "bg-yellow-900/20", border: "border-yellow-800/30", label: key.toUpperCase() };
+            return { color: "#71717a", bg: "bg-zinc-800/40", border: "border-zinc-700/40", label: key.toUpperCase() };
+          };
+          const overall = verdictStyle(vdrOutcome.overall_verdict);
+          const m1 = vdrOutcome.mode_1_capability;
+          const m2 = vdrOutcome.mode_2_output_rate;
+          const m3 = vdrOutcome.mode_3_critical_override;
+          const m1v = verdictStyle(m1?.verdict);
+          const m2v = verdictStyle(m2?.verdict);
+          const m3v = verdictStyle(m3?.verdict);
+          const indicatorEntries: [string, any][] = m1?.indicators ? Object.entries(m1.indicators) : [];
+          const m2Metrics = m2?.metrics || {};
+          const remRate = m2Metrics.remediation_rate_pct;
+          const remTarget = m2Metrics.remediation_target_pct;
+          const breachCount = Array.isArray(m3?.breaches) ? m3.breaches.length : 0;
+          return (
+            <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
+              <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+                <div>
+                  <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-1">VDR Outcome</div>
+                  <div className="text-[11px] text-zinc-500">{vdrOutcome.framework || "VDR Outcome framework"}</div>
+                </div>
+                <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md border ${overall.bg} ${overall.border}`} style={{ color: overall.color }}>
+                  {overall.label}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {/* Mode 1 — Capability */}
+                <div className="bg-zinc-900/40 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Mode 1 · Capability</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${m1v.bg}`} style={{ color: m1v.color }}>{m1v.label}</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {indicatorEntries.map(([name, info]) => {
+                      const iv = verdictStyle(info?.verdict);
+                      return (
+                        <div key={name} className="flex items-center justify-between text-[11px]" title={info?.note}>
+                          <span className="text-zinc-400 truncate">{name.replace(/_/g, " ")}</span>
+                          <span className="w-2 h-2 rounded-full inline-block flex-shrink-0 ml-2" style={{ background: iv.color }} />
+                        </div>
+                      );
+                    })}
+                    {indicatorEntries.length === 0 && <div className="text-[11px] text-zinc-600">No indicators reported</div>}
+                  </div>
+                </div>
+                {/* Mode 2 — Output Rate */}
+                <div className="bg-zinc-900/40 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Mode 2 · Output Rate</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${m2v.bg}`} style={{ color: m2v.color }}>{m2v.label}</span>
+                  </div>
+                  {typeof remRate === "number" && (
+                    <div className="mb-2">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-2xl font-extrabold" style={{ ...mono, color: m2v.color }}>{remRate}%</span>
+                        {typeof remTarget === "number" && (
+                          <span className="text-[11px] text-zinc-500">/ {remTarget}% target</span>
+                        )}
+                      </div>
+                      <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden mt-1.5">
+                        <div className="h-full rounded-full" style={{ width: `${Math.min(remRate, 100)}%`, background: m2v.color }} />
+                      </div>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+                    {m2Metrics.oldest_active_critical_days != null && (
+                      <div className="flex justify-between"><span className="text-zinc-500">Oldest critical</span><span className="text-zinc-300 font-bold" style={mono}>{m2Metrics.oldest_active_critical_days}d</span></div>
+                    )}
+                    {typeof m2Metrics.active_n5_overdue === "number" && (
+                      <div className="flex justify-between"><span className="text-zinc-500">N5 overdue</span><span className="text-zinc-300 font-bold" style={mono}>{m2Metrics.active_n5_overdue}</span></div>
+                    )}
+                    {typeof m2Metrics.active_n4_overdue === "number" && (
+                      <div className="flex justify-between"><span className="text-zinc-500">N4 overdue</span><span className="text-zinc-300 font-bold" style={mono}>{m2Metrics.active_n4_overdue}</span></div>
+                    )}
+                    {typeof m2Metrics.accepted_count === "number" && (
+                      <div className="flex justify-between"><span className="text-zinc-500">Accepted</span><span className="text-zinc-300 font-bold" style={mono}>{m2Metrics.accepted_count}</span></div>
+                    )}
+                  </div>
+                  {m2?.explanation && <div className="text-[10px] text-zinc-600 mt-2">{m2.explanation}</div>}
+                </div>
+                {/* Mode 3 — Critical Override */}
+                <div className="bg-zinc-900/40 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Mode 3 · Critical Override</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${m3v.bg}`} style={{ color: m3v.color }}>{m3v.label}</span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-extrabold" style={{ ...mono, color: breachCount > 0 ? "#ef4444" : "#10b981" }}>{breachCount}</span>
+                    <span className="text-[11px] text-zinc-500">{breachCount === 1 ? "breach" : "breaches"}</span>
+                  </div>
+                  <div className="text-[10px] text-zinc-600 mt-1">
+                    {breachCount === 0 ? "No critical SLA overrides triggered" : "Critical SLA breach recorded"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ──────────────────────────────────────────────
+            1c. CSPM + VDR ACCEPTANCE — side by side
+           ────────────────────────────────────────────── */}
+        {(cspm || vdrAcceptance) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {cspm && (
+              <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold">CSPM Findings</div>
+                  <span className="text-[10px] text-zinc-500">Cloud posture</span>
+                </div>
+                <div className="flex items-baseline gap-2 mb-3">
+                  <span className="text-3xl font-extrabold text-zinc-100" style={mono}>{(cspm.total ?? 0).toLocaleString()}</span>
+                  <span className="text-xs text-zinc-500">total findings</span>
+                </div>
+                {cspm.by_severity && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {(["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const).map(sev => (
+                      <div key={sev} className="bg-zinc-900/40 rounded px-2 py-2 text-center">
+                        <div className="text-[9px] uppercase tracking-wide font-bold" style={{ color: SEV_COLORS[sev] }}>{sev}</div>
+                        <div className="text-base font-extrabold text-zinc-100 mt-0.5" style={mono}>{cspm.by_severity[sev] ?? 0}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {vdrAcceptance && (
+              <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold">VDR Acceptance</div>
+                  <span className="text-[10px] text-zinc-500">SLA window</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-zinc-900/40 rounded px-2 py-3 text-center">
+                    <div className="text-[9px] uppercase tracking-wide text-zinc-500 font-bold">Threshold</div>
+                    <div className="text-base font-extrabold text-zinc-100 mt-1" style={mono}>{vdrAcceptance.threshold_days ?? 0}d</div>
+                  </div>
+                  <div className="bg-zinc-900/40 rounded px-2 py-3 text-center">
+                    <div className="text-[9px] uppercase tracking-wide text-zinc-500 font-bold">Accepted</div>
+                    <div className="text-base font-extrabold text-emerald-400 mt-1" style={mono}>{vdrAcceptance.accepted ?? 0}</div>
+                  </div>
+                  <div className="bg-zinc-900/40 rounded px-2 py-3 text-center">
+                    <div className="text-[9px] uppercase tracking-wide text-zinc-500 font-bold">Active</div>
+                    <div className="text-base font-extrabold text-amber-400 mt-1" style={mono}>{vdrAcceptance.active ?? 0}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ──────────────────────────────────────────────
             2. TREND CHART — full-width line chart with toggle
@@ -423,6 +592,7 @@ export default function VDRDashboard() {
         {/* ──────────────────────────────────────────────
             4. DETECTION SOURCES BAR — 9 FedRAMP categories
            ────────────────────────────────────────────── */}
+        {hasDetectionSources && (
         <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
           <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-4">Detection Sources — FedRAMP Required Categories</div>
           <ResponsiveContainer width="100%" height={180}>
@@ -446,6 +616,7 @@ export default function VDRDashboard() {
             ))}
           </div>
         </div>
+        )}
 
         {/* ──────────────────────────────────────────────
             5. RISK GAUGES — LEV / IRV / KEV circular meters
@@ -502,6 +673,7 @@ export default function VDRDashboard() {
         {/* ──────────────────────────────────────────────
             7. DELTA COMPARISON CARDS — 7d and 30d changes
            ────────────────────────────────────────────── */}
+        {hasDeltas && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             { period: "7-Day Change", delta: d7 },
@@ -527,6 +699,7 @@ export default function VDRDashboard() {
             </div>
           ))}
         </div>
+        )}
 
         {/* ──────────────────────────────────────────────
             8. COMPLIANCE BANNER
@@ -574,6 +747,7 @@ export default function VDRDashboard() {
         {/* ──────────────────────────────────────────────
             9. SCAN SOURCES TABLE — expandable for 3PAO reviewers
            ────────────────────────────────────────────── */}
+        {hasScanSources && (
         <div className="bg-[#141416] border border-white/[0.04] rounded-xl overflow-hidden">
           <button onClick={() => setScanTableOpen(!scanTableOpen)}
             className="w-full flex items-center justify-between p-5 text-left hover:bg-white/[0.02] transition-colors">
@@ -617,6 +791,7 @@ export default function VDRDashboard() {
             </div>
           )}
         </div>
+        )}
 
         {/* ──────────────────────────────────────────────
             10. ATTACK SURFACE CARD — collapsed by default
