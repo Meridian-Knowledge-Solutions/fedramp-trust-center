@@ -109,23 +109,49 @@ export default function VDRDashboard() {
     total_vulnerabilities: d.total_vulnerabilities ?? d.total,
   });
 
+  // Trends may be a flat array (current schema) or an object with daily/weekly/monthly buckets (legacy)
+  const dailyTrends = useMemo(() => {
+    if (!data?.trends) return [];
+    if (Array.isArray(data.trends)) return data.trends;
+    return data.trends.daily || [];
+  }, [data]);
+
   // Derived trend data
   const trendData = useMemo(() => {
     if (!data?.trends) return [];
-    if (trendMode === "daily") return (data.trends.daily || []).map(normalizeTrendEntry);
+    if (trendMode === "daily") return dailyTrends.map(normalizeTrendEntry);
     if (trendMode === "weekly") {
-      return (data.trends.weekly || []).map((w: any) => normalizeTrendEntry({
-        date: w.week_start ?? w.date,
-        total_vulnerabilities: w.avg_total ?? w.total,
-        active_count: w.avg_active ?? w.active,
+      const weekly = !Array.isArray(data.trends) ? data.trends.weekly : null;
+      if (weekly?.length) {
+        return weekly.map((w: any) => normalizeTrendEntry({
+          date: w.week_start ?? w.date,
+          total_vulnerabilities: w.avg_total ?? w.total,
+          active_count: w.avg_active ?? w.active,
+        }));
+      }
+      // Aggregate daily into weekly buckets
+      const grouped: Record<string, number[]> = {};
+      dailyTrends.forEach((d: any) => {
+        const date = new Date(d.date + "T00:00:00");
+        const day = date.getDay();
+        const monday = new Date(date);
+        monday.setDate(date.getDate() - ((day + 6) % 7));
+        const key = monday.toISOString().slice(0, 10);
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(d.total ?? d.total_vulnerabilities);
+      });
+      return Object.entries(grouped).map(([week, vals]) => ({
+        date: week,
+        total_vulnerabilities: Math.round(vals.reduce((a, b) => a + b, 0) / vals.length),
       }));
     }
     // monthly — use monthly array if available, else aggregate from daily
-    if (data.trends.monthly?.length) {
-      return data.trends.monthly.map(normalizeTrendEntry);
+    const monthly = !Array.isArray(data.trends) ? data.trends.monthly : null;
+    if (monthly?.length) {
+      return monthly.map(normalizeTrendEntry);
     }
     const grouped: Record<string, number[]> = {};
-    (data.trends.daily || []).forEach((d: any) => {
+    dailyTrends.forEach((d: any) => {
       const m = d.date.slice(0, 7);
       if (!grouped[m]) grouped[m] = [];
       grouped[m].push(d.total ?? d.total_vulnerabilities);
@@ -134,20 +160,20 @@ export default function VDRDashboard() {
       date: month,
       total_vulnerabilities: Math.round(vals.reduce((a: number, b: number) => a + b, 0) / vals.length),
     }));
-  }, [data, trendMode]);
+  }, [data, trendMode, dailyTrends]);
 
-  // Severity donut data — supports both data.severity_distribution and data.snapshot.severity
+  // Severity donut data — supports data.severity_distribution, data.snapshot.severity, and data.risk.severity
   const sevDonut = useMemo(() => {
-    const sev = data?.severity_distribution ?? data?.snapshot?.severity;
+    const sev = data?.severity_distribution ?? data?.snapshot?.severity ?? data?.risk?.severity;
     if (!sev) return [];
     return Object.entries(sev)
       .filter(([, v]) => (v as number) > 0)
       .map(([name, value]) => ({ name, value: value as number, fill: SEV_COLORS[name] || "#6b7280" }));
   }, [data]);
 
-  // N-rating bar data — supports both data.n_rating_distribution and data.snapshot.n_ratings
+  // N-rating bar data — supports data.n_rating_distribution, data.snapshot.n_ratings, and data.risk.n_ratings
   const nRatingData = useMemo(() => {
-    const nr = data?.n_rating_distribution ?? data?.snapshot?.n_ratings;
+    const nr = data?.n_rating_distribution ?? data?.snapshot?.n_ratings ?? data?.risk?.n_ratings;
     if (!nr) return [];
     return Object.entries(nr).map(([name, value]) => ({
       name, value: value as number
@@ -167,10 +193,9 @@ export default function VDRDashboard() {
 
   // Peak value for trend annotation
   const trendPeak = useMemo(() => {
-    const daily = data?.trends?.daily || [];
-    if (!daily.length) return 0;
-    return Math.max(...daily.map((d: any) => d.total_vulnerabilities ?? d.total));
-  }, [data]);
+    if (!dailyTrends.length) return 0;
+    return Math.max(...dailyTrends.map((d: any) => d.total_vulnerabilities ?? d.total ?? 0));
+  }, [dailyTrends]);
 
   const formatDate = (v: string) => {
     if (v.length === 7) {
@@ -197,20 +222,35 @@ export default function VDRDashboard() {
     );
   }
 
-  // Build kpi from either data.kpi (legacy) or data.snapshot (current schema)
+  // Build kpi from data.kpi (legacy), data.snapshot, or the current flatter schema (data.risk, data.compliance)
   const snap = data.snapshot || {};
+  const risk = data.risk || {};
+  const compliance = data.compliance || {};
   const kpi = data.kpi || {
     total_vulnerabilities: snap.total_vulnerabilities ?? 0,
-    critical_count: snap.critical_findings ?? snap.severity?.CRITICAL ?? 0,
-    lev_count: snap.lev_count ?? 0,
-    irv_count: snap.irv_count ?? 0,
-    kev_count: snap.kev_matches ?? 0,
-    compliance_rate: snap.compliance_rate ?? 0,
+    critical_count: snap.critical_findings ?? risk.critical ?? risk.severity?.CRITICAL ?? snap.severity?.CRITICAL ?? 0,
+    lev_count: snap.lev_count ?? risk.lev_count ?? 0,
+    irv_count: snap.irv_count ?? risk.irv_count ?? 0,
+    kev_count: snap.kev_matches ?? risk.kev_matches ?? 0,
+    compliance_rate: snap.compliance_rate ?? compliance.rate ?? 0,
     unique_cves: snap.unique_cves ?? 0,
   };
   const env = data.environment;
-  const atk = data.attack_surface;
-  const posture = data.security_posture;
+  // Normalize attack surface field names: current schema uses short names (nodes, edges, paths, blast_radius)
+  const atkRaw = data.attack_surface;
+  const atk = atkRaw ? {
+    total_attack_paths: atkRaw.total_attack_paths ?? atkRaw.paths ?? 0,
+    critical_attack_paths: atkRaw.critical_attack_paths ?? atkRaw.critical_paths ?? 0,
+    exploitable_paths: atkRaw.exploitable_paths ?? 0,
+    blast_radius_score: atkRaw.blast_radius_score ?? atkRaw.blast_radius ?? 0,
+    graph_node_count: atkRaw.graph_node_count ?? atkRaw.nodes ?? 0,
+    graph_edge_count: atkRaw.graph_edge_count ?? atkRaw.edges ?? 0,
+    avg_path_risk_score: atkRaw.avg_path_risk_score ?? null,
+  } : null;
+  const posture = data.security_posture ?? (data.posture ? {
+    posture_score: data.posture.posture_score ?? data.posture.score,
+    overall_rating: data.posture.overall_rating ?? data.posture.rating,
+  } : null);
   const meta = data.metadata || {};
 
   // Build deltas from either kpi.delta_7d (legacy) or data.deltas.vs_7d (current)
@@ -611,7 +651,7 @@ export default function VDRDashboard() {
                     { l: "Exploitable", v: atk.exploitable_paths, c: atk.exploitable_paths > 0 ? "#ef4444" : "#10b981" },
                     { l: "Blast Radius", v: atk.blast_radius_score.toFixed(1), c: atk.blast_radius_score > 0 ? "#d97706" : "#10b981" },
                     { l: "Graph Nodes", v: atk.graph_node_count, c: "#d4d4d8" },
-                    { l: "Graph Edges", v: atk.graph_edge_count.toLocaleString(), c: "#d4d4d8" },
+                    { l: "Graph Edges", v: (atk.graph_edge_count ?? 0).toLocaleString(), c: "#d4d4d8" },
                   ].map((item, i) => (
                     <div key={i} className="bg-zinc-900/40 rounded-lg px-3 py-3 flex flex-col">
                       <span className="text-[10px] text-zinc-600 uppercase tracking-wide font-bold mb-1">{item.l}</span>
@@ -619,10 +659,12 @@ export default function VDRDashboard() {
                     </div>
                   ))}
                 </div>
-                <div className="mt-3 bg-zinc-900/30 rounded-lg px-4 py-2.5 flex items-center justify-between text-xs">
-                  <span className="text-zinc-500">Average Path Risk Score</span>
-                  <span className="font-bold text-zinc-300" style={mono}>{atk.avg_path_risk_score}</span>
-                </div>
+                {atk.avg_path_risk_score != null && (
+                  <div className="mt-3 bg-zinc-900/30 rounded-lg px-4 py-2.5 flex items-center justify-between text-xs">
+                    <span className="text-zinc-500">Average Path Risk Score</span>
+                    <span className="font-bold text-zinc-300" style={mono}>{atk.avg_path_risk_score}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
