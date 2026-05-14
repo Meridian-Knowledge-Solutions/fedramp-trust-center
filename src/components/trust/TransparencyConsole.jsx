@@ -93,6 +93,29 @@ const TabButton = ({ id, label, icon: Icon, active, set, count, badge }) => (
     </button>
 );
 
+// Engine-internal synthetic resource markers that should not surface to
+// engineers. Mirrors the filter in fedramp-20x-submission-final's
+// generate_remediation_issue.py (PR #264). Note: empty_result_* is a REAL
+// failure marker (missing infrastructure) — do not filter that one.
+const isEngineNoise = (issue) => {
+    if (issue && typeof issue === 'object') {
+        const resource = issue.resource;
+        return typeof resource === 'string' && resource.startsWith('empty_allowed_');
+    }
+    if (typeof issue === 'string') {
+        return /\bempty_allowed_\d/.test(issue);
+    }
+    return false;
+};
+
+// Mode 3 outcome-class behavior: per-resource score is above threshold but the
+// assertion flipped FAIL because a separate metric-level threshold breached.
+// The engine is working correctly — this is not a technical failure.
+const isVerdictDisagreement = (issue) => {
+    const text = typeof issue === 'string' ? issue : (issue?.message || issue?.detail || '');
+    return /Assertion is False but score is \d+%/i.test(text);
+};
+
 const IssueCard = ({ issue, type }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const parts = issue.split(': ');
@@ -101,11 +124,20 @@ const IssueCard = ({ issue, type }) => {
 
     const typeStyles = {
         technical: 'border-red-500/20 bg-red-500/5',
-        compliance: 'border-amber-500/20 bg-amber-500/5'
+        compliance: 'border-amber-500/20 bg-amber-500/5',
+        disagreement: 'border-blue-500/20 bg-blue-500/5'
     };
 
+    const typeLabels = {
+        technical: { text: 'Technical Failure', color: 'text-red-400' },
+        compliance: { text: 'Compliance Gap', color: 'text-amber-400' },
+        disagreement: { text: 'Score / Verdict Disagreement', color: 'text-blue-400' }
+    };
+
+    const label = typeLabels[type] || typeLabels.technical;
+
     return (
-        <div className={`rounded-lg border ${typeStyles[type]} overflow-hidden`}>
+        <div className={`rounded-lg border ${typeStyles[type] || typeStyles.technical} overflow-hidden`}>
             <div
                 className="p-3 cursor-pointer hover:bg-white/5 transition-colors"
                 onClick={() => setIsExpanded(!isExpanded)}
@@ -114,11 +146,7 @@ const IssueCard = ({ issue, type }) => {
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                             <span className="font-mono text-xs font-bold text-white">{ksiId}</span>
-                            {type === 'technical' ? (
-                                <span className="text-xs text-red-400">Technical Failure</span>
-                            ) : (
-                                <span className="text-xs text-amber-400">Compliance Gap</span>
-                            )}
+                            <span className={`text-xs ${label.color}`}>{label.text}</span>
                         </div>
                         <p className="text-sm text-zinc-300 line-clamp-2">{description}</p>
                     </div>
@@ -588,7 +616,20 @@ const TransparencyConsole = () => {
     const executionAnalysis = integrityReport?.execution_quality_analysis || {};
     const overallAssessment = integrityReport?.overall_integrity_assessment || {};
 
-    const technicalIssues = executionReport?.technical_issues || [];
+    const rawTechnicalIssues = executionReport?.technical_issues || [];
+    // Partition: drop engine-noise markers, split Mode 3 score/verdict
+    // disagreements out of the technical-failure bucket (engine is working
+    // as designed; calling those "Technical Failure" is misleading).
+    const technicalIssues = [];
+    const verdictDisagreements = [];
+    for (const item of rawTechnicalIssues) {
+        if (isEngineNoise(item)) continue;
+        if (isVerdictDisagreement(item)) {
+            verdictDisagreements.push(item);
+        } else {
+            technicalIssues.push(item);
+        }
+    }
     const complianceFailures = executionReport?.compliance_failures || [];
     const consistencyChecks = consistencyLog?.consistency_checks || [];
     const latestValidations = consistencyLog?.historical_validations?.[consistencyLog.historical_validations.length - 1]?.results || [];
@@ -632,7 +673,7 @@ const TransparencyConsole = () => {
                             icon={Terminal}
                             active={activeTab}
                             set={setActiveTab}
-                            count={technicalIssues.length + complianceFailures.length}
+                            count={technicalIssues.length + verdictDisagreements.length + complianceFailures.length}
                         />
                         <TabButton
                             id="consistency"
@@ -810,10 +851,10 @@ const TransparencyConsole = () => {
                                     />
                                     <MetricCard
                                         label="Total Issues"
-                                        value={technicalIssues.length + complianceFailures.length}
-                                        subtext={`${technicalIssues.length} technical, ${complianceFailures.length} compliance`}
+                                        value={technicalIssues.length + verdictDisagreements.length + complianceFailures.length}
+                                        subtext={`${technicalIssues.length} technical, ${verdictDisagreements.length} score/verdict, ${complianceFailures.length} compliance`}
                                         icon={AlertCircle}
-                                        status={technicalIssues.length + complianceFailures.length === 0 ? 'excellent' : 'warning'}
+                                        status={technicalIssues.length + verdictDisagreements.length + complianceFailures.length === 0 ? 'excellent' : 'warning'}
                                     />
                                 </div>
 
@@ -830,6 +871,24 @@ const TransparencyConsole = () => {
                                         <div className="space-y-2">
                                             {technicalIssues.map((issue, idx) => (
                                                 <IssueCard key={idx} issue={issue} type="technical" />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Score / Verdict Disagreements — Mode 3 outcome class */}
+                                {verdictDisagreements.length > 0 && (
+                                    <div className="bg-[#18181b] rounded-lg border border-white/10 p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-lg font-bold flex items-center gap-2">
+                                                <AlertCircle size={20} className="text-blue-400" />
+                                                Score / Verdict Disagreements ({verdictDisagreements.length})
+                                            </h3>
+                                            <span className="text-xs text-zinc-500">Per-resource score above threshold; metric-level threshold breached</span>
+                                        </div>
+                                        <div className="space-y-2">
+                                            {verdictDisagreements.map((issue, idx) => (
+                                                <IssueCard key={idx} issue={issue} type="disagreement" />
                                             ))}
                                         </div>
                                     </div>
@@ -853,7 +912,7 @@ const TransparencyConsole = () => {
                                     </div>
                                 )}
 
-                                {technicalIssues.length === 0 && complianceFailures.length === 0 && (
+                                {technicalIssues.length === 0 && verdictDisagreements.length === 0 && complianceFailures.length === 0 && (
                                     <div className="bg-[#18181b] rounded-lg border border-emerald-500/20 p-12 text-center">
                                         <CheckCircle2 size={48} className="text-emerald-400 mx-auto mb-4" />
                                         <h3 className="text-xl font-bold text-emerald-400 mb-2">No Issues Detected</h3>
