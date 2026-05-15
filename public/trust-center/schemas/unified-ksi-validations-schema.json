@@ -259,17 +259,82 @@
               "required": ["resource", "status", "reason"],
               "properties": {
                 "resource": {
-                  "type": "string",
-                  "description": "Resource identifier (may be redacted)"
+                  "type": ["string", "null", "object"],
+                  "description": "Resource identifier. Typical case: a string (often redacted to a '[resource]' hash). Null is permitted when the finding is engine-side metadata rather than tied to a specific AWS resource (e.g., compliance-artifact freshness checks that key off the artifact filename rather than an ARN). The object form is a known-degraded case where an upstream primitive surfaces the raw response item (e.g., an IdentityStore user record with FamilyName/GivenName); consumers should stringify defensively and the engine should normalize this in a future release."
                 },
                 "status": {
                   "type": "string",
-                  "enum": ["PASS", "FAIL", "UNVERIFIED"],
-                  "description": "Individual resource evaluation result"
+                  "enum": ["PASS", "FAIL", "UNVERIFIED", "WARNING", "ACTIVITY"],
+                  "description": "Individual resource evaluation result. PASS / FAIL = definitive verdicts; WARNING = degraded but not failing (e.g., 96% rate against 100% target); ACTIVITY = unverified (engine collected the response but the outcome class couldn't assert a definitive verdict — typically a primitive shape it doesn't recognize, or empty data permitted by register policy); UNVERIFIED = legacy alias of ACTIVITY retained for back-compat."
                 },
                 "reason": {
                   "type": "string",
                   "description": "Explanation of the resource evaluation outcome"
+                }
+              }
+            }
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["capability", "output"],
+            "description": "Which Mode the engine evaluated this KSI under. 'capability' = Mode 1 (the operational system exists and runs); 'output' = Mode 2 (an output-rate metric meets target). Mode 3 (critical override) applies on top of either mode and forces FAIL regardless; it does not appear here as a distinct value."
+          },
+          "capability_status": {
+            "type": ["string", "null"],
+            "enum": ["operational", "degraded", "missing", null],
+            "description": "Mode 1 capability verdict. Present for KSIs evaluated under Mode 1 (capability); null for KSIs evaluated purely under Mode 2 (output) where the capability is implicit in the metric source."
+          },
+          "display_status": {
+            "type": "string",
+            "enum": ["pass", "fail"],
+            "description": "Lowercase UI-friendly status. Equivalent to the assertion boolean but in a string form the Trust Center frontend can use directly without case conversion. Always one of 'pass' or 'fail' — ACTIVITY / WARNING per-resource statuses don't propagate up to the KSI display state, only PASS or FAIL do."
+          },
+          "commands_executed": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Total number of CLI commands the engine ran for this KSI."
+          },
+          "successful_commands": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of CLI commands that completed without execution failure (network error, AccessDenied, command-not-found, etc.). The ratio successful_commands / commands_executed is a tech-quality indicator independent of the compliance verdict — high command-failure rate may mask the real KSI state (see Tracker #255 P2 cluster pattern)."
+          },
+          "command_executions": {
+            "type": "array",
+            "description": "Per-command execution metadata. Useful for diagnosing why a KSI returned an unexpected verdict (e.g., one of the commands hit AccessDeniedException). Mirrors what the engine writes to evidence_v2_engine/<KSI>/_execution_log.json on gated branches.",
+            "items": {
+              "type": "object",
+              "required": ["index", "command", "status"],
+              "properties": {
+                "index": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "0-indexed position within the KSI's cli_commands array."
+                },
+                "command": {
+                  "type": "string",
+                  "description": "The CLI command string as executed (post variable substitution)."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Free-form note from the cli_commands register entry (the 'note' field)."
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["success", "failed"],
+                  "description": "Whether the command exited cleanly with valid output."
+                },
+                "exit_code": {
+                  "type": ["integer", "null"],
+                  "description": "Process exit code; null when the command never started."
+                },
+                "execution_time": {
+                  "type": ["number", "string", "null"],
+                  "description": "Wall-clock seconds the command took, or null when not measured."
+                },
+                "error_message": {
+                  "type": ["string", "null"],
+                  "description": "Captured stderr / exception message when status='failed'; null otherwise."
                 }
               }
             }
