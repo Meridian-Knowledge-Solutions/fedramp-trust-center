@@ -520,7 +520,7 @@
       "evidence_v2/KSI-CMT-02/iac_policy.json",
       "evidence_v2/KSI-CMT-02/pipeline_executions.json"
     ],
-    "implementation_summary": "Infrastructure deployed exclusively via Terraform with state stored in S3 (mks-states bucket) and DynamoDB locking. No console changes permitted in production.",
+    "implementation_summary": "Infrastructure deployed exclusively via Terraform with state stored in S3 ([tf-state-bucket]) and DynamoDB locking. No console changes permitted in production.",
     "pass_criteria": "PASS if: A Terraform state S3 bucket exists (containing 'terraform', 'state', or 'tfstate' in the name), a DynamoDB lock table exists for state locking, at least one running EC2 instance is managed by Terraform, AND the configuration-management-policy.md mandating IaC exists in CodeCommit.",
     "fail_criteria": "FAIL if: No Terraform state bucket exists (infrastructure not managed as code), no DynamoDB lock table exists (no concurrency control), no managed EC2 instances exist, or the IaC policy document is missing."
   },
@@ -581,7 +581,7 @@
     ],
     "implementation_summary": "Change management effectiveness measured via Terraform state version history and CloudTrail event analysis. All changes traceable to specific PRs and approvers.",
     "pass_criteria": "PASS if: The change-management-procedure.md document exists in CodeCommit, AND the Terraform state file exists in S3 with version history proving sequential, tracked infrastructure changes.",
-    "fail_criteria": "FAIL if: The change management procedure document is missing, or no Terraform state file exists in the mks-states bucket."
+    "fail_criteria": "FAIL if: The change management procedure document is missing, or no Terraform state file exists in the [tf-state-bucket]."
   },
   "KSI-CNA-01": {
     "description": "Persistently ensure all machine-based information resources are configured to limit inbound and outbound network traffic.",
@@ -1200,7 +1200,7 @@
       {
         "command": "aws s3 ls s3://mks-states/ --recursive | grep -E '\\.tfstate|\\.tfplan' || echo 'No State Files Found'",
         "note": "PRIMARY: Scan the Terraform State bucket. Presence of '.tfplan' proves pre-deployment evaluation; '.tfstate' proves active configuration management.",
-        "expected_output": "Terraform state/plan files must exist in the mks-states bucket"
+        "expected_output": "Terraform state/plan files must exist in the [tf-state-bucket]"
       },
       {
         "command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, 'infra') || contains(repositoryName, 'terraform')]\" --output json",
@@ -1616,7 +1616,7 @@
       "evidence_v2/KSI-SVC-04/config_policy.json",
       "evidence_v2/KSI-SVC-04/instance_patch_states.json"
     ],
-    "implementation_summary": "Configuration management automated via Terraform with state stored in S3 (mks-states bucket) and DynamoDB state locking for concurrency control. Configuration management policy in CodeCommit mandates IaC-only changes.",
+    "implementation_summary": "Configuration management automated via Terraform with state stored in S3 ([tf-state-bucket]) and DynamoDB state locking for concurrency control. Configuration management policy in CodeCommit mandates IaC-only changes.",
     "pass_criteria": "PASS if: A Terraform state S3 bucket exists with versioning enabled, a DynamoDB lock table exists for state locking, AND at least one running EC2 instance is managed via Terraform.",
     "fail_criteria": "FAIL if: No Terraform state bucket exists, no DynamoDB lock table exists for concurrency control, or no managed instances can be verified."
   },
