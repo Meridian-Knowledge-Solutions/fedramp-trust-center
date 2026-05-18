@@ -1625,8 +1625,8 @@
     "justification": "Validates Cryptographic Integrity for EC2 Environments. Checks for: 1) CloudTrail Log File Validation (Cryptographic proof of audit logs), 2) S3 Versioning (Integrity of build artifacts/backups), and 3) SSM Session Manager (Cryptographically authenticated/encrypted console access).",
     "cli_commands": [
       {
-        "command": "aws cloudtrail describe-trails --query \"trailList[?LogFileValidationEnabled==true]\" --output json",
-        "note": "LOGS: Validate that CloudTrail Log File Validation is enabled (Cryptographic hashing of audit trails).",
+        "command": "aws cloudtrail describe-trails --query 'trailList[].TrailARN' --output text | tr '\\t' '\\n' | xargs -I{} aws cloudtrail get-trail --name {} --output json | jq -s '[.[] | .Trail | select(.LogFileValidationEnabled == true)]'",
+        "note": "LOGS: Validate that CloudTrail Log File Validation is enabled (Cryptographic hashing of audit trails). Uses describe-trails to enumerate trail ARNs (including shadow entries for organization trails owned by other accounts), then calls get-trail per ARN — get-trail returns the FULL Trail object including LogFileValidationEnabled even for shadow trails, where describe-trails strips that field from the home-account-controlled view on member-account responses. Required when the boundary delegates audit logging to an org trail in a separate management account.",
         "expected_output": "CloudTrail LogFileValidationEnabled must be true"
       },
       {
