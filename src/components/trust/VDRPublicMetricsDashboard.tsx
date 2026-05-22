@@ -252,7 +252,6 @@ export default function VDRDashboard() {
     overall_rating: data.posture.overall_rating ?? data.posture.rating,
   } : null);
   const meta = data.metadata || {};
-  const cspm = data.cspm;
   const vdrAcceptance = data.vdr_acceptance;
   const vdrOutcome = data.vdr_outcome;
   const hasDeltas = !!(data.kpi?.delta_7d || data.kpi?.delta_30d || data.deltas);
@@ -412,54 +411,28 @@ export default function VDRDashboard() {
         })()}
 
         {/* ──────────────────────────────────────────────
-            1c. CSPM + VDR ACCEPTANCE — side by side
+            1c. VDR ACCEPTANCE
            ────────────────────────────────────────────── */}
-        {(cspm || vdrAcceptance) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {cspm && (
-              <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold">CSPM Findings</div>
-                  <span className="text-[10px] text-zinc-500">Cloud posture</span>
-                </div>
-                <div className="flex items-baseline gap-2 mb-3">
-                  <span className="text-3xl font-extrabold text-zinc-100" style={mono}>{(cspm.total ?? 0).toLocaleString()}</span>
-                  <span className="text-xs text-zinc-500">total findings</span>
-                </div>
-                {cspm.by_severity && (
-                  <div className="grid grid-cols-4 gap-2">
-                    {(["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const).map(sev => (
-                      <div key={sev} className="bg-zinc-900/40 rounded px-2 py-2 text-center">
-                        <div className="text-[9px] uppercase tracking-wide font-bold" style={{ color: SEV_COLORS[sev] }}>{sev}</div>
-                        <div className="text-base font-extrabold text-zinc-100 mt-0.5" style={mono}>{cspm.by_severity[sev] ?? 0}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+        {vdrAcceptance && (
+          <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold">VDR Acceptance</div>
+              <span className="text-[10px] text-zinc-500">SLA window</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-zinc-900/40 rounded px-2 py-3 text-center">
+                <div className="text-[9px] uppercase tracking-wide text-zinc-500 font-bold">Threshold</div>
+                <div className="text-base font-extrabold text-zinc-100 mt-1" style={mono}>{vdrAcceptance.threshold_days ?? 0}d</div>
               </div>
-            )}
-            {vdrAcceptance && (
-              <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold">VDR Acceptance</div>
-                  <span className="text-[10px] text-zinc-500">SLA window</span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-zinc-900/40 rounded px-2 py-3 text-center">
-                    <div className="text-[9px] uppercase tracking-wide text-zinc-500 font-bold">Threshold</div>
-                    <div className="text-base font-extrabold text-zinc-100 mt-1" style={mono}>{vdrAcceptance.threshold_days ?? 0}d</div>
-                  </div>
-                  <div className="bg-zinc-900/40 rounded px-2 py-3 text-center">
-                    <div className="text-[9px] uppercase tracking-wide text-zinc-500 font-bold">Accepted</div>
-                    <div className="text-base font-extrabold text-emerald-400 mt-1" style={mono}>{vdrAcceptance.accepted ?? 0}</div>
-                  </div>
-                  <div className="bg-zinc-900/40 rounded px-2 py-3 text-center">
-                    <div className="text-[9px] uppercase tracking-wide text-zinc-500 font-bold">Active</div>
-                    <div className="text-base font-extrabold text-amber-400 mt-1" style={mono}>{vdrAcceptance.active ?? 0}</div>
-                  </div>
-                </div>
+              <div className="bg-zinc-900/40 rounded px-2 py-3 text-center">
+                <div className="text-[9px] uppercase tracking-wide text-zinc-500 font-bold">Accepted</div>
+                <div className="text-base font-extrabold text-emerald-400 mt-1" style={mono}>{vdrAcceptance.accepted ?? 0}</div>
               </div>
-            )}
+              <div className="bg-zinc-900/40 rounded px-2 py-3 text-center">
+                <div className="text-[9px] uppercase tracking-wide text-zinc-500 font-bold">Active</div>
+                <div className="text-base font-extrabold text-amber-400 mt-1" style={mono}>{vdrAcceptance.active ?? 0}</div>
+              </div>
+            </div>
           </div>
         )}
 
