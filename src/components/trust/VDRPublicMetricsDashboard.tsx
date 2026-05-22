@@ -289,7 +289,6 @@ export default function VDRDashboard() {
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               <h1 className="text-xl font-extrabold text-white tracking-tight">VDR Metrics</h1>
               <span className="text-[10px] bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded font-semibold tracking-wide">PUBLIC</span>
-              <span className="text-[10px] bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded font-medium">v{data.schema_version ?? meta.schema_version}</span>
             </div>
             <p className="text-xs text-zinc-600">FedRAMP 20x Vulnerability Detection &amp; Response</p>
           </div>
@@ -329,7 +328,7 @@ export default function VDRDashboard() {
         </div>
 
         {/* ──────────────────────────────────────────────
-            1b. VDR OUTCOME PANEL — Mode 1/2/3 capability/output/override verdicts
+            1b. OPERATIONAL STATUS — single-row summary
            ────────────────────────────────────────────── */}
         {vdrOutcome && (() => {
           const verdictStyle = (v?: string) => {
@@ -343,97 +342,70 @@ export default function VDRDashboard() {
             return { color: "#71717a", bg: "bg-zinc-800/40", border: "border-zinc-700/40", label: key.toUpperCase() };
           };
           const overall = verdictStyle(vdrOutcome.overall_verdict);
-          const m1 = vdrOutcome.mode_1_capability;
           const m2 = vdrOutcome.mode_2_output_rate;
           const m3 = vdrOutcome.mode_3_critical_override;
-          const m1v = verdictStyle(m1?.verdict);
-          const m2v = verdictStyle(m2?.verdict);
-          const m3v = verdictStyle(m3?.verdict);
-          const indicatorEntries: [string, any][] = m1?.indicators ? Object.entries(m1.indicators) : [];
           const m2Metrics = m2?.metrics || {};
           const remRate = m2Metrics.remediation_rate_pct;
           const remTarget = m2Metrics.remediation_target_pct;
           const breachCount = Array.isArray(m3?.breaches) ? m3.breaches.length : 0;
+          const remOk = typeof remRate === "number" && remRate >= (remTarget ?? 0);
+          const remColor = typeof remRate !== "number" ? "#71717a" : remOk ? "#10b981" : "#eab308";
+          const tiles: { label: string; value: React.ReactNode; sub?: React.ReactNode; color: string; bar?: number }[] = [];
+          if (typeof remRate === "number") {
+            tiles.push({
+              label: "Remediation Rate",
+              value: `${remRate}%`,
+              sub: typeof remTarget === "number" ? `${remTarget}% target` : undefined,
+              color: remColor,
+              bar: Math.min(remRate, 100),
+            });
+          }
+          if (m2Metrics.oldest_active_critical_days != null) {
+            tiles.push({
+              label: "Oldest Active Critical",
+              value: m2Metrics.oldest_active_critical_days,
+              sub: "days",
+              color: "#e4e4e7",
+            });
+          }
+          tiles.push({
+            label: "Critical SLA Breaches",
+            value: breachCount,
+            sub: breachCount === 1 ? "breach" : "breaches",
+            color: breachCount > 0 ? "#ef4444" : "#10b981",
+          });
+          const overdue = (m2Metrics.active_n5_overdue ?? 0) + (m2Metrics.active_n4_overdue ?? 0);
+          if (typeof m2Metrics.active_n5_overdue === "number" || typeof m2Metrics.active_n4_overdue === "number") {
+            tiles.push({
+              label: "Overdue Items",
+              value: overdue,
+              sub: "high & critical",
+              color: overdue > 0 ? "#f97316" : "#10b981",
+            });
+          }
           return (
             <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
               <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-                <div>
-                  <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-1">VDR Outcome</div>
-                  <div className="text-[11px] text-zinc-500">{vdrOutcome.framework || "VDR Outcome framework"}</div>
-                </div>
+                <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold">Operational Status</div>
                 <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md border ${overall.bg} ${overall.border}`} style={{ color: overall.color }}>
                   {overall.label}
                 </span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {/* Mode 1 — Capability */}
-                <div className="bg-zinc-900/40 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Mode 1 · Capability</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${m1v.bg}`} style={{ color: m1v.color }}>{m1v.label}</span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {indicatorEntries.map(([name, info]) => {
-                      const iv = verdictStyle(info?.verdict);
-                      return (
-                        <div key={name} className="flex items-center justify-between text-[11px]" title={info?.note}>
-                          <span className="text-zinc-400 truncate">{name.replace(/_/g, " ")}</span>
-                          <span className="w-2 h-2 rounded-full inline-block flex-shrink-0 ml-2" style={{ background: iv.color }} />
-                        </div>
-                      );
-                    })}
-                    {indicatorEntries.length === 0 && <div className="text-[11px] text-zinc-600">No indicators reported</div>}
-                  </div>
-                </div>
-                {/* Mode 2 — Output Rate */}
-                <div className="bg-zinc-900/40 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Mode 2 · Output Rate</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${m2v.bg}`} style={{ color: m2v.color }}>{m2v.label}</span>
-                  </div>
-                  {typeof remRate === "number" && (
-                    <div className="mb-2">
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-2xl font-extrabold" style={{ ...mono, color: m2v.color }}>{remRate}%</span>
-                        {typeof remTarget === "number" && (
-                          <span className="text-[11px] text-zinc-500">/ {remTarget}% target</span>
-                        )}
-                      </div>
-                      <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden mt-1.5">
-                        <div className="h-full rounded-full" style={{ width: `${Math.min(remRate, 100)}%`, background: m2v.color }} />
-                      </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {tiles.map((t, i) => (
+                  <div key={i} className="bg-zinc-900/40 rounded-lg p-4">
+                    <div className="text-[10px] text-zinc-600 uppercase tracking-wide font-bold mb-1.5">{t.label}</div>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-extrabold" style={{ ...mono, color: t.color, lineHeight: 1.1 }}>{t.value}</span>
+                      {t.sub && <span className="text-[11px] text-zinc-500">{t.sub}</span>}
                     </div>
-                  )}
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
-                    {m2Metrics.oldest_active_critical_days != null && (
-                      <div className="flex justify-between"><span className="text-zinc-500">Oldest critical</span><span className="text-zinc-300 font-bold" style={mono}>{m2Metrics.oldest_active_critical_days}d</span></div>
-                    )}
-                    {typeof m2Metrics.active_n5_overdue === "number" && (
-                      <div className="flex justify-between"><span className="text-zinc-500">N5 overdue</span><span className="text-zinc-300 font-bold" style={mono}>{m2Metrics.active_n5_overdue}</span></div>
-                    )}
-                    {typeof m2Metrics.active_n4_overdue === "number" && (
-                      <div className="flex justify-between"><span className="text-zinc-500">N4 overdue</span><span className="text-zinc-300 font-bold" style={mono}>{m2Metrics.active_n4_overdue}</span></div>
-                    )}
-                    {typeof m2Metrics.accepted_count === "number" && (
-                      <div className="flex justify-between"><span className="text-zinc-500">Accepted</span><span className="text-zinc-300 font-bold" style={mono}>{m2Metrics.accepted_count}</span></div>
+                    {typeof t.bar === "number" && (
+                      <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden mt-2">
+                        <div className="h-full rounded-full" style={{ width: `${t.bar}%`, background: t.color }} />
+                      </div>
                     )}
                   </div>
-                  {m2?.explanation && <div className="text-[10px] text-zinc-600 mt-2">{m2.explanation}</div>}
-                </div>
-                {/* Mode 3 — Critical Override */}
-                <div className="bg-zinc-900/40 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Mode 3 · Critical Override</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${m3v.bg}`} style={{ color: m3v.color }}>{m3v.label}</span>
-                  </div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-2xl font-extrabold" style={{ ...mono, color: breachCount > 0 ? "#ef4444" : "#10b981" }}>{breachCount}</span>
-                    <span className="text-[11px] text-zinc-500">{breachCount === 1 ? "breach" : "breaches"}</span>
-                  </div>
-                  <div className="text-[10px] text-zinc-600 mt-1">
-                    {breachCount === 0 ? "No critical SLA overrides triggered" : "Critical SLA breach recorded"}
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           );
@@ -715,11 +687,11 @@ export default function VDRDashboard() {
               )}
             </div>
           </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-zinc-500 mb-3">
-            {meta.vdr_standard && <span>Standard: <span className="text-zinc-300 font-semibold">{meta.vdr_standard}</span></span>}
-            {meta.pipeline_version && <span>Pipeline: <span className="text-zinc-300 font-semibold">{meta.pipeline_version}</span></span>}
-            {meta.sla_threshold && <span>SLA Threshold: <span className="text-zinc-300 font-semibold">{meta.sla_threshold}</span></span>}
-          </div>
+          {meta.sla_threshold && (
+            <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-zinc-500 mb-3">
+              <span>SLA Threshold: <span className="text-zinc-300 font-semibold">{meta.sla_threshold}</span></span>
+            </div>
+          )}
           {/* Compliance rate bar */}
           <div className="flex items-center gap-3">
             <div className="flex-1 bg-zinc-800 rounded-full h-3 overflow-hidden">
@@ -846,9 +818,8 @@ export default function VDRDashboard() {
         )}
 
         {/* Footer */}
-        <div className="pt-4 border-t border-white/[0.04] flex justify-between items-center text-[10px] text-zinc-700 flex-wrap gap-2">
-          <span>VDR Public Metrics v{data.schema_version ?? meta.schema_version} · {meta.privacy_notice}</span>
-          <span>{meta.vdr_standard} · Generated {meta.generated_at ? new Date(meta.generated_at).toLocaleDateString() : "N/A"}</span>
+        <div className="pt-4 border-t border-white/[0.04] flex justify-end items-center text-[10px] text-zinc-700 flex-wrap gap-2">
+          <span>Generated {meta.generated_at ? new Date(meta.generated_at).toLocaleDateString() : "N/A"}</span>
         </div>
       </div>
     </div>
