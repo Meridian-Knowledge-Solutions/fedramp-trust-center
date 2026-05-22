@@ -17,6 +17,7 @@ import {
 // ReportsHub removed — reports & compliance now in Organization tabs
 
 import { THEME, BASE_PATH } from '../../config/theme';
+import CustomerResponsibilityMatrix from './CustomerResponsibilityMatrix';
 
 // --- SUB-COMPONENT: Change Pipeline (Live SCN Tracking) ---
 const PlannedChangesSection = ({ scnHistory }) => {
@@ -732,6 +733,9 @@ export const TrustCenterView = () => {
                 <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-6 shadow-md`}>
                     <LiveMasDashboard boundary={masBoundary} architecture={masArch} history={masHistory} />
                 </div>
+
+                {/* --- CUSTOMER RESPONSIBILITY MATRIX (NIST 800-53 Rev 5 + KSI) --- */}
+                <CustomerResponsibilityMatrix />
 
                 {/* --- AUTHORIZED SERVICES GRID --- */}
                 <div>
