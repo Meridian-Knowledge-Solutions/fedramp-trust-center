@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meridianks.com/fedramp/schemas/cli-evidence-v1.0.json",
+  "title": "FedRAMP 20x CLI Evidence Output",
+  "description": "Machine-readable schema for per-KSI CLI evidence artifacts (cli_output.json). Each file is an array of command execution records capturing the raw AWS CLI output, execution metadata, and redacted evidence for a single KSI validation.",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "required": [
+      "attempted",
+      "status",
+      "timestamp",
+      "exit_code",
+      "cli_command",
+      "validation_id",
+      "command_index"
+    ],
+    "properties": {
+      "attempted": {
+        "type": "boolean",
+        "description": "Whether the command was actually executed (false if skipped by circuit breaker)"
+      },
+      "status": {
+        "type": "string",
+        "enum": ["success", "failure", "timeout", "skipped"],
+        "description": "Execution outcome status"
+      },
+      "timestamp": {
+        "type": "string",
+        "description": "Execution timestamp (may be partially redacted)"
+      },
+      "exit_code": {
+        "type": "integer",
+        "description": "Shell exit code (0 = success)"
+      },
+      "stdout_digest": {
+        "type": "string",
+        "description": "SHA-256 digest of the raw stdout (for integrity verification without exposing secrets)"
+      },
+      "stderr": {
+        "type": "string",
+        "description": "Standard error output from the command (empty on success)"
+      },
+      "raw_output": {
+        "description": "Parsed JSON output from the CLI command (redacted of sensitive values). Structure varies by AWS service.",
+        "oneOf": [
+          { "type": "object" },
+          { "type": "array" },
+          { "type": "null" }
+        ]
+      },
+      "execution_time_seconds": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Wall-clock execution time in seconds"
+      },
+      "command_timeout": {
+        "type": "boolean",
+        "description": "Whether the command was terminated due to timeout"
+      },
+      "cli_command": {
+        "type": "string",
+        "description": "The CLI command that was executed"
+      },
+      "validation_id": {
+        "type": "string",
+        "pattern": "^KSI-[A-Z]{2,4}-\\d{2}$",
+        "description": "KSI identifier this evidence belongs to"
+      },
+      "command_note": {
+        "type": "string",
+        "description": "Context tag from the CLI command register explaining the purpose of this command"
+      },
+      "command_index": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Zero-based index of this command within the KSI's command list"
+      },
+      "ksi_description": {
+        "type": "string",
+        "description": "Description of the parent KSI requirement"
+      }
+    }
+  }
+}
