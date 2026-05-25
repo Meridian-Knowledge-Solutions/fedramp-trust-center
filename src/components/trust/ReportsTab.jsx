@@ -174,8 +174,19 @@ const AssessmentCard = memo(({ assessment, onDownload }) => {
   );
 });
 
+// Pre-generated reports are complete standalone HTML documents with their own
+// styling (Tailwind CDN, custom fonts, light theme). Injecting our dark-theme
+// CSS into them breaks the layout and font sizing. Render those as-is and only
+// wrap raw HTML fragments.
+const isStandaloneHtmlDocument = (html) => {
+  if (typeof html !== 'string') return false;
+  const head = html.slice(0, 512).toLowerCase();
+  return head.includes('<!doctype') || head.includes('<html');
+};
+
 // Wrap HTML content with dark-theme styles for iframe rendering
 const wrapHtmlWithStyles = (html) => {
+  if (isStandaloneHtmlDocument(html)) return html;
   const darkThemeCSS = `
     <style>
       *, *::before, *::after { box-sizing: border-box; }
@@ -245,9 +256,11 @@ const wrapHtmlWithStyles = (html) => {
 const ContentViewer = memo(({ content, format, title, onClose }) => {
   if (!content) return null;
 
+  const isHtml = format === 'html';
+
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[80] flex items-center justify-center p-4" onClick={onClose}>
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} w-full max-w-5xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl`} onClick={e => e.stopPropagation()}>
+      <div className={`${THEME.panel} rounded-xl border ${THEME.border} w-full ${isHtml ? 'max-w-7xl h-[90vh]' : 'max-w-5xl max-h-[85vh]'} flex flex-col overflow-hidden shadow-2xl`} onClick={e => e.stopPropagation()}>
         <div className="px-5 py-3 border-b border-white/5 bg-[#09090b] flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
             {format === 'json' ? <FileJson size={14} className="text-amber-400" /> : <FileCode size={14} className="text-blue-400" />}
@@ -268,10 +281,10 @@ const ContentViewer = memo(({ content, format, title, onClose }) => {
           ) : (
             <iframe
               srcDoc={wrapHtmlWithStyles(content)}
-              className="w-full h-full min-h-[600px]"
-              style={{ background: '#09090b' }}
+              className="w-full h-full min-h-[600px] block"
+              style={{ background: '#ffffff', border: 0 }}
               title={title}
-              sandbox="allow-same-origin"
+              sandbox="allow-scripts"
             />
           )}
         </div>
