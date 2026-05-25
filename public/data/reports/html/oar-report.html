@@ -2,142 +2,263 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Ongoing Authorization Report (OAR) - 2026-03-02</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ongoing Authorization Report (OAR) - 2026-05-25</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        :root {
+            --accent-50:  rgb(var(--a50));
+            --accent-100: rgb(var(--a100));
+            --accent-500: rgb(var(--a500));
+            --accent-600: rgb(var(--a600));
+            --accent-700: rgb(var(--a700));
+        }
+        html, body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+        .font-mono, code { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+        .accent-band { background: linear-gradient(135deg, var(--accent-600), var(--accent-700)); }
+        .accent-text { color: var(--accent-600); }
+        .accent-bg-soft { background: var(--accent-50); }
+        .accent-border { border-color: var(--accent-500); }
+        .card { background: #fff; border: 1px solid rgb(226 232 240); border-radius: 16px; box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px -2px rgba(15,23,42,.05); }
+        .card-flush { background: #fff; border: 1px solid rgb(226 232 240); border-radius: 16px; overflow: hidden; }
+        .section-eyebrow { letter-spacing: .18em; font-weight: 700; font-size: 10px; text-transform: uppercase; color: var(--accent-600); }
+        .section-h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; color: rgb(15 23 42); }
+        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .data-table thead th { background: rgb(248 250 252); color: rgb(71 85 105); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; text-align: left; padding: 12px 16px; position: sticky; top: 0; }
+        .data-table thead th:first-child { border-top-left-radius: 16px; }
+        .data-table thead th:last-child { border-top-right-radius: 16px; }
+        .data-table tbody td { padding: 12px 16px; font-size: 13px; color: rgb(30 41 59); border-top: 1px solid rgb(241 245 249); }
+        .data-table tbody tr:hover td { background: rgb(248 250 252); }
+        .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1; }
+        .pill-good { background: rgb(220 252 231); color: rgb(22 101 52); }
+        .pill-warn { background: rgb(254 243 199); color: rgb(146 64 14); }
+        .pill-bad  { background: rgb(254 226 226); color: rgb(153 27 27); }
+        .pill-info { background: rgb(241 245 249); color: rgb(51 65 85); }
+        .accent-indigo { --a50: 238 242 255; --a100: 224 231 255; --a500: 99 102 241; --a600: 79 70 229; --a700: 67 56 202; }
+        .accent-indigo { --a50: 238 242 255; --a100: 224 231 255; --a500: 99 102 241; --a600: 79 70 229; --a700: 67 56 202; }
+        .accent-blue   { --a50: 239 246 255; --a100: 219 234 254; --a500: 59 130 246; --a600: 37 99 235; --a700: 29 78 216; }
+        .accent-amber  { --a50: 255 251 235; --a100: 254 243 199; --a500: 245 158 11; --a600: 217 119 6;  --a700: 180 83 9; }
+        .accent-rose   { --a50: 255 241 242; --a100: 255 228 230; --a500: 244 63 94;  --a600: 225 29 72;  --a700: 190 18 60; }
         @media print {
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 11pt; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 11pt; background: #fff; }
             .no-print { display: none; }
             .page-break { page-break-before: always; }
+            .card, .card-flush { box-shadow: none; break-inside: avoid; }
         }
     </style>
 </head>
-<body class="bg-white">
-    <header class="border-b-4 border-blue-600 bg-gray-50 py-6">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Ongoing Authorization Report (OAR)</h1>
-                    <p class="text-sm text-gray-600 uppercase tracking-wide font-semibold">FRR-CCM-01 through CCM-07</p>
+<body class="bg-slate-50 accent-indigo">
+    <div class="accent-band h-1.5 w-full"></div>
+    <header class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                <div class="flex items-start gap-4">
+                    <div class="accent-band text-white rounded-2xl w-12 h-12 flex items-center justify-center shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-6 h-6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 5.523-3.879 10.268-9 11.486-5.121-1.218-9-5.963-9-11.486V5.25l9-3 9 3V12Z"/></svg>
+                    </div>
+                    <div>
+                        <p class="section-eyebrow mb-1">FRR-CCM-01 through CCM-07</p>
+                        <h1 class="text-3xl font-bold text-slate-900 tracking-tight leading-tight">Ongoing Authorization Report (OAR)</h1>
+                        <p class="text-sm text-slate-500 mt-1">Meridian Knowledge Solutions &middot; Meridian LMS &middot; Moderate</p>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <p class="text-xs text-gray-500 uppercase font-semibold">Generated</p>
-                    <p class="text-sm font-mono text-gray-900">2026-03-02 21:43 UTC</p>
-                    <p class="text-xs text-gray-500 uppercase font-semibold mt-2">Data Type</p>
-                    <p class="text-sm font-mono text-gray-900">LIVE</p>
+                <div class="flex flex-wrap gap-2 lg:justify-end">
+                    <span class="pill pill-info"><span class="opacity-60">Generated</span><span class="font-mono">2026-05-25 04:57 UTC</span></span>
+                    <span class="pill pill-info"><span class="opacity-60">Data</span><span class="font-mono">LIVE</span></span>
                 </div>
             </div>
         </div>
     </header>
+    <main class="max-w-7xl mx-auto px-6 lg:px-8 py-8 space-y-8">
 
-    <main class="max-w-7xl mx-auto px-6 py-8">
-
-        <section class="mb-10">
-            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">1. Executive Summary</h2>
-            <p class="text-sm text-gray-700 mt-4 mb-4 leading-relaxed">This Ongoing Authorization Report covers the period ending 2026-03-02. The Meridian LMS maintains a 100.0% compliance rate across 61 Key Security Indicators with 0 active gaps. Persistent validation is demonstrated through 501 KSI validation runs and 146 daily evidence snapshots. The VDR pipeline tracks 287 vulnerabilities with 0 accepted.</p>
-            <div class="grid grid-cols-4 gap-4">
+        <section class="space-y-4">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 1</p>
+                    <h2 class="section-h2">Executive Summary</h2>
+                </div>
+            </div>
+            
+            
+            <p class="text-sm text-slate-600 leading-relaxed">This Ongoing Authorization Report covers the period ending 2026-05-15. The Meridian LMS maintains a 93.4% compliance rate across 61 Key Security Indicators with 4 active gaps. Persistent validation is demonstrated through 1092 KSI validation runs and 230 daily evidence snapshots. The VDR pipeline tracks 14 vulnerabilities with 0 accepted.</p>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 
-        <div class="border-2 border-gray-300 p-4 bg-gray-50">
-            <p class="text-xs text-gray-600 uppercase font-semibold mb-1">Compliance Rate</p>
-            <p class="text-2xl font-bold text-gray-900 ">100.0%</p>
+        <div class="card p-5">
+            <div class="flex items-start justify-between mb-3">
+                <p class="section-eyebrow">Compliance Rate</p>
+                <div class="accent-text"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg></div>
+            </div>
+            <p class="text-3xl font-bold tracking-tight text-amber-600">93.4%</p>
+            
         </div>
                 
-        <div class="border-2 border-gray-300 p-4 bg-gray-50">
-            <p class="text-xs text-gray-600 uppercase font-semibold mb-1">Active Gaps</p>
-            <p class="text-2xl font-bold text-gray-900 ">0</p>
+        <div class="card p-5">
+            <div class="flex items-start justify-between mb-3">
+                <p class="section-eyebrow">Active Gaps</p>
+                <div class="accent-text"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9.303 3.376c.866 1.5-.217 3.374-1.948 3.374H4.645c-1.732 0-2.813-1.874-1.948-3.374L9.4 3.003c.866-1.5 3.032-1.5 3.898 0l8.704 13.123ZM12 17.25h.007v.008H12v-.008Z"/></svg></div>
+            </div>
+            <p class="text-3xl font-bold tracking-tight text-amber-600">4</p>
+            
         </div>
                 
-        <div class="border-2 border-gray-300 p-4 bg-gray-50">
-            <p class="text-xs text-gray-600 uppercase font-semibold mb-1">Total KSIs</p>
-            <p class="text-2xl font-bold text-gray-900 ">61</p>
+        <div class="card p-5">
+            <div class="flex items-start justify-between mb-3">
+                <p class="section-eyebrow">Total KSIs</p>
+                <div class="accent-text"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125V19.5A1.5 1.5 0 0 0 4.5 21h15a1.5 1.5 0 0 0 1.5-1.5v-3.375M3 13.125 7.5 8.625l4 4 5.5-5.5L21 11.25"/></svg></div>
+            </div>
+            <p class="text-3xl font-bold tracking-tight text-slate-900">61</p>
+            
         </div>
                 
-        <div class="border-2 border-gray-300 p-4 bg-gray-50">
-            <p class="text-xs text-gray-600 uppercase font-semibold mb-1">Evidence Snapshots</p>
-            <p class="text-2xl font-bold text-gray-900 ">146</p>
+        <div class="card p-5">
+            <div class="flex items-start justify-between mb-3">
+                <p class="section-eyebrow">Evidence Snapshots</p>
+                <div class="accent-text"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg></div>
+            </div>
+            <p class="text-3xl font-bold tracking-tight text-slate-900">230</p>
+            <p class="text-xs text-slate-500 mt-2">period 2026-02-14 — 2026-05-15</p>
         </div>
             </div>
         </section>
-        <section class="mb-10">
-            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">2. Compliance Trend (14-Day Window)</h2>
-            <p class="text-sm text-gray-700 mt-4 mb-4">Trend direction: <strong>stable</strong></p>
+        <section class="space-y-4">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 2</p>
+                    <h2 class="section-h2">Compliance Trend</h2>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 mt-2 max-w-3xl leading-relaxed">Persistent compliance evidence across 14 distinct days of automated KSI validation.</p>
             
-        <div class="border-2 border-gray-300 bg-white">
-            <table class="w-full">
-                <thead class="bg-gray-100 border-b-2 border-gray-300"><tr><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Date</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Compliance</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Total KSIs</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Passed</th></tr></thead>
-                <tbody><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-02-17</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-02-18</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-02-19</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-02-20</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-02-21</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-02-22</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-02-23</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-02-24</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-02-25</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-02-26</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-02-27</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-02-28</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-03-01</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-03-02</td><td class="px-4 py-3 text-sm">100.0%</td><td class="px-4 py-3 text-sm">61</td><td class="px-4 py-3 text-sm">61</td></tr></tbody>
-            </table>
+            <div class="flex items-center gap-3 text-sm text-slate-600">
+                <span>14-day temporal validation window.</span>
+                <span>Direction:</span> <span class="pill pill-good">IMPROVING</span>
+            </div>
+            
+        <div class="card-flush">
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead><tr><th>Date</th><th>Compliance</th><th>Total KSIs</th><th>Passed</th></tr></thead>
+                    <tbody><tr><td><span class="font-mono">2026-05-25</span></td><td><span class="pill pill-warn">93.4%</span></td><td>61</td><td>57</td></tr><tr><td><span class="font-mono">2026-05-24</span></td><td><span class="pill pill-warn">93.4%</span></td><td>61</td><td>57</td></tr><tr><td><span class="font-mono">2026-05-23</span></td><td><span class="pill pill-warn">93.4%</span></td><td>61</td><td>57</td></tr><tr><td><span class="font-mono">2026-05-22</span></td><td><span class="pill pill-warn">93.4%</span></td><td>61</td><td>57</td></tr><tr><td><span class="font-mono">2026-05-21</span></td><td><span class="pill pill-warn">93.4%</span></td><td>61</td><td>57</td></tr><tr><td><span class="font-mono">2026-05-20</span></td><td><span class="pill pill-warn">93.4%</span></td><td>61</td><td>57</td></tr><tr><td><span class="font-mono">2026-05-19</span></td><td><span class="pill pill-warn">93.4%</span></td><td>61</td><td>57</td></tr><tr><td><span class="font-mono">2026-05-18</span></td><td><span class="pill pill-warn">93.4%</span></td><td>61</td><td>57</td></tr><tr><td><span class="font-mono">2026-05-17</span></td><td><span class="pill pill-warn">85.2%</span></td><td>61</td><td>52</td></tr><tr><td><span class="font-mono">2026-05-16</span></td><td><span class="pill pill-warn">85.2%</span></td><td>61</td><td>52</td></tr><tr><td><span class="font-mono">2026-05-15</span></td><td><span class="pill pill-warn">85.2%</span></td><td>61</td><td>52</td></tr><tr><td><span class="font-mono">2026-05-14</span></td><td><span class="pill pill-warn">85.2%</span></td><td>61</td><td>52</td></tr><tr><td><span class="font-mono">2026-05-13</span></td><td><span class="pill pill-warn">83.6%</span></td><td>61</td><td>51</td></tr><tr><td><span class="font-mono">2026-05-12</span></td><td><span class="pill pill-warn">82.0%</span></td><td>61</td><td>50</td></tr></tbody>
+                </table>
+            </div>
         </div>
         </section>
-        <section class="mb-10">
-            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">3. Transformative Changes</h2>
+        <section class="space-y-4">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 3</p>
+                    <h2 class="section-h2">Transformative Changes</h2>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 mt-2 max-w-3xl leading-relaxed">Significant Change Notifications classified per the tiered FRR-SCN framework.</p>
             
-        <div class="border-2 border-gray-300 bg-white">
-            <table class="w-full">
-                <thead class="bg-gray-100 border-b-2 border-gray-300"><tr><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Date</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Type</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Description</th></tr></thead>
-                <tbody><tr><td colspan="3" class="px-4 py-8 text-sm text-gray-500 text-center">No transformative changes recorded.</td></tr></tbody>
-            </table>
+        <div class="card-flush">
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead><tr><th>Date</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody><tr><td><span class="font-mono">2025-12-23</span></td><td><span class="pill pill-info">adaptive</span></td><td>Routine recurring change</td></tr><tr><td><span class="font-mono">2025-12-23</span></td><td><span class="pill pill-info">adaptive</span></td><td>Routine recurring change</td></tr><tr><td><span class="font-mono">2025-12-23</span></td><td><span class="pill pill-info">adaptive</span></td><td>Routine recurring change</td></tr><tr><td><span class="font-mono">2025-12-24</span></td><td><span class="pill pill-info">adaptive</span></td><td>Routine recurring change</td></tr><tr><td><span class="font-mono">2025-12-24</span></td><td><span class="pill pill-info">adaptive</span></td><td>Routine recurring change</td></tr><tr><td><span class="font-mono">2025-12-24</span></td><td><span class="pill pill-info">adaptive</span></td><td>Routine recurring change</td></tr><tr><td><span class="font-mono">2025-12-25</span></td><td><span class="pill pill-info">adaptive</span></td><td>Routine recurring change</td></tr><tr><td><span class="font-mono">2026-01-03</span></td><td><span class="pill pill-info">transformative</span></td><td>Routine recurring change</td></tr></tbody>
+                </table>
+            </div>
         </div>
         </section>
-        <section class="mb-10">
-            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">4. Planned Changes (90-Day Window)</h2>
+        <section class="space-y-4 page-break">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 4</p>
+                    <h2 class="section-h2">Planned Changes</h2>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 mt-2 max-w-3xl leading-relaxed">Forward-looking transparency on anticipated modifications within the next 90 days (FRR-CCM-01).</p>
             
-        <div class="border-2 border-gray-300 bg-white">
-            <table class="w-full">
-                <thead class="bg-gray-100 border-b-2 border-gray-300"><tr><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Title</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Description</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Target Date</th></tr></thead>
-                <tbody><tr><td colspan="3" class="px-4 py-8 text-sm text-gray-500 text-center">No planned changes.</td></tr></tbody>
-            </table>
+        <div class="card-flush">
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead><tr><th>Title</th><th>Description</th><th>Target Date</th></tr></thead>
+                    <tbody><tr><td colspan="3" style="padding:32px 16px;text-align:center;color:rgb(100 116 139);font-size:13px;font-style:italic">No planned changes in the 90-day window.</td></tr></tbody>
+                </table>
+            </div>
         </div>
         </section>
-        <section class="mb-10">
-            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">5. Accepted Vulnerabilities</h2>
+        <section class="space-y-4">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 5</p>
+                    <h2 class="section-h2">Accepted Vulnerabilities</h2>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 mt-2 max-w-3xl leading-relaxed">Risk-accepted findings with documented business justifications (FRR-VDR-07).</p>
             
-        <div class="border-2 border-gray-300 bg-white">
-            <table class="w-full">
-                <thead class="bg-gray-100 border-b-2 border-gray-300"><tr><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">ID</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Severity</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Title</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Justification</th></tr></thead>
-                <tbody><tr><td colspan="4" class="px-4 py-8 text-sm text-gray-500 text-center">No accepted vulnerabilities.</td></tr></tbody>
-            </table>
+        <div class="card-flush">
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead><tr><th>ID</th><th>Severity</th><th>Title</th><th>Justification</th></tr></thead>
+                    <tbody><tr><td colspan="4" style="padding:32px 16px;text-align:center;color:rgb(100 116 139);font-size:13px;font-style:italic">No accepted vulnerabilities.</td></tr></tbody>
+                </table>
+            </div>
         </div>
         </section>
-        <section class="mb-10">
-            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">6. Recommendations</h2>
+        <section class="space-y-4">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 6</p>
+                    <h2 class="section-h2">Updated Recommendations</h2>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 mt-2 max-w-3xl leading-relaxed">Best practices for security, configuration, and operational improvements.</p>
             
-        <div class="border-2 border-gray-300 bg-white">
-            <table class="w-full">
-                <thead class="bg-gray-100 border-b-2 border-gray-300"><tr><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Category</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Title</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Description</th></tr></thead>
-                <tbody><tr><td colspan="3" class="px-4 py-8 text-sm text-gray-500 text-center">No new recommendations.</td></tr></tbody>
-            </table>
+        <div class="card-flush">
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead><tr><th>Category</th><th>Title</th><th>Description</th></tr></thead>
+                    <tbody><tr><td colspan="3" style="padding:32px 16px;text-align:center;color:rgb(100 116 139);font-size:13px;font-style:italic">No new recommendations.</td></tr></tbody>
+                </table>
+            </div>
         </div>
         </section>
-        <section class="mb-10">
-            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">7. Anonymized Feedback Summary</h2>
-            <p class="text-sm text-gray-700 mt-4 mb-4">Contact: [EMAIL-REDACTED]</p>
+        <section class="space-y-4">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 7</p>
+                    <h2 class="section-h2">Feedback Mechanism</h2>
+                </div>
+            </div>
             
-        <div class="border-2 border-gray-300 bg-white">
-            <table class="w-full">
-                <thead class="bg-gray-100 border-b-2 border-gray-300"><tr><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Date</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Question</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Answer</th></tr></thead>
-                <tbody><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-01-10</td><td class="px-4 py-3 text-sm">How is multi-AZ resilience measured for Load Balancers?</td><td class="px-4 py-3 text-sm">We use the LoadBalancerPrimitive to count unique 'AvailabilityZoneNames' returned by the AWS ELBv2 API. A count >= 2 is required for a PASS.</td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">2026-01-12</td><td class="px-4 py-3 text-sm">What is the remediation timeframe for critical vulnerabilities?</td><td class="px-4 py-3 text-sm">Per our VDR policy, critical vulnerabilities (N5/N4) must be remediated within 15 days.</td></tr></tbody>
-            </table>
-        </div>
+            
+            <div class="card p-6 space-y-3">
+                <div class="flex items-center gap-3">
+                    <div class="accent-bg-soft accent-text rounded-xl w-10 h-10 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg></div>
+                    <p class="text-sm text-slate-600">Asynchronous feedback channel for all necessary parties (FRR-CCM-04).</p>
+                </div>
+                <p class="text-sm"><span class="text-slate-500">Contact:</span> <a class="accent-text font-medium" href="mailto:[EMAIL-REDACTED]">[EMAIL-REDACTED]</a></p>
+                <p class="text-xs text-slate-500 italic leading-relaxed border-l-2 accent-border pl-3">Per FRR-CCM-05, agency feedback and questions are not disclosed publicly. Submissions are routed to FedRAMP and the provider only.</p>
+            </div>
         </section>
-        <section class="mb-10">
-            <h2 class="text-xl font-bold text-gray-900 mb-1 pb-2 border-b-2 border-gray-300">8. FRR-CCM Compliance Attestations</h2>
+        <section class="space-y-4 page-break">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 8</p>
+                    <h2 class="section-h2">FRR-CCM Compliance Attestations</h2>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 mt-2 max-w-3xl leading-relaxed">Verbatim from RFC-0016 Collaborative Continuous Monitoring Standard.</p>
             
-        <div class="border-2 border-gray-300 bg-white">
-            <table class="w-full">
-                <thead class="bg-gray-100 border-b-2 border-gray-300"><tr><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Requirement</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Description</th><th class="px-4 py-3 text-xs font-bold text-gray-700 uppercase text-left">Status</th></tr></thead>
-                <tbody><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">CCM-01</td><td class="px-4 py-3 text-sm">Ongoing Authorization Report with all required sections</td><td class="px-4 py-3 text-sm"><span class="text-green-600 font-bold">COMPLIANT</span></td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">CCM-02</td><td class="px-4 py-3 text-sm">Regular 3-month reporting cycle (Feb 15, May 15, Aug 15, Nov 15)</td><td class="px-4 py-3 text-sm"><span class="text-green-600 font-bold">COMPLIANT</span></td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">CCM-03</td><td class="px-4 py-3 text-sm">Public next report date disclosed</td><td class="px-4 py-3 text-sm"><span class="text-green-600 font-bold">COMPLIANT</span></td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">CCM-04</td><td class="px-4 py-3 text-sm">Asynchronous feedback mechanism</td><td class="px-4 py-3 text-sm"><span class="text-green-600 font-bold">COMPLIANT</span></td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">CCM-05</td><td class="px-4 py-3 text-sm">Anonymized feedback summary</td><td class="px-4 py-3 text-sm"><span class="text-green-600 font-bold">COMPLIANT</span></td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">CCM-06</td><td class="px-4 py-3 text-sm">No irresponsible disclosure - sensitive data redacted</td><td class="px-4 py-3 text-sm"><span class="text-green-600 font-bold">COMPLIANT</span></td></tr><tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm">CCM-07</td><td class="px-4 py-3 text-sm">Responsible public sharing configured</td><td class="px-4 py-3 text-sm"><span class="text-green-600 font-bold">COMPLIANT</span></td></tr></tbody>
-            </table>
+        <div class="card-flush">
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead><tr><th>Requirement</th><th>Description</th><th>Status</th></tr></thead>
+                    <tbody><tr><td><span class="font-mono text-xs">FRR-CCM-01</span></td><td>Providers MUST make an Ongoing Authorization Report available to all necessary parties every 3 months</td><td><span class="pill pill-good">Compliant</span></td></tr><tr><td><span class="font-mono text-xs">FRR-CCM-02</span></td><td>Providers SHOULD establish a regular 3 month cycle for Ongoing Authorization Reports that does not align with calendar quarters</td><td><span class="pill pill-good">Compliant</span></td></tr><tr><td><span class="font-mono text-xs">FRR-CCM-03</span></td><td>Providers MUST publicly include the target date for their next Ongoing Authorization Report</td><td><span class="pill pill-good">Compliant</span></td></tr><tr><td><span class="font-mono text-xs">FRR-CCM-04</span></td><td>Providers MUST establish and share an asynchronous mechanism for all necessary parties to provide feedback</td><td><span class="pill pill-good">Compliant</span></td></tr><tr><td><span class="font-mono text-xs">FRR-CCM-05</span></td><td>Providers MUST NOT share feedback or questions from agencies publicly or with other parties than FedRAMP</td><td><span class="pill pill-good">Compliant</span></td></tr><tr><td><span class="font-mono text-xs">FRR-CCM-06</span></td><td>Providers MUST NOT irresponsibly disclose sensitive information in an Ongoing Authorization Report</td><td><span class="pill pill-good">Compliant</span></td></tr><tr><td><span class="font-mono text-xs">FRR-CCM-07</span></td><td>Providers MAY responsibly share some or all of the information an Ongoing Authorization Report publicly</td><td><span class="pill pill-good">Compliant</span></td></tr></tbody>
+                </table>
+            </div>
         </div>
         </section>
     </main>
-
-    <footer class="border-t-2 border-gray-300 bg-gray-50 py-6 mt-12">
-        <div class="max-w-7xl mx-auto px-6 text-center">
-            <p class="text-xs text-gray-600 uppercase font-semibold tracking-wide">Ongoing Authorization Report (OAR)</p>
-            <p class="text-xs text-gray-500 mt-1">Automatically generated per FedRAMP 20x continuous monitoring requirements.</p>
-            <p class="text-xs text-gray-400 mt-1 font-mono">Hash: 2b04c246fe621a94...</p>
+    <footer class="border-t border-slate-200 bg-white mt-8">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs text-slate-500">
+            <p>Automatically generated per FedRAMP 20x continuous monitoring requirements (RFC-0016).</p>
+            <p class="font-mono">SHA-256: <span class="text-slate-700">083ff02327c725b1...</span></p>
         </div>
     </footer>
 </body>
