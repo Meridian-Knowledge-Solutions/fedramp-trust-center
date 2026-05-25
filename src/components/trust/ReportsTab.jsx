@@ -174,87 +174,9 @@ const AssessmentCard = memo(({ assessment, onDownload }) => {
   );
 });
 
-// Pre-generated reports are complete standalone HTML documents with their own
-// styling (Tailwind CDN, custom fonts, light theme). Injecting our dark-theme
-// CSS into them breaks the layout and font sizing. Render those as-is and only
-// wrap raw HTML fragments.
-const isStandaloneHtmlDocument = (html) => {
-  if (typeof html !== 'string') return false;
-  const head = html.slice(0, 512).toLowerCase();
-  return head.includes('<!doctype') || head.includes('<html');
-};
-
-// Wrap HTML content with dark-theme styles for iframe rendering
-const wrapHtmlWithStyles = (html) => {
-  if (isStandaloneHtmlDocument(html)) return html;
-  const darkThemeCSS = `
-    <style>
-      *, *::before, *::after { box-sizing: border-box; }
-      html, body {
-        margin: 0; padding: 16px; background: #09090b; color: #e2e8f0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 14px; line-height: 1.6;
-      }
-      h1, h2, h3, h4, h5, h6 {
-        color: #f8fafc; margin: 1.5em 0 0.5em; font-weight: 700; letter-spacing: -0.01em;
-      }
-      h1 { font-size: 1.5em; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.3em; }
-      h2 { font-size: 1.25em; }
-      h3 { font-size: 1.1em; }
-      p { margin: 0.75em 0; }
-      a { color: #60a5fa; text-decoration: none; }
-      a:hover { text-decoration: underline; color: #93bbfd; }
-      table {
-        width: 100%; border-collapse: collapse; margin: 1em 0;
-        background: #121217; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;
-      }
-      thead { background: #18181b; }
-      th {
-        padding: 10px 14px; text-align: left; font-size: 10px; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-      }
-      td {
-        padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #cbd5e1; font-size: 13px;
-      }
-      tr:hover td { background: rgba(255,255,255,0.03); }
-      tr:last-child td { border-bottom: none; }
-      code {
-        background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;
-        font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.9em; color: #e2e8f0;
-        border: 1px solid rgba(255,255,255,0.05);
-      }
-      pre {
-        background: #121217; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
-        padding: 16px; overflow-x: auto; margin: 1em 0;
-      }
-      pre code { background: none; border: none; padding: 0; }
-      ul, ol { padding-left: 1.5em; margin: 0.75em 0; }
-      li { margin: 0.3em 0; color: #cbd5e1; }
-      li::marker { color: #475569; }
-      blockquote {
-        margin: 1em 0; padding: 12px 16px; border-left: 3px solid #3b82f6;
-        background: rgba(59,130,246,0.05); border-radius: 0 6px 6px 0; color: #94a3b8;
-      }
-      hr { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 1.5em 0; }
-      ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-      ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-    </style>
-  `;
-  // Inject styles at the beginning of <head> if present, otherwise prepend
-  if (html.includes('<head>')) {
-    return html.replace('<head>', '<head>' + darkThemeCSS);
-  } else if (html.includes('<html>')) {
-    return html.replace('<html>', '<html><head>' + darkThemeCSS + '</head>');
-  }
-  return darkThemeCSS + html;
-};
-
-// Viewer modal for JSON/HTML content
-const ContentViewer = memo(({ content, format, title, onClose }) => {
-  if (!content) return null;
+// Viewer modal for JSON content or an HTML report URL
+const ContentViewer = memo(({ content, url, format, title, onClose }) => {
+  if (!content && !url) return null;
 
   const isHtml = format === 'html';
 
@@ -279,12 +201,15 @@ const ContentViewer = memo(({ content, format, title, onClose }) => {
               {typeof content === 'string' ? content : JSON.stringify(content, null, 2)}
             </pre>
           ) : (
+            // Load the standalone report by URL so its Tailwind CDN script,
+            // Google Fonts, and own CSS run in a normal document context.
+            // Fetching + srcDoc breaks runtime CSS-in-JS (Tailwind CDN) under
+            // an opaque-origin sandbox, producing oversized/unstyled output.
             <iframe
-              srcDoc={wrapHtmlWithStyles(content)}
+              src={url}
               className="w-full h-full min-h-[600px] block"
               style={{ background: '#ffffff', border: 0 }}
               title={title}
-              sandbox="allow-scripts"
             />
           )}
         </div>
@@ -300,6 +225,7 @@ export const ReportsTab = memo(() => {
   } = useTrustCenterData();
 
   const [viewerContent, setViewerContent] = useState(null);
+  const [viewerUrl, setViewerUrl] = useState(null);
   const [viewerFormat, setViewerFormat] = useState('json');
   const [viewerTitle, setViewerTitle] = useState('');
 
@@ -334,6 +260,7 @@ export const ReportsTab = memo(() => {
       if (res.ok) {
         const data = await res.json();
         setViewerContent(data);
+        setViewerUrl(null);
         setViewerFormat('json');
         setViewerTitle(report.title || report.path.split('/').pop());
       }
@@ -342,18 +269,11 @@ export const ReportsTab = memo(() => {
     }
   }, [getFileUrl]);
 
-  const handleViewHtml = useCallback(async (htmlReport) => {
-    try {
-      const res = await fetch(getFileUrl(htmlReport.path));
-      if (res.ok) {
-        const html = await res.text();
-        setViewerContent(html);
-        setViewerFormat('html');
-        setViewerTitle(htmlReport.title || htmlReport.path.split('/').pop());
-      }
-    } catch {
-      // Silent fail
-    }
+  const handleViewHtml = useCallback((htmlReport) => {
+    setViewerContent(null);
+    setViewerUrl(getFileUrl(htmlReport.path));
+    setViewerFormat('html');
+    setViewerTitle(htmlReport.title || htmlReport.path.split('/').pop());
   }, [getFileUrl]);
 
   const handleDownload = useCallback((report) => {
@@ -379,12 +299,17 @@ export const ReportsTab = memo(() => {
     }
   }, [reports, assessments, getFileUrl]);
 
+  const closeViewer = useCallback(() => {
+    setViewerContent(null);
+    setViewerUrl(null);
+  }, []);
+
   // Close viewer on ESC
   useEffect(() => {
-    const handleEsc = (e) => { if (e.key === 'Escape') setViewerContent(null); };
+    const handleEsc = (e) => { if (e.key === 'Escape') closeViewer(); };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, []);
+  }, [closeViewer]);
 
   if (loading) {
     return (
@@ -506,12 +431,13 @@ export const ReportsTab = memo(() => {
       )}
 
       {/* Content Viewer Overlay */}
-      {viewerContent && (
+      {(viewerContent || viewerUrl) && (
         <ContentViewer
           content={viewerContent}
+          url={viewerUrl}
           format={viewerFormat}
           title={viewerTitle}
-          onClose={() => setViewerContent(null)}
+          onClose={closeViewer}
         />
       )}
     </div>
