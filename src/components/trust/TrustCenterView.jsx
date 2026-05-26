@@ -20,17 +20,24 @@ import { THEME, BASE_PATH } from '../../config/theme';
 import CustomerResponsibilityMatrix from './CustomerResponsibilityMatrix';
 
 // --- SUB-COMPONENT: Change Pipeline (Live SCN Tracking) ---
-const PlannedChangesSection = ({ scnHistory }) => {
-    // Filter for upcoming or recently initiated changes if available, 
-    // otherwise show the most recent significant activity.
-    const displayChanges = scnHistory?.slice(0, 4) || [];
+const SCN_TIER_STYLES = {
+    routine_recurring:     { border: 'border-l-emerald-500 bg-emerald-500/5', dot: 'bg-emerald-500', label: 'Routine' },
+    adaptive:              { border: 'border-l-blue-500 bg-blue-500/5',       dot: 'bg-blue-500',    label: 'Adaptive' },
+    transformative:        { border: 'border-l-rose-500 bg-rose-500/5',       dot: 'bg-rose-500',    label: 'Transformative' },
+    impact_categorization: { border: 'border-l-orange-500 bg-orange-500/5',   dot: 'bg-orange-500',  label: 'Impact Categorization' },
+    critical:              { border: 'border-l-red-600 bg-red-600/10',        dot: 'bg-red-600',     label: 'Critical' },
+};
 
-    const getImpactStyles = (impact) => {
-        const type = impact?.toLowerCase();
-        if (type === 'transformative') return 'border-l-rose-500 bg-rose-500/5';
-        if (type === 'adaptive') return 'border-l-blue-500 bg-blue-500/5';
-        return 'border-l-emerald-500 bg-emerald-500/5';
-    };
+const SCN_IMPACT_BADGE = {
+    none:    'bg-white/5 text-slate-400 border-white/10',
+    minimal: 'bg-white/5 text-slate-400 border-white/10',
+    low:     'bg-blue-500/10 text-blue-300 border-blue-500/20',
+    medium:  'bg-amber-500/10 text-amber-300 border-amber-500/20',
+    high:    'bg-red-500/10 text-red-300 border-red-500/30',
+};
+
+const PlannedChangesSection = ({ scnHistory }) => {
+    const displayChanges = scnHistory?.slice(0, 4) || [];
 
     return (
         <div className="bg-[#121217] rounded-[2rem] border border-white/5 p-8 h-full">
@@ -50,27 +57,48 @@ const PlannedChangesSection = ({ scnHistory }) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {displayChanges.length > 0 ? displayChanges.map((change, idx) => (
-                    <div key={idx} className={`p-5 rounded-2xl border border-white/5 border-l-2 ${getImpactStyles(change.classification)} hover:bg-white/[0.04] transition-colors`}>
-                        <div className="flex justify-between items-start mb-2">
-                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
-                                {change.change_id}
-                            </p>
-                            <span className="text-[8px] font-mono text-slate-500">
-                                {new Date(change.timestamp).toLocaleDateString()}
-                            </span>
+                {displayChanges.length > 0 ? displayChanges.map((change, idx) => {
+                    const tier = SCN_TIER_STYLES[change.classification] || SCN_TIER_STYLES.routine_recurring;
+                    const impact = (change.infrastructure_impact || 'none').toLowerCase();
+                    const impactBadge = SCN_IMPACT_BADGE[impact] || SCN_IMPACT_BADGE.none;
+                    // Older rows used singular keys (transformative/adaptive/routine);
+                    // newer rows use *_contexts. Tolerate both.
+                    const ctx = change.contextual_analysis || {};
+                    const ctxCounts = {
+                        transformative: ctx.transformative ?? ctx.transformative_contexts ?? 0,
+                        adaptive:       ctx.adaptive       ?? ctx.adaptive_contexts       ?? 0,
+                        routine:        ctx.routine        ?? ctx.routine_contexts        ?? 0,
+                    };
+                    const ctxTotal = ctxCounts.transformative + ctxCounts.adaptive + ctxCounts.routine;
+
+                    return (
+                        <div key={idx} className={`p-5 rounded-2xl border border-white/5 border-l-2 ${tier.border} hover:bg-white/[0.04] transition-colors`}>
+                            <div className="flex justify-between items-start mb-2">
+                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
+                                    {change.change_id}
+                                </p>
+                                <span className="text-[8px] font-mono text-slate-500">
+                                    {new Date(change.timestamp).toLocaleDateString()}
+                                </span>
+                            </div>
+                            <p className="text-xs font-bold text-slate-200 line-clamp-1">{change.description}</p>
+                            <div className="mt-3 flex items-center gap-2 flex-wrap">
+                                <div className={`w-1.5 h-1.5 rounded-full ${tier.dot}`} />
+                                <span className="text-[10px] uppercase font-bold text-slate-400 italic">
+                                    {tier.label}
+                                </span>
+                                <span className={`text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border ${impactBadge}`}>
+                                    {impact} impact
+                                </span>
+                                {ctxTotal > 0 && (
+                                    <span className="text-[9px] font-mono text-slate-600 ml-auto">
+                                        T:{ctxCounts.transformative} A:{ctxCounts.adaptive} R:{ctxCounts.routine}
+                                    </span>
+                                )}
+                            </div>
                         </div>
-                        <p className="text-xs font-bold text-slate-200 line-clamp-1">{change.description || 'Infrastructure Update'}</p>
-                        <div className="mt-3 flex items-center gap-2">
-                            <div className={`w-1.5 h-1.5 rounded-full ${change.classification === 'transformative' ? 'bg-rose-500' :
-                                    change.classification === 'adaptive' ? 'bg-blue-500' : 'bg-emerald-500'
-                                }`} />
-                            <span className="text-[10px] uppercase font-bold text-slate-400 italic">
-                                {change.classification?.replace('_', ' ')}
-                            </span>
-                        </div>
-                    </div>
-                )) : (
+                    );
+                }) : (
                     <div className="col-span-full p-12 text-center border-2 border-dashed border-white/5 rounded-3xl">
                         <p className="text-xs text-slate-500 italic">No active SCN flows detected in pipeline.</p>
                     </div>
