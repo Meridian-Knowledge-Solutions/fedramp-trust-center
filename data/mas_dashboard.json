@@ -1,18 +1,20 @@
 {
   "meta": {
-    "generated_at": "2026-05-26T01:01:03.752142+00:00",
+    "generated_at": "2026-05-26T05:50:04.060232+00:00",
     "compliance_ver": "FedRAMP 20x",
     "scope": "PUBLIC_SAFE",
-    "fingerprint": "d74ddac09547"
+    "fingerprint": "5e2df46e79af"
   },
   "health": {
-    "overall": "warning",
+    "overall": "critical",
     "connected_systems": 2,
     "total_systems": 6,
     "total_integrations": 8,
     "non_fedramp_integrations": 3,
-    "drift_count": 2,
-    "critical_drift": 0
+    "drift_count": 21,
+    "critical_drift": 5,
+    "incident_count": 0,
+    "critical_incidents": 0
   },
   "categories": [
     {
@@ -21,7 +23,7 @@
       "icon": "cloud",
       "connected": 1,
       "total": 1,
-      "drift_count": 2,
+      "drift_count": 21,
       "health": "warning"
     },
     {
@@ -118,8 +120,9 @@
       "category": "infrastructure",
       "status": "connected",
       "health": "warning",
-      "resource_count": 96,
-      "drift_count": 2,
+      "resource_count": 99,
+      "drift_count": 21,
+      "incident_count": 0,
       "connected": true,
       "is_third_party": true,
       "is_fedramp_authorized": true,
@@ -140,6 +143,7 @@
       "health": "healthy",
       "resource_count": 1,
       "drift_count": 0,
+      "incident_count": 0,
       "connected": true,
       "is_third_party": true,
       "is_fedramp_authorized": true,
@@ -160,6 +164,7 @@
       "health": "unknown",
       "resource_count": 0,
       "drift_count": 0,
+      "incident_count": 0,
       "connected": false,
       "is_third_party": true,
       "is_fedramp_authorized": true,
@@ -180,6 +185,7 @@
       "health": "unknown",
       "resource_count": 0,
       "drift_count": 0,
+      "incident_count": 0,
       "connected": false,
       "is_third_party": true,
       "is_fedramp_authorized": false,
@@ -200,6 +206,7 @@
       "health": "unknown",
       "resource_count": 0,
       "drift_count": 0,
+      "incident_count": 0,
       "connected": false,
       "is_third_party": true,
       "is_fedramp_authorized": true,
@@ -220,6 +227,7 @@
       "health": "unknown",
       "resource_count": 0,
       "drift_count": 0,
+      "incident_count": 0,
       "connected": false,
       "is_third_party": false,
       "is_fedramp_authorized": true,
@@ -726,17 +734,214 @@
   "drift_summary": [
     {
       "source": "aws",
-      "type": "directory_service",
+      "type": "zombie_cost",
+      "resource_type": "directory_service",
       "severity": "warning",
       "description": "'AWS Directory Service' billing ($14.64/mo) but 0 resources in us-east-1.",
+      "expected": ">0",
+      "actual": 0,
       "delta": 1
     },
     {
       "source": "aws",
-      "type": "transfer",
+      "type": "zombie_cost",
+      "resource_type": "transfer",
       "severity": "warning",
       "description": "'AWS Transfer Family' billing ($36.0/mo) but 0 resources in us-east-1.",
+      "expected": ">0",
+      "actual": 0,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "alb",
+      "severity": "warning",
+      "description": "alb: 1 resource(s) declared in Terraform but missing from AWS",
+      "expected": 1,
+      "actual": 2,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "alb",
+      "severity": "warning",
+      "description": "alb: 2 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 2,
+      "delta": 2
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "api_endpoints",
+      "severity": "warning",
+      "description": "api_endpoints: 1 resource(s) in AWS not declared in Terraform",
+      "expected": 0,
+      "actual": 2,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "backup",
+      "severity": "critical",
+      "description": "backup: 1 resource(s) declared in Terraform but missing from AWS",
+      "expected": 1,
+      "actual": 3,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "backup",
+      "severity": "warning",
+      "description": "backup: 3 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 3,
+      "delta": 3
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "ec2",
+      "severity": "warning",
+      "description": "ec2: 4 resource(s) declared in Terraform but missing from AWS",
+      "expected": 4,
+      "actual": 3,
+      "delta": 4
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "ec2",
+      "severity": "warning",
+      "description": "ec2: 1 resource(s) in AWS not declared in Terraform",
+      "expected": 4,
+      "actual": 3,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "fsx",
+      "severity": "warning",
+      "description": "fsx: 1 resource(s) declared in Terraform but missing from AWS",
+      "expected": 1,
+      "actual": 2,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "fsx",
+      "severity": "warning",
+      "description": "fsx: 2 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 2,
+      "delta": 2
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "lambda",
+      "severity": "warning",
+      "description": "lambda: 26 resource(s) in AWS not declared in Terraform",
+      "expected": 0,
+      "actual": 15,
+      "delta": 26
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "rds",
+      "severity": "critical",
+      "description": "rds: 1 resource(s) declared in Terraform but missing from AWS",
+      "expected": 1,
+      "actual": 2,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "rds",
+      "severity": "warning",
+      "description": "rds: 2 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 2,
+      "delta": 2
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "route53",
+      "severity": "critical",
+      "description": "route53: 1 resource(s) declared in Terraform but missing from AWS",
+      "expected": 1,
+      "actual": 1,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "route53",
+      "severity": "warning",
+      "description": "route53: 1 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 1,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "s3",
+      "severity": "warning",
+      "description": "s3: 1 resource(s) declared in Terraform but missing from AWS",
+      "expected": 1,
+      "actual": 2,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "s3",
+      "severity": "warning",
+      "description": "s3: 2 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 2,
+      "delta": 2
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "security_groups",
+      "severity": "critical",
+      "description": "security_groups: 27 resource(s) declared in Terraform but missing from AWS",
+      "expected": 28,
+      "actual": 23,
+      "delta": 27
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "security_groups",
+      "severity": "critical",
+      "description": "security_groups: 22 resource(s) in AWS not declared in Terraform",
+      "expected": 28,
+      "actual": 23,
+      "delta": 22
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "vpc",
+      "severity": "warning",
+      "description": "vpc: 1 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 2,
       "delta": 1
     }
-  ]
+  ],
+  "health_summary": []
 }
