@@ -11,12 +11,13 @@ import {
     TrendingUp, BarChart3, Landmark, Network, Cloud, ArrowDown, ChevronDown, ChevronRight,
     AlertTriangle, GitCommit, RefreshCw, Hash, FileJson, Cpu, Key, Radio, CheckSquare,
     PieChart, Layout, Monitor, HardDrive, Ticket, AlertCircle, Calendar,
-    ArrowRight, User, ShieldCheck, Send, Eye as EyeIcon
+    ArrowRight, User, ShieldCheck, Send, Video, Eye as EyeIcon
 } from 'lucide-react';
 // Recharts imports removed — charts now in UnifiedMasDashboard
 // ReportsHub removed — reports & compliance now in Organization tabs
 
 import { THEME, BASE_PATH } from '../../config/theme';
+import { QUARTERLY_REGISTRATION_URL } from '../../config/api';
 import CustomerResponsibilityMatrix from './CustomerResponsibilityMatrix';
 
 // --- SUB-COMPONENT: Change Pipeline (Live SCN Tracking) ---
@@ -145,7 +146,82 @@ const PlannedChangesSection = ({ scnHistory }) => {
     );
 };
 
-// QuarterlyReviewCard removed — now in Organization tabs (ReportsHub)
+// --- SUB-COMPONENT: Quarterly Review Registration (Teams) ---
+// Restores the collaborative continuous-monitoring review sign-up (FRR-CCM-QR-02).
+// The registration link is the canonical QUARTERLY_REGISTRATION_URL from config so
+// pipeline data syncs cannot overwrite it; meeting details come from
+// public/data/quarterly_meetings.json.
+const QuarterlyReviewCard = memo(({ meeting }) => {
+    if (!meeting) return null;
+
+    const registrationUrl = QUARTERLY_REGISTRATION_URL || meeting.registrationUrl;
+
+    const dateLabel = meeting.nextDate
+        ? new Date(meeting.nextDate + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+        : 'Date to be announced';
+
+    const downloadICS = () => {
+        const ics = [
+            'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
+            `SUMMARY:${meeting.meetingTitle || 'FedRAMP Quarterly Review'}`,
+            `DTSTART:${(meeting.nextDate || '').replace(/-/g, '')}T190000Z`,
+            `DURATION:PT${meeting.durationMinutes || 60}M`,
+            `DESCRIPTION:${(meeting.description || '').replace(/\n/g, ' ')}\\n\\nRegister: ${registrationUrl}`,
+            'END:VEVENT', 'END:VCALENDAR'
+        ].join('\n');
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute('download', `FedRAMP_Review_${meeting.nextDate || 'session'}.ics`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+    };
+
+    return (
+        <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-6 shadow-lg relative overflow-hidden`}>
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-indigo-500 to-blue-500 opacity-60" />
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="flex items-start gap-4 min-w-0">
+                    <div className="p-2.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20 shrink-0">
+                        <Video className="w-5 h-5 text-indigo-400" />
+                    </div>
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <h3 className="text-sm font-bold text-white">{meeting.meetingTitle || 'Quarterly Continuous Monitoring Review'}</h3>
+                            <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold uppercase tracking-wide">FRR-CCM-QR-02</span>
+                        </div>
+                        {meeting.description && (
+                            <p className="text-xs text-slate-400 leading-relaxed mb-2 max-w-2xl">{meeting.description}</p>
+                        )}
+                        <div className="flex items-center gap-3 flex-wrap text-[11px] text-slate-400">
+                            <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3 text-indigo-400" /> {dateLabel}</span>
+                            {meeting.time && <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-indigo-400" /> {meeting.time}</span>}
+                            {meeting.durationMinutes && <span className="text-slate-500">· {meeting.durationMinutes} min</span>}
+                            <span className="text-slate-500">· Microsoft Teams</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-2 shrink-0 w-full sm:w-auto lg:min-w-[200px]">
+                    <button
+                        onClick={() => window.open(registrationUrl, '_blank', 'noopener')}
+                        className="flex items-center justify-center gap-1.5 w-full px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold text-xs transition-all shadow-lg shadow-indigo-900/20"
+                    >
+                        <Video className="w-3.5 h-3.5" /> Register for Session
+                    </button>
+                    <button
+                        onClick={downloadICS}
+                        className="flex items-center justify-center gap-1.5 w-full px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all border border-white/10"
+                    >
+                        <Download className="w-3 h-3" /> Add to Calendar
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+});
+
 // OngoingAuthorizationReportCard removed — now in Organization tabs (ReportsHub)
 
 // DriftAlert removed — now in UnifiedMasDashboard
@@ -518,6 +594,7 @@ export const TrustCenterView = () => {
     const [scnHistory, setScnHistory] = useState([]);
     const [plannedChanges, setPlannedChanges] = useState([]);
     const [nextReportDate, setNextReportDate] = useState(null);
+    const [quarterlyMeeting, setQuarterlyMeeting] = useState(null);
     const [csoInfo, setCsoInfo] = useState(null);
     const [feedbackEntries, setFeedbackEntries] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -561,6 +638,12 @@ export const TrustCenterView = () => {
                 try {
                     const csoRes = await fetch(`${BASE_PATH}cso_public_info.json?t=${ts}`);
                     if (csoRes.ok) setCsoInfo(await csoRes.json());
+                } catch {}
+
+                // Load quarterly review meeting (Teams registration)
+                try {
+                    const meetingRes = await fetch(`${BASE_PATH}quarterly_meetings.json?t=${ts}`);
+                    if (meetingRes.ok) setQuarterlyMeeting(await meetingRes.json());
                 } catch {}
 
                 // Load feedback entries from OAR
@@ -806,6 +889,9 @@ export const TrustCenterView = () => {
                         </div>
                     </div>
                 )}
+
+                {/* --- QUARTERLY REVIEW REGISTRATION (FRR-CCM-QR-02) --- */}
+                <QuarterlyReviewCard meeting={quarterlyMeeting} />
 
                 </div>
                 )}
