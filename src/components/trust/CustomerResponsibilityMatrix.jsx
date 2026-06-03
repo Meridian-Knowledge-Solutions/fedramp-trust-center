@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, memo } from 'react';
 import {
     Shield, Users, Cloud, Server, Search, ChevronDown, ChevronRight,
     Building2, UserCheck, Layers, FileText, Filter, X, Sparkles,
-    KeyRound, Info, ArrowRight, CheckCircle2, Circle, AlertCircle, Download
+    KeyRound, Info, ArrowRight, CheckCircle2, Circle, AlertCircle, Download,
+    ShieldCheck, Landmark, Stamp, ScrollText
 } from 'lucide-react';
 import { THEME, BASE_PATH } from '../../config/theme';
 
@@ -25,6 +26,19 @@ const FAMILY_ACCENT = {
 const familyKey = (f) => (f || '').split(' - ')[0];
 const familyAccent = (f) => FAMILY_ACCENT[familyKey(f)] || '#71717a';
 
+// Coverage disposition → badge style (CMMC / CUI map). Matches the leading
+// keyword of the "Coverage" cells in the source matrix.
+const coverageTheme = (coverage) => {
+    const c = (coverage || '').toLowerCase();
+    if (c.startsWith('covered') && c.includes('inherit')) return { text: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20', dot: '#a855f7' };
+    if (c.startsWith('inherit'))                          return { text: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20', dot: '#a855f7' };
+    if (c.startsWith('covered'))                          return { text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', dot: '#10b981' };
+    if (c.startsWith('partial'))                          return { text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: '#f59e0b' };
+    if (c.startsWith('supported'))                        return { text: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', dot: '#3b82f6' };
+    if (c.startsWith('customer') || c.startsWith('gov'))  return { text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: '#f59e0b' };
+    return { text: 'text-slate-400', bg: 'bg-white/5', border: 'border-white/10', dot: '#71717a' };
+};
+
 // ───────── Top header ─────────
 const Header = ({ summary, mode }) => {
     const m = mode === 'cloud' ? summary?.cloud_fedramp : summary?.on_prem;
@@ -41,7 +55,7 @@ const Header = ({ summary, mode }) => {
                         <div>
                             <h2 className="text-2xl font-bold text-white tracking-tight">Customer Responsibility Matrix</h2>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                Who does what — across NIST 800-53 Rev 5 controls and FedRAMP 20x KSIs
+                                Who does what — across NIST 800-53 Rev 5, FedRAMP 20x KSIs, and CMMC 2.0 L2 / CUI
                             </p>
                         </div>
                     </div>
@@ -55,6 +69,12 @@ const Header = ({ summary, mode }) => {
                         <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-1 rounded-md border border-blue-500/20 font-semibold tracking-wide uppercase">
                             FedRAMP 20x KSI Mapped
                         </span>
+                        <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-md border border-emerald-500/20 font-semibold tracking-wide uppercase">
+                            CMMC 2.0 Level 2
+                        </span>
+                        <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded-md border border-indigo-500/20 font-semibold tracking-wide uppercase">
+                            CUI / DoD Cross-Ref
+                        </span>
                     </div>
                 </div>
                 <div className="flex flex-col items-end gap-3">
@@ -63,9 +83,10 @@ const Header = ({ summary, mode }) => {
                         <div className="text-4xl font-extrabold text-white font-mono leading-none mt-1">{m?.total ?? 0}</div>
                     </div>
                     <a
-                        href={`${BASE_PATH}Meridian_LMS_CRM_NIST_800-53_Rev5.xlsx`}
+                        href={`${BASE_PATH}Meridian_LMS_CRM_NIST_800-53_Rev5_CMMC_CUI.xlsx`}
                         download
                         className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/10 hover:text-white transition-all"
+                        title="NIST 800-53 Rev 5 + FedRAMP 20x KSI + CMMC 2.0 L2 / CUI cross-reference"
                     >
                         <Download className="w-3 h-3" /> Download XLSX
                     </a>
@@ -268,6 +289,14 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
                                 </span>
                             </>
                         )}
+                        {ctrl.cmmc && (
+                            <>
+                                <span className="text-slate-600">·</span>
+                                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                                    CMMC L2
+                                </span>
+                            </>
+                        )}
                     </div>
                 </div>
                 <div className="shrink-0 self-center">
@@ -312,6 +341,42 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
                             </div>
                         </div>
                     )}
+                    {(ctrl.cmmc || ctrl.cui_obligation || ctrl.cui_disposition) && (
+                        <div className="rounded-lg border border-indigo-500/15 bg-indigo-500/[0.04] p-3">
+                            <div className="text-[9px] text-indigo-400 uppercase tracking-wider font-bold mb-2 flex items-center gap-1.5">
+                                <Landmark className="w-3 h-3" /> CMMC 2.0 L2 / CUI / DoD Cross-Reference
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div>
+                                    <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1">CMMC L2 Practice <span className="text-slate-600 normal-case">(800-171)</span></div>
+                                    {ctrl.cmmc ? (
+                                        <div className="flex flex-wrap gap-1">
+                                            {ctrl.cmmc.split(',').map(p => (
+                                                <span key={p} className="text-[10px] font-mono bg-indigo-500/10 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold">
+                                                    {p.trim()}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <span className="text-[10px] text-slate-600 italic">No 800-171 / CMMC L2 equivalent</span>
+                                    )}
+                                </div>
+                                <div>
+                                    <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1">CUI Obligation <span className="text-slate-600 normal-case">(DoDI 5200.48)</span></div>
+                                    <div className="text-[11px] text-slate-300 leading-snug">{ctrl.cui_obligation || '—'}</div>
+                                </div>
+                                <div>
+                                    <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1">Coverage Disposition</div>
+                                    {ctrl.cui_disposition ? (
+                                        <div className={`inline-flex items-start gap-1.5 text-[10px] leading-snug px-2 py-1 rounded border ${coverageTheme(ctrl.cui_disposition).bg} ${coverageTheme(ctrl.cui_disposition).border} ${coverageTheme(ctrl.cui_disposition).text}`}>
+                                            <span className="w-1.5 h-1.5 rounded-full mt-1 shrink-0" style={{ background: coverageTheme(ctrl.cui_disposition).dot }} />
+                                            <span>{ctrl.cui_disposition}</span>
+                                        </div>
+                                    ) : <span className="text-[10px] text-slate-600">—</span>}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
@@ -349,6 +414,9 @@ const ControlBrowser = ({ controls, mode }) => {
                 (c.control_name || '').toLowerCase().includes(q) ||
                 (c.implementation_notes || '').toLowerCase().includes(q) ||
                 (c.family || '').toLowerCase().includes(q) ||
+                (c.cmmc || '').toLowerCase().includes(q) ||
+                (c.cui_obligation || '').toLowerCase().includes(q) ||
+                (c.cui_disposition || '').toLowerCase().includes(q) ||
                 c.ksis?.some(k => k.toLowerCase().includes(q))
             );
         });
@@ -398,7 +466,7 @@ const ControlBrowser = ({ controls, mode }) => {
                     type="text"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    placeholder="Search controls by ID, name, KSI, or notes (e.g., AC-2, MFA, KSI-IAM)…"
+                    placeholder="Search by ID, name, KSI, CMMC practice, or CUI (e.g., AC-2, MFA, KSI-IAM, AC.L2-3.1.1, safeguarding)…"
                     className="w-full bg-[#09090b] border border-white/10 rounded-lg pl-9 pr-9 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/20"
                 />
                 {search && (
@@ -631,6 +699,137 @@ const KSIRef = ({ items }) => {
     );
 };
 
+// ───────── CMMC 2.0 L2 / CUI / DoD mapping section ─────────
+const CmmcCuiMapping = ({ map, summary }) => {
+    const [open, setOpen] = useState(false);
+    if (!map) return null;
+
+    const CoverageBadge = ({ value }) => {
+        const t = coverageTheme(value);
+        return (
+            <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded border ${t.bg} ${t.border} ${t.text} whitespace-nowrap`}>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: t.dot }} />
+                {value}
+            </span>
+        );
+    };
+
+    return (
+        <div className="bg-gradient-to-br from-indigo-500/[0.04] to-transparent border border-indigo-500/20 rounded-xl">
+            <button onClick={() => setOpen(!open)} className="w-full p-5 flex items-center justify-between text-left">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+                        <Landmark className="w-4 h-4 text-indigo-400" />
+                    </div>
+                    <div>
+                        <div className="text-sm font-bold text-white flex items-center gap-2">
+                            CMMC 2.0 Level 2 &amp; CUI / DoD Coverage Map
+                            <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold uppercase tracking-wide">RFP Crosswalk</span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 mt-0.5">
+                            NIST SP 800-171 Rev 2 · DoDI 5200.48 / DAFI 16-1403 · {summary?.cmmc_families ?? 14} CMMC L2 domains · {summary?.cui_handling_requirements ?? 7} CUI handling requirements
+                        </div>
+                    </div>
+                </div>
+                {open ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
+            </button>
+            {open && (
+                <div className="px-5 pb-5 border-t border-indigo-500/10 space-y-6 mt-2 pt-4">
+                    {/* About */}
+                    {map.about?.length > 0 && (
+                        <div className="bg-[#0f0f12] border border-white/5 rounded-lg p-4">
+                            <div className="flex items-start gap-3">
+                                <Info className="w-4 h-4 text-indigo-400 mt-0.5 shrink-0" />
+                                <div className="space-y-2">
+                                    {map.about.map((p, i) => (
+                                        <p key={i} className={`text-[11px] leading-relaxed ${i === 0 ? 'text-slate-300' : 'text-slate-400'}`}>{p}</p>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* CUI handling requirements */}
+                    {map.cui_handling?.length > 0 && (
+                        <div>
+                            <div className="text-[10px] uppercase tracking-wider font-bold text-indigo-400 mb-2 flex items-center gap-1.5">
+                                <Stamp className="w-3.5 h-3.5" /> CUI Handling Requirements — DoDI 5200.48 / DAFI 16-1403
+                            </div>
+                            <div className="overflow-x-auto rounded-lg border border-white/10">
+                                <table className="w-full text-left border-collapse min-w-[640px]">
+                                    <thead>
+                                        <tr className="bg-white/[0.03] text-[9px] uppercase tracking-wider text-slate-500">
+                                            <th className="px-3 py-2 font-bold">Requirement</th>
+                                            <th className="px-3 py-2 font-bold">Primary Controls</th>
+                                            <th className="px-3 py-2 font-bold">Coverage</th>
+                                            <th className="px-3 py-2 font-bold">Responsibility &amp; Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {map.cui_handling.map((row, i) => (
+                                            <tr key={i} className="border-t border-white/5 align-top">
+                                                <td className="px-3 py-2.5 text-[11px] font-semibold text-slate-200 whitespace-nowrap">{row.requirement}</td>
+                                                <td className="px-3 py-2.5 text-[10px] font-mono text-slate-400">{row.primary_controls}</td>
+                                                <td className="px-3 py-2.5"><CoverageBadge value={row.coverage} /></td>
+                                                <td className="px-3 py-2.5 text-[11px] text-slate-400 leading-relaxed">{row.notes}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Family coverage */}
+                    {map.family_coverage?.length > 0 && (
+                        <div>
+                            <div className="text-[10px] uppercase tracking-wider font-bold text-indigo-400 mb-2 flex items-center gap-1.5">
+                                <ShieldCheck className="w-3.5 h-3.5" /> NIST 800-171 / CMMC Level 2 Family Coverage ({map.family_coverage.length} domains)
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {map.family_coverage.map((row, i) => (
+                                    <div key={i} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3">
+                                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                                            <span className="text-[11px] font-bold text-slate-200">{row.domain}</span>
+                                            <CoverageBadge value={row.coverage} />
+                                        </div>
+                                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                                            {(row.ksi_family || '').split(',').map(f => f.trim()).filter(Boolean).map(f => (
+                                                <span key={f} className="text-[9px] font-mono bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 font-bold">
+                                                    {f.includes('(') || f.includes('Inherited') ? f : `KSI-${f}`}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <div className="text-[10px] text-slate-500 leading-relaxed">{row.notes}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Scope notes */}
+                    {map.scope_notes?.length > 0 && (
+                        <div>
+                            <div className="text-[10px] uppercase tracking-wider font-bold text-indigo-400 mb-2 flex items-center gap-1.5">
+                                <ScrollText className="w-3.5 h-3.5" /> Scope &amp; Shared-Responsibility Notes
+                            </div>
+                            <div className="space-y-1.5">
+                                {map.scope_notes.map((note, i) => (
+                                    <div key={i} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3 text-[11px] leading-relaxed">
+                                        {note.title
+                                            ? <><span className="font-bold text-slate-200">{note.title}:</span> <span className="text-slate-400">{note.text}</span></>
+                                            : <span className="text-slate-500 italic">{note.text}</span>}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
 // ───────── Top-level component ─────────
 const CustomerResponsibilityMatrix = () => {
     const [data, setData] = useState(null);
@@ -676,10 +875,12 @@ const CustomerResponsibilityMatrix = () => {
             <ModeLegend mode={mode} />
             <ResponsibilitySplit counts={modeSummary?.by_responsibility} total={modeSummary?.total} />
             <ControlBrowser controls={controls} mode={mode} />
+            <CmmcCuiMapping map={data.cmmc_cui} summary={summary.cmmc_cui} />
             <AppSecCapsule items={data.app_sec || []} summary={summary.app_sec} />
             <KSIRef items={data.ksi_reference || []} />
             <div className="text-[10px] text-slate-600 text-right">
                 Source: Meridian LMS CRM · {data.metadata?.framework} · KSI mapping per {data.metadata?.ksi_mapping}
+                {data.metadata?.cmmc_mapping && <> · CMMC/CUI per {data.metadata.cmmc_mapping}</>}
             </div>
         </div>
     );

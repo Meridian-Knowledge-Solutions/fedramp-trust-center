@@ -3,8 +3,11 @@
     "framework": "NIST SP 800-53 Rev 5",
     "ksi_mapping": "FedRAMP 20x Phase 2",
     "baseline": "Moderate",
-    "generated": "2026-05-22",
-    "source": "Meridian LMS Controls Responsibility Matrix"
+    "cmmc_mapping": "CMMC 2.0 Level 2 (NIST SP 800-171 Rev 2)",
+    "cui_mapping": "CUI per DoDI 5200.48 & DAFI 16-1403; FOIA/FOUO per DoD 5400.7-R",
+    "generated": "2026-06-03",
+    "source": "Meridian LMS Controls Responsibility Matrix",
+    "xlsx_file": "Meridian_LMS_CRM_NIST_800-53_Rev5_CMMC_CUI.xlsx"
   },
   "summary": {
     "on_prem": {
@@ -49,7 +52,182 @@
         "OWASP": 4
       }
     },
-    "ksi_count": 72
+    "ksi_count": 72,
+    "cmmc_cui": {
+      "cmmc_l2_mapped_controls": 116,
+      "cui_obligation_controls": 185,
+      "cui_handling_requirements": 7,
+      "cmmc_families": 14
+    }
+  },
+  "cmmc_cui": {
+    "title": "CMMC 2.0 Level 2 & CUI / DoD Coverage Map",
+    "frameworks": "CMMC 2.0 Level 2 (NIST SP 800-171 Rev 2) | CUI per DoDI 5200.48 & DAFI 16-1403 | FOIA / FOUO per DoD 5400.7-R and the Air Force Supplement",
+    "about": [
+      "CMMC 2.0 Level 2 comprises the 110 requirements of NIST SP 800-171 Rev 2, which are a tailored subset of NIST SP 800-53 Moderate. DoDI 5200.48 and DAFI 16-1403 rely on these NIST standards for safeguarding Controlled Unclassified Information (CUI) on information systems. Because the Meridian LMS operates in a FedRAMP 20x Moderate Class C Certified environment, the same control evidence supports CMMC 2.0 Level 2 / NIST 800-171 and CUI safeguarding requirements.",
+      "Coverage indicates that one or more of Meridian’s continuously-validated Key Security Indicators (KSIs) map to the control or requirement, reflecting the security capabilities Meridian maintains. Current validation status for every KSI is published on the Meridian Trust Center and is refreshed every four hours.",
+      "This crosswalk is provided for informational due-diligence purposes and does not constitute a certification or a standalone contractual representation. Meridian maintains FedRAMP 20x Moderate Class C Certification; CMMC certification is a separate, independent assessment. Responsibility assignments may vary by deployment configuration and should be reviewed against your specific authorization agreement."
+    ],
+    "cui_handling": [
+      {
+        "requirement": "Marking",
+        "primary_controls": "MP-3 / 800-171 3.8.4",
+        "coverage": "Customer / Gov",
+        "notes": "CUI is designated and marked by the Government as the designating authority. The platform safeguards and preserves markings applied to content prior to ingestion. Native, system-generated CUI marking is not a current platform feature and can be discussed as a configuration or roadmap item."
+      },
+      {
+        "requirement": "Handling",
+        "primary_controls": "AC-2/3/6, AC-21, IA-2/4/5",
+        "coverage": "Covered",
+        "notes": "Need-to-know access, role-based controls, and full audit (KSI-IAM, KSI-MLA). Dissemination determinations remain with the Government / Customer."
+      },
+      {
+        "requirement": "Transmitting",
+        "primary_controls": "SC-8, SC-8(1), SC-23, AC-17(2)",
+        "coverage": "Covered",
+        "notes": "CUI in transit protected with TLS 1.2+ using FIPS 140-validated cryptographic modules (KSI-SVC, KSI-CNA)."
+      },
+      {
+        "requirement": "Safeguarding",
+        "primary_controls": "SC-7, SC-28, SC-13, AU-*, CM-*",
+        "coverage": "Covered",
+        "notes": "FedRAMP 20x Moderate baseline — boundary protection, encryption at rest, audit, and configuration management (KSI-CNA, KSI-SVC, KSI-MLA, KSI-CMT)."
+      },
+      {
+        "requirement": "Destruction",
+        "primary_controls": "MP-6 / 800-171 3.8.3",
+        "coverage": "Covered (inherited)",
+        "notes": "Media sanitization (NIST SP 800-88) is provided by the AWS infrastructure; tenant data is cryptographically erased upon offboarding."
+      },
+      {
+        "requirement": "Data revealing critical vulnerabilities",
+        "primary_controls": "RA-5, SI-2, AU-9",
+        "coverage": "Covered",
+        "notes": "Vulnerability data is classified by sensitivity and access-restricted; the Trust Center publishes validation outcomes, not raw findings (KSI-VDR, KSI-RA)."
+      },
+      {
+        "requirement": "FOIA / FOUO (DoD 5400.7-R / AF Supp.)",
+        "primary_controls": "Operational procedure",
+        "coverage": "Supported (process)",
+        "notes": "Meridian refers FOIA requests for Government records to the contracting agency and does not release Government information independently; FOUO / CUI is safeguarded under the controls in this matrix."
+      }
+    ],
+    "family_coverage": [
+      {
+        "domain": "AC 3.1 Access Control",
+        "ksi_family": "IAM, CNA",
+        "coverage": "Covered",
+        "notes": "Federated SSO, MFA, role-based access, boundary protection"
+      },
+      {
+        "domain": "AT 3.2 Awareness & Training",
+        "ksi_family": "CED",
+        "coverage": "Covered",
+        "notes": "Role-based security and CUI-handling training"
+      },
+      {
+        "domain": "AU 3.3 Audit & Accountability",
+        "ksi_family": "MLA",
+        "coverage": "Covered",
+        "notes": "Multi-region audit logging, log integrity, encryption, retention"
+      },
+      {
+        "domain": "CM 3.4 Configuration Mgmt",
+        "ksi_family": "CMT",
+        "coverage": "Covered",
+        "notes": "Infrastructure-as-code, configuration baselines, change control"
+      },
+      {
+        "domain": "IA 3.5 Identification & Auth",
+        "ksi_family": "IAM",
+        "coverage": "Covered",
+        "notes": "Multi-factor authentication, credential lifecycle management"
+      },
+      {
+        "domain": "IR 3.6 Incident Response",
+        "ksi_family": "INR",
+        "coverage": "Covered",
+        "notes": "Incident handling and reporting; timelines per applicable contract"
+      },
+      {
+        "domain": "MA 3.7 Maintenance",
+        "ksi_family": "CMT, SVC",
+        "coverage": "Covered",
+        "notes": "Primarily inherited from the AWS infrastructure in cloud deployments"
+      },
+      {
+        "domain": "MP 3.8 Media Protection",
+        "ksi_family": "SVC",
+        "coverage": "Partial",
+        "notes": "Encryption and media sanitization covered; native CUI marking (3.8.4) is not a current platform feature"
+      },
+      {
+        "domain": "PS 3.9 Personnel Security",
+        "ksi_family": "IAM, PIY",
+        "coverage": "Covered",
+        "notes": "Screening and termination handling; access agreements are organizational"
+      },
+      {
+        "domain": "PE 3.10 Physical Protection",
+        "ksi_family": "Inherited (AWS)",
+        "coverage": "Inherited",
+        "notes": "Physical and environmental controls inherited from AWS data centers"
+      },
+      {
+        "domain": "RA 3.11 Risk Assessment",
+        "ksi_family": "VDR, TPR",
+        "coverage": "Covered",
+        "notes": "Continuous vulnerability scanning and remediation tracking"
+      },
+      {
+        "domain": "CA 3.12 Security Assessment",
+        "ksi_family": "AFR",
+        "coverage": "Covered",
+        "notes": "Continuous assessment and plan-of-action management"
+      },
+      {
+        "domain": "SC 3.13 System & Comms Protection",
+        "ksi_family": "CNA, SVC",
+        "coverage": "Covered",
+        "notes": "Boundary protection, FIPS-validated cryptography, data at rest and in transit"
+      },
+      {
+        "domain": "SI 3.14 System & Info Integrity",
+        "ksi_family": "MLA, VDR, TPR",
+        "coverage": "Covered",
+        "notes": "Flaw remediation, system monitoring, malicious-code protection"
+      }
+    ],
+    "scope_notes": [
+      {
+        "title": "CUI Marking",
+        "text": "Marking and designation of CUI are the responsibility of the Government as the designating authority. The platform preserves and safeguards markings applied to content prior to ingestion. Native, system-generated CUI marking is not a current platform feature and can be addressed as a configuration or roadmap item."
+      },
+      {
+        "title": "Personnel Training",
+        "text": "Meridian provides role-based security and CUI-handling training for personnel with access to customer data, reflected in the KSI-CED family. Current training-control status is available on the Meridian Trust Center."
+      },
+      {
+        "title": "Cryptography",
+        "text": "Data in transit and at rest is protected using FIPS 140-validated cryptographic modules (AWS KMS and FIPS endpoints)."
+      },
+      {
+        "title": "Supply Chain",
+        "text": "Third-party and supplier risk is addressed through the KSI-TPR family. A dedicated Supply Chain (SR) requirement family is introduced in NIST SP 800-171 Revision 3."
+      },
+      {
+        "title": "CMMC and FedRAMP",
+        "text": "This mapping supports CMMC 2.0 Level 2 / NIST 800-171 evidence reuse. Meridian maintains FedRAMP 20x Moderate Class C Certification; CMMC certification is a separate, independent assessment."
+      },
+      {
+        "title": "Incident Reporting and FOIA",
+        "text": "Incident reporting timelines and FOIA / FOUO handling are addressed through Meridian’s operational procedures and the applicable contract."
+      },
+      {
+        "title": null,
+        "text": "This matrix is informational and should be reviewed against your specific authorization agreement; it is not a standalone contractual representation."
+      }
+    ]
   },
   "on_prem": [
     {
@@ -65,7 +243,10 @@
       "implementation_notes": "Customer develops and maintains access control policies for their environment.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "AC - Access Control",
@@ -82,7 +263,10 @@
         "KSI-IAM-01",
         "KSI-IAM-04",
         "KSI-IAM-06"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.1, AC.L2-3.1.2",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -97,7 +281,10 @@
       "implementation_notes": "Meridian provides API/automation hooks for account lifecycle. Customer implements automation in their environment. | See Meridian Secure Config Guide: Support.Login.Enabled, EnableProxyLogin",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.1",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -113,7 +300,10 @@
       "ksis": [
         "KSI-IAM-03",
         "KSI-IAM-07"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.1",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -129,7 +319,10 @@
       "ksis": [
         "KSI-IAM-06",
         "KSI-IAM-07"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.1",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -145,7 +338,10 @@
       "ksis": [
         "KSI-MLA-02",
         "KSI-SVC-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.7",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -160,7 +356,10 @@
       "implementation_notes": "Meridian supports immediate account disabling. Customer identifies high-risk individuals and executes. | See Meridian Secure Config Guide: PWD_DEACTIVATE_USER_THRESHOLD - table PASSWORD_EDIT_SETTINGS, EnableProxyLogin, Support.Login.Enabled",
       "ksis": [
         "KSI-IAM-06"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.1",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -176,7 +375,10 @@
       "ksis": [
         "KSI-IAM-02",
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.1, AC.L2-3.1.2",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -192,7 +394,10 @@
       "ksis": [
         "KSI-IAM-03",
         "KSI-CNA-02"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.3",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-CNA · customer-operated"
     },
     {
       "family": "AC - Access Control",
@@ -208,7 +413,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-PIY-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.4",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-PIY · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -223,7 +431,10 @@
       "implementation_notes": "Meridian implements least-privilege role model in the LMS. Customer assigns minimum necessary roles to users. | See Meridian Secure Config Guide: ScheduleTaskAuthorizedUserOnly, CServerSecurityEnabled, Service.AccountIds",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.5",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -238,7 +449,10 @@
       "implementation_notes": "Meridian restricts admin functions to authorized roles. Customer designates authorized administrators. | See Meridian Secure Config Guide: ScheduleTaskAuthorizedUserOnly, Service.AccountIds",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.5",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -253,7 +467,10 @@
       "implementation_notes": "Meridian supports separate privileged/unprivileged accounts. Customer enforces use of non-privileged accounts for routine tasks. | See Meridian Secure Config Guide: ScheduleTaskAuthorizedUserOnly, Service.AccountIds",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.6",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -268,7 +485,10 @@
       "implementation_notes": "Meridian restricts privileged LMS functions. Customer manages who holds privileged roles. | See Meridian Secure Config Guide: HRISConsoleUser, ScheduleTaskAuthorizedUserOnly, Service.AccountIds",
       "ksis": [
         "KSI-IAM-03"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.5",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -283,7 +503,10 @@
       "implementation_notes": "Meridian logs all privileged function usage within the LMS application. | See Meridian Secure Config Guide: ScheduleTaskAuthorizedUserOnly, Service.AccountIds",
       "ksis": [
         "KSI-MLA-02"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.7",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-MLA · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -298,7 +521,10 @@
       "implementation_notes": "Meridian enforces role-based restrictions preventing non-privileged users from executing admin functions. | See Meridian Secure Config Guide: ScheduleTaskAuthorizedUserOnly, Service.AccountIds",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.7",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -314,7 +540,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-06"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.8",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -327,7 +556,10 @@
       "applicability": "Voluntary",
       "applicability_rationale": "Meridian LMS supports configurable login banners/system use notifications as a best practice.",
       "implementation_notes": "Meridian provides configurable login banners/system use notifications within the LMS.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "AC.L2-3.1.9",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered (voluntary) — KSI: see KSI column · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -340,7 +572,10 @@
       "applicability": "Voluntary",
       "applicability_rationale": "Meridian LMS enforces configurable concurrent session limits as a best practice.",
       "implementation_notes": "Meridian enforces concurrent session limits within the LMS application. | See Meridian Secure Config Guide: MGInternal:SessionTracker, MaxConcurrentSession",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered (voluntary) — KSI: see KSI column · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -353,7 +588,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Endpoint/device control; not applicable to a web-based LMS application.",
       "implementation_notes": "Customer manages endpoint device lock policies (screensaver, timeout) on their workstations.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "AC.L2-3.1.10",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "AC - Access Control",
@@ -369,7 +607,10 @@
       "ksis": [
         "KSI-CNA-03",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.11",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-IAM · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -384,7 +625,10 @@
       "implementation_notes": "Meridian defines which LMS actions (if any) are permitted without authentication (e.g., public course catalog). | See Meridian Secure Config Guide: EnablePublicCatalog, EnablePublicCatalogDomain",
       "ksis": [
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -400,7 +644,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.12",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "AC - Access Control",
@@ -416,7 +663,10 @@
       "ksis": [
         "KSI-MLA-01",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.12",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-IAM · customer-operated"
     },
     {
       "family": "AC - Access Control",
@@ -431,7 +681,10 @@
       "implementation_notes": "Customer ensures remote access uses encrypted channels (VPN, TLS).",
       "ksis": [
         "KSI-SVC-02"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.13",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · customer-operated"
     },
     {
       "family": "AC - Access Control",
@@ -448,7 +701,10 @@
         "KSI-CNA-01",
         "KSI-CNA-02",
         "KSI-CNA-03"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.14",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-CNA · customer-operated"
     },
     {
       "family": "AC - Access Control",
@@ -463,7 +719,10 @@
       "implementation_notes": "Customer restricts and monitors privileged remote commands in their environment.",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.15",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "AC - Access Control",
@@ -476,7 +735,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Wireless network infrastructure; outside LMS application scope.",
       "implementation_notes": "Customer manages wireless access controls in their facility.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "AC.L2-3.1.16, AC.L2-3.1.17",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "AC - Access Control",
@@ -489,7 +751,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Mobile device management; outside LMS application scope.",
       "implementation_notes": "Customer manages mobile device access policies and MDM.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "AC.L2-3.1.18, AC.L2-3.1.19",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "AC - Access Control",
@@ -505,7 +770,10 @@
       "ksis": [
         "KSI-IAM-05",
         "KSI-TPR-03"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.20, AC.L2-3.1.21",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-TPR · customer-operated"
     },
     {
       "family": "AC - Access Control",
@@ -522,7 +790,10 @@
         "KSI-PIY-02",
         "KSI-SVC-03",
         "KSI-TPR-02"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.22",
+      "cui_obligation": "Dissemination / info sharing",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-SVC, KSI-TPR · customer-operated"
     },
     {
       "family": "AT - Awareness and Training",
@@ -537,7 +808,10 @@
       "implementation_notes": "Customer develops security awareness and training policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Training (personnel)",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "AT - Awareness and Training",
@@ -553,7 +827,10 @@
       "ksis": [
         "KSI-CED-01",
         "KSI-CED-02"
-      ]
+      ],
+      "cmmc": "AT.L2-3.2.1",
+      "cui_obligation": "Training (personnel)",
+      "cui_disposition": "Covered — KSI: KSI-CED · customer-operated"
     },
     {
       "family": "AT - Awareness and Training",
@@ -568,7 +845,10 @@
       "implementation_notes": "Customer provides insider threat awareness training.",
       "ksis": [
         "KSI-CED-01"
-      ]
+      ],
+      "cmmc": "AT.L2-3.2.3",
+      "cui_obligation": "Training (personnel)",
+      "cui_disposition": "Covered — KSI: KSI-CED · customer-operated"
     },
     {
       "family": "AT - Awareness and Training",
@@ -584,7 +864,10 @@
       "ksis": [
         "KSI-CED-01",
         "KSI-CED-02"
-      ]
+      ],
+      "cmmc": "AT.L2-3.2.1",
+      "cui_obligation": "Training (personnel)",
+      "cui_disposition": "Covered — KSI: KSI-CED · customer-operated"
     },
     {
       "family": "AT - Awareness and Training",
@@ -599,7 +882,10 @@
       "implementation_notes": "Customer provides role-based security training to LMS administrators.",
       "ksis": [
         "KSI-CED-02"
-      ]
+      ],
+      "cmmc": "AT.L2-3.2.2",
+      "cui_obligation": "Training (personnel)",
+      "cui_disposition": "Covered — KSI: KSI-CED · customer-operated"
     },
     {
       "family": "AT - Awareness and Training",
@@ -614,7 +900,10 @@
       "implementation_notes": "Customer maintains training records for their personnel.",
       "ksis": [
         "KSI-CED-01"
-      ]
+      ],
+      "cmmc": "AT.L2-3.2.1",
+      "cui_obligation": "Training (personnel)",
+      "cui_disposition": "Covered — KSI: KSI-CED · customer-operated"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -629,7 +918,10 @@
       "implementation_notes": "Customer develops audit and accountability policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -646,7 +938,10 @@
         "KSI-CMT-01",
         "KSI-MLA-01",
         "KSI-MLA-07"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.1, AU.L2-3.3.2, AU.L2-3.3.3",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -661,7 +956,10 @@
       "implementation_notes": "Meridian ensures LMS audit records contain required fields (who, what, when, where, outcome). | See Meridian Secure Config Guide: ExtractPayloadToAuditLogDetails, EnableAuditTrail",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.1",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · Meridian application"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -676,7 +974,10 @@
       "implementation_notes": "Meridian includes additional contextual information in audit records (session ID, source IP, etc.). | See Meridian Secure Config Guide: ExtractPayloadToAuditLogDetails, EnableAuditTrail",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.1",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · Meridian application"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -691,7 +992,10 @@
       "implementation_notes": "Customer provisions and manages storage for audit logs in their environment.",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · customer-operated"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -707,7 +1011,10 @@
       "ksis": [
         "KSI-MLA-01",
         "KSI-MLA-03"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.4",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -722,7 +1029,10 @@
       "implementation_notes": "Customer reviews and analyzes audit records from the LMS and infrastructure.",
       "ksis": [
         "KSI-MLA-02"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.5",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · customer-operated"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -737,7 +1047,10 @@
       "implementation_notes": "Customer integrates LMS audit logs into their SIEM/analysis platform.",
       "ksis": [
         "KSI-MLA-02"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.5",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · customer-operated"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -752,7 +1065,10 @@
       "implementation_notes": "Meridian provides audit log filtering/export features. Customer uses their tools for reduction and reporting.",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.6",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -767,7 +1083,10 @@
       "implementation_notes": "Meridian uses system clock for audit timestamps. Customer ensures NTP synchronization on their servers.",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.7",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -782,7 +1101,10 @@
       "implementation_notes": "Customer protects audit logs from unauthorized access/modification in their environment.",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.8, AU.L2-3.3.9",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · customer-operated"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -797,7 +1119,10 @@
       "implementation_notes": "Customer defines and enforces audit log retention periods.",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.1",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · customer-operated"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -812,7 +1137,10 @@
       "implementation_notes": "Meridian generates audit records at the application level for LMS events. | See Meridian Secure Config Guide: ExtractPayloadToAuditLogDetails, EnableAuditTrail",
       "ksis": [
         "KSI-MLA-07"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.1, AU.L2-3.3.2",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · Meridian application"
     },
     {
       "family": "CA - Assessment, Authorization, and Monitoring",
@@ -827,7 +1155,10 @@
       "implementation_notes": "Customer develops assessment and authorization policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security assessment & monitoring",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "CA - Assessment, Authorization, and Monitoring",
@@ -843,7 +1174,10 @@
       "ksis": [
         "KSI-PIY-06",
         "KSI-AFR"
-      ]
+      ],
+      "cmmc": "CA.L2-3.12.1",
+      "cui_obligation": "Security assessment & monitoring",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-AFR · customer-operated"
     },
     {
       "family": "CA - Assessment, Authorization, and Monitoring",
@@ -860,7 +1194,10 @@
         "KSI-TPR-01",
         "KSI-TPR-02",
         "KSI-TPR-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security assessment & monitoring",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "CA - Assessment, Authorization, and Monitoring",
@@ -875,7 +1212,10 @@
       "implementation_notes": "Customer develops and maintains POA&Ms for findings.",
       "ksis": [
         "KSI-MLA-03"
-      ]
+      ],
+      "cmmc": "CA.L2-3.12.2",
+      "cui_obligation": "Security assessment & monitoring",
+      "cui_disposition": "Covered — KSI: KSI-MLA · customer-operated"
     },
     {
       "family": "CA - Assessment, Authorization, and Monitoring",
@@ -892,7 +1232,10 @@
         "KSI-MLA-03",
         "KSI-MLA-05",
         "KSI-SVC-07"
-      ]
+      ],
+      "cmmc": "CA.L2-3.12.3",
+      "cui_obligation": "Security assessment & monitoring",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-SVC · customer-operated"
     },
     {
       "family": "CA - Assessment, Authorization, and Monitoring",
@@ -909,7 +1252,10 @@
         "KSI-CNA-01",
         "KSI-CNA-02",
         "KSI-CNA-03"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security assessment & monitoring",
+      "cui_disposition": "Covered — KSI: KSI-CNA · customer-operated"
     },
     {
       "family": "CM - Configuration Management",
@@ -924,7 +1270,10 @@
       "implementation_notes": "Customer develops configuration management policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "CM - Configuration Management",
@@ -941,7 +1290,10 @@
         "KSI-CMT-02",
         "KSI-CNA-04",
         "KSI-SVC-04"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.1, CM.L2-3.4.2",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-CNA, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -959,7 +1311,10 @@
         "KSI-CMT-02",
         "KSI-CMT-03",
         "KSI-CMT-04"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.3",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -974,7 +1329,10 @@
       "implementation_notes": "Meridian performs impact analysis on application changes. Customer performs impact analysis on infrastructure changes.",
       "ksis": [
         "KSI-CMT-05"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.4",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -990,7 +1348,10 @@
       "ksis": [
         "KSI-CMT-02",
         "KSI-CMT-04"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.5",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -1007,7 +1368,10 @@
         "KSI-CMT-01",
         "KSI-CMT-02",
         "KSI-SVC-04"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.2",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -1023,7 +1387,10 @@
       "ksis": [
         "KSI-CMT-02",
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.6, CM.L2-3.4.7",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -1041,7 +1408,10 @@
         "KSI-CMT-05",
         "KSI-CNA-01",
         "KSI-SVC-01"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.7",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-CNA, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -1056,7 +1426,10 @@
       "implementation_notes": "Customer maintains inventory of all system components including the LMS in their environment.",
       "ksis": [
         "KSI-PIY-01"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.1",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "CM - Configuration Management",
@@ -1072,7 +1445,10 @@
       "ksis": [
         "KSI-CMT-02",
         "KSI-PIY-01"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.1",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-PIY · customer-operated"
     },
     {
       "family": "CM - Configuration Management",
@@ -1089,7 +1465,10 @@
         "KSI-CMT-04",
         "KSI-IAM-04",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-IAM · customer-operated"
     },
     {
       "family": "CM - Configuration Management",
@@ -1104,7 +1483,10 @@
       "implementation_notes": "Customer manages software licensing and usage restrictions.",
       "ksis": [
         "KSI-TPR-01"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.9",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "CM - Configuration Management",
@@ -1121,7 +1503,10 @@
         "KSI-PIY-01",
         "KSI-SVC-03",
         "KSI-TPR-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-SVC, KSI-TPR · customer-operated"
     },
     {
       "family": "CP - Contingency Planning",
@@ -1136,7 +1521,10 @@
       "implementation_notes": "Customer develops contingency planning policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "CP - Contingency Planning",
@@ -1151,7 +1539,10 @@
       "implementation_notes": "Customer develops contingency plan including LMS recovery procedures.",
       "ksis": [
         "KSI-RPL-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · customer-operated"
     },
     {
       "family": "CP - Contingency Planning",
@@ -1166,7 +1557,10 @@
       "implementation_notes": "Customer trains personnel on contingency procedures.",
       "ksis": [
         "KSI-CED-03"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-CED · customer-operated"
     },
     {
       "family": "CP - Contingency Planning",
@@ -1181,7 +1575,10 @@
       "implementation_notes": "Customer tests contingency plan including LMS recovery.",
       "ksis": [
         "KSI-RPL-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · customer-operated"
     },
     {
       "family": "CP - Contingency Planning",
@@ -1196,7 +1593,10 @@
       "implementation_notes": "Customer provides and manages alternate storage for backups.",
       "ksis": [
         "KSI-RPL-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · customer-operated"
     },
     {
       "family": "CP - Contingency Planning",
@@ -1211,7 +1611,10 @@
       "implementation_notes": "Customer provides and manages alternate processing capability.",
       "ksis": [
         "KSI-RPL-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · customer-operated"
     },
     {
       "family": "CP - Contingency Planning",
@@ -1226,7 +1629,10 @@
       "implementation_notes": "Customer manages alternate telecommunications for their facility.",
       "ksis": [
         "KSI-RPL-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · customer-operated"
     },
     {
       "family": "CP - Contingency Planning",
@@ -1241,7 +1647,10 @@
       "implementation_notes": "Customer manages system and data backups for all components including LMS data.",
       "ksis": [
         "KSI-RPL-03"
-      ]
+      ],
+      "cmmc": "MP.L2-3.8.9",
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · customer-operated"
     },
     {
       "family": "CP - Contingency Planning",
@@ -1258,7 +1667,10 @@
         "KSI-RPL-01",
         "KSI-RPL-02",
         "KSI-RPL-03"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · customer-operated"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -1273,7 +1685,10 @@
       "implementation_notes": "Customer develops I&A policies for their environment.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -1289,7 +1704,10 @@
       "ksis": [
         "KSI-IAM-01",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.1, IA.L2-3.5.2",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -1305,7 +1723,10 @@
       "ksis": [
         "KSI-IAM-01",
         "KSI-IAM-02"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.3",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -1321,12 +1742,15 @@
       "ksis": [
         "KSI-IAM-01",
         "KSI-IAM-02"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.3",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
       "control_id": "IA-2(8)",
-      "control_name": "Access to Accounts \u2014 Replay Resistant",
+      "control_name": "Access to Accounts — Replay Resistant",
       "meridian": true,
       "customer": true,
       "csp": null,
@@ -1337,7 +1761,10 @@
       "ksis": [
         "KSI-IAM-01",
         "KSI-IAM-02"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.4",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -1352,7 +1779,10 @@
       "implementation_notes": "Customer manages device identification/authentication (802.1X, certificates) in their network.",
       "ksis": [
         "KSI-IAM-03"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.2",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -1368,7 +1798,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.5, IA.L2-3.5.6",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -1384,7 +1817,10 @@
       "ksis": [
         "KSI-IAM-01",
         "KSI-IAM-02"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.2",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -1399,7 +1835,10 @@
       "implementation_notes": "Meridian enforces password complexity requirements. Customer sets password policy parameters. | See Meridian Secure Config Guide: PASSWORD_EDIT_SETTINGS table, EnablePasswordRestriction",
       "ksis": [
         "KSI-IAM-02"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.7, IA.L2-3.5.8, IA.L2-3.5.9, IA.L2-3.5.10",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -1416,7 +1855,10 @@
         "KSI-IAM-02",
         "KSI-IAM-03",
         "KSI-SVC-06"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.2",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-SVC · customer-operated"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -1431,7 +1873,10 @@
       "implementation_notes": "Meridian obscures authentication feedback (masked passwords) in the LMS interface.",
       "ksis": [
         "KSI-IAM-02"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.11",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · Meridian application"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -1446,7 +1891,10 @@
       "implementation_notes": "Meridian supports authentication of external users. Customer defines policies for external user access. | See Meridian Secure Config Guide: DAT_AUTHENTICATION_TYPE_JSON (DOMAIN_AUTHENTICATION_TYPES)",
       "ksis": [
         "KSI-IAM-01"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.1",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -1461,7 +1909,10 @@
       "implementation_notes": "Customer performs identity proofing before granting LMS access. | See Meridian Secure Config Guide: EmailVerificationExpirationLimit",
       "ksis": [
         "KSI-IAM-07"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "IR - Incident Response",
@@ -1476,7 +1927,10 @@
       "implementation_notes": "Customer develops incident response policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "IR - Incident Response",
@@ -1491,7 +1945,10 @@
       "implementation_notes": "Customer trains personnel on incident response procedures.",
       "ksis": [
         "KSI-CED-03"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.1",
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-CED · customer-operated"
     },
     {
       "family": "IR - Incident Response",
@@ -1508,7 +1965,10 @@
         "KSI-INR-02",
         "KSI-INR-03",
         "KSI-RPL-04"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.3",
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-INR, KSI-RPL · customer-operated"
     },
     {
       "family": "IR - Incident Response",
@@ -1525,7 +1985,10 @@
         "KSI-INR-01",
         "KSI-INR-02",
         "KSI-INR-03"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.1",
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-INR · customer-operated"
     },
     {
       "family": "IR - Incident Response",
@@ -1540,7 +2003,10 @@
       "implementation_notes": "Customer monitors for and tracks security incidents.",
       "ksis": [
         "KSI-INR-02"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.1",
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-INR · customer-operated"
     },
     {
       "family": "IR - Incident Response",
@@ -1555,7 +2021,10 @@
       "implementation_notes": "Meridian reports application security incidents to the customer. Customer reports to appropriate authorities.",
       "ksis": [
         "KSI-INR-01"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.2",
+      "cui_obligation": "Incident reporting",
+      "cui_disposition": "Covered — KSI: KSI-INR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IR - Incident Response",
@@ -1570,7 +2039,10 @@
       "implementation_notes": "Meridian provides technical assistance for LMS-related incidents. Customer provides broader IR resources.",
       "ksis": [
         "KSI-INR-01"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.1",
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-INR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IR - Incident Response",
@@ -1587,7 +2059,10 @@
         "KSI-INR-01",
         "KSI-INR-02",
         "KSI-INR-03"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.1",
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-INR · customer-operated"
     },
     {
       "family": "MA - Maintenance",
@@ -1602,7 +2077,10 @@
       "implementation_notes": "Customer develops maintenance policies for their environment.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Maintenance",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "MA - Maintenance",
@@ -1618,7 +2096,10 @@
       "ksis": [
         "KSI-CMT-01",
         "KSI-SVC-01"
-      ]
+      ],
+      "cmmc": "MA.L2-3.7.1, MA.L2-3.7.2, MA.L2-3.7.3",
+      "cui_obligation": "Maintenance",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-SVC · customer-operated"
     },
     {
       "family": "MA - Maintenance",
@@ -1631,7 +2112,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Infrastructure maintenance; outside LMS application scope.",
       "implementation_notes": "Customer controls and monitors nonlocal maintenance sessions.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "MA.L2-3.7.5",
+      "cui_obligation": "Maintenance",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "MA - Maintenance",
@@ -1644,7 +2128,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Infrastructure maintenance personnel; outside LMS application scope.",
       "implementation_notes": "Customer manages authorization of maintenance personnel.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "MA.L2-3.7.6",
+      "cui_obligation": "Maintenance",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "MP - Media Protection",
@@ -1659,7 +2146,10 @@
       "implementation_notes": "Customer develops media protection policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "MP - Media Protection",
@@ -1672,7 +2162,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical media; outside LMS application scope.",
       "implementation_notes": "Customer restricts access to digital and physical media in their environment.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "MP.L2-3.8.1, MP.L2-3.8.2",
+      "cui_obligation": "Media handling",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "MP - Media Protection",
@@ -1687,7 +2180,10 @@
       "implementation_notes": "Customer physically secures and encrypts media in their facility. | See Meridian Secure Config Guide: EnableSSN, EnableEHRI",
       "ksis": [
         "KSI-SVC-03"
-      ]
+      ],
+      "cmmc": "MP.L2-3.8.1",
+      "cui_obligation": "Media handling",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "MP - Media Protection",
@@ -1700,7 +2196,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical media sanitization; outside LMS application scope.",
       "implementation_notes": "Customer sanitizes media before disposal or reuse.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "MP.L2-3.8.3",
+      "cui_obligation": "Destruction / sanitization",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -1715,7 +2214,10 @@
       "implementation_notes": "Customer develops PE policies for their facility.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -1728,7 +2230,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical security; outside LMS application scope. Customer (on-prem) or AWS (cloud) responsibility.",
       "implementation_notes": "Customer manages physical access authorizations to their facility/data center.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "PE.L2-3.10.1",
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -1741,7 +2246,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical security; outside LMS application scope.",
       "implementation_notes": "Customer manages physical access controls (badges, guards, biometrics) at their facility.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "PE.L2-3.10.1, PE.L2-3.10.3, PE.L2-3.10.5",
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -1754,7 +2262,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical security; outside LMS application scope.",
       "implementation_notes": "Customer monitors physical access to their facility.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "PE.L2-3.10.2",
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -1767,7 +2278,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical security; outside LMS application scope.",
       "implementation_notes": "Customer maintains visitor logs for their facility.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "PE.L2-3.10.4",
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -1780,7 +2294,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "Customer protects power equipment and cabling.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -1793,7 +2310,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "Customer manages emergency power shutoff capability.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -1806,7 +2326,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "Customer manages UPS/generator for their environment.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -1819,7 +2342,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "Customer manages emergency lighting in their facility.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -1832,7 +2358,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "Customer manages fire protection for their facility.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -1845,7 +2374,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "Customer manages temperature/humidity controls.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -1858,7 +2390,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "Customer protects equipment from water damage.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "PL - Planning",
@@ -1873,7 +2408,10 @@
       "implementation_notes": "Customer develops planning policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "PL - Planning",
@@ -1888,7 +2426,10 @@
       "implementation_notes": "Customer develops SSP covering the LMS in their environment.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": "CA.L2-3.12.4",
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "PL - Planning",
@@ -1903,7 +2444,10 @@
       "implementation_notes": "Customer develops and enforces rules of behavior for LMS users.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "PL - Planning",
@@ -1919,7 +2463,10 @@
       "ksis": [
         "KSI-PIY-04",
         "KSI-SVC-01"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-SVC · customer-operated"
     },
     {
       "family": "PL - Planning",
@@ -1934,7 +2481,10 @@
       "implementation_notes": "Customer selects appropriate NIST baseline for their environment.",
       "ksis": [
         "KSI-CNA-07"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-CNA · customer-operated"
     },
     {
       "family": "PS - Personnel Security",
@@ -1949,7 +2499,10 @@
       "implementation_notes": "Customer develops personnel security policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "PS - Personnel Security",
@@ -1965,7 +2518,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "PS.L2-3.9.1",
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "PS - Personnel Security",
@@ -1981,7 +2537,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "PS.L2-3.9.1",
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "PS - Personnel Security",
@@ -1997,7 +2556,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-06"
-      ]
+      ],
+      "cmmc": "PS.L2-3.9.2",
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "PS - Personnel Security",
@@ -2013,7 +2575,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "PS.L2-3.9.2",
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "PS - Personnel Security",
@@ -2029,7 +2594,10 @@
       "ksis": [
         "KSI-CED-03",
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-CED, KSI-IAM · customer-operated"
     },
     {
       "family": "PS - Personnel Security",
@@ -2045,7 +2613,10 @@
       "ksis": [
         "KSI-TPR-01",
         "KSI-TPR-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "PS - Personnel Security",
@@ -2060,7 +2631,10 @@
       "implementation_notes": "Customer enforces sanctions for personnel who violate security policies.",
       "ksis": [
         "KSI-IAM-06"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "RA - Risk Assessment",
@@ -2075,7 +2649,10 @@
       "implementation_notes": "Customer develops risk assessment policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Risk & vulnerability mgmt",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "RA - Risk Assessment",
@@ -2088,7 +2665,10 @@
       "applicability": "Customer-Only",
       "applicability_rationale": "No KSI mapping; control falls entirely to customer organizational/infrastructure responsibility.",
       "implementation_notes": "Customer conducts risk assessments of their environment including the LMS.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "RA.L2-3.11.1",
+      "cui_obligation": "Risk & vulnerability mgmt",
+      "cui_disposition": "Customer / Government responsibility — no KSI mapping"
     },
     {
       "family": "RA - Risk Assessment",
@@ -2105,7 +2685,10 @@
         "KSI-MLA-03",
         "KSI-SVC-07",
         "KSI-TPR-04"
-      ]
+      ],
+      "cmmc": "RA.L2-3.11.2, RA.L2-3.11.3",
+      "cui_obligation": "Risk & vulnerability mgmt",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-SVC, KSI-TPR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "RA - Risk Assessment",
@@ -2120,7 +2703,10 @@
       "implementation_notes": "Customer responds to identified risks per organizational risk management framework.",
       "ksis": [
         "KSI-SVC-07"
-      ]
+      ],
+      "cmmc": "RA.L2-3.11.1",
+      "cui_obligation": "Risk & vulnerability mgmt",
+      "cui_disposition": "Covered — KSI: KSI-SVC · customer-operated"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -2135,7 +2721,10 @@
       "implementation_notes": "Customer develops SA policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -2151,7 +2740,10 @@
       "ksis": [
         "KSI-PIY-06",
         "KSI-TPR-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-TPR · customer-operated"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -2167,7 +2759,10 @@
       "ksis": [
         "KSI-PIY-04",
         "KSI-PIY-06"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY · Meridian application"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -2182,7 +2777,10 @@
       "implementation_notes": "Customer includes security requirements in acquisition of LMS and supporting systems.",
       "ksis": [
         "KSI-TPR-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -2197,7 +2795,10 @@
       "implementation_notes": "Meridian provides LMS admin/security documentation. Customer maintains documentation for their overall environment.",
       "ksis": [
         "KSI-SVC-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -2212,7 +2813,10 @@
       "implementation_notes": "Meridian applies security engineering principles in LMS design and development.",
       "ksis": [
         "KSI-PIY-04"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.2",
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY · Meridian application"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -2228,7 +2832,10 @@
       "ksis": [
         "KSI-TPR-02",
         "KSI-TPR-03"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -2244,7 +2851,10 @@
       "ksis": [
         "KSI-TPR-02",
         "KSI-TPR-03"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-TPR · Meridian application"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -2260,7 +2870,10 @@
       "ksis": [
         "KSI-TPR-02",
         "KSI-TPR-03"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-TPR · Meridian application"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2275,7 +2888,10 @@
       "implementation_notes": "Customer develops SC policies for their environment.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2290,7 +2906,10 @@
       "implementation_notes": "Meridian separates user interface functions from admin/management functions in the LMS.",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.3",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · Meridian application"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2308,7 +2927,10 @@
         "KSI-IAM-05",
         "KSI-PIY-04",
         "KSI-SVC-08"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.4",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-IAM, KSI-PIY, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2323,7 +2945,10 @@
       "implementation_notes": "Customer implements DoS protection (firewall, IPS) in their environment. | See Meridian Secure Config Guide: maxRequestLength",
       "ksis": [
         "KSI-CNA-05"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2339,7 +2964,10 @@
       "ksis": [
         "KSI-CNA-03",
         "KSI-SVC-01"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.1, SC.L2-3.13.5",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-SVC · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2354,7 +2982,10 @@
       "implementation_notes": "Customer limits the number of external network access points.",
       "ksis": [
         "KSI-CNA-02"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.1",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2369,7 +3000,10 @@
       "implementation_notes": "Customer manages external telecom connections.",
       "ksis": [
         "KSI-CNA-02"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.1",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2384,7 +3018,10 @@
       "implementation_notes": "Customer configures deny-by-default network rules.",
       "ksis": [
         "KSI-CNA-01"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.6",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2401,7 +3038,10 @@
         "KSI-CNA-02",
         "KSI-CNA-03",
         "KSI-SVC-02"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.8",
+      "cui_obligation": "Transmitting (in transit)",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2416,7 +3056,10 @@
       "implementation_notes": "Meridian uses FIPS-validated cryptography in the application. Customer ensures infrastructure supports FIPS. | See Meridian Secure Config Guide: Cert.IgnoreErrors, Cert.IgnoreUrls, PayPalAPIUsername, PayPalAPIPassword, PayPalAPISignature",
       "ksis": [
         "KSI-SVC-02"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.8, SC.L2-3.13.11",
+      "cui_obligation": "Transmitting (in transit)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2432,7 +3075,10 @@
       "ksis": [
         "KSI-CNA-02",
         "KSI-CNA-03"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.9",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2447,7 +3093,10 @@
       "implementation_notes": "Customer manages cryptographic keys for their environment.",
       "ksis": [
         "KSI-SVC-06"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.10",
+      "cui_obligation": "Safeguarding (at rest)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2464,7 +3113,10 @@
         "KSI-SVC-02",
         "KSI-SVC-03",
         "KSI-SVC-05"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.11",
+      "cui_obligation": "Safeguarding (at rest)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2479,7 +3131,10 @@
       "implementation_notes": "Customer manages PKI certificates for their environment.",
       "ksis": [
         "KSI-SVC-06"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.10",
+      "cui_obligation": "Safeguarding (at rest)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2495,7 +3150,10 @@
       "ksis": [
         "KSI-IAM-05",
         "KSI-SVC-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-SVC · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2511,7 +3169,10 @@
       "ksis": [
         "KSI-IAM-05",
         "KSI-SVC-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-SVC · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2527,7 +3188,10 @@
       "ksis": [
         "KSI-IAM-05",
         "KSI-SVC-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-SVC · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2548,7 +3212,10 @@
         "KSI-SVC-02",
         "KSI-SVC-05",
         "KSI-SVC-09"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.15",
+      "cui_obligation": "Transmitting (in transit)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-SVC · Meridian application"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2563,7 +3230,10 @@
       "implementation_notes": "Customer manages encryption of data at rest on their storage systems.",
       "ksis": [
         "KSI-SVC-03"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.16",
+      "cui_obligation": "Safeguarding (at rest)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2578,7 +3248,10 @@
       "implementation_notes": "Customer implements cryptographic protection of data at rest.",
       "ksis": [
         "KSI-SVC-03"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.16",
+      "cui_obligation": "Safeguarding (at rest)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -2595,7 +3268,10 @@
         "KSI-IAM-04",
         "KSI-IAM-05",
         "KSI-SVC-01"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-SVC · customer-operated"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -2610,7 +3286,10 @@
       "implementation_notes": "Customer develops SI policies for their environment.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -2627,7 +3306,10 @@
         "KSI-CMT-03",
         "KSI-CMT-05",
         "KSI-MLA-03"
-      ]
+      ],
+      "cmmc": "SI.L2-3.14.1",
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -2643,7 +3325,10 @@
       "ksis": [
         "KSI-MLA-03",
         "KSI-SVC-01"
-      ]
+      ],
+      "cmmc": "SI.L2-3.14.1",
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -2661,7 +3346,10 @@
         "KSI-CNA-04",
         "KSI-IAM-05",
         "KSI-MLA-03"
-      ]
+      ],
+      "cmmc": "SI.L2-3.14.2, SI.L2-3.14.4, SI.L2-3.14.5",
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-CNA, KSI-IAM, KSI-MLA · customer-operated"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -2678,7 +3366,10 @@
         "KSI-MLA-02",
         "KSI-SVC-01",
         "KSI-SVC-04"
-      ]
+      ],
+      "cmmc": "SI.L2-3.14.6, SI.L2-3.14.7",
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-SVC · customer-operated"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -2695,7 +3386,10 @@
         "KSI-MLA-03",
         "KSI-SVC-04",
         "KSI-TPR-04"
-      ]
+      ],
+      "cmmc": "SI.L2-3.14.3",
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-SVC, KSI-TPR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -2712,7 +3406,10 @@
         "KSI-SVC-05",
         "KSI-SVC-09",
         "KSI-TPR-03"
-      ]
+      ],
+      "cmmc": "SI.L2-3.14.1",
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-SVC, KSI-TPR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -2729,7 +3426,10 @@
         "KSI-CNA-02",
         "KSI-MLA-03",
         "KSI-PIY-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-MLA, KSI-PIY · Meridian application"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -2747,7 +3447,10 @@
         "KSI-MLA-03",
         "KSI-MLA-08",
         "KSI-PIY-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-MLA, KSI-PIY · Meridian application"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -2763,7 +3466,10 @@
       "ksis": [
         "KSI-RPL-03",
         "KSI-SVC-10"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-RPL, KSI-SVC · customer-operated"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -2779,7 +3485,10 @@
       "ksis": [
         "KSI-CNA-02",
         "KSI-PIY-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-PIY · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -2794,7 +3503,10 @@
       "implementation_notes": "Customer develops supply chain risk management policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -2809,7 +3521,10 @@
       "implementation_notes": "Customer develops SCRM plan for their environment.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -2825,7 +3540,10 @@
       "ksis": [
         "KSI-PIY-02",
         "KSI-TPR-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-TPR · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -2841,7 +3559,10 @@
       "ksis": [
         "KSI-TPR-03",
         "KSI-TPR-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -2857,7 +3578,10 @@
       "ksis": [
         "KSI-TPR-03",
         "KSI-TPR-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -2872,7 +3596,10 @@
       "implementation_notes": "Customer establishes notification agreements with suppliers.",
       "ksis": [
         "KSI-TPR-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -2889,7 +3616,10 @@
         "KSI-SVC-01",
         "KSI-SVC-04",
         "KSI-SVC-05"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-SVC · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -2905,7 +3635,10 @@
       "ksis": [
         "KSI-PIY-02",
         "KSI-CED-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-CED · customer-operated"
     }
   ],
   "cloud_fedramp": [
@@ -2922,7 +3655,10 @@
       "implementation_notes": "Customer develops and maintains access control policies. Meridian provides application security documentation for reference.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "AC - Access Control",
@@ -2939,7 +3675,10 @@
         "KSI-IAM-01",
         "KSI-IAM-04",
         "KSI-IAM-06"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.1, AC.L2-3.1.2",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -2954,7 +3693,10 @@
       "implementation_notes": "Meridian supports automated account provisioning via API and SCIM integration. Customer implements automation workflows through their IdP.",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.1",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -2970,7 +3712,10 @@
       "ksis": [
         "KSI-IAM-03",
         "KSI-IAM-07"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.1",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -2986,7 +3731,10 @@
       "ksis": [
         "KSI-IAM-06",
         "KSI-IAM-07"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.1",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -3002,7 +3750,10 @@
       "ksis": [
         "KSI-MLA-02",
         "KSI-SVC-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.7",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-SVC · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -3017,7 +3768,10 @@
       "implementation_notes": "Meridian supports immediate account disabling via admin console and API. Customer identifies high-risk individuals and initiates disabling. GuardDuty triggers automated credential rotation on high-severity findings.",
       "ksis": [
         "KSI-IAM-06"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.1",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -3033,7 +3787,10 @@
       "ksis": [
         "KSI-IAM-02",
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.1, AC.L2-3.1.2",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -3049,7 +3806,10 @@
       "ksis": [
         "KSI-IAM-03",
         "KSI-CNA-02"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.3",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-CNA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -3065,7 +3825,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-PIY-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.4",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-PIY · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -3080,7 +3843,10 @@
       "implementation_notes": "Meridian implements granular least-privilege role model within the LMS. Customer assigns minimum necessary roles. IAM roles follow least-privilege with no wildcard permissions; legacy IAM users audited and minimized.",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.5",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -3095,7 +3861,10 @@
       "implementation_notes": "Meridian restricts security configuration functions to designated admin roles. Customer authorizes specific personnel for admin access.",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.5",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -3110,7 +3879,10 @@
       "implementation_notes": "Meridian supports separate privileged and standard user accounts. Customer enforces dual-account policy for administrators.",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.6",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -3125,7 +3897,10 @@
       "implementation_notes": "Meridian restricts privileged LMS functions to designated roles. Customer manages who holds privileged roles. Break-glass IAM users require hardware MFA tokens.",
       "ksis": [
         "KSI-IAM-03"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.5",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -3140,7 +3915,10 @@
       "implementation_notes": "All privileged function usage within the LMS is logged with user identity, timestamp, action performed, and source IP. CloudTrail captures infrastructure privileged actions.",
       "ksis": [
         "KSI-MLA-02"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.7",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-MLA · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -3155,7 +3933,10 @@
       "implementation_notes": "Application code enforces role-based restrictions preventing non-privileged users from executing admin functions. No client-side bypass possible.",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.7",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -3171,7 +3952,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-06"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.8",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -3184,7 +3968,10 @@
       "applicability": "Voluntary",
       "applicability_rationale": "Meridian LMS supports configurable login banners/system use notifications as a best practice.",
       "implementation_notes": "Configurable login banner and system use notification displayed before authentication. Customer provides banner text content.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "AC.L2-3.1.9",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered (voluntary) — KSI: see KSI column · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -3197,7 +3984,10 @@
       "applicability": "Voluntary",
       "applicability_rationale": "Meridian LMS enforces configurable concurrent session limits as a best practice.",
       "implementation_notes": "Configurable concurrent session limits per user. New sessions can terminate oldest session or be denied based on configuration.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered (voluntary) — KSI: see KSI column · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -3210,7 +4000,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Endpoint/device control; not applicable to a web-based LMS application.",
       "implementation_notes": "Endpoint device lock policies managed by customer on their workstations. Not applicable to the LMS web application.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "AC.L2-3.1.10",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "AC - Access Control",
@@ -3226,7 +4019,10 @@
       "ksis": [
         "KSI-CNA-03",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.11",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-IAM · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -3241,7 +4037,10 @@
       "implementation_notes": "LMS defines which actions are permitted without authentication (e.g., public course catalog if enabled). Public access scope is configurable and disabled by default.",
       "ksis": [
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · Meridian application"
     },
     {
       "family": "AC - Access Control",
@@ -3257,7 +4056,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.12",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -3273,7 +4075,10 @@
       "ksis": [
         "KSI-MLA-01",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.12",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-IAM · customer-operated"
     },
     {
       "family": "AC - Access Control",
@@ -3288,7 +4093,10 @@
       "implementation_notes": "Meridian enforces TLS for all application traffic via ACM-managed certificates on ALB and CloudFront. Customer configures encrypted connectivity for infrastructure access.",
       "ksis": [
         "KSI-SVC-02"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.13",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -3305,7 +4113,10 @@
         "KSI-CNA-01",
         "KSI-CNA-02",
         "KSI-CNA-03"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.14",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-CNA · inherited (AWS)"
     },
     {
       "family": "AC - Access Control",
@@ -3320,7 +4131,10 @@
       "implementation_notes": "Customer restricts privileged remote access. SSM Session Manager replaces SSH with TLS-encrypted, IAM-signed instance access.",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.15",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "AC - Access Control",
@@ -3333,7 +4147,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Wireless network infrastructure; outside LMS application scope.",
       "implementation_notes": "AWS manages wireless access in data centers. Not applicable to the LMS application.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "AC.L2-3.1.16, AC.L2-3.1.17",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "AC - Access Control",
@@ -3346,7 +4163,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Mobile device management; outside LMS application scope.",
       "implementation_notes": "Customer manages mobile device access policies for their users.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "AC.L2-3.1.18, AC.L2-3.1.19",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "AC - Access Control",
@@ -3362,7 +4182,10 @@
       "ksis": [
         "KSI-IAM-05",
         "KSI-TPR-03"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.20, AC.L2-3.1.21",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-TPR · customer-operated"
     },
     {
       "family": "AC - Access Control",
@@ -3379,7 +4202,10 @@
         "KSI-PIY-02",
         "KSI-SVC-03",
         "KSI-TPR-02"
-      ]
+      ],
+      "cmmc": "AC.L2-3.1.22",
+      "cui_obligation": "Dissemination / info sharing",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-SVC, KSI-TPR · customer-operated"
     },
     {
       "family": "AT - Awareness and Training",
@@ -3394,7 +4220,10 @@
       "implementation_notes": "Customer develops organizational security awareness and training policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Training (personnel)",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "AT - Awareness and Training",
@@ -3410,7 +4239,10 @@
       "ksis": [
         "KSI-CED-01",
         "KSI-CED-02"
-      ]
+      ],
+      "cmmc": "AT.L2-3.2.1",
+      "cui_obligation": "Training (personnel)",
+      "cui_disposition": "Covered — KSI: KSI-CED · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AT - Awareness and Training",
@@ -3425,7 +4257,10 @@
       "implementation_notes": "Meridian provides insider threat awareness to its staff. Customer provides insider threat training to their personnel.",
       "ksis": [
         "KSI-CED-01"
-      ]
+      ],
+      "cmmc": "AT.L2-3.2.3",
+      "cui_obligation": "Training (personnel)",
+      "cui_disposition": "Covered — KSI: KSI-CED · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AT - Awareness and Training",
@@ -3441,7 +4276,10 @@
       "ksis": [
         "KSI-CED-01",
         "KSI-CED-02"
-      ]
+      ],
+      "cmmc": "AT.L2-3.2.1",
+      "cui_obligation": "Training (personnel)",
+      "cui_disposition": "Covered — KSI: KSI-CED · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AT - Awareness and Training",
@@ -3456,7 +4294,10 @@
       "implementation_notes": "Meridian's privileged users complete AWS Skill Builder IAM Deep Dive and role-specific training. Customer provides role-based training to their LMS administrators.",
       "ksis": [
         "KSI-CED-02"
-      ]
+      ],
+      "cmmc": "AT.L2-3.2.2",
+      "cui_obligation": "Training (personnel)",
+      "cui_disposition": "Covered — KSI: KSI-CED · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AT - Awareness and Training",
@@ -3471,7 +4312,10 @@
       "implementation_notes": "Meridian maintains training records via commit-signed attestation files in version control. Customer maintains their own training records.",
       "ksis": [
         "KSI-CED-01"
-      ]
+      ],
+      "cmmc": "AT.L2-3.2.1",
+      "cui_obligation": "Training (personnel)",
+      "cui_disposition": "Covered — KSI: KSI-CED · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3486,7 +4330,10 @@
       "implementation_notes": "Customer develops organizational audit and accountability policies. Meridian documents application audit capabilities.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3503,7 +4350,10 @@
         "KSI-CMT-01",
         "KSI-MLA-01",
         "KSI-MLA-07"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.1, AU.L2-3.3.2, AU.L2-3.3.3",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3518,7 +4368,10 @@
       "implementation_notes": "LMS audit records include user identity, timestamp, event type, source IP, session ID, outcome, and affected resource.",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.1",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · Meridian application"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3533,7 +4386,10 @@
       "implementation_notes": "Audit records include extended metadata: browser agent, domain context, proxy user (if applicable), and request correlation IDs.",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.1",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · Meridian application"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3548,7 +4404,10 @@
       "implementation_notes": "Meridian manages application log volume. CloudWatch Logs and S3 provide scalable log storage. Customer configures retention policies and monitors capacity.",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3564,7 +4423,10 @@
       "ksis": [
         "KSI-MLA-01",
         "KSI-MLA-03"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.4",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3579,7 +4441,10 @@
       "implementation_notes": "Customer reviews and analyzes audit logs. Meridian provides log export capabilities. CloudWatch Metric Filters automate analysis of root logins, unauthorized API calls, security group changes, and failed authentication.",
       "ksis": [
         "KSI-MLA-02"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.5",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · customer-operated"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3594,7 +4459,10 @@
       "implementation_notes": "Customer integrates LMS and infrastructure logs into their SIEM for automated correlation and analysis.",
       "ksis": [
         "KSI-MLA-02"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.5",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · customer-operated"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3609,7 +4477,10 @@
       "implementation_notes": "Meridian provides log search, filtering, and export within the LMS. CloudWatch Logs Insights provides query capability across infrastructure logs.",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.6",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3624,7 +4495,10 @@
       "implementation_notes": "Meridian uses server clock for audit timestamps. AWS provides synchronized NTP across all infrastructure. Customer ensures client-side time synchronization.",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.7",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3639,7 +4513,10 @@
       "implementation_notes": "Log integrity protected via S3 Object Lock and CloudTrail Log File Validation (digest hashing). Access to audit logs restricted via S3 bucket policies (security team read-only) and KMS encryption.",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.8, AU.L2-3.3.9",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3654,7 +4531,10 @@
       "implementation_notes": "Customer defines audit log retention periods. Infrastructure logs retained 365-731 days based on log group configuration.",
       "ksis": [
         "KSI-MLA-01"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.1",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · customer-operated"
     },
     {
       "family": "AU - Audit and Accountability",
@@ -3669,7 +4549,10 @@
       "implementation_notes": "LMS generates audit records for all security-relevant events. Event types defined in configuration and documented in the Secure Configuration Guide.",
       "ksis": [
         "KSI-MLA-07"
-      ]
+      ],
+      "cmmc": "AU.L2-3.3.1, AU.L2-3.3.2",
+      "cui_obligation": "Audit & accountability",
+      "cui_disposition": "Covered — KSI: KSI-MLA · Meridian application"
     },
     {
       "family": "CA - Assessment, Authorization, and Monitoring",
@@ -3684,7 +4567,10 @@
       "implementation_notes": "Customer develops organizational assessment and authorization policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security assessment & monitoring",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "CA - Assessment, Authorization, and Monitoring",
@@ -3696,11 +4582,14 @@
       "responsibility": "Shared",
       "applicability": "KSI-Mapped",
       "applicability_rationale": null,
-      "implementation_notes": "Meridian maintains FedRAMP authorization with automated validation of all 61 KSIs via CI/CD pipeline. Customer conducts organizational assessments.",
+      "implementation_notes": "Meridian maintains FedRAMP 20x Class C Certification with automated validation of all 61 KSIs via CI/CD pipeline. Customer conducts organizational assessments.",
       "ksis": [
         "KSI-PIY-06",
         "KSI-AFR"
-      ]
+      ],
+      "cmmc": "CA.L2-3.12.1",
+      "cui_obligation": "Security assessment & monitoring",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-AFR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CA - Assessment, Authorization, and Monitoring",
@@ -3717,7 +4606,10 @@
         "KSI-TPR-01",
         "KSI-TPR-02",
         "KSI-TPR-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security assessment & monitoring",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "CA - Assessment, Authorization, and Monitoring",
@@ -3732,7 +4624,10 @@
       "implementation_notes": "Meridian tracks application findings with automated remediation tracking. Vulnerability posture monitored via Inspector and SecurityHub. Customer maintains organizational POA&Ms.",
       "ksis": [
         "KSI-MLA-03"
-      ]
+      ],
+      "cmmc": "CA.L2-3.12.2",
+      "cui_obligation": "Security assessment & monitoring",
+      "cui_disposition": "Covered — KSI: KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CA - Assessment, Authorization, and Monitoring",
@@ -3749,7 +4644,10 @@
         "KSI-MLA-03",
         "KSI-MLA-05",
         "KSI-SVC-07"
-      ]
+      ],
+      "cmmc": "CA.L2-3.12.3",
+      "cui_obligation": "Security assessment & monitoring",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CA - Assessment, Authorization, and Monitoring",
@@ -3766,7 +4664,10 @@
         "KSI-CNA-01",
         "KSI-CNA-02",
         "KSI-CNA-03"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security assessment & monitoring",
+      "cui_disposition": "Covered — KSI: KSI-CNA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -3781,7 +4682,10 @@
       "implementation_notes": "Customer develops organizational CM policies. Meridian documents application CM practices.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "CM - Configuration Management",
@@ -3798,7 +4702,10 @@
         "KSI-CMT-02",
         "KSI-CNA-04",
         "KSI-SVC-04"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.1, CM.L2-3.4.2",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-CNA, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -3816,7 +4723,10 @@
         "KSI-CMT-02",
         "KSI-CMT-03",
         "KSI-CMT-04"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.3",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -3831,7 +4741,10 @@
       "implementation_notes": "Meridian performs impact analysis on application changes. Changes validated by Checkov scans in CI pipeline before deployment. AWS Config rules provide continuous drift detection post-deployment.",
       "ksis": [
         "KSI-CMT-05"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.4",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -3847,7 +4760,10 @@
       "ksis": [
         "KSI-CMT-02",
         "KSI-CMT-04"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.5",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -3864,7 +4780,10 @@
         "KSI-CMT-01",
         "KSI-CMT-02",
         "KSI-SVC-04"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.2",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -3880,7 +4799,10 @@
       "ksis": [
         "KSI-CMT-02",
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.6, CM.L2-3.4.7",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -3898,7 +4820,10 @@
         "KSI-CMT-05",
         "KSI-CNA-01",
         "KSI-SVC-01"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.7",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-CNA, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -3913,7 +4838,10 @@
       "implementation_notes": "Meridian maintains application component inventory (SBOM). Real-time infrastructure inventory via AWS Config with automatic discovery. SSM Inventory provides OS-level software lists. Customer maintains organizational inventory.",
       "ksis": [
         "KSI-PIY-01"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.1",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-PIY · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -3929,7 +4857,10 @@
       "ksis": [
         "KSI-CMT-02",
         "KSI-PIY-01"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.1",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-PIY · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CM - Configuration Management",
@@ -3946,7 +4877,10 @@
         "KSI-CMT-04",
         "KSI-IAM-04",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-IAM · customer-operated"
     },
     {
       "family": "CM - Configuration Management",
@@ -3961,7 +4895,10 @@
       "implementation_notes": "Customer manages software licensing compliance.",
       "ksis": [
         "KSI-TPR-01"
-      ]
+      ],
+      "cmmc": "CM.L2-3.4.9",
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "CM - Configuration Management",
@@ -3978,7 +4915,10 @@
         "KSI-PIY-01",
         "KSI-SVC-03",
         "KSI-TPR-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Configuration management",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-SVC, KSI-TPR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CP - Contingency Planning",
@@ -3993,7 +4933,10 @@
       "implementation_notes": "Customer develops organizational contingency planning policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "CP - Contingency Planning",
@@ -4008,7 +4951,10 @@
       "implementation_notes": "Meridian provides application recovery documentation. Recovery plans aligned with RPO=24hrs, RTO=4hrs. Customer develops organizational contingency plan.",
       "ksis": [
         "KSI-RPL-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CP - Contingency Planning",
@@ -4023,7 +4969,10 @@
       "implementation_notes": "Meridian's IR/DR staff complete training including review of incident-response-plan.md and tabletop exercises with tracked attestations. Customer trains their personnel.",
       "ksis": [
         "KSI-CED-03"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-CED · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CP - Contingency Planning",
@@ -4038,7 +4987,10 @@
       "implementation_notes": "Recovery capability tested via quarterly restore operations with duration metrics (current success rate: 92.9%). Customer tests organizational contingency plan.",
       "ksis": [
         "KSI-RPL-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CP - Contingency Planning",
@@ -4053,7 +5005,10 @@
       "implementation_notes": "AWS provides geographically redundant storage. AWS Backup enforces daily backups with 30-day retention.",
       "ksis": [
         "KSI-RPL-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · inherited (AWS)"
     },
     {
       "family": "CP - Contingency Planning",
@@ -4068,7 +5023,10 @@
       "implementation_notes": "Multi-AZ ALB and Multi-AZ RDS provide alternate processing. Recovery plan alignment validated via 203 tracked backup jobs.",
       "ksis": [
         "KSI-RPL-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · inherited (AWS)"
     },
     {
       "family": "CP - Contingency Planning",
@@ -4083,7 +5041,10 @@
       "implementation_notes": "AWS manages telecommunications redundancy across data centers.",
       "ksis": [
         "KSI-RPL-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · inherited (AWS)"
     },
     {
       "family": "CP - Contingency Planning",
@@ -4098,7 +5059,10 @@
       "implementation_notes": "AWS Backup plans enforce daily backups with 30-day retention across RDS, EBS, and S3. Meridian documents application data requiring backup. Customer configures retention policies per regulatory requirements.",
       "ksis": [
         "KSI-RPL-03"
-      ]
+      ],
+      "cmmc": "MP.L2-3.8.9",
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "CP - Contingency Planning",
@@ -4115,7 +5079,10 @@
         "KSI-RPL-01",
         "KSI-RPL-02",
         "KSI-RPL-03"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Availability / backup",
+      "cui_disposition": "Covered — KSI: KSI-RPL · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -4130,7 +5097,10 @@
       "implementation_notes": "Customer develops organizational I&A policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -4146,7 +5116,10 @@
       "ksis": [
         "KSI-IAM-01",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.1, IA.L2-3.5.2",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -4162,7 +5135,10 @@
       "ksis": [
         "KSI-IAM-01",
         "KSI-IAM-02"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.3",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -4178,12 +5154,15 @@
       "ksis": [
         "KSI-IAM-01",
         "KSI-IAM-02"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.3",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
       "control_id": "IA-2(8)",
-      "control_name": "Access to Accounts \u2014 Replay Resistant",
+      "control_name": "Access to Accounts — Replay Resistant",
       "meridian": true,
       "customer": true,
       "csp": false,
@@ -4194,7 +5173,10 @@
       "ksis": [
         "KSI-IAM-01",
         "KSI-IAM-02"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.4",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -4209,7 +5191,10 @@
       "implementation_notes": "Customer manages device authentication. Service-to-service authentication uses IAM Roles with no long-lived credentials.",
       "ksis": [
         "KSI-IAM-03"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.2",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -4225,7 +5210,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.5, IA.L2-3.5.6",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -4241,7 +5229,10 @@
       "ksis": [
         "KSI-IAM-01",
         "KSI-IAM-02"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.2",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -4256,7 +5247,10 @@
       "implementation_notes": "Meridian enforces password restrictions including minimum length, special characters, uppercase, numeric requirements, and password history. Customer sets specific thresholds via configuration.",
       "ksis": [
         "KSI-IAM-02"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.7, IA.L2-3.5.8, IA.L2-3.5.9, IA.L2-3.5.10",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -4273,7 +5267,10 @@
         "KSI-IAM-02",
         "KSI-IAM-03",
         "KSI-SVC-06"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.2",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -4285,10 +5282,13 @@
       "responsibility": "Meridian",
       "applicability": "KSI-Mapped",
       "applicability_rationale": null,
-      "implementation_notes": "Authentication feedback is obscured in the LMS UI \u2014 passwords masked, generic error messages on failed login to prevent user enumeration.",
+      "implementation_notes": "Authentication feedback is obscured in the LMS UI — passwords masked, generic error messages on failed login to prevent user enumeration.",
       "ksis": [
         "KSI-IAM-02"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.11",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · Meridian application"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -4303,7 +5303,10 @@
       "implementation_notes": "Meridian supports authentication of external users via configurable authentication methods. Customer defines policies for external user access.",
       "ksis": [
         "KSI-IAM-01"
-      ]
+      ],
+      "cmmc": "IA.L2-3.5.1",
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IA - Identification and Authentication",
@@ -4318,7 +5321,10 @@
       "implementation_notes": "Customer performs identity proofing before provisioning LMS accounts.",
       "ksis": [
         "KSI-IAM-07"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (access control)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "IR - Incident Response",
@@ -4333,7 +5339,10 @@
       "implementation_notes": "Customer develops organizational IR policies. Meridian maintains application-level IR procedures.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "IR - Incident Response",
@@ -4348,7 +5357,10 @@
       "implementation_notes": "Meridian's IR staff complete training including tabletop exercises with attestations tracked in version control. Customer trains their personnel.",
       "ksis": [
         "KSI-CED-03"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.1",
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-CED · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IR - Incident Response",
@@ -4365,7 +5377,10 @@
         "KSI-INR-02",
         "KSI-INR-03",
         "KSI-RPL-04"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.3",
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-INR, KSI-RPL · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IR - Incident Response",
@@ -4382,7 +5397,10 @@
         "KSI-INR-01",
         "KSI-INR-02",
         "KSI-INR-03"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.1",
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-INR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IR - Incident Response",
@@ -4397,7 +5415,10 @@
       "implementation_notes": "Meridian monitors application for incidents via GuardDuty threat detection and SecurityHub findings. Past incidents logged in CloudWatch Logs and S3 audit buckets with pattern analysis. Customer monitors their organizational environment.",
       "ksis": [
         "KSI-INR-02"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.1",
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-INR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IR - Incident Response",
@@ -4412,7 +5433,10 @@
       "implementation_notes": "Meridian reports application incidents per FedRAMP ICP requirements via automated notification pipeline. Customer reports per organizational and regulatory requirements.",
       "ksis": [
         "KSI-INR-01"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.2",
+      "cui_obligation": "Incident reporting",
+      "cui_disposition": "Covered — KSI: KSI-INR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IR - Incident Response",
@@ -4427,7 +5451,10 @@
       "implementation_notes": "Meridian provides application incident technical support. Customer provides broader organizational IR resources.",
       "ksis": [
         "KSI-INR-01"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.1",
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-INR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "IR - Incident Response",
@@ -4444,7 +5471,10 @@
         "KSI-INR-01",
         "KSI-INR-02",
         "KSI-INR-03"
-      ]
+      ],
+      "cmmc": "IR.L2-3.6.1",
+      "cui_obligation": "Incident handling",
+      "cui_disposition": "Covered — KSI: KSI-INR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "MA - Maintenance",
@@ -4459,7 +5489,10 @@
       "implementation_notes": "Customer develops organizational maintenance policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Maintenance",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "MA - Maintenance",
@@ -4475,7 +5508,10 @@
       "ksis": [
         "KSI-CMT-01",
         "KSI-SVC-01"
-      ]
+      ],
+      "cmmc": "MA.L2-3.7.1, MA.L2-3.7.2, MA.L2-3.7.3",
+      "cui_obligation": "Maintenance",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "MA - Maintenance",
@@ -4488,7 +5524,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Infrastructure maintenance; outside LMS application scope.",
       "implementation_notes": "Customer controls remote maintenance access to their environment.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "MA.L2-3.7.5",
+      "cui_obligation": "Maintenance",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "MA - Maintenance",
@@ -4501,7 +5540,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Infrastructure maintenance personnel; outside LMS application scope.",
       "implementation_notes": "Customer authorizes maintenance personnel.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "MA.L2-3.7.6",
+      "cui_obligation": "Maintenance",
+      "cui_disposition": "Not applicable to the LMS application"
     },
     {
       "family": "MP - Media Protection",
@@ -4516,7 +5558,10 @@
       "implementation_notes": "Customer develops organizational media protection policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "MP - Media Protection",
@@ -4529,7 +5574,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical media; outside LMS application scope.",
       "implementation_notes": "AWS manages physical media access in data centers.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "MP.L2-3.8.1, MP.L2-3.8.2",
+      "cui_obligation": "Media handling",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "MP - Media Protection",
@@ -4544,7 +5592,10 @@
       "implementation_notes": "AWS manages physical media storage and encryption in data centers.",
       "ksis": [
         "KSI-SVC-03"
-      ]
+      ],
+      "cmmc": "MP.L2-3.8.1",
+      "cui_obligation": "Media handling",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "MP - Media Protection",
@@ -4557,7 +5608,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical media sanitization; outside LMS application scope.",
       "implementation_notes": "AWS sanitizes media per NIST 800-88.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "MP.L2-3.8.3",
+      "cui_obligation": "Destruction / sanitization",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -4572,7 +5626,10 @@
       "implementation_notes": "AWS maintains physical and environmental protection policies for data centers.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Covered — KSI: KSI-PIY · inherited (AWS)"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -4585,7 +5642,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical security; outside LMS application scope. Customer (on-prem) or AWS (cloud) responsibility.",
       "implementation_notes": "AWS manages physical access authorizations to data centers.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "PE.L2-3.10.1",
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -4598,7 +5658,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical security; outside LMS application scope.",
       "implementation_notes": "AWS manages physical access controls at data centers.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "PE.L2-3.10.1, PE.L2-3.10.3, PE.L2-3.10.5",
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -4611,7 +5674,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical security; outside LMS application scope.",
       "implementation_notes": "AWS monitors physical access at data centers.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "PE.L2-3.10.2",
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -4624,7 +5690,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical security; outside LMS application scope.",
       "implementation_notes": "AWS maintains visitor logs for data centers.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "PE.L2-3.10.4",
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -4637,7 +5706,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "AWS manages power equipment protection at data centers.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -4650,7 +5722,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "AWS manages emergency shutoff at data centers.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -4663,7 +5738,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "AWS manages emergency power at data centers.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -4676,7 +5754,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "AWS manages emergency lighting at data centers.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -4689,7 +5770,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "AWS manages fire protection at data centers.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -4702,7 +5786,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "AWS manages environmental controls at data centers.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "PE - Physical and Environmental Protection",
@@ -4715,7 +5802,10 @@
       "applicability": "Not Applicable",
       "applicability_rationale": "Physical infrastructure; outside LMS application scope.",
       "implementation_notes": "AWS manages water damage protection at data centers.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": null,
+      "cui_obligation": "Physical protection",
+      "cui_disposition": "Inherited from AWS — not applicable to LMS application"
     },
     {
       "family": "PL - Planning",
@@ -4730,7 +5820,10 @@
       "implementation_notes": "Customer develops organizational planning policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "PL - Planning",
@@ -4742,10 +5835,13 @@
       "responsibility": "Shared",
       "applicability": "KSI-Mapped",
       "applicability_rationale": null,
-      "implementation_notes": "Meridian maintains application security plan and FedRAMP authorization package (auto-compiled from CodeCommit governance artifacts). Customer maintains organizational SSP.",
+      "implementation_notes": "Meridian maintains application security plan and FedRAMP 20x Class C Certification package (auto-compiled from CodeCommit governance artifacts). Customer maintains organizational SSP.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": "CA.L2-3.12.4",
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "PL - Planning",
@@ -4760,7 +5856,10 @@
       "implementation_notes": "Customer develops and enforces rules of behavior for LMS users.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "PL - Planning",
@@ -4776,7 +5875,10 @@
       "ksis": [
         "KSI-PIY-04",
         "KSI-SVC-01"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "PL - Planning",
@@ -4791,7 +5893,10 @@
       "implementation_notes": "Customer selects NIST baseline. Meridian aligns application controls to FedRAMP Moderate via KSI validation.",
       "ksis": [
         "KSI-CNA-07"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-CNA · customer-operated"
     },
     {
       "family": "PS - Personnel Security",
@@ -4806,7 +5911,10 @@
       "implementation_notes": "Meridian maintains personnel security policies for its staff. Customer maintains policies for their personnel.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-PIY · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "PS - Personnel Security",
@@ -4822,7 +5930,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "PS.L2-3.9.1",
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "PS - Personnel Security",
@@ -4838,7 +5949,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "PS.L2-3.9.1",
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "PS - Personnel Security",
@@ -4854,7 +5968,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-06"
-      ]
+      ],
+      "cmmc": "PS.L2-3.9.2",
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-IAM · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "PS - Personnel Security",
@@ -4870,7 +5987,10 @@
       "ksis": [
         "KSI-IAM-04",
         "KSI-IAM-05"
-      ]
+      ],
+      "cmmc": "PS.L2-3.9.2",
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "PS - Personnel Security",
@@ -4886,7 +6006,10 @@
       "ksis": [
         "KSI-CED-03",
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-CED, KSI-IAM · customer-operated"
     },
     {
       "family": "PS - Personnel Security",
@@ -4902,7 +6025,10 @@
       "ksis": [
         "KSI-TPR-01",
         "KSI-TPR-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "PS - Personnel Security",
@@ -4917,7 +6043,10 @@
       "implementation_notes": "Customer enforces sanctions for security policy violations.",
       "ksis": [
         "KSI-IAM-06"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Personnel security",
+      "cui_disposition": "Covered — KSI: KSI-IAM · customer-operated"
     },
     {
       "family": "RA - Risk Assessment",
@@ -4932,7 +6061,10 @@
       "implementation_notes": "Customer develops organizational risk assessment policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Risk & vulnerability mgmt",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "RA - Risk Assessment",
@@ -4945,7 +6077,10 @@
       "applicability": "Customer-Only",
       "applicability_rationale": "No KSI mapping; control falls entirely to customer organizational/infrastructure responsibility.",
       "implementation_notes": "Meridian conducts application risk assessments. Customer conducts organizational risk assessments.",
-      "ksis": []
+      "ksis": [],
+      "cmmc": "RA.L2-3.11.1",
+      "cui_obligation": "Risk & vulnerability mgmt",
+      "cui_disposition": "Customer / Government responsibility — no KSI mapping"
     },
     {
       "family": "RA - Risk Assessment",
@@ -4962,7 +6097,10 @@
         "KSI-MLA-03",
         "KSI-SVC-07",
         "KSI-TPR-04"
-      ]
+      ],
+      "cmmc": "RA.L2-3.11.2, RA.L2-3.11.3",
+      "cui_obligation": "Risk & vulnerability mgmt",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-SVC, KSI-TPR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "RA - Risk Assessment",
@@ -4977,7 +6115,10 @@
       "implementation_notes": "Customer responds to identified risks per organizational risk management framework. Security posture assessed by SecurityHub, GuardDuty, Config, and Inspector.",
       "ksis": [
         "KSI-SVC-07"
-      ]
+      ],
+      "cmmc": "RA.L2-3.11.1",
+      "cui_obligation": "Risk & vulnerability mgmt",
+      "cui_disposition": "Covered — KSI: KSI-SVC · customer-operated"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -4992,7 +6133,10 @@
       "implementation_notes": "Customer develops organizational SA policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -5008,7 +6152,10 @@
       "ksis": [
         "KSI-PIY-06",
         "KSI-TPR-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-TPR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -5024,7 +6171,10 @@
       "ksis": [
         "KSI-PIY-04",
         "KSI-PIY-06"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY · Meridian application"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -5036,10 +6186,13 @@
       "responsibility": "Customer",
       "applicability": "KSI-Mapped",
       "applicability_rationale": null,
-      "implementation_notes": "Customer includes security requirements in procurement. Meridian provides security documentation and FedRAMP authorization evidence.",
+      "implementation_notes": "Customer includes security requirements in procurement. Meridian provides security documentation and FedRAMP 20x Class C Certification evidence.",
       "ksis": [
         "KSI-TPR-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -5054,7 +6207,10 @@
       "implementation_notes": "Meridian provides application security and administration documentation. Customer maintains system-level documentation.",
       "ksis": [
         "KSI-SVC-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -5069,7 +6225,10 @@
       "implementation_notes": "Security engineering principles applied in LMS design: input validation, output encoding, parameterized queries, secure session handling, CSRF protection, and least-privilege defaults.",
       "ksis": [
         "KSI-PIY-04"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.2",
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-PIY · Meridian application"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -5085,7 +6244,10 @@
       "ksis": [
         "KSI-TPR-02",
         "KSI-TPR-03"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -5101,7 +6263,10 @@
       "ksis": [
         "KSI-TPR-02",
         "KSI-TPR-03"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-TPR · Meridian application"
     },
     {
       "family": "SA - System and Services Acquisition",
@@ -5117,7 +6282,10 @@
       "ksis": [
         "KSI-TPR-02",
         "KSI-TPR-03"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Security planning / SDLC",
+      "cui_disposition": "Covered — KSI: KSI-TPR · Meridian application"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5132,7 +6300,10 @@
       "implementation_notes": "Customer develops organizational SC policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5147,7 +6318,10 @@
       "implementation_notes": "LMS separates user-facing functions from administrative/management interfaces with distinct role-based access.",
       "ksis": [
         "KSI-IAM-04"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.3",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-IAM · Meridian application"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5165,7 +6339,10 @@
         "KSI-IAM-05",
         "KSI-PIY-04",
         "KSI-SVC-08"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.4",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-IAM, KSI-PIY, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5180,7 +6357,10 @@
       "implementation_notes": "DDoS protection via AWS Shield Standard (automatic on ALB), WAFv2 Web ACLs, and Route53 anycast. Meridian implements application-level rate limiting and input size controls.",
       "ksis": [
         "KSI-CNA-05"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5196,7 +6376,10 @@
       "ksis": [
         "KSI-CNA-03",
         "KSI-SVC-01"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.1, SC.L2-3.13.5",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5211,7 +6394,10 @@
       "implementation_notes": "Attack surface minimized via private subnets, Security Group references, and RDS PubliclyAccessible=false. VPC Endpoints for S3 and DynamoDB avoid internet transit.",
       "ksis": [
         "KSI-CNA-02"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.1",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5226,7 +6412,10 @@
       "implementation_notes": "AWS manages external telecom connections at data centers.",
       "ksis": [
         "KSI-CNA-02"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.1",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA · inherited (AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5241,7 +6430,10 @@
       "implementation_notes": "Security Groups implement default-deny with specific allow-lists. NACLs enforce subnet-level deny rules.",
       "ksis": [
         "KSI-CNA-01"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.6",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5258,7 +6450,10 @@
         "KSI-CNA-02",
         "KSI-CNA-03",
         "KSI-SVC-02"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.8",
+      "cui_obligation": "Transmitting (in transit)",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5273,7 +6468,10 @@
       "implementation_notes": "FIPS 140-2 validated modules via AWS GovCloud-compatible services. KMS provides AES-256 encryption. Meridian uses FIPS-validated crypto libraries.",
       "ksis": [
         "KSI-SVC-02"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.8, SC.L2-3.13.11",
+      "cui_obligation": "Transmitting (in transit)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5289,7 +6487,10 @@
       "ksis": [
         "KSI-CNA-02",
         "KSI-CNA-03"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.9",
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-CNA · Meridian application"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5304,7 +6505,10 @@
       "implementation_notes": "Cryptographic key management via AWS KMS with automatic annual key rotation. Customer manages key policies. Meridian uses customer-managed keys where applicable.",
       "ksis": [
         "KSI-SVC-06"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.10",
+      "cui_obligation": "Safeguarding (at rest)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5321,7 +6525,10 @@
         "KSI-SVC-02",
         "KSI-SVC-03",
         "KSI-SVC-05"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.11",
+      "cui_obligation": "Safeguarding (at rest)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5336,7 +6543,10 @@
       "implementation_notes": "Certificate management via ACM with auto-renewal. Customer manages PKI lifecycle for user certificates.",
       "ksis": [
         "KSI-SVC-06"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.10",
+      "cui_obligation": "Safeguarding (at rest)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5352,7 +6562,10 @@
       "ksis": [
         "KSI-IAM-05",
         "KSI-SVC-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-SVC · inherited (AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5368,7 +6581,10 @@
       "ksis": [
         "KSI-IAM-05",
         "KSI-SVC-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-SVC · inherited (AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5384,7 +6600,10 @@
       "ksis": [
         "KSI-IAM-05",
         "KSI-SVC-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-SVC · inherited (AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5405,7 +6624,10 @@
         "KSI-SVC-02",
         "KSI-SVC-05",
         "KSI-SVC-09"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.15",
+      "cui_obligation": "Transmitting (in transit)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-SVC · Meridian application"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5420,7 +6642,10 @@
       "implementation_notes": "Data at rest encrypted via KMS (AES-256) for S3, RDS, and EBS. Customer enables encryption and manages key policies.",
       "ksis": [
         "KSI-SVC-03"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.16",
+      "cui_obligation": "Safeguarding (at rest)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5435,7 +6660,10 @@
       "implementation_notes": "AES-256 encryption for all storage via KMS. Customer manages key policies and rotation schedules.",
       "ksis": [
         "KSI-SVC-03"
-      ]
+      ],
+      "cmmc": "SC.L2-3.13.16",
+      "cui_obligation": "Safeguarding (at rest)",
+      "cui_disposition": "Covered — KSI: KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SC - System and Communications Protection",
@@ -5452,7 +6680,10 @@
         "KSI-IAM-04",
         "KSI-IAM-05",
         "KSI-SVC-01"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Safeguarding (boundary/comms)",
+      "cui_disposition": "Covered — KSI: KSI-IAM, KSI-SVC · inherited (AWS)"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -5467,7 +6698,10 @@
       "implementation_notes": "Customer develops organizational SI policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -5484,7 +6718,10 @@
         "KSI-CMT-03",
         "KSI-CMT-05",
         "KSI-MLA-03"
-      ]
+      ],
+      "cmmc": "SI.L2-3.14.1",
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -5500,7 +6737,10 @@
       "ksis": [
         "KSI-MLA-03",
         "KSI-SVC-01"
-      ]
+      ],
+      "cmmc": "SI.L2-3.14.1",
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -5518,7 +6758,10 @@
         "KSI-CNA-04",
         "KSI-IAM-05",
         "KSI-MLA-03"
-      ]
+      ],
+      "cmmc": "SI.L2-3.14.2, SI.L2-3.14.4, SI.L2-3.14.5",
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-CMT, KSI-CNA, KSI-IAM, KSI-MLA · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -5535,7 +6778,10 @@
         "KSI-MLA-02",
         "KSI-SVC-01",
         "KSI-SVC-04"
-      ]
+      ],
+      "cmmc": "SI.L2-3.14.6, SI.L2-3.14.7",
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-SVC · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -5552,7 +6798,10 @@
         "KSI-MLA-03",
         "KSI-SVC-04",
         "KSI-TPR-04"
-      ]
+      ],
+      "cmmc": "SI.L2-3.14.3",
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-MLA, KSI-SVC, KSI-TPR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -5569,7 +6818,10 @@
         "KSI-SVC-05",
         "KSI-SVC-09",
         "KSI-TPR-03"
-      ]
+      ],
+      "cmmc": "SI.L2-3.14.1",
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-SVC, KSI-TPR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -5586,7 +6838,10 @@
         "KSI-CNA-02",
         "KSI-MLA-03",
         "KSI-PIY-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-MLA, KSI-PIY · Meridian application"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -5604,7 +6859,10 @@
         "KSI-MLA-03",
         "KSI-MLA-08",
         "KSI-PIY-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-MLA, KSI-PIY · Meridian application"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -5620,7 +6878,10 @@
       "ksis": [
         "KSI-RPL-03",
         "KSI-SVC-10"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-RPL, KSI-SVC · customer-operated"
     },
     {
       "family": "SI - System and Information Integrity",
@@ -5636,7 +6897,10 @@
       "ksis": [
         "KSI-CNA-02",
         "KSI-PIY-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "System & information integrity",
+      "cui_disposition": "Covered — KSI: KSI-CNA, KSI-PIY · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -5651,7 +6915,10 @@
       "implementation_notes": "Customer develops organizational supply chain risk management policies.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-PIY · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -5666,7 +6933,10 @@
       "implementation_notes": "Meridian maintains supply chain risk management for LMS dependencies in version-controlled policy documents. Customer maintains organizational SCRM plan.",
       "ksis": [
         "KSI-PIY-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-PIY · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -5682,7 +6952,10 @@
       "ksis": [
         "KSI-PIY-02",
         "KSI-TPR-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-TPR · shared (Meridian + Customer/AWS)"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -5698,7 +6971,10 @@
       "ksis": [
         "KSI-TPR-03",
         "KSI-TPR-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -5714,7 +6990,10 @@
       "ksis": [
         "KSI-TPR-03",
         "KSI-TPR-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -5729,7 +7008,10 @@
       "implementation_notes": "Customer establishes notification agreements with suppliers.",
       "ksis": [
         "KSI-TPR-04"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-TPR · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -5746,7 +7028,10 @@
         "KSI-SVC-01",
         "KSI-SVC-04",
         "KSI-SVC-05"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-SVC · customer-operated"
     },
     {
       "family": "SR - Supply Chain Risk Management",
@@ -5762,7 +7047,10 @@
       "ksis": [
         "KSI-PIY-02",
         "KSI-CED-02"
-      ]
+      ],
+      "cmmc": null,
+      "cui_obligation": "Supply chain risk",
+      "cui_disposition": "Covered — KSI: KSI-PIY, KSI-CED · shared (Meridian + Customer/AWS)"
     }
   ],
   "app_sec": [
@@ -7205,7 +8493,7 @@
     {
       "config_id": "ADHOC_STATUS",
       "functional_area": "Reports",
-      "title": "Is Ad Hoc Report Builder \u201cOn\u201d or \u201cOff?\u201d",
+      "title": "Is Ad Hoc Report Builder “On” or “Off?”",
       "category": "Other",
       "subarea": "Adhoc",
       "audience": "Site Administrators, Domain Administrators, Report Managers",
@@ -7408,7 +8696,7 @@
     {
       "theme": "MLA - Monitoring, Logging & Auditing",
       "ksi_id": "KSI-MLA-04",
-      "description": "Retired \u2014 superseded by KSI-MLA-03",
+      "description": "Retired — superseded by KSI-MLA-03",
       "nist_controls": null
     },
     {
@@ -7420,7 +8708,7 @@
     {
       "theme": "MLA - Monitoring, Logging & Auditing",
       "ksi_id": "KSI-MLA-06",
-      "description": "Retired \u2014 superseded by KSI-MLA-03",
+      "description": "Retired — superseded by KSI-MLA-03",
       "nist_controls": null
     },
     {
