@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, memo, useCallback, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../contexts/ModalContext';
 import { useSystemStatus } from '../../hooks/useSystemStatus';
@@ -11,12 +11,13 @@ import {
     TrendingUp, BarChart3, Landmark, Network, Cloud, ArrowDown, ChevronDown, ChevronRight,
     AlertTriangle, GitCommit, RefreshCw, Hash, FileJson, Cpu, Key, Radio, CheckSquare,
     PieChart, Layout, Monitor, HardDrive, Ticket, AlertCircle, Calendar,
-    ArrowRight, User, ShieldCheck, Send, Eye as EyeIcon
+    ArrowRight, User, ShieldCheck, Send, Video, Eye as EyeIcon
 } from 'lucide-react';
 // Recharts imports removed — charts now in UnifiedMasDashboard
 // ReportsHub removed — reports & compliance now in Organization tabs
 
 import { THEME, BASE_PATH } from '../../config/theme';
+import { QUARTERLY_REGISTRATION_URL } from '../../config/api';
 import CustomerResponsibilityMatrix from './CustomerResponsibilityMatrix';
 
 // --- SUB-COMPONENT: Change Pipeline (Live SCN Tracking) ---
@@ -35,6 +36,43 @@ const SCN_IMPACT_BADGE = {
     medium:  'bg-amber-500/10 text-amber-300 border-amber-500/20',
     high:    'bg-red-500/10 text-red-300 border-red-500/30',
 };
+
+// --- SUB-TAB NAVIGATION ---
+// The Trust Center carries a lot of data; rather than one long scroll, it is
+// organized into focused sub-tabs so customers/prospects can jump straight to
+// the area they need (e.g. compliance crosswalks during an RFP).
+const TRUST_TABS = [
+    { id: 'overview',   label: 'Overview',            icon: Layout,      desc: 'Service profile & schedule' },
+    { id: 'compliance', label: 'Compliance & CRM',    icon: ShieldCheck, desc: 'NIST · KSI · CMMC · CUI' },
+    { id: 'boundary',   label: 'System Boundary',     icon: Network,     desc: 'Authorization boundary' },
+    { id: 'changes',    label: 'Change Activity',     icon: Activity,    desc: 'Live SCN tracking' },
+    { id: 'services',   label: 'Services & Downloads', icon: Layers,     desc: 'Scope & artifacts' },
+];
+
+const TrustTabBar = ({ active, onChange }) => (
+    <div className="sticky top-0 z-30 -mt-2 py-3 bg-[#09090b]/95 backdrop-blur-md border-b border-white/5">
+        <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-white/10 pb-1">
+            {TRUST_TABS.map(t => {
+                const Icon = t.icon;
+                const on = active === t.id;
+                return (
+                    <button
+                        key={t.id}
+                        onClick={() => onChange(t.id)}
+                        title={t.desc}
+                        aria-current={on ? 'page' : undefined}
+                        className={`group flex items-center gap-2 px-4 py-2 rounded-xl border whitespace-nowrap transition-all shrink-0 ${on
+                            ? 'bg-blue-500/10 border-blue-500/30 text-white shadow-sm shadow-blue-900/20'
+                            : 'bg-white/[0.02] border-white/5 text-slate-400 hover:text-slate-200 hover:border-white/10 hover:bg-white/[0.04]'}`}
+                    >
+                        <Icon className={`w-4 h-4 ${on ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
+                        <span className="text-xs font-bold tracking-wide">{t.label}</span>
+                    </button>
+                );
+            })}
+        </div>
+    </div>
+);
 
 const PlannedChangesSection = ({ scnHistory }) => {
     const displayChanges = scnHistory?.slice(0, 4) || [];
@@ -108,7 +146,82 @@ const PlannedChangesSection = ({ scnHistory }) => {
     );
 };
 
-// QuarterlyReviewCard removed — now in Organization tabs (ReportsHub)
+// --- SUB-COMPONENT: Quarterly Review Registration (Teams) ---
+// Restores the collaborative continuous-monitoring review sign-up (FRR-CCM-QR-02).
+// The registration link is the canonical QUARTERLY_REGISTRATION_URL from config so
+// pipeline data syncs cannot overwrite it; meeting details come from
+// public/data/quarterly_meetings.json.
+const QuarterlyReviewCard = memo(({ meeting }) => {
+    if (!meeting) return null;
+
+    const registrationUrl = QUARTERLY_REGISTRATION_URL || meeting.registrationUrl;
+
+    const dateLabel = meeting.nextDate
+        ? new Date(meeting.nextDate + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+        : 'Date to be announced';
+
+    const downloadICS = () => {
+        const ics = [
+            'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
+            `SUMMARY:${meeting.meetingTitle || 'FedRAMP Quarterly Review'}`,
+            `DTSTART:${(meeting.nextDate || '').replace(/-/g, '')}T190000Z`,
+            `DURATION:PT${meeting.durationMinutes || 60}M`,
+            `DESCRIPTION:${(meeting.description || '').replace(/\n/g, ' ')}\\n\\nRegister: ${registrationUrl}`,
+            'END:VEVENT', 'END:VCALENDAR'
+        ].join('\n');
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute('download', `FedRAMP_Review_${meeting.nextDate || 'session'}.ics`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+    };
+
+    return (
+        <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-6 shadow-lg relative overflow-hidden`}>
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-indigo-500 to-blue-500 opacity-60" />
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="flex items-start gap-4 min-w-0">
+                    <div className="p-2.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20 shrink-0">
+                        <Video className="w-5 h-5 text-indigo-400" />
+                    </div>
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <h3 className="text-sm font-bold text-white">{meeting.meetingTitle || 'Quarterly Continuous Monitoring Review'}</h3>
+                            <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold uppercase tracking-wide">FRR-CCM-QR-02</span>
+                        </div>
+                        {meeting.description && (
+                            <p className="text-xs text-slate-400 leading-relaxed mb-2 max-w-2xl">{meeting.description}</p>
+                        )}
+                        <div className="flex items-center gap-3 flex-wrap text-[11px] text-slate-400">
+                            <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3 text-indigo-400" /> {dateLabel}</span>
+                            {meeting.time && <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-indigo-400" /> {meeting.time}</span>}
+                            {meeting.durationMinutes && <span className="text-slate-500">· {meeting.durationMinutes} min</span>}
+                            <span className="text-slate-500">· Microsoft Teams</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-2 shrink-0 w-full sm:w-auto lg:min-w-[200px]">
+                    <button
+                        onClick={() => window.open(registrationUrl, '_blank', 'noopener')}
+                        className="flex items-center justify-center gap-1.5 w-full px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold text-xs transition-all shadow-lg shadow-indigo-900/20"
+                    >
+                        <Video className="w-3.5 h-3.5" /> Register for Session
+                    </button>
+                    <button
+                        onClick={downloadICS}
+                        className="flex items-center justify-center gap-1.5 w-full px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all border border-white/10"
+                    >
+                        <Download className="w-3 h-3" /> Add to Calendar
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+});
+
 // OngoingAuthorizationReportCard removed — now in Organization tabs (ReportsHub)
 
 // DriftAlert removed — now in UnifiedMasDashboard
@@ -481,9 +594,19 @@ export const TrustCenterView = () => {
     const [scnHistory, setScnHistory] = useState([]);
     const [plannedChanges, setPlannedChanges] = useState([]);
     const [nextReportDate, setNextReportDate] = useState(null);
+    const [quarterlyMeeting, setQuarterlyMeeting] = useState(null);
     const [csoInfo, setCsoInfo] = useState(null);
     const [feedbackEntries, setFeedbackEntries] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('overview');
+    const rootRef = useRef(null);
+
+    // Switch sub-tab and reset the scroll position so the new tab starts at the
+    // top of the view rather than wherever the previous tab was scrolled to.
+    const handleTabChange = useCallback((id) => {
+        setActiveTab(id);
+        rootRef.current?.closest('main')?.scrollTo({ top: 0 });
+    }, []);
 
     const uptime = status?.uptime_percent ? `${parseFloat(status.uptime_percent).toFixed(2)}%` : '99.99%';
     const latency = status?.avg_latency || '24ms';
@@ -515,6 +638,12 @@ export const TrustCenterView = () => {
                 try {
                     const csoRes = await fetch(`${BASE_PATH}cso_public_info.json?t=${ts}`);
                     if (csoRes.ok) setCsoInfo(await csoRes.json());
+                } catch {}
+
+                // Load quarterly review meeting (Teams registration)
+                try {
+                    const meetingRes = await fetch(`${BASE_PATH}quarterly_meetings.json?t=${ts}`);
+                    if (meetingRes.ok) setQuarterlyMeeting(await meetingRes.json());
                 } catch {}
 
                 // Load feedback entries from OAR
@@ -639,7 +768,7 @@ export const TrustCenterView = () => {
     );
 
     return (
-        <div className="-m-6 md:-m-8 min-h-screen bg-[#09090b] text-slate-300 font-sans selection:bg-blue-500/30 relative">
+        <div ref={rootRef} className="-m-6 md:-m-8 min-h-screen bg-[#09090b] text-slate-300 font-sans selection:bg-blue-500/30 relative">
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="relative z-10 px-6 md:px-8 py-8 space-y-8 max-w-7xl mx-auto">
 
@@ -662,6 +791,13 @@ export const TrustCenterView = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* --- SUB-TAB NAVIGATION --- */}
+                <TrustTabBar active={activeTab} onChange={handleTabChange} />
+
+                {/* ===== OVERVIEW TAB ===== */}
+                {activeTab === 'overview' && (
+                <div className="space-y-8">
 
                 {/* --- SERVICE PROFILE --- */}
                 <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 shadow-lg`}>
@@ -754,16 +890,47 @@ export const TrustCenterView = () => {
                     </div>
                 )}
 
+                {/* --- QUARTERLY REVIEW REGISTRATION (FRR-CCM-QR-02) --- */}
+                <QuarterlyReviewCard meeting={quarterlyMeeting} />
+
+                </div>
+                )}
+
+                {/* ===== CHANGE ACTIVITY TAB ===== */}
+                {activeTab === 'changes' && (
+                <div className="space-y-8">
+
                 {/* --- CHANGE PIPELINE (SCN Tracking) --- */}
                 <PlannedChangesSection scnHistory={scnHistory} />
+
+                </div>
+                )}
+
+                {/* ===== SYSTEM BOUNDARY TAB ===== */}
+                {activeTab === 'boundary' && (
+                <div className="space-y-8">
 
                 {/* --- LIVE SYSTEM BOUNDARY --- */}
                 <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-6 shadow-md`}>
                     <LiveMasDashboard boundary={masBoundary} architecture={masArch} history={masHistory} />
                 </div>
 
+                </div>
+                )}
+
+                {/* ===== COMPLIANCE & CRM TAB ===== */}
+                {activeTab === 'compliance' && (
+                <div className="space-y-8">
+
                 {/* --- CUSTOMER RESPONSIBILITY MATRIX (NIST 800-53 Rev 5 + KSI) --- */}
                 <CustomerResponsibilityMatrix />
+
+                </div>
+                )}
+
+                {/* ===== SERVICES & DOWNLOADS TAB ===== */}
+                {activeTab === 'services' && (
+                <div className="space-y-8">
 
                 {/* --- AUTHORIZED SERVICES GRID --- */}
                 <div>
@@ -832,6 +999,10 @@ export const TrustCenterView = () => {
                     <FooterAction title="Secure Config" onClick={viewSecureConfig} onDownload={downloadSecureConfig} downloadLabel="Download secure configuration" />
                     <FooterAction title="Support" onClick={() => window.location.href = 'mailto:support@meridianks.com'} />
                 </div>
+
+                </div>
+                )}
+
             </div>
         </div>
     );
