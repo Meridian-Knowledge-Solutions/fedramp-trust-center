@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, memo, useCallback, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../contexts/ModalContext';
 import { useSystemStatus } from '../../hooks/useSystemStatus';
@@ -35,6 +35,43 @@ const SCN_IMPACT_BADGE = {
     medium:  'bg-amber-500/10 text-amber-300 border-amber-500/20',
     high:    'bg-red-500/10 text-red-300 border-red-500/30',
 };
+
+// --- SUB-TAB NAVIGATION ---
+// The Trust Center carries a lot of data; rather than one long scroll, it is
+// organized into focused sub-tabs so customers/prospects can jump straight to
+// the area they need (e.g. compliance crosswalks during an RFP).
+const TRUST_TABS = [
+    { id: 'overview',   label: 'Overview',            icon: Layout,      desc: 'Service profile & schedule' },
+    { id: 'compliance', label: 'Compliance & CRM',    icon: ShieldCheck, desc: 'NIST · KSI · CMMC · CUI' },
+    { id: 'boundary',   label: 'System Boundary',     icon: Network,     desc: 'Authorization boundary' },
+    { id: 'changes',    label: 'Change Activity',     icon: Activity,    desc: 'Live SCN tracking' },
+    { id: 'services',   label: 'Services & Downloads', icon: Layers,     desc: 'Scope & artifacts' },
+];
+
+const TrustTabBar = ({ active, onChange }) => (
+    <div className="sticky top-0 z-30 -mt-2 py-3 bg-[#09090b]/95 backdrop-blur-md border-b border-white/5">
+        <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-white/10 pb-1">
+            {TRUST_TABS.map(t => {
+                const Icon = t.icon;
+                const on = active === t.id;
+                return (
+                    <button
+                        key={t.id}
+                        onClick={() => onChange(t.id)}
+                        title={t.desc}
+                        aria-current={on ? 'page' : undefined}
+                        className={`group flex items-center gap-2 px-4 py-2 rounded-xl border whitespace-nowrap transition-all shrink-0 ${on
+                            ? 'bg-blue-500/10 border-blue-500/30 text-white shadow-sm shadow-blue-900/20'
+                            : 'bg-white/[0.02] border-white/5 text-slate-400 hover:text-slate-200 hover:border-white/10 hover:bg-white/[0.04]'}`}
+                    >
+                        <Icon className={`w-4 h-4 ${on ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
+                        <span className="text-xs font-bold tracking-wide">{t.label}</span>
+                    </button>
+                );
+            })}
+        </div>
+    </div>
+);
 
 const PlannedChangesSection = ({ scnHistory }) => {
     const displayChanges = scnHistory?.slice(0, 4) || [];
@@ -484,6 +521,15 @@ export const TrustCenterView = () => {
     const [csoInfo, setCsoInfo] = useState(null);
     const [feedbackEntries, setFeedbackEntries] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('overview');
+    const rootRef = useRef(null);
+
+    // Switch sub-tab and reset the scroll position so the new tab starts at the
+    // top of the view rather than wherever the previous tab was scrolled to.
+    const handleTabChange = useCallback((id) => {
+        setActiveTab(id);
+        rootRef.current?.closest('main')?.scrollTo({ top: 0 });
+    }, []);
 
     const uptime = status?.uptime_percent ? `${parseFloat(status.uptime_percent).toFixed(2)}%` : '99.99%';
     const latency = status?.avg_latency || '24ms';
@@ -639,7 +685,7 @@ export const TrustCenterView = () => {
     );
 
     return (
-        <div className="-m-6 md:-m-8 min-h-screen bg-[#09090b] text-slate-300 font-sans selection:bg-blue-500/30 relative">
+        <div ref={rootRef} className="-m-6 md:-m-8 min-h-screen bg-[#09090b] text-slate-300 font-sans selection:bg-blue-500/30 relative">
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="relative z-10 px-6 md:px-8 py-8 space-y-8 max-w-7xl mx-auto">
 
@@ -662,6 +708,13 @@ export const TrustCenterView = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* --- SUB-TAB NAVIGATION --- */}
+                <TrustTabBar active={activeTab} onChange={handleTabChange} />
+
+                {/* ===== OVERVIEW TAB ===== */}
+                {activeTab === 'overview' && (
+                <div className="space-y-8">
 
                 {/* --- SERVICE PROFILE --- */}
                 <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-8 shadow-lg`}>
@@ -754,16 +807,44 @@ export const TrustCenterView = () => {
                     </div>
                 )}
 
+                </div>
+                )}
+
+                {/* ===== CHANGE ACTIVITY TAB ===== */}
+                {activeTab === 'changes' && (
+                <div className="space-y-8">
+
                 {/* --- CHANGE PIPELINE (SCN Tracking) --- */}
                 <PlannedChangesSection scnHistory={scnHistory} />
+
+                </div>
+                )}
+
+                {/* ===== SYSTEM BOUNDARY TAB ===== */}
+                {activeTab === 'boundary' && (
+                <div className="space-y-8">
 
                 {/* --- LIVE SYSTEM BOUNDARY --- */}
                 <div className={`${THEME.panel} border ${THEME.border} rounded-2xl p-6 shadow-md`}>
                     <LiveMasDashboard boundary={masBoundary} architecture={masArch} history={masHistory} />
                 </div>
 
+                </div>
+                )}
+
+                {/* ===== COMPLIANCE & CRM TAB ===== */}
+                {activeTab === 'compliance' && (
+                <div className="space-y-8">
+
                 {/* --- CUSTOMER RESPONSIBILITY MATRIX (NIST 800-53 Rev 5 + KSI) --- */}
                 <CustomerResponsibilityMatrix />
+
+                </div>
+                )}
+
+                {/* ===== SERVICES & DOWNLOADS TAB ===== */}
+                {activeTab === 'services' && (
+                <div className="space-y-8">
 
                 {/* --- AUTHORIZED SERVICES GRID --- */}
                 <div>
@@ -832,6 +913,10 @@ export const TrustCenterView = () => {
                     <FooterAction title="Secure Config" onClick={viewSecureConfig} onDownload={downloadSecureConfig} downloadLabel="Download secure configuration" />
                     <FooterAction title="Support" onClick={() => window.location.href = 'mailto:support@meridianks.com'} />
                 </div>
+
+                </div>
+                )}
+
             </div>
         </div>
     );
