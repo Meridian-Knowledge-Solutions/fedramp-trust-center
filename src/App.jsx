@@ -3,7 +3,7 @@ import {
   LayoutDashboard, ShieldAlert, User, LogOut,
   Menu, Activity, Calendar, Clock,
   FileText, RefreshCw, BarChart3, Eye, X, Shield, Layers,
-  BookOpen, Code2, FileBarChart, Database, ListTodo
+  BookOpen, Code2, FileBarChart, Database, ListTodo, Lock
 } from 'lucide-react';
 
 import {
@@ -17,6 +17,7 @@ import { ModalProvider, useModal } from './contexts/ModalContext';
 import { ModalContainer } from './components/modals';
 import SettingsModal from './components/modals/SettingsModal';
 import VerifyHandler from './hooks/VerifyHandler';
+import { getRouteSegments, setRoute, onRouteChange } from './utils/hashRoute';
 
 import { TrustCenterView } from './components/trust/TrustCenterView';
 import { TransparencyConsole } from './components/trust/TransparencyConsole';
@@ -64,9 +65,10 @@ const getTimeElapsed = (date) => {
 
 // --- MICRO COMPONENTS ---
 
-const SidebarItem = memo(({ icon: Icon, label, badge, isActive, onClick }) => (
+const SidebarItem = memo(({ icon: Icon, label, badge, isActive, onClick, locked }) => (
   <button
     onClick={onClick}
+    title={locked ? `${label} — requires verified federal access` : undefined}
     className={`group flex items-center w-full px-3 py-3 mx-2 mb-1 text-sm font-medium rounded-md cursor-pointer ${TRANSITIONS.default} border border-transparent
     ${isActive ? THEME.active : `text-slate-400 ${THEME.hover} hover:text-slate-200`}`}
   >
@@ -76,6 +78,9 @@ const SidebarItem = memo(({ icon: Icon, label, badge, isActive, onClick }) => (
       <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded-sm ${badge.color} border border-white/5 tracking-wider`}>
         {badge.text}
       </span>
+    )}
+    {locked && (
+      <Lock size={12} className="text-slate-600 group-hover:text-slate-400 shrink-0" aria-label="Requires federal access" />
     )}
   </button>
 ));
@@ -481,23 +486,61 @@ const DashboardContent = memo(({ onOpenRegister }) => {
 
 // --- APP SHELL ---
 
+const KNOWN_VIEWS = new Set([
+  'dashboard', 'trust', 'vdr', 'transparency', 'metrics',
+  'failures', 'register', 'mas', 'policies', 'schema', 'reports',
+]);
+
 const AppShell = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeView, setActiveView] = useState('dashboard');
+  // Initialize the active view from the URL hash so deep links land directly
+  // (e.g. #trust/compliance/cmmc opens the Trust Center on the CMMC tab).
+  const [activeView, setActiveView] = useState(() => {
+    const seg = getRouteSegments()[0];
+    return KNOWN_VIEWS.has(seg) ? seg : 'dashboard';
+  });
   const [registerFilters, setRegisterFilters] = useState({});
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [freshness, setFreshness] = useState(null);
   const scrollY = useScrollPosition();
 
   const { user, isAuthenticated, logout } = useAuth();
   const { openModal } = useModal();
 
+  // User-initiated navigation: update state AND the URL hash (top-level views
+  // reset any deeper tab/section so the link reflects where you are).
+  const navigate = useCallback((view) => {
+    setActiveView(view);
+    setRoute([view]);
+    setMobileMenuOpen(false);
+  }, []);
+
+  // React to external hash changes (back/forward, shared deep links) without
+  // rewriting the hash — preserves deeper tab/section segments.
+  useEffect(() => {
+    const sync = () => {
+      const seg = getRouteSegments()[0];
+      if (KNOWN_VIEWS.has(seg)) setActiveView(seg);
+    };
+    return onRouteChange(sync);
+  }, []);
+
+  // Site-wide data freshness signal (continuous-monitoring "last refreshed").
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${import.meta.env.BASE_URL}data/next_report_date.json`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => { if (!cancelled && j) setFreshness(j.last_data_refresh || j.last_report_generated || null); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   // Navigate to the Remediation Register, optionally pre-filtered (e.g. heatmap click).
   const goToRegister = useCallback((filters = {}) => {
     setRegisterFilters(filters);
-    setActiveView('register');
-    setMobileMenuOpen(false);
-  }, []);
+    navigate('register');
+  }, [navigate]);
 
   return (
     <div className={`flex h-screen ${THEME.bg} text-slate-300 font-sans overflow-hidden selection:bg-blue-500/30`}>
@@ -547,37 +590,41 @@ const AppShell = () => {
               icon={LayoutDashboard}
               label="Overview"
               isActive={activeView === 'dashboard'}
-              onClick={() => { setActiveView('dashboard'); setMobileMenuOpen(false); }}
+              onClick={() => { navigate('dashboard'); setMobileMenuOpen(false); }}
             />
             <SidebarItem
               icon={ShieldAlert}
               label="Trust Center"
               isActive={activeView === 'trust'}
-              onClick={() => { setActiveView('trust'); setMobileMenuOpen(false); }}
+              onClick={() => { navigate('trust'); setMobileMenuOpen(false); }}
             />
             <SidebarItem
               icon={Shield}
               label="VDR Security"
+              locked={!isAuthenticated}
               isActive={activeView === 'vdr'}
-              onClick={() => { setActiveView('vdr'); setMobileMenuOpen(false); }}
+              onClick={() => { navigate('vdr'); setMobileMenuOpen(false); }}
             />
             <SidebarItem
               icon={Eye}
               label="Transparency Console"
+              locked={!isAuthenticated}
               isActive={activeView === 'transparency'}
-              onClick={() => { setActiveView('transparency'); setMobileMenuOpen(false); }}
+              onClick={() => { navigate('transparency'); setMobileMenuOpen(false); }}
             />
             <SidebarItem
               icon={BarChart3}
               label="Pipeline Metrics"
+              locked={!isAuthenticated}
               isActive={activeView === 'metrics'}
-              onClick={() => { setActiveView('metrics'); setMobileMenuOpen(false); }}
+              onClick={() => { navigate('metrics'); setMobileMenuOpen(false); }}
             />
             <SidebarItem
               icon={Clock}
               label="Failure History"
+              locked={!isAuthenticated}
               isActive={activeView === 'failures'}
-              onClick={() => { setActiveView('failures'); setMobileMenuOpen(false); }}
+              onClick={() => { navigate('failures'); setMobileMenuOpen(false); }}
             />
             <SidebarItem
               icon={ListTodo}
@@ -588,8 +635,9 @@ const AppShell = () => {
             <SidebarItem
               icon={Layers}
               label="Assessment Scope"
+              locked={!isAuthenticated}
               isActive={activeView === 'mas'}
-              onClick={() => { setActiveView('mas'); setMobileMenuOpen(false); }}
+              onClick={() => { navigate('mas'); setMobileMenuOpen(false); }}
             />
 
             <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Organization</div>
@@ -597,20 +645,23 @@ const AppShell = () => {
             <SidebarItem
               icon={BookOpen}
               label="Policies"
+              locked={!isAuthenticated}
               isActive={activeView === 'policies'}
-              onClick={() => { setActiveView('policies'); setMobileMenuOpen(false); }}
+              onClick={() => { navigate('policies'); setMobileMenuOpen(false); }}
             />
             <SidebarItem
               icon={Code2}
               label="Schema"
+              locked={!isAuthenticated}
               isActive={activeView === 'schema'}
-              onClick={() => { setActiveView('schema'); setMobileMenuOpen(false); }}
+              onClick={() => { navigate('schema'); setMobileMenuOpen(false); }}
             />
             <SidebarItem
               icon={FileBarChart}
               label="Reports"
+              locked={!isAuthenticated}
               isActive={activeView === 'reports'}
-              onClick={() => { setActiveView('reports'); setMobileMenuOpen(false); }}
+              onClick={() => { navigate('reports'); setMobileMenuOpen(false); }}
             />
 
             <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
@@ -667,37 +718,41 @@ const AppShell = () => {
               icon={LayoutDashboard}
               label="Overview"
               isActive={activeView === 'dashboard'}
-              onClick={() => setActiveView('dashboard')}
+              onClick={() => navigate('dashboard')}
             />
             <SidebarItem
               icon={ShieldAlert}
               label="Trust Center"
               isActive={activeView === 'trust'}
-              onClick={() => setActiveView('trust')}
+              onClick={() => navigate('trust')}
             />
             <SidebarItem
               icon={Shield}
               label="VDR Security"
+              locked={!isAuthenticated}
               isActive={activeView === 'vdr'}
-              onClick={() => setActiveView('vdr')}
+              onClick={() => navigate('vdr')}
             />
             <SidebarItem
               icon={Eye}
               label="Transparency Console"
+              locked={!isAuthenticated}
               isActive={activeView === 'transparency'}
-              onClick={() => setActiveView('transparency')}
+              onClick={() => navigate('transparency')}
             />
             <SidebarItem
               icon={BarChart3}
               label="Pipeline Metrics"
+              locked={!isAuthenticated}
               isActive={activeView === 'metrics'}
-              onClick={() => setActiveView('metrics')}
+              onClick={() => navigate('metrics')}
             />
             <SidebarItem
               icon={Clock}
               label="Failure History"
+              locked={!isAuthenticated}
               isActive={activeView === 'failures'}
-              onClick={() => setActiveView('failures')}
+              onClick={() => navigate('failures')}
             />
             <SidebarItem
               icon={ListTodo}
@@ -708,8 +763,9 @@ const AppShell = () => {
             <SidebarItem
               icon={Layers}
               label="Assessment Scope"
+              locked={!isAuthenticated}
               isActive={activeView === 'mas'}
-              onClick={() => setActiveView('mas')}
+              onClick={() => navigate('mas')}
             />
 
             <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Organization</div>
@@ -717,20 +773,23 @@ const AppShell = () => {
             <SidebarItem
               icon={BookOpen}
               label="Policies"
+              locked={!isAuthenticated}
               isActive={activeView === 'policies'}
-              onClick={() => setActiveView('policies')}
+              onClick={() => navigate('policies')}
             />
             <SidebarItem
               icon={Code2}
               label="Schema"
+              locked={!isAuthenticated}
               isActive={activeView === 'schema'}
-              onClick={() => setActiveView('schema')}
+              onClick={() => navigate('schema')}
             />
             <SidebarItem
               icon={FileBarChart}
               label="Reports"
+              locked={!isAuthenticated}
               isActive={activeView === 'reports'}
-              onClick={() => setActiveView('reports')}
+              onClick={() => navigate('reports')}
             />
 
             <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
@@ -791,6 +850,19 @@ const AppShell = () => {
           </div>
 
           <div className="flex items-center space-x-3 lg:space-x-6">
+            {freshness && (
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/15"
+                   title="Continuous monitoring — data refreshed on this date; Key Security Indicators re-validate every 4 hours.">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                <div className="leading-tight">
+                  <div className="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Continuous Monitoring</div>
+                  <div className="text-[10px] text-emerald-300 font-mono">Updated {freshness}</div>
+                </div>
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <div className="text-right hidden md:block">
                 <div className="text-xs font-bold text-white">{isAuthenticated ? user.agency : 'Public User'}</div>
@@ -814,19 +886,28 @@ const AppShell = () => {
               activeView === 'register' ? <RemediationRegister initialFilters={registerFilters} /> :
               !isAuthenticated ? (
                 <div className="flex items-center justify-center min-h-[60vh]">
-                  <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-10 rounded-2xl border border-gray-700 text-center max-w-md">
-                    <div className="w-16 h-16 mx-auto mb-5 bg-gray-800 rounded-2xl flex items-center justify-center border border-gray-700">
-                      <Shield size={32} className="text-gray-500" />
+                  <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-10 rounded-2xl border border-gray-700 max-w-lg">
+                    <div className="w-16 h-16 mb-5 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
+                      <Lock size={28} className="text-blue-400" />
                     </div>
-                    <h3 className="font-semibold text-white text-xl mb-3">Federal Access Required</h3>
+                    <h3 className="font-semibold text-white text-xl mb-3">Verified federal access required</h3>
+                    <p className="text-sm text-gray-400 mb-4 leading-relaxed">
+                      This section contains detailed authorization data for the service. To keep that
+                      data with verified government and DoD audiences, we ask you to register with your
+                      <span className="text-gray-300"> .gov / .mil email</span> before viewing it — it
+                      only takes a minute, and it's how we confirm you're a federal stakeholder.
+                    </p>
                     <p className="text-sm text-gray-400 mb-6 leading-relaxed">
-                      This section is restricted to authorized federal personnel. Request access to view detailed findings, reports, and assessment data.
+                      No registration is needed for our public transparency views:
+                      <button onClick={() => navigate('trust')} className="text-blue-400 hover:text-blue-300 font-medium mx-1">Trust Center</button>,
+                      <button onClick={() => navigate('dashboard')} className="text-blue-400 hover:text-blue-300 font-medium mx-1">Overview</button>, and the
+                      <button onClick={() => navigate('register')} className="text-blue-400 hover:text-blue-300 font-medium mx-1">Remediation Register</button>.
                     </p>
                     <button
                       onClick={() => openModal('registration')}
                       className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-900/30"
                     >
-                      Request Full Access
+                      Register with government email
                     </button>
                   </div>
                 </div>

@@ -18,6 +18,7 @@ import {
 
 import { THEME, BASE_PATH } from '../../config/theme';
 import { QUARTERLY_REGISTRATION_URL } from '../../config/api';
+import { getRouteSegments, setRoute, onRouteChange } from '../../utils/hashRoute';
 import CustomerResponsibilityMatrix from './CustomerResponsibilityMatrix';
 
 // --- SUB-COMPONENT: Change Pipeline (Live SCN Tracking) ---
@@ -48,6 +49,7 @@ const TRUST_TABS = [
     { id: 'changes',    label: 'Change Activity',     icon: Activity,    desc: 'Live SCN tracking' },
     { id: 'services',   label: 'Services & Downloads', icon: Layers,     desc: 'Scope & artifacts' },
 ];
+const TRUST_TAB_IDS = new Set(TRUST_TABS.map(t => t.id));
 
 const TrustTabBar = ({ active, onChange }) => (
     <div className="sticky top-0 z-30 -mt-2 py-3 bg-[#09090b]/95 backdrop-blur-md border-b border-white/5">
@@ -598,14 +600,29 @@ export const TrustCenterView = () => {
     const [csoInfo, setCsoInfo] = useState(null);
     const [feedbackEntries, setFeedbackEntries] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('overview');
+    // Initialize the sub-tab from the URL hash (e.g. #trust/compliance) so deep
+    // links open the right tab; default to overview otherwise.
+    const [activeTab, setActiveTab] = useState(() => {
+        const seg = getRouteSegments();
+        return seg[0] === 'trust' && TRUST_TAB_IDS.has(seg[1]) ? seg[1] : 'overview';
+    });
     const rootRef = useRef(null);
 
-    // Switch sub-tab and reset the scroll position so the new tab starts at the
-    // top of the view rather than wherever the previous tab was scrolled to.
+    // Switch sub-tab, record it in the URL hash (so the view is shareable), and
+    // reset scroll so the new tab starts at the top.
     const handleTabChange = useCallback((id) => {
         setActiveTab(id);
+        setRoute(['trust', id]);
         rootRef.current?.closest('main')?.scrollTo({ top: 0 });
+    }, []);
+
+    // Keep the active tab in sync with external hash changes (back/forward, deep links).
+    useEffect(() => {
+        const sync = () => {
+            const seg = getRouteSegments();
+            if (seg[0] === 'trust' && TRUST_TAB_IDS.has(seg[1])) setActiveTab(seg[1]);
+        };
+        return onRouteChange(sync);
     }, []);
 
     const uptime = status?.uptime_percent ? `${parseFloat(status.uptime_percent).toFixed(2)}%` : '99.99%';

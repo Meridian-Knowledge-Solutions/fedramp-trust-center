@@ -6,6 +6,7 @@ import {
     ShieldCheck, Landmark, Stamp, ScrollText
 } from 'lucide-react';
 import { THEME, BASE_PATH } from '../../config/theme';
+import { getRouteSegments, setRoute, onRouteChange } from '../../utils/hashRoute';
 
 // ───────── Theme tokens ─────────
 const RESP_THEMES = {
@@ -533,7 +534,7 @@ const ControlBrowser = ({ controls, mode }) => {
 };
 
 // ───────── App Security Controls capsule ─────────
-const AppSecCapsule = ({ items, summary }) => {
+const AppSecCapsule = ({ items, summary, embedded = false }) => {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
     const categories = useMemo(() => {
@@ -557,26 +558,30 @@ const AppSecCapsule = ({ items, summary }) => {
         );
     }, [items, search]);
 
+    const header = (
+        <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                <Sparkles className="w-4 h-4 text-cyan-400" />
+            </div>
+            <div>
+                <div className="text-sm font-bold text-white">Application Security Configuration</div>
+                <div className="text-[11px] text-slate-500 mt-0.5">
+                    {summary?.total ?? items.length} configuration items in the Meridian Secure Configuration Guide
+                </div>
+            </div>
+        </div>
+    );
     return (
         <div className="bg-[#121217] border border-white/10 rounded-xl">
-            <button
-                onClick={() => setOpen(!open)}
-                className="w-full p-5 flex items-center justify-between text-left"
-            >
-                <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                        <Sparkles className="w-4 h-4 text-cyan-400" />
-                    </div>
-                    <div>
-                        <div className="text-sm font-bold text-white">Application Security Configuration</div>
-                        <div className="text-[11px] text-slate-500 mt-0.5">
-                            {summary?.total ?? items.length} configuration items in the Meridian Secure Configuration Guide
-                        </div>
-                    </div>
-                </div>
-                {open ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-            </button>
-            {open && (
+            {embedded ? (
+                <div className="w-full p-5 flex items-center justify-between">{header}</div>
+            ) : (
+                <button onClick={() => setOpen(!open)} className="w-full p-5 flex items-center justify-between text-left">
+                    {header}
+                    {open ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
+                </button>
+            )}
+            {(embedded || open) && (
                 <div className="px-5 pb-5 border-t border-white/5">
                     {/* Category tiles */}
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mt-4">
@@ -639,7 +644,7 @@ const AppSecCapsule = ({ items, summary }) => {
 };
 
 // ───────── KSI Reference capsule ─────────
-const KSIRef = ({ items }) => {
+const KSIRef = ({ items, embedded = false }) => {
     const [open, setOpen] = useState(false);
     const themes = useMemo(() => {
         const map = new Map();
@@ -650,26 +655,30 @@ const KSIRef = ({ items }) => {
         return Array.from(map.entries());
     }, [items]);
 
+    const header = (
+        <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                <KeyRound className="w-4 h-4 text-blue-400" />
+            </div>
+            <div>
+                <div className="text-sm font-bold text-white">FedRAMP 20x KSI Reference</div>
+                <div className="text-[11px] text-slate-500 mt-0.5">
+                    {items.length} Key Security Indicators across {themes.length} themes
+                </div>
+            </div>
+        </div>
+    );
     return (
         <div className="bg-[#121217] border border-white/10 rounded-xl">
-            <button
-                onClick={() => setOpen(!open)}
-                className="w-full p-5 flex items-center justify-between text-left"
-            >
-                <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                        <KeyRound className="w-4 h-4 text-blue-400" />
-                    </div>
-                    <div>
-                        <div className="text-sm font-bold text-white">FedRAMP 20x KSI Reference</div>
-                        <div className="text-[11px] text-slate-500 mt-0.5">
-                            {items.length} Key Security Indicators across {themes.length} themes
-                        </div>
-                    </div>
-                </div>
-                {open ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-            </button>
-            {open && (
+            {embedded ? (
+                <div className="w-full p-5 flex items-center justify-between">{header}</div>
+            ) : (
+                <button onClick={() => setOpen(!open)} className="w-full p-5 flex items-center justify-between text-left">
+                    {header}
+                    {open ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
+                </button>
+            )}
+            {(embedded || open) && (
                 <div className="px-5 pb-5 border-t border-white/5 space-y-4 mt-4">
                     {themes.map(([theme, list]) => (
                         <div key={theme}>
@@ -700,7 +709,7 @@ const KSIRef = ({ items }) => {
 };
 
 // ───────── CMMC 2.0 L2 / CUI / DoD mapping section ─────────
-const CmmcCuiMapping = ({ map, summary }) => {
+const CmmcCuiMapping = ({ map, summary, embedded = false }) => {
     const [open, setOpen] = useState(false);
     if (!map) return null;
 
@@ -714,26 +723,33 @@ const CmmcCuiMapping = ({ map, summary }) => {
         );
     };
 
+    const header = (
+        <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+                <Landmark className="w-4 h-4 text-indigo-400" />
+            </div>
+            <div>
+                <div className="text-sm font-bold text-white flex items-center gap-2">
+                    CMMC 2.0 Level 2 &amp; CUI / DoD Coverage Map
+                    <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold uppercase tracking-wide">RFP Crosswalk</span>
+                </div>
+                <div className="text-[11px] text-slate-500 mt-0.5">
+                    NIST SP 800-171 Rev 2 · DoDI 5200.48 / DAFI 16-1403 · {summary?.cmmc_families ?? 14} CMMC L2 domains · {summary?.cui_handling_requirements ?? 7} CUI handling requirements
+                </div>
+            </div>
+        </div>
+    );
     return (
         <div className="bg-gradient-to-br from-indigo-500/[0.04] to-transparent border border-indigo-500/20 rounded-xl">
-            <button onClick={() => setOpen(!open)} className="w-full p-5 flex items-center justify-between text-left">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
-                        <Landmark className="w-4 h-4 text-indigo-400" />
-                    </div>
-                    <div>
-                        <div className="text-sm font-bold text-white flex items-center gap-2">
-                            CMMC 2.0 Level 2 &amp; CUI / DoD Coverage Map
-                            <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold uppercase tracking-wide">RFP Crosswalk</span>
-                        </div>
-                        <div className="text-[11px] text-slate-500 mt-0.5">
-                            NIST SP 800-171 Rev 2 · DoDI 5200.48 / DAFI 16-1403 · {summary?.cmmc_families ?? 14} CMMC L2 domains · {summary?.cui_handling_requirements ?? 7} CUI handling requirements
-                        </div>
-                    </div>
-                </div>
-                {open ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-            </button>
-            {open && (
+            {embedded ? (
+                <div className="w-full p-5 flex items-center justify-between">{header}</div>
+            ) : (
+                <button onClick={() => setOpen(!open)} className="w-full p-5 flex items-center justify-between text-left">
+                    {header}
+                    {open ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
+                </button>
+            )}
+            {(embedded || open) && (
                 <div className="px-5 pb-5 border-t border-indigo-500/10 space-y-6 mt-2 pt-4">
                     {/* About */}
                     {map.about?.length > 0 && (
@@ -830,12 +846,71 @@ const CmmcCuiMapping = ({ map, summary }) => {
     );
 };
 
+// ───────── Compliance-context segmented navigation ─────────
+// The CRM spans several distinct compliance contexts (NIST control ownership,
+// CMMC/CUI/DoD crosswalk, application-security config, KSI reference). Rather
+// than stacking them all in one long scroll, each is its own focused view.
+const CRM_SECTIONS = [
+    { id: 'controls', label: 'NIST 800-53 Controls', icon: Layers,    accent: 'text-blue-400'   },
+    { id: 'cmmc',     label: 'CMMC / CUI / DoD',     icon: Landmark,   accent: 'text-indigo-400' },
+    { id: 'appsec',   label: 'App Security',          icon: Sparkles,   accent: 'text-cyan-400'   },
+    { id: 'ksi',      label: 'KSI Reference',         icon: KeyRound,   accent: 'text-blue-400'   },
+];
+const CRM_SECTION_IDS = new Set(CRM_SECTIONS.map(s => s.id));
+
+const SectionNav = ({ active, onChange, counts }) => (
+    <div className="flex gap-2 overflow-x-auto scrollbar-thin pb-1">
+        {CRM_SECTIONS.map(s => {
+            const Icon = s.icon;
+            const on = active === s.id;
+            const count = counts?.[s.id];
+            return (
+                <button
+                    key={s.id}
+                    onClick={() => onChange(s.id)}
+                    aria-current={on ? 'page' : undefined}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border whitespace-nowrap transition-all shrink-0 ${on
+                        ? 'bg-white/[0.06] border-white/20 text-white'
+                        : 'bg-white/[0.02] border-white/5 text-slate-400 hover:text-slate-200 hover:border-white/10'}`}
+                >
+                    <Icon className={`w-4 h-4 ${on ? s.accent : 'text-slate-500'}`} />
+                    <span className="text-xs font-bold tracking-wide">{s.label}</span>
+                    {count != null && (
+                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${on ? 'bg-white/10 text-slate-200' : 'bg-white/5 text-slate-500'}`}>{count}</span>
+                    )}
+                </button>
+            );
+        })}
+    </div>
+);
+
 // ───────── Top-level component ─────────
 const CustomerResponsibilityMatrix = () => {
     const [data, setData] = useState(null);
     const [mode, setMode] = useState('cloud');
+    // Initialize the compliance context from the URL hash
+    // (e.g. #trust/compliance/cmmc) so RFP deep links land on the right view.
+    const [section, setSection] = useState(() => {
+        const seg = getRouteSegments();
+        return seg[0] === 'trust' && seg[1] === 'compliance' && CRM_SECTION_IDS.has(seg[2]) ? seg[2] : 'controls';
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Write the selected compliance context into the hash so it can be shared.
+    const handleSectionChange = (id) => {
+        setSection(id);
+        setRoute(['trust', 'compliance', id]);
+    };
+
+    // Sync with external hash changes (back/forward, deep links).
+    useEffect(() => {
+        const sync = () => {
+            const seg = getRouteSegments();
+            if (seg[0] === 'trust' && seg[1] === 'compliance' && CRM_SECTION_IDS.has(seg[2])) setSection(seg[2]);
+        };
+        return onRouteChange(sync);
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -868,16 +943,36 @@ const CustomerResponsibilityMatrix = () => {
     const summary = data.summary || {};
     const modeSummary = mode === 'cloud' ? summary.cloud_fedramp : summary.on_prem;
 
+    const counts = {
+        controls: modeSummary?.total ?? controls.length,
+        cmmc: data.cmmc_cui?.family_coverage?.length ?? summary.cmmc_cui?.cmmc_families,
+        appsec: summary.app_sec?.total ?? data.app_sec?.length,
+        ksi: data.ksi_reference?.length ?? summary.ksi_count,
+    };
+
     return (
         <div className="space-y-6">
             <Header summary={summary} mode={mode} />
-            <ModeToggle mode={mode} setMode={setMode} />
-            <ModeLegend mode={mode} />
-            <ResponsibilitySplit counts={modeSummary?.by_responsibility} total={modeSummary?.total} />
-            <ControlBrowser controls={controls} mode={mode} />
-            <CmmcCuiMapping map={data.cmmc_cui} summary={summary.cmmc_cui} />
-            <AppSecCapsule items={data.app_sec || []} summary={summary.app_sec} />
-            <KSIRef items={data.ksi_reference || []} />
+            <SectionNav active={section} onChange={handleSectionChange} counts={counts} />
+
+            {section === 'controls' && (
+                <div className="space-y-6">
+                    <ModeToggle mode={mode} setMode={setMode} />
+                    <ModeLegend mode={mode} />
+                    <ResponsibilitySplit counts={modeSummary?.by_responsibility} total={modeSummary?.total} />
+                    <ControlBrowser controls={controls} mode={mode} />
+                </div>
+            )}
+            {section === 'cmmc' && (
+                <CmmcCuiMapping map={data.cmmc_cui} summary={summary.cmmc_cui} embedded />
+            )}
+            {section === 'appsec' && (
+                <AppSecCapsule items={data.app_sec || []} summary={summary.app_sec} embedded />
+            )}
+            {section === 'ksi' && (
+                <KSIRef items={data.ksi_reference || []} embedded />
+            )}
+
             <div className="text-[10px] text-slate-600 text-right">
                 Source: Meridian LMS CRM · {data.metadata?.framework} · KSI mapping per {data.metadata?.ksi_mapping}
                 {data.metadata?.cmmc_mapping && <> · CMMC/CUI per {data.metadata.cmmc_mapping}</>}
