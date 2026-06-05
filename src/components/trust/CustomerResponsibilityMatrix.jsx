@@ -6,6 +6,7 @@ import {
     ShieldCheck, Landmark, Stamp, ScrollText
 } from 'lucide-react';
 import { THEME, BASE_PATH } from '../../config/theme';
+import { getRouteSegments, setRoute, onRouteChange } from '../../utils/hashRoute';
 
 // ───────── Theme tokens ─────────
 const RESP_THEMES = {
@@ -855,6 +856,7 @@ const CRM_SECTIONS = [
     { id: 'appsec',   label: 'App Security',          icon: Sparkles,   accent: 'text-cyan-400'   },
     { id: 'ksi',      label: 'KSI Reference',         icon: KeyRound,   accent: 'text-blue-400'   },
 ];
+const CRM_SECTION_IDS = new Set(CRM_SECTIONS.map(s => s.id));
 
 const SectionNav = ({ active, onChange, counts }) => (
     <div className="flex gap-2 overflow-x-auto scrollbar-thin pb-1">
@@ -886,9 +888,29 @@ const SectionNav = ({ active, onChange, counts }) => (
 const CustomerResponsibilityMatrix = () => {
     const [data, setData] = useState(null);
     const [mode, setMode] = useState('cloud');
-    const [section, setSection] = useState('controls');
+    // Initialize the compliance context from the URL hash
+    // (e.g. #trust/compliance/cmmc) so RFP deep links land on the right view.
+    const [section, setSection] = useState(() => {
+        const seg = getRouteSegments();
+        return seg[0] === 'trust' && seg[1] === 'compliance' && CRM_SECTION_IDS.has(seg[2]) ? seg[2] : 'controls';
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Write the selected compliance context into the hash so it can be shared.
+    const handleSectionChange = (id) => {
+        setSection(id);
+        setRoute(['trust', 'compliance', id]);
+    };
+
+    // Sync with external hash changes (back/forward, deep links).
+    useEffect(() => {
+        const sync = () => {
+            const seg = getRouteSegments();
+            if (seg[0] === 'trust' && seg[1] === 'compliance' && CRM_SECTION_IDS.has(seg[2])) setSection(seg[2]);
+        };
+        return onRouteChange(sync);
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -931,7 +953,7 @@ const CustomerResponsibilityMatrix = () => {
     return (
         <div className="space-y-6">
             <Header summary={summary} mode={mode} />
-            <SectionNav active={section} onChange={setSection} counts={counts} />
+            <SectionNav active={section} onChange={handleSectionChange} counts={counts} />
 
             {section === 'controls' && (
                 <div className="space-y-6">
