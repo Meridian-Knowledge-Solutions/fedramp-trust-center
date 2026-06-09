@@ -502,11 +502,14 @@ const AppShell = () => {
   });
   const [registerFilters, setRegisterFilters] = useState({});
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [freshness, setFreshness] = useState(null);
   const scrollY = useScrollPosition();
 
   const { user, isAuthenticated, logout } = useAuth();
   const { openModal } = useModal();
+  // Header freshness = timestamp of the last KSI continuous-validation run,
+  // already loaded by DataProvider (unified_ksi_validations.json metadata).
+  const { metadata } = useData();
+  const freshness = metadata?.validation_date || null;
 
   // User-initiated navigation: update state AND the URL hash (top-level views
   // reset any deeper tab/section so the link reflects where you are).
@@ -524,16 +527,6 @@ const AppShell = () => {
       if (KNOWN_VIEWS.has(seg)) setActiveView(seg);
     };
     return onRouteChange(sync);
-  }, []);
-
-  // Site-wide data freshness signal (continuous-monitoring "last refreshed").
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`${import.meta.env.BASE_URL}data/next_report_date.json`)
-      .then(r => (r.ok ? r.json() : null))
-      .then(j => { if (!cancelled && j) setFreshness(j.last_data_refresh || j.last_report_generated || null); })
-      .catch(() => {});
-    return () => { cancelled = true; };
   }, []);
 
   // Navigate to the Remediation Register, optionally pre-filtered (e.g. heatmap click).
@@ -852,14 +845,14 @@ const AppShell = () => {
           <div className="flex items-center space-x-3 lg:space-x-6">
             {freshness && (
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/15"
-                   title="Continuous monitoring — data refreshed on this date; Key Security Indicators re-validate every 4 hours.">
+                   title={`Last KSI continuous-validation run: ${new Date(freshness).toLocaleString()}. Key Security Indicators re-validate every 4 hours.`}>
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
                 <div className="leading-tight">
-                  <div className="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Continuous Monitoring</div>
-                  <div className="text-[10px] text-emerald-300 font-mono">Updated {freshness}</div>
+                  <div className="text-[8px] text-slate-500 uppercase font-bold tracking-wider">KSI Validation</div>
+                  <div className="text-[10px] text-emerald-300 font-mono">Last run {getTimeElapsed(new Date(freshness))}</div>
                 </div>
               </div>
             )}
