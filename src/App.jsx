@@ -526,12 +526,17 @@ const AppShell = () => {
     return onRouteChange(sync);
   }, []);
 
-  // Site-wide data freshness signal (continuous-monitoring "last refreshed").
+  // Site-wide data freshness signal — the timestamp of the last continuous-
+  // monitoring run. Sourced from vdr_public_metrics.json (metadata.generated_at),
+  // which the pipeline rewrites on every run, so it always reflects the last run.
   useEffect(() => {
     let cancelled = false;
-    fetch(`${import.meta.env.BASE_URL}data/next_report_date.json`)
+    fetch(`${import.meta.env.BASE_URL}data/vdr_public_metrics.json`)
       .then(r => (r.ok ? r.json() : null))
-      .then(j => { if (!cancelled && j) setFreshness(j.last_data_refresh || j.last_report_generated || null); })
+      .then(j => {
+        const ts = j?.metadata?.generated_at || j?.snapshot?.timestamp;
+        if (!cancelled && ts) setFreshness(ts);
+      })
       .catch(() => {});
     return () => { cancelled = true; };
   }, []);
@@ -852,14 +857,14 @@ const AppShell = () => {
           <div className="flex items-center space-x-3 lg:space-x-6">
             {freshness && (
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/15"
-                   title="Continuous monitoring — data refreshed on this date; Key Security Indicators re-validate every 4 hours.">
+                   title={`Continuous monitoring — last validation run ${new Date(freshness).toLocaleString()}. Key Security Indicators re-validate every 4 hours.`}>
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
                 <div className="leading-tight">
                   <div className="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Continuous Monitoring</div>
-                  <div className="text-[10px] text-emerald-300 font-mono">Updated {freshness}</div>
+                  <div className="text-[10px] text-emerald-300 font-mono">Last run {getTimeElapsed(new Date(freshness))}</div>
                 </div>
               </div>
             )}
