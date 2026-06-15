@@ -1,7 +1,7 @@
 # FedRAMP Compliance Validation Report
 
 **Report Type:** System 2.5 Validation Integrity Report  
-**Generated:** 2026-06-15T03:20:24.334591  
+**Generated:** 2026-06-15T21:32:05.729738  
 **Purpose:** 3PAO audit readiness and technical validation verification
 
 ---
@@ -10,9 +10,9 @@
 
 ### Validation Results
 - **Total KSIs Validated:** 61
-- **Passed:** 57 ✅
-- **Failed:** 4 ❌
-- **Overall Pass Rate:** 93.4%
+- **Passed:** 5 ✅
+- **Failed:** 56 ❌
+- **Overall Pass Rate:** 8.2%
 
 ### Temporal Consistency Analysis
 - **Average Consistency Score:** 100.0%
@@ -20,9 +20,9 @@
 - **Consistency Status:** EXCELLENT
 
 ### Execution Quality Analysis
-- **Technical Issues Detected:** 4
-- **Execution Quality Score:** 80%
-- **Automation Status:** WARNING
+- **Technical Issues Detected:** 45
+- **Execution Quality Score:** 0%
+- **Automation Status:** FAIL
 
 ---
 
@@ -30,10 +30,10 @@
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Integrity Score** | 90.0% | ✔️ Good |
+| **Integrity Score** | 50.0% | ❌ Critical |
 | **Validation Determinism** | verified | ✅ |
 | **Technical Correctness** | issues_detected | ⚠️ |
-| **Audit Readiness** | ready | ✅ Ready |
+| **Audit Readiness** | needs_review | ⚠️ Needs Review |
 
 ---
 
@@ -43,12 +43,12 @@
 The temporal consistency score of 100.0% indicates that the validation engine produces **deterministic** results - identical infrastructure states yield identical validation outcomes.
 
 ### Execution Quality
-The execution quality score of 80% shows technical issues detected: 4 automation failures require investigation.
+The execution quality score of 0% shows technical issues detected: 45 automation failures require investigation.
 
 ### Audit Readiness
-Overall audit readiness status: **READY**
+Overall audit readiness status: **NEEDS_REVIEW**
 
-✅ The validation system is ready for 3PAO audit. Results are consistent, technically sound, and mathematically verified.
+⚠️ The validation system requires review before 3PAO audit. Address temporal consistency or technical issues identified above.
 
 ---
 
