@@ -114,10 +114,10 @@ const PlannedChangesSection = ({ scnHistory }) => {
                     return (
                         <div key={idx} className={`p-5 rounded-2xl border border-white/5 border-l-2 ${tier.border} hover:bg-white/[0.04] transition-colors`}>
                             <div className="flex justify-between items-start mb-2">
-                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
                                     {change.change_id}
                                 </p>
-                                <span className="text-[8px] font-mono text-slate-500">
+                                <span className="text-[10px] font-mono text-slate-500">
                                     {new Date(change.timestamp).toLocaleDateString()}
                                 </span>
                             </div>
@@ -127,11 +127,11 @@ const PlannedChangesSection = ({ scnHistory }) => {
                                 <span className="text-[10px] uppercase font-bold text-slate-400 italic">
                                     {tier.label}
                                 </span>
-                                <span className={`text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border ${impactBadge}`}>
+                                <span className={`text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border ${impactBadge}`}>
                                     {impact} impact
                                 </span>
                                 {ctxTotal > 0 && (
-                                    <span className="text-[9px] font-mono text-slate-600 ml-auto">
+                                    <span className="text-[10px] font-mono text-slate-600 ml-auto">
                                         T:{ctxCounts.transformative} A:{ctxCounts.adaptive} R:{ctxCounts.routine}
                                     </span>
                                 )}
@@ -192,7 +192,7 @@ const QuarterlyReviewCard = memo(({ meeting }) => {
                     <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                             <h3 className="text-sm font-bold text-white">{meeting.meetingTitle || 'Quarterly Continuous Monitoring Review'}</h3>
-                            <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold uppercase tracking-wide">FRR-CCM-QR-02</span>
+                            <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold uppercase tracking-wide">FRR-CCM-QR-02</span>
                         </div>
                         {meeting.description && (
                             <p className="text-xs text-slate-400 leading-relaxed mb-2 max-w-2xl">{meeting.description}</p>
@@ -332,14 +332,14 @@ const FlowNode = memo(({ stage, isActive, onClick }) => {
                         <Icon size={16} className={isActive ? theme.text : 'text-slate-500'} />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">{stage.subtitle}</div>
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">{stage.subtitle}</div>
                         <h4 className="text-sm font-bold text-white leading-tight truncate">{stage.title}</h4>
                     </div>
                 </div>
                 <p className="text-[11px] leading-relaxed text-slate-400 mb-3 line-clamp-2">{stage.description}</p>
                 <div className="flex flex-wrap gap-1.5">
                     {stage.security.map((badge, i) => (
-                        <span key={i} className={`px-1.5 py-0.5 rounded text-[9px] font-bold border
+                        <span key={i} className={`px-1.5 py-0.5 rounded text-[10px] font-bold border
                             ${isActive ? `${theme.bg} ${theme.text} ${theme.border}` : 'bg-white/[0.03] text-slate-500 border-white/[0.06]'
                             } transition-colors`}>
                             {badge}
@@ -365,7 +365,7 @@ const FlowDetailPanel = ({ stage }) => {
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1 flex-wrap">
                         <h3 className="text-lg font-bold text-white">{stage.title}</h3>
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${theme.border} ${theme.text} uppercase tracking-wider`}>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${theme.border} ${theme.text} uppercase tracking-wider`}>
                             {stage.classification}
                         </span>
                     </div>
@@ -510,7 +510,7 @@ const IntegrationCard = ({ item }) => {
                     <div className="text-sm font-bold text-white">{item.provider}</div>
                     <div className="text-[10px] text-slate-500 uppercase">{item.category}</div>
                 </div>
-                <div className={`px-2 py-0.5 rounded border text-[9px] font-bold uppercase ${item.risk === 'low' ? 'bg-emerald-900/20 text-emerald-400 border-emerald-500/20' :
+                <div className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${item.risk === 'low' ? 'bg-emerald-900/20 text-emerald-400 border-emerald-500/20' :
                     item.risk === 'high' ? 'bg-rose-900/20 text-rose-400 border-rose-500/20' :
                         'bg-amber-900/20 text-amber-400 border-amber-500/20'
                     }`}>
@@ -525,10 +525,10 @@ const IntegrationCard = ({ item }) => {
                 </div>
                 {item.pii_shared && item.pii_shared.length > 0 && (
                     <div className="pt-2">
-                        <div className="text-[9px] uppercase font-bold text-slate-600 mb-1">PII Shared</div>
+                        <div className="text-[10px] uppercase font-bold text-slate-600 mb-1">PII Shared</div>
                         <div className="flex flex-wrap gap-1">
                             {item.pii_shared.slice(0, 3).map((pii, i) => (
-                                <span key={i} className="text-[9px] bg-white/5 px-1.5 py-0.5 rounded text-slate-400">{pii}</span>
+                                <span key={i} className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-slate-400">{pii}</span>
                             ))}
                         </div>
                     </div>
@@ -844,7 +844,7 @@ export const TrustCenterView = () => {
                             <div className="flex items-center gap-2 mb-4">
                                 <Globe className="w-4 h-4 text-blue-400" />
                                 <h3 className="text-sm font-bold text-white">CSO Public Information</h3>
-                                <span className="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 font-bold uppercase">ADS-CSO-PUB</span>
+                                <span className="text-[10px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 font-bold uppercase">ADS-CSO-PUB</span>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                                 <InfoCard label="FedRAMP ID" value={csoInfo.package_id} sub={csoInfo.authorization_type} />
@@ -885,19 +885,19 @@ export const TrustCenterView = () => {
                             </div>
                             <div className="flex items-center gap-4 px-4 py-2.5 rounded-lg bg-[#09090b] border border-white/5">
                                 <div className="text-center">
-                                    <div className="text-[9px] text-slate-600 uppercase tracking-wider font-bold">Next OAR</div>
+                                    <div className="text-[10px] text-slate-600 uppercase tracking-wider font-bold">Next OAR</div>
                                     <div className="text-white font-mono text-sm font-bold">{nextReportDate.next_ongoing_report || 'TBD'}</div>
                                 </div>
                                 <div className="w-px h-8 bg-white/10" />
                                 <div className="text-center">
-                                    <div className="text-[9px] text-slate-600 uppercase tracking-wider font-bold">Next Review</div>
+                                    <div className="text-[10px] text-slate-600 uppercase tracking-wider font-bold">Next Review</div>
                                     <div className="text-white font-mono text-sm font-bold">{nextReportDate.next_quarterly_review || 'TBD'}</div>
                                 </div>
                                 {nextReportDate.vdr_cadence && (
                                     <>
                                         <div className="w-px h-8 bg-white/10" />
                                         <div className="text-center">
-                                            <div className="text-[9px] text-slate-600 uppercase tracking-wider font-bold">VDR Cadence</div>
+                                            <div className="text-[10px] text-slate-600 uppercase tracking-wider font-bold">VDR Cadence</div>
                                             <div className="text-white font-mono text-sm font-bold">{nextReportDate.vdr_cadence}</div>
                                         </div>
                                     </>
@@ -1110,7 +1110,7 @@ const FeedbackSection = memo(({ feedbackEntries }) => {
                 <div>
                     <div className="flex items-center justify-between mb-3">
                         <h3 className="text-sm font-bold text-white">Feedback Summary</h3>
-                        <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 font-bold uppercase">CCM-05</span>
+                        <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 font-bold uppercase">CCM-05</span>
                     </div>
                     <p className="text-xs text-slate-400 mb-4 leading-relaxed">
                         Anonymized summary of feedback received and responses provided, per FRR-CCM-05.
@@ -1126,7 +1126,7 @@ const FeedbackSection = memo(({ feedbackEntries }) => {
                                     <div className="flex items-start gap-2 ml-5.5 pl-0.5 border-l-2 border-indigo-500/20">
                                         <p className="text-[11px] text-slate-400 leading-relaxed pl-2">{entry.answer}</p>
                                     </div>
-                                    <div className="text-[9px] text-slate-600 mt-2 text-right font-mono">{entry.date}</div>
+                                    <div className="text-[10px] text-slate-600 mt-2 text-right font-mono">{entry.date}</div>
                                 </div>
                             ))}
                         </div>
@@ -1179,7 +1179,7 @@ const TelemetryItem = ({ label, value }) => (
     <div className="flex items-center gap-3 px-4 py-1.5">
         <div>
             <div className="text-white font-mono font-bold text-sm leading-none">{value}</div>
-            <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mt-0.5">{label}</div>
+            <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mt-0.5">{label}</div>
         </div>
     </div>
 );
@@ -1196,7 +1196,7 @@ const ServiceCard = ({ title, desc, features }) => (
     <div className={`${THEME.panel} border ${THEME.border} p-5 rounded-xl hover:border-blue-500/30 transition-all group flex flex-col h-full cursor-default`}>
         <div className="flex justify-between items-start mb-3">
             <h4 className="font-bold text-white text-sm">{title}</h4>
-            <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase font-bold">Auth</span>
+            <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase font-bold">Auth</span>
         </div>
         <p className="text-xs text-slate-400 mb-4 leading-relaxed line-clamp-2">{desc}</p>
         <div className="space-y-1.5 flex-1">

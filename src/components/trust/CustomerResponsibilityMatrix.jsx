@@ -350,7 +350,7 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
                 <div className="px-4 pb-4 pl-8 border-t border-white/5 pt-3 space-y-3">
                     {ctrl.implementation_notes && (
                         <div>
-                            <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
+                            <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
                                 <FileText className="w-3 h-3" /> Implementation Notes
                             </div>
                             <p className="text-xs text-slate-300 leading-relaxed">
@@ -364,7 +364,7 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
                     )}
                     {ctrl.applicability_rationale && (
                         <div>
-                            <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
+                            <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
                                 <AlertCircle className="w-3 h-3" /> Applicability Rationale
                             </div>
                             <p className="text-xs text-slate-400 leading-relaxed">{ctrl.applicability_rationale}</p>
@@ -372,7 +372,7 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
                     )}
                     {ctrl.ksis?.length > 0 && (
                         <div>
-                            <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
+                            <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
                                 <KeyRound className="w-3 h-3" /> KSI Mapping
                             </div>
                             <div className="flex flex-wrap gap-1.5">
@@ -386,12 +386,12 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
                     )}
                     {(ctrl.cmmc || ctrl.cui_obligation || ctrl.cui_disposition) && (
                         <div className="rounded-lg border border-indigo-500/15 bg-indigo-500/[0.04] p-3">
-                            <div className="text-[9px] text-indigo-400 uppercase tracking-wider font-bold mb-2 flex items-center gap-1.5">
+                            <div className="text-[10px] text-indigo-400 uppercase tracking-wider font-bold mb-2 flex items-center gap-1.5">
                                 <Landmark className="w-3 h-3" /> CMMC 2.0 L2 / CUI / DoD Cross-Reference
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <div>
-                                    <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1">CMMC L2 Practice <span className="text-slate-600 normal-case">(800-171)</span></div>
+                                    <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1">CMMC L2 Practice <span className="text-slate-600 normal-case">(800-171)</span></div>
                                     {ctrl.cmmc ? (
                                         <div className="flex flex-wrap gap-1">
                                             {ctrl.cmmc.split(',').map(p => (
@@ -405,11 +405,11 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
                                     )}
                                 </div>
                                 <div>
-                                    <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1">CUI Obligation <span className="text-slate-600 normal-case">(DoDI 5200.48)</span></div>
+                                    <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1">CUI Obligation <span className="text-slate-600 normal-case">(DoDI 5200.48)</span></div>
                                     <div className="text-[11px] text-slate-300 leading-snug">{ctrl.cui_obligation || '—'}</div>
                                 </div>
                                 <div>
-                                    <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1">Coverage Disposition</div>
+                                    <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1">Coverage Disposition</div>
                                     {ctrl.cui_disposition ? (
                                         <div className={`inline-flex items-start gap-1.5 text-[10px] leading-snug px-2 py-1 rounded border ${coverageTheme(ctrl.cui_disposition).bg} ${coverageTheme(ctrl.cui_disposition).border} ${coverageTheme(ctrl.cui_disposition).text}`}>
                                             <span className="w-1.5 h-1.5 rounded-full mt-1 shrink-0" style={{ background: coverageTheme(ctrl.cui_disposition).dot }} />
@@ -634,6 +634,7 @@ const ControlsSection = ({ controls, modeSummary, mode, setMode }) => {
 const AppSecCapsule = ({ items, summary, embedded = false }) => {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
+    const [activeCategory, setActiveCategory] = useState(null);
     const categories = useMemo(() => {
         const map = {};
         items.forEach(i => {
@@ -645,15 +646,18 @@ const AppSecCapsule = ({ items, summary, embedded = false }) => {
 
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
-        if (!q) return items;
-        return items.filter(i =>
-            (i.config_id || '').toLowerCase().includes(q) ||
-            (i.title || '').toLowerCase().includes(q) ||
-            (i.functional_area || '').toLowerCase().includes(q) ||
-            i.nist?.some(n => n.toLowerCase().includes(q)) ||
-            i.ksis?.some(k => k.toLowerCase().includes(q))
-        );
-    }, [items, search]);
+        return items.filter(i => {
+            if (activeCategory && (i.category || 'Other') !== activeCategory) return false;
+            if (!q) return true;
+            return (
+                (i.config_id || '').toLowerCase().includes(q) ||
+                (i.title || '').toLowerCase().includes(q) ||
+                (i.functional_area || '').toLowerCase().includes(q) ||
+                i.nist?.some(n => n.toLowerCase().includes(q)) ||
+                i.ksis?.some(k => k.toLowerCase().includes(q))
+            );
+        });
+    }, [items, search, activeCategory]);
 
     const header = (
         <div className="flex items-center gap-3">
@@ -680,14 +684,23 @@ const AppSecCapsule = ({ items, summary, embedded = false }) => {
             )}
             {(embedded || open) && (
                 <div className="px-5 pb-5 border-t border-white/5">
-                    {/* Category tiles */}
+                    {/* Category tiles — click to filter the list */}
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mt-4">
-                        {categories.map(([c, count]) => (
-                            <div key={c} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3">
-                                <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1">{c}</div>
-                                <div className="text-xl font-extrabold text-white font-mono">{count}</div>
-                            </div>
-                        ))}
+                        {categories.map(([c, count]) => {
+                            const on = activeCategory === c;
+                            return (
+                                <button
+                                    key={c}
+                                    onClick={() => setActiveCategory(on ? null : c)}
+                                    className={`text-left rounded-lg p-3 border transition-all ${on
+                                        ? 'border-cyan-500/40 bg-cyan-500/[0.06]'
+                                        : 'border-white/5 bg-[#0f0f12] hover:border-white/15 hover:bg-white/[0.03]'}`}
+                                >
+                                    <div className="text-[10px] text-slate-400 uppercase tracking-wide font-semibold mb-1 truncate">{c}</div>
+                                    <div className="text-2xl font-extrabold text-white font-mono">{count}</div>
+                                </button>
+                            );
+                        })}
                     </div>
                     <div className="relative mt-4">
                         <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -699,37 +712,50 @@ const AppSecCapsule = ({ items, summary, embedded = false }) => {
                             className="w-full bg-[#09090b] border border-white/10 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/40"
                         />
                     </div>
-                    <div className="mt-3 space-y-1.5 max-h-[360px] overflow-y-auto pr-1">
+                    <div className="flex items-center justify-between gap-3 mt-3 flex-wrap">
+                        <div className="text-xs text-slate-500">
+                            Showing <span className="text-slate-300 font-bold font-mono">{Math.min(filtered.length, 100)}</span> of {filtered.length}
+                        </div>
+                        {activeCategory && (
+                            <button
+                                onClick={() => setActiveCategory(null)}
+                                className="flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-300"
+                            >
+                                <Filter className="w-3 h-3" /> Filtered to <span className="text-slate-300 font-semibold">{activeCategory}</span>
+                                <span className="text-cyan-400 underline">Clear</span>
+                            </button>
+                        )}
+                    </div>
+                    <div className="mt-2 space-y-1.5 max-h-[420px] overflow-y-auto pr-1">
                         {filtered.slice(0, 100).map(i => (
-                            <div key={i.config_id} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3">
-                                <div className="flex items-start gap-3">
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                                            <span className="text-[10px] font-mono font-bold text-cyan-400">{i.config_id}</span>
-                                            <span className="text-[9px] text-slate-500 uppercase tracking-wider">{i.category}</span>
-                                            {i.subarea && <span className="text-[9px] text-slate-600">/ {i.subarea}</span>}
-                                        </div>
-                                        <div className="text-xs text-slate-200 leading-snug">{i.title}</div>
-                                        {(i.nist?.length || i.ksis?.length) && (
-                                            <div className="flex flex-wrap gap-1 mt-2">
-                                                {i.nist?.map(n => (
-                                                    <span key={n} className="text-[9px] font-mono bg-white/[0.04] text-slate-400 px-1.5 py-0.5 rounded border border-white/5">
-                                                        {n}
-                                                    </span>
-                                                ))}
-                                                {i.ksis?.map(k => (
-                                                    <span key={k} className="text-[9px] font-mono bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">
-                                                        {k}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
+                            <div key={i.config_id} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3.5">
+                                <div className="flex items-center gap-2.5 flex-wrap mb-1.5">
+                                    <span className="text-[11px] font-mono font-bold text-cyan-400">{i.config_id}</span>
+                                    <span className="text-[10px] text-slate-500 uppercase tracking-wide">{i.category}</span>
+                                    {i.subarea && <span className="text-[10px] text-slate-600">/ {i.subarea}</span>}
                                 </div>
+                                <div className="text-sm text-slate-100 leading-snug">{i.title}</div>
+                                {(i.nist?.length || i.ksis?.length) && (
+                                    <div className="flex flex-wrap gap-1.5 mt-2">
+                                        {i.nist?.map(n => (
+                                            <span key={n} className="text-[10px] font-mono bg-white/[0.04] text-slate-400 px-1.5 py-0.5 rounded border border-white/5">
+                                                {n}
+                                            </span>
+                                        ))}
+                                        {i.ksis?.map(k => (
+                                            <span key={k} className="text-[10px] font-mono bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">
+                                                {k}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ))}
+                        {filtered.length === 0 && (
+                            <div className="text-center text-sm text-slate-500 py-8">No settings match the current filters.</div>
+                        )}
                         {filtered.length > 100 && (
-                            <div className="text-center text-[10px] text-slate-500 py-2">
+                            <div className="text-center text-[11px] text-slate-500 py-2">
                                 Showing first 100 of {filtered.length}. Refine search to see more.
                             </div>
                         )}
@@ -779,16 +805,19 @@ const KSIRef = ({ items, embedded = false }) => {
                 <div className="px-5 pb-5 border-t border-white/5 space-y-4 mt-4">
                     {themes.map(([theme, list]) => (
                         <div key={theme}>
-                            <div className="text-[10px] uppercase tracking-wider font-bold text-blue-400 mb-2">{theme}</div>
+                            <div className="flex items-center gap-2 mb-2.5">
+                                <span className="text-xs uppercase tracking-wide font-bold text-blue-400">{theme}</span>
+                                <span className="text-[10px] text-slate-600 font-mono">{list.length}</span>
+                            </div>
                             <div className="space-y-1.5">
                                 {list.map(k => (
-                                    <div key={k.ksi_id} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3">
+                                    <div key={k.ksi_id} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3.5">
                                         <div className="flex items-start gap-3">
-                                            <span className="text-[10px] font-mono font-bold text-blue-400 shrink-0">{k.ksi_id}</span>
+                                            <span className="text-[11px] font-mono font-bold text-blue-400 shrink-0 mt-0.5">{k.ksi_id}</span>
                                             <div className="flex-1">
-                                                <div className="text-xs text-slate-200">{k.description}</div>
+                                                <div className="text-sm text-slate-100 leading-snug">{k.description}</div>
                                                 {k.nist_controls && (
-                                                    <div className="text-[10px] text-slate-500 font-mono mt-1">
+                                                    <div className="text-[11px] text-slate-500 font-mono mt-1.5">
                                                         NIST: <span className="text-slate-400">{k.nist_controls}</span>
                                                     </div>
                                                 )}
@@ -813,7 +842,7 @@ const CmmcCuiMapping = ({ map, summary, embedded = false }) => {
     const CoverageBadge = ({ value }) => {
         const t = coverageTheme(value);
         return (
-            <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded border ${t.bg} ${t.border} ${t.text} whitespace-nowrap`}>
+            <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2 py-0.5 rounded border ${t.bg} ${t.border} ${t.text} whitespace-nowrap`}>
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: t.dot }} />
                 {value}
             </span>
@@ -828,7 +857,7 @@ const CmmcCuiMapping = ({ map, summary, embedded = false }) => {
             <div>
                 <div className="text-sm font-bold text-white flex items-center gap-2">
                     CMMC 2.0 Level 2 &amp; CUI / DoD Coverage Map
-                    <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold uppercase tracking-wide">RFP Crosswalk</span>
+                    <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold uppercase tracking-wide">RFP Crosswalk</span>
                 </div>
                 <div className="text-[11px] text-slate-500 mt-0.5">
                     NIST SP 800-171 Rev 2 · DoDI 5200.48 / DAFI 16-1403 · {summary?.cmmc_families ?? 14} CMMC L2 domains · {summary?.cui_handling_requirements ?? 7} CUI handling requirements
@@ -865,26 +894,26 @@ const CmmcCuiMapping = ({ map, summary, embedded = false }) => {
                     {/* CUI handling requirements */}
                     {map.cui_handling?.length > 0 && (
                         <div>
-                            <div className="text-[10px] uppercase tracking-wider font-bold text-indigo-400 mb-2 flex items-center gap-1.5">
+                            <div className="text-[11px] uppercase tracking-wider font-bold text-indigo-400 mb-2.5 flex items-center gap-1.5">
                                 <Stamp className="w-3.5 h-3.5" /> CUI Handling Requirements — DoDI 5200.48 / DAFI 16-1403
                             </div>
                             <div className="overflow-x-auto rounded-lg border border-white/10">
                                 <table className="w-full text-left border-collapse min-w-[640px]">
                                     <thead>
-                                        <tr className="bg-white/[0.03] text-[9px] uppercase tracking-wider text-slate-500">
-                                            <th className="px-3 py-2 font-bold">Requirement</th>
-                                            <th className="px-3 py-2 font-bold">Primary Controls</th>
-                                            <th className="px-3 py-2 font-bold">Coverage</th>
-                                            <th className="px-3 py-2 font-bold">Responsibility &amp; Notes</th>
+                                        <tr className="bg-white/[0.03] text-[10px] uppercase tracking-wider text-slate-500">
+                                            <th className="px-3 py-2.5 font-bold">Requirement</th>
+                                            <th className="px-3 py-2.5 font-bold">Primary Controls</th>
+                                            <th className="px-3 py-2.5 font-bold">Coverage</th>
+                                            <th className="px-3 py-2.5 font-bold">Responsibility &amp; Notes</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {map.cui_handling.map((row, i) => (
                                             <tr key={i} className="border-t border-white/5 align-top">
-                                                <td className="px-3 py-2.5 text-[11px] font-semibold text-slate-200 whitespace-nowrap">{row.requirement}</td>
-                                                <td className="px-3 py-2.5 text-[10px] font-mono text-slate-400">{row.primary_controls}</td>
-                                                <td className="px-3 py-2.5"><CoverageBadge value={row.coverage} /></td>
-                                                <td className="px-3 py-2.5 text-[11px] text-slate-400 leading-relaxed">{row.notes}</td>
+                                                <td className="px-3 py-3 text-xs font-semibold text-slate-200 whitespace-nowrap">{row.requirement}</td>
+                                                <td className="px-3 py-3 text-[11px] font-mono text-slate-400">{row.primary_controls}</td>
+                                                <td className="px-3 py-3"><CoverageBadge value={row.coverage} /></td>
+                                                <td className="px-3 py-3 text-xs text-slate-400 leading-relaxed">{row.notes}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -896,24 +925,24 @@ const CmmcCuiMapping = ({ map, summary, embedded = false }) => {
                     {/* Family coverage */}
                     {map.family_coverage?.length > 0 && (
                         <div>
-                            <div className="text-[10px] uppercase tracking-wider font-bold text-indigo-400 mb-2 flex items-center gap-1.5">
+                            <div className="text-[11px] uppercase tracking-wider font-bold text-indigo-400 mb-2.5 flex items-center gap-1.5">
                                 <ShieldCheck className="w-3.5 h-3.5" /> NIST 800-171 / CMMC Level 2 Family Coverage ({map.family_coverage.length} domains)
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 {map.family_coverage.map((row, i) => (
-                                    <div key={i} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3">
-                                        <div className="flex items-center justify-between gap-2 mb-1.5">
-                                            <span className="text-[11px] font-bold text-slate-200">{row.domain}</span>
+                                    <div key={i} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3.5">
+                                        <div className="flex items-center justify-between gap-2 mb-2">
+                                            <span className="text-sm font-bold text-slate-100">{row.domain}</span>
                                             <CoverageBadge value={row.coverage} />
                                         </div>
-                                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                                        <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
                                             {(row.ksi_family || '').split(',').map(f => f.trim()).filter(Boolean).map(f => (
-                                                <span key={f} className="text-[9px] font-mono bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 font-bold">
+                                                <span key={f} className="text-[10px] font-mono bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 font-bold">
                                                     {f.includes('(') || f.includes('Inherited') ? f : `KSI-${f}`}
                                                 </span>
                                             ))}
                                         </div>
-                                        <div className="text-[10px] text-slate-500 leading-relaxed">{row.notes}</div>
+                                        <div className="text-[11px] text-slate-500 leading-relaxed">{row.notes}</div>
                                     </div>
                                 ))}
                             </div>
@@ -923,7 +952,7 @@ const CmmcCuiMapping = ({ map, summary, embedded = false }) => {
                     {/* Scope notes */}
                     {map.scope_notes?.length > 0 && (
                         <div>
-                            <div className="text-[10px] uppercase tracking-wider font-bold text-indigo-400 mb-2 flex items-center gap-1.5">
+                            <div className="text-[11px] uppercase tracking-wider font-bold text-indigo-400 mb-2.5 flex items-center gap-1.5">
                                 <ScrollText className="w-3.5 h-3.5" /> Scope &amp; Shared-Responsibility Notes
                             </div>
                             <div className="space-y-1.5">
