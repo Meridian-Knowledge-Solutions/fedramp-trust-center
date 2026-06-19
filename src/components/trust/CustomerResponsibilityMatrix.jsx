@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, memo } from 'react';
+import React, { useState, useEffect, useMemo, memo, useRef } from 'react';
 import {
     Shield, Users, Cloud, Server, Search, ChevronDown, ChevronRight,
     Building2, UserCheck, Layers, FileText, Filter, X, Sparkles,
@@ -60,22 +60,12 @@ const Header = ({ summary, mode }) => {
                             </p>
                         </div>
                     </div>
-                    <div className="flex flex-wrap gap-2 mt-4">
-                        <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-1 rounded-md border border-white/10 font-semibold tracking-wide uppercase">
-                            NIST SP 800-53 Rev 5
-                        </span>
-                        <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-1 rounded-md border border-white/10 font-semibold tracking-wide uppercase">
-                            Moderate Baseline
-                        </span>
-                        <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-1 rounded-md border border-blue-500/20 font-semibold tracking-wide uppercase">
-                            FedRAMP 20x KSI Mapped
-                        </span>
-                        <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-md border border-emerald-500/20 font-semibold tracking-wide uppercase">
-                            CMMC 2.0 Level 2
-                        </span>
-                        <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded-md border border-indigo-500/20 font-semibold tracking-wide uppercase">
-                            CUI / DoD Cross-Ref
-                        </span>
+                    <div className="flex flex-wrap gap-1.5 mt-4">
+                        {['NIST SP 800-53 Rev 5', 'Moderate Baseline', 'FedRAMP 20x KSI', 'CMMC 2.0 Level 2', 'CUI / DoD Cross-Ref'].map(b => (
+                            <span key={b} className="text-[11px] bg-white/[0.04] text-slate-400 px-2.5 py-1 rounded-md border border-white/10 font-medium">
+                                {b}
+                            </span>
+                        ))}
                     </div>
                 </div>
                 <div className="flex flex-col items-end gap-3">
@@ -132,21 +122,37 @@ const ModeToggle = ({ mode, setMode }) => (
     </div>
 );
 
-// ───────── Responsibility split ─────────
-const ResponsibilitySplit = ({ counts, total }) => {
-    const entries = Object.entries(counts || {}).filter(([, v]) => v > 0);
-    // Order parties consistently
-    const order = ['Customer', 'Shared', 'Meridian', 'Inherited (AWS)'];
-    entries.sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]));
+// ───────── Ownership chip (single, calm party indicator) ─────────
+// Replaces the old stack of per-party pills on each row. The control's
+// `responsibility` already names the owning party, so one chip says it all.
+const OwnershipChip = ({ responsibility }) => {
+    const t = RESP_THEMES[responsibility] || RESP_THEMES.Customer;
+    const Icon = t.icon || Circle;
+    return (
+        <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-md border ${t.bg} ${t.border} ${t.text}`}>
+            <Icon className="w-3 h-3" />
+            {t.label}
+        </span>
+    );
+};
+
+const RESP_ORDER = ['Customer', 'Shared', 'Meridian', 'Inherited (AWS)'];
+
+// ───────── Ownership digest ─────────
+// "Who owns what" at a glance — the calm, large-type summary that leads the
+// section so a reviewer understands the split before drilling into 185 rows.
+const OwnershipDigest = ({ counts, total }) => {
+    const entries = Object.entries(counts || {}).filter(([, v]) => v > 0)
+        .sort((a, b) => RESP_ORDER.indexOf(a[0]) - RESP_ORDER.indexOf(b[0]));
 
     return (
-        <div className="bg-[#121217] border border-white/10 rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                <div className="text-[10px] text-slate-500 uppercase tracking-[0.15em] font-bold">Who Owns What</div>
-                <span className="text-[10px] text-slate-600">{total} controls assessed</span>
+        <div className="bg-[#121217] border border-white/10 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wide">Who owns what</h3>
+                <span className="text-xs text-slate-500">{total} controls assessed</span>
             </div>
             {/* Segmented bar */}
-            <div className="flex h-3 rounded-full overflow-hidden bg-zinc-900 mb-4">
+            <div className="flex h-4 rounded-full overflow-hidden bg-zinc-900 mb-5">
                 {entries.map(([k, v]) => {
                     const t = RESP_THEMES[k];
                     const pct = (v / total) * 100;
@@ -161,20 +167,86 @@ const ResponsibilitySplit = ({ counts, total }) => {
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {entries.map(([k, v]) => {
-                    const t = RESP_THEMES[k] || { color: '#71717a', text: 'text-zinc-400', bg: 'bg-zinc-800/40' };
+                    const t = RESP_THEMES[k] || { color: '#71717a', text: 'text-zinc-400', bg: 'bg-zinc-800/40', label: k };
                     const Icon = t.icon || Circle;
                     const pct = ((v / total) * 100).toFixed(0);
                     return (
-                        <div key={k} className={`rounded-lg p-3 border border-white/5 ${t.bg}`}>
-                            <div className="flex items-center gap-2 mb-1.5">
-                                <Icon className={`w-3.5 h-3.5 ${t.text}`} />
-                                <span className={`text-[10px] uppercase font-bold tracking-wide ${t.text}`}>{k}</span>
+                        <div key={k} className={`rounded-xl p-4 border border-white/5 ${t.bg}`}>
+                            <div className="flex items-center gap-2 mb-2">
+                                <Icon className={`w-4 h-4 ${t.text}`} />
+                                <span className={`text-xs font-bold ${t.text}`}>{t.label || k}</span>
                             </div>
-                            <div className="flex items-baseline gap-1.5">
-                                <span className="text-2xl font-extrabold text-white font-mono">{v}</span>
-                                <span className="text-[10px] text-slate-500">{pct}%</span>
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-3xl font-extrabold text-white font-mono leading-none">{v}</span>
+                                <span className="text-xs text-slate-500">{pct}%</span>
                             </div>
                         </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+// ───────── Family overview ─────────
+// A calm grid of the NIST 800-53 families. Each card shows the family's control
+// count and a mini ownership bar, and acts as the entry point into the detailed
+// browser (click → opens the browser filtered to that family). This lets a
+// reviewer grasp the structure without scrolling the full list.
+const FamilyOverview = ({ controls, activeFamily, onSelectFamily }) => {
+    const families = useMemo(() => {
+        const map = new Map();
+        controls.forEach(c => {
+            if (c.applicability === 'Not Applicable') return;
+            const key = familyKey(c.family);
+            if (!key) return;
+            if (!map.has(key)) map.set(key, { id: key, full: c.family, count: 0, resp: {} });
+            const e = map.get(key);
+            e.count += 1;
+            e.resp[c.responsibility] = (e.resp[c.responsibility] || 0) + 1;
+        });
+        return Array.from(map.values()).sort((a, b) => a.id.localeCompare(b.id));
+    }, [controls]);
+
+    return (
+        <div className="bg-[#121217] border border-white/10 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wide">Control families</h3>
+                <span className="text-xs text-slate-500">{families.length} families · click to browse</span>
+            </div>
+            <p className="text-xs text-slate-500 mb-5">Each NIST 800-53 family at a glance — the bar shows how ownership splits within it.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {families.map(f => {
+                    const accent = familyAccent(f.full);
+                    const label = (f.full || '').split(' - ')[1] || f.full;
+                    const on = activeFamily === f.id;
+                    const respEntries = RESP_ORDER.filter(k => f.resp[k]);
+                    return (
+                        <button
+                            key={f.id}
+                            onClick={() => onSelectFamily(f.id)}
+                            className={`text-left rounded-xl border p-4 transition-all ${on
+                                ? 'border-white/25 bg-white/[0.05]'
+                                : 'border-white/[0.06] bg-[#0f0f12] hover:border-white/15 hover:bg-white/[0.03]'}`}
+                        >
+                            <div className="flex items-center justify-between gap-2 mb-2.5">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <span className="text-base font-mono font-extrabold" style={{ color: accent }}>{f.id}</span>
+                                    <span className="text-xs text-slate-400 truncate">{label}</span>
+                                </div>
+                                <span className="text-lg font-bold text-white font-mono shrink-0">{f.count}</span>
+                            </div>
+                            <div className="flex h-1.5 rounded-full overflow-hidden bg-zinc-900">
+                                {respEntries.map(k => {
+                                    const t = RESP_THEMES[k];
+                                    return (
+                                        <div key={k} className="h-full"
+                                            style={{ width: `${(f.resp[k] / f.count) * 100}%`, background: t?.color || '#71717a' }}
+                                            title={`${k}: ${f.resp[k]}`} />
+                                    );
+                                })}
+                            </div>
+                        </button>
                     );
                 })}
             </div>
@@ -239,10 +311,7 @@ const FamilyFilter = ({ families, activeFamily, setActiveFamily }) => (
 
 // ───────── Control row ─────────
 const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
-    const resp = RESP_THEMES[ctrl.responsibility] || RESP_THEMES.Customer;
     const accent = familyAccent(ctrl.family);
-    const RespIcon = resp.icon || Circle;
-    const isNA = ctrl.applicability === 'Not Applicable';
 
     return (
         <div className={`rounded-xl border transition-all ${isExpanded ? 'border-white/20 bg-white/[0.03]' : 'border-white/[0.06] bg-[#0f0f12] hover:border-white/10'}`}>
@@ -252,52 +321,25 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
             >
                 <div className="w-1 self-stretch rounded-full shrink-0" style={{ background: accent }} />
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                        <span className="text-xs font-mono font-bold text-white">{ctrl.control_id}</span>
-                        <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">{familyKey(ctrl.family)}</span>
+                    <div className="flex items-center gap-2.5 flex-wrap mb-1.5">
+                        <span className="text-sm font-mono font-bold text-white">{ctrl.control_id}</span>
+                        <OwnershipChip responsibility={ctrl.responsibility} />
                         {ctrl.applicability === 'Not Applicable' && (
-                            <span className="text-[9px] bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded font-bold uppercase">N/A</span>
+                            <span className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded font-semibold uppercase tracking-wide">N/A</span>
                         )}
                         {ctrl.applicability === 'Voluntary' && (
-                            <span className="text-[9px] bg-cyan-500/10 text-cyan-400 px-1.5 py-0.5 rounded font-bold uppercase">Voluntary</span>
+                            <span className="text-[10px] bg-cyan-500/10 text-cyan-300 px-1.5 py-0.5 rounded font-semibold uppercase tracking-wide">Voluntary</span>
                         )}
                     </div>
-                    <div className="text-sm text-slate-200 font-semibold leading-snug pr-4">{ctrl.control_name}</div>
-                    <div className="flex items-center gap-2 flex-wrap mt-2">
-                        {/* Party badges */}
-                        {ctrl.meridian && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                Meridian
-                            </span>
-                        )}
-                        {ctrl.customer && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                Customer
-                            </span>
-                        )}
-                        {mode === 'cloud' && ctrl.csp && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                                AWS
-                            </span>
-                        )}
-                        <span className="text-slate-600">·</span>
-                        <span className={`text-[10px] font-bold ${resp.text}`}>{ctrl.responsibility}</span>
+                    <div className="text-[15px] text-slate-100 font-medium leading-snug pr-4">{ctrl.control_name}</div>
+                    {/* Quiet metadata line — family + KSI/CMMC presence, no competing colors */}
+                    <div className="flex items-center gap-2 flex-wrap mt-2 text-[11px] text-slate-500">
+                        <span className="font-semibold uppercase tracking-wide" style={{ color: accent }}>{familyKey(ctrl.family)}</span>
+                        <span className="text-slate-600 truncate">{(ctrl.family || '').split(' - ')[1] || ''}</span>
                         {ctrl.ksis?.length > 0 && (
-                            <>
-                                <span className="text-slate-600">·</span>
-                                <span className="text-[10px] text-slate-500 font-mono">
-                                    {ctrl.ksis.length} KSI{ctrl.ksis.length === 1 ? '' : 's'}
-                                </span>
-                            </>
+                            <span>· {ctrl.ksis.length} KSI{ctrl.ksis.length === 1 ? '' : 's'}</span>
                         )}
-                        {ctrl.cmmc && (
-                            <>
-                                <span className="text-slate-600">·</span>
-                                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                                    CMMC L2
-                                </span>
-                            </>
-                        )}
+                        {ctrl.cmmc && <span className="text-indigo-400/80 font-semibold">· CMMC L2</span>}
                     </div>
                 </div>
                 <div className="shrink-0 self-center">
@@ -385,9 +427,8 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
 });
 
 // ───────── Control browser ─────────
-const ControlBrowser = ({ controls, mode }) => {
+const ControlBrowser = ({ controls, mode, activeFamily, setActiveFamily, onCollapse }) => {
     const [search, setSearch] = useState('');
-    const [activeFamily, setActiveFamily] = useState(null);
     const [activeResp, setActiveResp] = useState(null);
     const [expanded, setExpanded] = useState(new Set());
     const [hideNA, setHideNA] = useState(true);
@@ -449,15 +490,25 @@ const ControlBrowser = ({ controls, mode }) => {
                         Showing <span className="text-slate-300 font-bold font-mono">{filtered.length}</span> of {controls.length} controls
                     </div>
                 </div>
-                <label className="flex items-center gap-2 text-[11px] text-slate-400 cursor-pointer select-none">
-                    <input
-                        type="checkbox"
-                        checked={hideNA}
-                        onChange={e => setHideNA(e.target.checked)}
-                        className="accent-blue-500"
-                    />
-                    Hide N/A controls
-                </label>
+                <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 text-[11px] text-slate-400 cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            checked={hideNA}
+                            onChange={e => setHideNA(e.target.checked)}
+                            className="accent-blue-500"
+                        />
+                        Hide N/A controls
+                    </label>
+                    {onCollapse && (
+                        <button
+                            onClick={onCollapse}
+                            className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 hover:text-white transition-colors"
+                        >
+                            <ChevronDown className="w-3.5 h-3.5 rotate-180" /> Collapse
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Search */}
@@ -527,6 +578,52 @@ const ControlBrowser = ({ controls, mode }) => {
                             mode={mode}
                         />
                     ))
+                )}
+            </div>
+        </div>
+    );
+};
+
+// ───────── Controls section (summary-first composition) ─────────
+// Leads with the calm overview (ownership digest + family cards), then keeps the
+// dense 185-row browser behind an explicit toggle so the default view stays
+// readable. Selecting a family card opens the browser pre-filtered to it.
+const ControlsSection = ({ controls, modeSummary, mode, setMode }) => {
+    const [browserOpen, setBrowserOpen] = useState(false);
+    const [activeFamily, setActiveFamily] = useState(null);
+    const browserRef = useRef(null);
+
+    const openBrowserAt = (familyId) => {
+        setActiveFamily(familyId);
+        setBrowserOpen(true);
+        requestAnimationFrame(() => browserRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    };
+
+    return (
+        <div className="space-y-6">
+            <ModeToggle mode={mode} setMode={setMode} />
+            <ModeLegend mode={mode} />
+            <OwnershipDigest counts={modeSummary?.by_responsibility} total={modeSummary?.total} />
+            <FamilyOverview controls={controls} activeFamily={browserOpen ? activeFamily : null} onSelectFamily={openBrowserAt} />
+
+            <div ref={browserRef}>
+                {browserOpen ? (
+                    <ControlBrowser
+                        controls={controls}
+                        mode={mode}
+                        activeFamily={activeFamily}
+                        setActiveFamily={setActiveFamily}
+                        onCollapse={() => setBrowserOpen(false)}
+                    />
+                ) : (
+                    <button
+                        onClick={() => setBrowserOpen(true)}
+                        className="w-full flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-[#121217] hover:bg-white/[0.04] py-4 text-sm font-bold text-slate-200 transition-all"
+                    >
+                        <Search className="w-4 h-4 text-blue-400" />
+                        Browse &amp; search all {controls.length} controls
+                        <ChevronDown className="w-4 h-4 text-slate-500" />
+                    </button>
                 )}
             </div>
         </div>
@@ -956,12 +1053,7 @@ const CustomerResponsibilityMatrix = () => {
             <SectionNav active={section} onChange={handleSectionChange} counts={counts} />
 
             {section === 'controls' && (
-                <div className="space-y-6">
-                    <ModeToggle mode={mode} setMode={setMode} />
-                    <ModeLegend mode={mode} />
-                    <ResponsibilitySplit counts={modeSummary?.by_responsibility} total={modeSummary?.total} />
-                    <ControlBrowser controls={controls} mode={mode} />
-                </div>
+                <ControlsSection controls={controls} modeSummary={modeSummary} mode={mode} setMode={setMode} />
             )}
             {section === 'cmmc' && (
                 <CmmcCuiMapping map={data.cmmc_cui} summary={summary.cmmc_cui} embedded />
