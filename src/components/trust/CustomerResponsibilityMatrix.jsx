@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { THEME, BASE_PATH } from '../../config/theme';
 import { getRouteSegments, setRoute, onRouteChange } from '../../utils/hashRoute';
+import { Card, Badge, Eyebrow } from './ui';
 
 // ───────── Theme tokens ─────────
 const RESP_THEMES = {
@@ -44,46 +45,38 @@ const coverageTheme = (coverage) => {
 const Header = ({ summary, mode }) => {
     const m = mode === 'cloud' ? summary?.cloud_fedramp : summary?.on_prem;
     return (
-        <div className="relative overflow-hidden bg-gradient-to-br from-[#0f1729] via-[#121217] to-[#0a0a0f] border border-white/10 rounded-2xl p-6 md:p-8">
-            <div className="absolute -top-12 -right-12 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-60" />
+        <Card className="relative overflow-hidden p-7 md:p-8">
+            <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-sky-500/10 blur-[100px] pointer-events-none" />
+            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-sky-500/40 to-transparent" />
             <div className="relative flex flex-col lg:flex-row gap-6 lg:items-end justify-between">
                 <div>
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                            <Layers className="w-5 h-5 text-blue-400" />
-                        </div>
-                        <div>
-                            <h2 className="text-2xl font-bold text-white tracking-tight">Customer Responsibility Matrix</h2>
-                            <p className="text-xs text-slate-400 mt-0.5">
-                                Who does what — across NIST 800-53 Rev 5, FedRAMP 20x KSIs, and CMMC 2.0 L2 / CUI
-                            </p>
-                        </div>
-                    </div>
+                    <Eyebrow className="mb-2">Shared Responsibility</Eyebrow>
+                    <h2 className="text-2xl font-bold text-white tracking-tight">Customer Responsibility Matrix</h2>
+                    <p className="text-[13px] text-slate-400 mt-1 max-w-2xl leading-relaxed">
+                        Who does what — across NIST 800-53 Rev 5, FedRAMP 20x KSIs, and CMMC 2.0 L2 / CUI.
+                    </p>
                     <div className="flex flex-wrap gap-1.5 mt-4">
-                        {['NIST SP 800-53 Rev 5', 'Moderate Baseline', 'FedRAMP 20x KSI', 'CMMC 2.0 Level 2', 'CUI / DoD Cross-Ref'].map(b => (
-                            <span key={b} className="text-[11px] bg-white/[0.04] text-slate-400 px-2.5 py-1 rounded-md border border-white/10 font-medium">
-                                {b}
-                            </span>
+                        {['NIST SP 800-53 Rev 5', 'Moderate Baseline', 'FedRAMP 20x KSI', 'CMMC 2.0 Level 2', 'CUI / DoD'].map(b => (
+                            <Badge key={b} variant="neutral">{b}</Badge>
                         ))}
                     </div>
                 </div>
-                <div className="flex flex-col items-end gap-3">
-                    <div className="text-right">
-                        <div className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Controls in scope</div>
-                        <div className="text-4xl font-extrabold text-white font-mono leading-none mt-1">{m?.total ?? 0}</div>
+                <div className="flex flex-col items-start lg:items-end gap-3">
+                    <div className="lg:text-right">
+                        <Eyebrow>Controls in scope</Eyebrow>
+                        <div className="text-4xl font-bold text-white font-mono leading-none mt-1.5">{m?.total ?? 0}</div>
                     </div>
                     <a
                         href={`${BASE_PATH}Meridian_LMS_CRM_NIST_800-53_Rev5_CMMC_CUI.xlsx`}
                         download
-                        className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/10 hover:text-white transition-all"
+                        className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 hover:bg-white/10 hover:text-white transition-all"
                         title="NIST 800-53 Rev 5 + FedRAMP 20x KSI + CMMC 2.0 L2 / CUI cross-reference"
                     >
-                        <Download className="w-3 h-3" /> Download XLSX
+                        <Download className="w-3.5 h-3.5" /> Download XLSX
                     </a>
                 </div>
             </div>
-        </div>
+        </Card>
     );
 };
 
