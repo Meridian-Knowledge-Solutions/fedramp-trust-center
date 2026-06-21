@@ -3,11 +3,7 @@ import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
     Legend, ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
-import {
-    GitCommit, Shield, Zap, Activity, Clock, Download,
-    TrendingUp, Cpu, Layout, AlertCircle, Users, GitPullRequest, 
-    GitMerge, AlertOctagon, FileText
-} from 'lucide-react';
+import { Download, AlertCircle } from 'lucide-react';
 
 // --- TYPES & INTERFACES ---
 interface CommitBreakdown {
@@ -155,217 +151,210 @@ export default function MetricsDashboard() {
     }, [history]);
 
     if (loading) return (
-        <div className="min-h-screen bg-[#050505] flex items-center justify-center font-mono text-slate-500 uppercase tracking-widest">
-            <Activity className="animate-pulse text-blue-500 mr-3" /> Initializing Telemetry...
-        </div>
-    );
-
-    if (error || !stats) return (
-        <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center">
-            <div className="max-w-md w-full bg-[#18181b] border border-red-500/30 p-8 rounded-xl shadow-2xl">
-                <AlertCircle className="text-red-500 mx-auto mb-4" size={48} />
-                <h2 className="text-white font-black uppercase tracking-tight">Stream Failure</h2>
-                <p className="text-slate-400 text-sm mt-4 font-mono">{error || "Unable to retrieve metrics archive."}</p>
+        <div className="tcx" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+            <div style={{ textAlign: 'center', fontFamily: 'var(--mono)', color: 'var(--ash)' }}>
+                <div style={{ width: 40, height: 40, margin: '0 auto 16px', borderRadius: '50%', border: '2px solid #34E0C455', borderTopColor: 'var(--signal)', animation: 'tcx-spin .8s linear infinite' }} />
+                initializing pipeline telemetry…
+                <style>{`@keyframes tcx-spin{to{transform:rotate(360deg)}}`}</style>
             </div>
         </div>
     );
 
+    if (error || !stats) return (
+        <div className="tcx" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: 24 }}>
+            <div className="panel" style={{ maxWidth: 460, width: '100%', padding: 32, textAlign: 'center', borderColor: '#F2607A55' }}>
+                <AlertCircle style={{ color: 'var(--red)', margin: '0 auto 16px' }} size={44} />
+                <div className="svc" style={{ marginBottom: 12 }}>Stream failure</div>
+                <p className="mono" style={{ color: 'var(--ash)' }}>{error || "Unable to retrieve metrics archive."}</p>
+            </div>
+        </div>
+    );
+
+    // ── real numeric series for sparkbars ──
+    const totalSeries = stats.normalized.map(w => w.total);
+    const ciSeries = history.map(w => w.ci_success_rate);
+    const prSeries = stats.normalized.map(w => w.prsMerged);
+    const securitySeries = stats.normalized.map(w => w.security);
+    const issuesSeries = stats.normalized.map(w => w.issuesClosed);
+    const fixesSeries = stats.normalized.map(w => w.fixes);
+    const featuresSeries = stats.normalized.map(w => w.features);
+    const infraSeries = stats.normalized.map(w => w.infra);
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0a0a0d] to-[#050505] p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
+        <div className="tcx" style={{ padding: '40px 0' }}>
+            <div className="wrap">
                 {/* --- HEADER ---  */}
-                <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-white/5">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-gradient-to-br from-blue-600/20 to-indigo-700/20 p-3 rounded-xl border border-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.15)]">
-                            <TrendingUp size={24} className="text-blue-400" />
-                        </div>
-                        <div>
-                            <h1 className="text-3xl font-black text-white uppercase tracking-tighter">Compliance Pipeline Effectiveness</h1>
-                            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-1">
-                                Pipeline Development Activity • KSI-PIY-06
-                            </p>
-                        </div>
-                    </div>
-                    <div className="bg-white/5 px-4 py-2 rounded-lg border border-white/5 shadow-inner">
-                        <span className={THEME.statLabel}>Frequency</span>
-                        <div className="text-white font-mono font-bold text-lg leading-tight">{history.length} Wks</div>
-                    </div>
-                </header>
+                <div className="kick">▤ — PIPELINE TELEMETRY · KSI-PIY-06</div>
+                <h1 className="big">Compliance pipeline <span className="g">effectiveness</span></h1>
+                <p className="lede">
+                    KSI validation throughput, evidence cadence, and pipeline-stability trend from {history.length} weeks of continuous-monitoring development activity.
+                </p>
 
-                {/* --- PULSE OVERVIEW ---  */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <PulseCard label="Contributors" value={stats.latestAuthors} icon={Users} color="text-purple-500" />
-                    <PulseCard label="Commits" value={stats.current.total} icon={GitCommit} color="text-blue-500" />
-                    <PulseCard label="PRs Merged" value={stats.latestPRs?.merged || 0} icon={GitMerge} color="text-emerald-500" />
-                    <PulseCard label="Issues Closed" value={stats.latestIssues?.closed || 0} icon={AlertOctagon} color="text-amber-500" />
-                    <PulseCard label="Files Changed" value={stats.latestChangedFiles} icon={FileText} color="text-cyan-500" />
+                {/* --- KPI OVERVIEW ---  */}
+                <div className="grid g4">
+                    <div className="kpi"><div className="v i">{stats.totalCommits.toLocaleString()}</div><div className="l">Validation commits</div><div className="sub">{history.length}-week window</div></div>
+                    <div className="kpi"><div className="v s">{stats.latestPRs?.merged || 0}</div><div className="l">PRs merged</div><div className="sub">latest cycle</div></div>
+                    <div className="kpi"><div className="v">{stats.latestIssues?.closed || 0}</div><div className="l">Issues closed</div><div className="sub">latest cycle</div></div>
+                    <div className="kpi"><div className="v a">{stats.avgCI.toFixed(1)}%</div><div className="l">Avg CI stability</div><div className="sub">pipeline health</div></div>
                 </div>
 
-                {/* --- CODE CHANGES STATS ---  */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className={THEME.card + " p-6"}>
-                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <TrendingUp size={14} className="text-emerald-400" /> Code Changes (This Week)
-                        </h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-black/20 p-4 rounded-lg border border-white/5">
-                                <div className={THEME.statLabel + " text-emerald-400"}>Additions</div>
-                                <div className="text-2xl font-bold text-white mt-1">+{stats.latestAdditions.toLocaleString()}</div>
-                            </div>
-                            <div className="bg-black/20 p-4 rounded-lg border border-white/5">
-                                <div className={THEME.statLabel + " text-rose-400"}>Deletions</div>
-                                <div className="text-2xl font-bold text-white mt-1">-{stats.latestDeletions.toLocaleString()}</div>
-                            </div>
-                        </div>
-                    </div>
+                <div className="grid g4" style={{ marginTop: 12 }}>
+                    <div className="kpi"><div className="v i">{stats.latestAuthors}</div><div className="l">Contributors</div></div>
+                    <div className="kpi"><div className="v">{stats.current.total}</div><div className="l">Commits this cycle</div></div>
+                    <div className="kpi"><div className="v s">+{stats.latestAdditions.toLocaleString()}</div><div className="l">Additions</div></div>
+                    <div className="kpi"><div className="v a">-{stats.latestDeletions.toLocaleString()}</div><div className="l">Deletions</div></div>
+                </div>
 
-                    <div className={THEME.card + " p-6"}>
-                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <GitPullRequest size={14} className="text-blue-400" /> Pull Requests & Issues
-                        </h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-black/20 p-4 rounded-lg border border-white/5">
-                                <div className={THEME.statLabel}>PRs Open</div>
-                                <div className="text-2xl font-bold text-white mt-1">{stats.latestPRs?.open || 0}</div>
-                            </div>
-                            <div className="bg-black/20 p-4 rounded-lg border border-white/5">
-                                <div className={THEME.statLabel}>Issues Open</div>
-                                <div className="text-2xl font-bold text-white mt-1">{stats.latestIssues?.open || 0}</div>
-                            </div>
-                        </div>
+                {/* --- TREND SPARKBARS ---  */}
+                <h3 className="sec">Pipeline trends · {history.length}-week series</h3>
+                <div className="panel">
+                    <div className="row">
+                        <span className="svc" style={{ width: 180 }}>Validation throughput</span>
+                        <Sparkbars data={totalSeries} />
+                        <span className="mono" style={{ marginLeft: 'auto', color: 'var(--signal)' }}>{stats.current.total} latest</span>
+                    </div>
+                    <div className="row">
+                        <span className="svc" style={{ width: 180 }}>CI stability</span>
+                        <Sparkbars data={ciSeries} max={100} />
+                        <span className="mono" style={{ marginLeft: 'auto', color: 'var(--signal)' }}>{stats.avgCI.toFixed(1)}% avg</span>
+                    </div>
+                    <div className="row">
+                        <span className="svc" style={{ width: 180 }}>Security commits</span>
+                        <Sparkbars data={securitySeries} color="var(--indigo)" />
+                        <span className="mono" style={{ marginLeft: 'auto', color: 'var(--indigo)' }}>{stats.current.security} latest</span>
+                    </div>
+                    <div className="row">
+                        <span className="svc" style={{ width: 180 }}>PRs merged</span>
+                        <Sparkbars data={prSeries} />
+                        <span className="mono" style={{ marginLeft: 'auto', color: 'var(--ash)' }}>{stats.latestPRs?.merged || 0} latest</span>
+                    </div>
+                    <div className="row">
+                        <span className="svc" style={{ width: 180 }}>Issues closed</span>
+                        <Sparkbars data={issuesSeries} color="var(--indigo)" />
+                        <span className="mono" style={{ marginLeft: 'auto', color: 'var(--ash)' }}>{stats.latestIssues?.closed || 0} latest</span>
                     </div>
                 </div>
 
-                {/* --- STACKED AREA CHART (DEVELOPMENT FLOW) ---  */}
-                <div className={THEME.card + " p-8 relative overflow-hidden"}>
-                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none"><Layout size={180} /></div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-widest mb-10 flex items-center gap-2">
-                        <Activity size={16} className="text-blue-500" /> Commits by Category
-                    </h3>
-                    <ResponsiveContainer width="100%" height={400}>
-                        <AreaChart data={stats.normalized}>
-                            <defs>
-                                <linearGradient id="colorOther" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor={THEME.chartColors.other} stopOpacity={0.2} />
-                                    <stop offset="95%" stopColor={THEME.chartColors.other} stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff05" />
-                            <XAxis dataKey="week" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                            <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', textTransform: 'uppercase', paddingTop: '20px' }} />
-
-                            <Area type="monotone" dataKey="other" stackId="1" stroke={THEME.chartColors.other} fill="url(#colorOther)" name="Other/Legacy" />
-                            <Area type="monotone" dataKey="features" stackId="1" stroke={THEME.chartColors.features} fill={THEME.chartColors.features + '20'} name="Features" />
-                            <Area type="monotone" dataKey="security" stackId="1" stroke={THEME.chartColors.security} fill={THEME.chartColors.security + '20'} name="Security" />
-                            <Area type="monotone" dataKey="infra" stackId="1" stroke={THEME.chartColors.infra} fill={THEME.chartColors.infra + '20'} name="Infrastructure" />
-                            <Area type="monotone" dataKey="fixes" stackId="1" stroke={THEME.chartColors.fixes} fill={THEME.chartColors.fixes + '20'} name="Fixes" />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* DISTRIBUTION PIE CHART  */}
-                    <div className={THEME.card + " p-8"}>
-                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-10 flex items-center gap-2">
-                            <Cpu size={14} className="text-purple-500" /> Commit Distribution
-                        </h3>
-                        <ResponsiveContainer width="100%" height={280}>
-                            <PieChart>
-                                <Pie data={stats.distribution} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={8} dataKey="value">
-                                    {stats.distribution.map((entry, i) => <Cell key={i} fill={entry.color} stroke="none" />)}
-                                </Pie>
+                {/* --- COMMITS BY CATEGORY (area) ---  */}
+                <h3 className="sec">Commits by category · stacked flow</h3>
+                <div className="panel">
+                    <div className="ph"><h4>Development flow</h4><span className="map">{history.length} cycles</span></div>
+                    <div style={{ padding: '18px 8px 8px' }}>
+                        <ResponsiveContainer width="100%" height={360}>
+                            <AreaChart data={stats.normalized}>
+                                <defs>
+                                    <linearGradient id="colorOther" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#424E5C" stopOpacity={0.25} />
+                                        <stop offset="95%" stopColor="#424E5C" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1A222D" />
+                                <XAxis dataKey="week" tick={{ fontSize: 10, fill: '#788596', fontFamily: 'var(--mono)' }} axisLine={false} tickLine={false} />
+                                <YAxis tick={{ fontSize: 10, fill: '#788596', fontFamily: 'var(--mono)' }} axisLine={false} tickLine={false} />
                                 <Tooltip content={<CustomTooltip />} />
-                            </PieChart>
+                                <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', textTransform: 'uppercase', paddingTop: '20px', fontFamily: 'var(--mono)' }} />
+
+                                <Area type="monotone" dataKey="other" stackId="1" stroke="#424E5C" fill="url(#colorOther)" name="Other/Legacy" />
+                                <Area type="monotone" dataKey="features" stackId="1" stroke="#818CF8" fill="#818CF822" name="Features" />
+                                <Area type="monotone" dataKey="security" stackId="1" stroke="#34E0C4" fill="#34E0C422" name="Security" />
+                                <Area type="monotone" dataKey="infra" stackId="1" stroke="#F2B85C" fill="#F2B85C22" name="Infrastructure" />
+                                <Area type="monotone" dataKey="fixes" stackId="1" stroke="#F2607A" fill="#F2607A22" name="Fixes" />
+                            </AreaChart>
                         </ResponsiveContainer>
                     </div>
+                </div>
 
-                    {/* PIPELINE GOVERNANCE CARD  */}
-                    <div className={THEME.card + " p-8"}>
-                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-10 flex items-center gap-2">
-                            <Shield size={14} className="text-emerald-500" /> Pipeline Governance
-                        </h3>
-                        <div className="space-y-6">
-                            <div className="bg-black/40 p-4 rounded-lg border border-white/5 shadow-inner">
-                                <div className="flex justify-between items-end mb-2">
-                                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Stability Health</span>
-                                    <span className="text-xl font-mono font-bold text-white">{stats.avgCI.toFixed(1)}%</span>
-                                </div>
-                                <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                                    <div className="bg-blue-600 h-full transition-all duration-1000" style={{ width: `${stats.avgCI}%` }} />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 rounded-lg bg-black/20 border border-white/5 shadow-sm">
-                                    <div className={THEME.statLabel}>Sec Merges</div>
-                                    <div className="text-xl font-bold text-white mt-1">{stats.current.merged}</div>
-                                </div>
-                                <div className="p-4 rounded-lg bg-black/20 border border-white/5 shadow-sm">
-                                    <div className={THEME.statLabel}>Releases (90d)</div>
-                                    <div className="text-xl font-bold text-white mt-1">{stats.latestReleases}</div>
-                                </div>
-                            </div>
+                {/* --- DISTRIBUTION + GOVERNANCE ---  */}
+                <h3 className="sec">Distribution &amp; governance</h3>
+                <div className="g2">
+                    <div className="panel">
+                        <div className="ph"><h4>Commit distribution</h4><span className="map">latest cycle</span></div>
+                        <div style={{ padding: '18px 8px 8px' }}>
+                            <ResponsiveContainer width="100%" height={260}>
+                                <PieChart>
+                                    <Pie data={stats.distribution} cx="50%" cy="50%" innerRadius={66} outerRadius={88} paddingAngle={8} dataKey="value">
+                                        {stats.distribution.map((entry, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} stroke="none" />)}
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltip />} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    <div className="panel">
+                        <div className="ph"><h4>Pipeline governance</h4><span className="map">FRR-CCM</span></div>
+                        <div className="row">
+                            <span className="svc" style={{ width: 180 }}>Stability health</span>
+                            <Sparkbars data={ciSeries} max={100} />
+                            <span className="mono" style={{ marginLeft: 'auto', color: 'var(--signal)' }}>{stats.avgCI.toFixed(1)}%</span>
+                        </div>
+                        <div className="row">
+                            <span className="svc" style={{ width: 180 }}>Security merges</span>
+                            <span className="mono" style={{ marginLeft: 'auto', color: 'var(--ash)' }}>{stats.current.merged}</span>
+                            <span style={{ marginLeft: 16 }}><span className="tag vi">DEPENDABOT</span></span>
+                        </div>
+                        <div className="row">
+                            <span className="svc" style={{ width: 180 }}>Releases (90d)</span>
+                            <span className="mono" style={{ marginLeft: 'auto', color: 'var(--ash)' }}>{stats.latestReleases}</span>
+                            <span style={{ marginLeft: 16 }}><span className="tag ok">SHIPPED</span></span>
+                        </div>
+                        <div className="row">
+                            <span className="svc" style={{ width: 180 }}>Files changed</span>
+                            <span className="mono" style={{ marginLeft: 'auto', color: 'var(--ash)' }}>{stats.latestChangedFiles}</span>
+                            <span style={{ marginLeft: 16 }}><span className="tag ok">latest</span></span>
+                        </div>
+                        <div className="row">
+                            <span className="svc" style={{ width: 180 }}>Open PRs / issues</span>
+                            <span className="mono" style={{ marginLeft: 'auto', color: 'var(--ash)' }}>{stats.latestPRs?.open || 0} PR · {stats.latestIssues?.open || 0} issues</span>
+                            <span style={{ marginLeft: 16 }}><span className="tag warn">IN FLIGHT</span></span>
                         </div>
                     </div>
                 </div>
 
                 {/* --- FOOTER ---  */}
-                <footer className="flex flex-col md:flex-row justify-between items-center bg-[#18181b] p-6 rounded-xl border border-white/5 gap-4 shadow-inner">
-                    <div className="flex gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
-                        <div>Archive node: <span className="text-white ml-2">metrics_history.jsonl</span></div>
-                        <div>Status: <span className="text-emerald-500 ml-2">Authenticated</span></div>
-                        <div>Privacy: <span className="text-blue-400 ml-2">Aggregate Only</span></div>
-                    </div>
-                    <a href={DATA_URL} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-2 bg-zinc-950 hover:bg-zinc-900 border border-white/5 text-slate-400 hover:text-white rounded-lg text-[10px] font-black uppercase transition-all shadow-lg">
-                        <Download size={12} /> Raw Sequence Archive
+                <div className="footer" style={{ marginTop: 30 }}>
+                    <span>ARCHIVE NODE: metrics_history.jsonl · STATUS AUTHENTICATED · AGGREGATE ONLY</span>
+                    <a href={DATA_URL} target="_blank" rel="noreferrer" className="badge i" style={{ cursor: 'pointer' }}>
+                        <Download size={12} /> RAW SEQUENCE ARCHIVE
                     </a>
-                </footer>
+                </div>
             </div>
         </div>
     );
 }
+
+// ── sparkbars from a real numeric series ──
+function Sparkbars({ data, max, color = 'var(--signal)' }: { data: number[]; max?: number; color?: string }) {
+    if (!data?.length) return null;
+    const hi = max ?? Math.max(...data);
+    const lo = Math.min(...data);
+    const span = hi - lo || 1;
+    return (
+        <div className="spark">
+            {data.map((d, i) => {
+                const h = 22 + ((d - lo) / span) * 78;
+                return <i key={i} style={{ height: `${h}%`, background: color, animationDelay: `${i * 12}ms` }} />;
+            })}
+        </div>
+    );
+}
+
+const PIE_COLORS = ['#818CF8', '#34E0C4', '#F2B85C', '#F2607A', '#424E5C'];
 
 // --- HELPER COMPONENTS ---
-function PulseCard({ label, value, icon: Icon, color }: any) {
-    return (
-        <div className={THEME.card + " p-4 flex flex-col items-center justify-center text-center group"}>
-            <div className={`mb-2 ${color}`}>
-                <Icon size={20} />
-            </div>
-            <div className="text-2xl font-black text-white tracking-tighter">{value}</div>
-            <span className={THEME.statLabel + " mt-1"}>{label}</span>
-        </div>
-    );
-}
-
-function StatCard({ label, value, icon: Icon, color }: any) {
-    return (
-        <div className={THEME.card + " p-6 flex justify-between items-center group shadow-xl"}>
-            <div>
-                <span className={THEME.statLabel}>{label}</span>
-                <div className="text-4xl font-black text-white tracking-tighter mt-1 group-hover:text-blue-400 transition-colors">{value}</div>
-            </div>
-            <div className={`p-3 rounded-xl bg-black/40 border border-white/5 ${color} shadow-inner`}>
-                <Icon size={20} />
-            </div>
-        </div>
-    );
-}
-
 function CustomTooltip({ active, payload, label }: any) {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-[#0c0c0e] border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-xl font-sans">
-                <p className="text-[10px] font-mono text-slate-500 uppercase mb-3 border-b border-white/5 pb-2">Cycle: {label}</p>
-                <div className="space-y-1.5">
+            <div className="panel" style={{ padding: 14, background: '#0b1016', fontFamily: 'var(--mono)' }}>
+                <p className="mono" style={{ color: 'var(--faint)', textTransform: 'uppercase', marginBottom: 10, borderBottom: '1px solid var(--line)', paddingBottom: 8 }}>Cycle: {label}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {payload.map((entry: any, i: number) => (
-                        <div key={i} className="flex justify-between items-center gap-8">
-                            <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: entry.color || entry.fill }} />
-                                <span className="text-[11px] font-bold text-slate-300">{entry.name}</span>
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 32 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: entry.color || entry.fill }} />
+                                <span style={{ fontSize: 11, color: 'var(--ash)' }}>{entry.name}</span>
                             </div>
-                            <span className="text-[11px] font-mono font-black text-white">{entry.value}</span>
+                            <span style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--ink)' }}>{entry.value}</span>
                         </div>
                     ))}
                 </div>

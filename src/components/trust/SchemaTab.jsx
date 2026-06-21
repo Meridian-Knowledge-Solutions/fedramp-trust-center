@@ -1,13 +1,8 @@
 import React, { useState, useEffect, memo, useCallback } from 'react';
-import { Code2, Download, Copy, Check, ChevronDown, ChevronRight, FileJson } from 'lucide-react';
+import { Code2, Download, Copy, Check, ChevronDown, ChevronRight } from 'lucide-react';
 import { useTrustCenterData } from '../../hooks/useTrustCenterData';
 
-const THEME = {
-  panel: 'bg-[#121217]',
-  border: 'border-white/10',
-};
-
-// Simple JSON syntax highlighter
+// JSON syntax highlighter — emits console `.k` (indigo keys) / `.v` (teal values) spans
 const highlightJson = (json, indent = 2) => {
   if (!json) return '';
   const str = typeof json === 'string' ? json : JSON.stringify(json, null, indent);
@@ -15,21 +10,17 @@ const highlightJson = (json, indent = 2) => {
   return str.replace(
     /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
     (match) => {
-      let cls = 'text-amber-300'; // number
       if (/^"/.test(match)) {
         if (/:$/.test(match)) {
-          cls = 'text-blue-400'; // key
+          // key
           match = match.replace(/:$/, '');
-          return `<span class="${cls}">${escapeHtml(match)}</span>:`;
-        } else {
-          cls = 'text-emerald-400'; // string
+          return `<span class="k">${escapeHtml(match)}</span>:`;
         }
-      } else if (/true|false/.test(match)) {
-        cls = 'text-purple-400'; // boolean
-      } else if (/null/.test(match)) {
-        cls = 'text-rose-400'; // null
+        // string value
+        return `<span class="v">${escapeHtml(match)}</span>`;
       }
-      return `<span class="${cls}">${escapeHtml(match)}</span>`;
+      // number / boolean / null value
+      return `<span class="v">${escapeHtml(match)}</span>`;
     }
   );
 };
@@ -38,53 +29,47 @@ const escapeHtml = (str) => {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 };
 
+const propCount = (schemaData) =>
+  Object.keys(
+    schemaData?.properties || schemaData?.items?.properties ||
+    (schemaData?.patternProperties && Object.values(schemaData.patternProperties)[0]?.properties) ||
+    schemaData?.$defs || schemaData?.definitions || {}
+  ).length;
+
+const reqCount = (schemaData) =>
+  (
+    schemaData?.required || schemaData?.items?.required ||
+    (schemaData?.patternProperties && Object.values(schemaData.patternProperties)[0]?.required) ||
+    []
+  ).length;
+
+// schema card — `.kpi` tile with a mono filename + a `.tag.ok` VALID
 const SchemaCard = memo(({ schema, isSelected, onClick, schemaData }) => {
-  const typeLabel = schema.title?.replace(' Schema', '') || schema.path.split('/').pop().replace('.json', '');
+  const filename = schema.filename || schema.path.split('/').pop();
 
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left p-4 rounded-lg border transition-all duration-200 group cursor-pointer ${
-        isSelected
-          ? 'bg-blue-500/10 border-blue-500/30'
-          : `${THEME.panel} ${THEME.border} hover:border-white/20`
-      }`}
+      className="kpi"
+      style={{
+        textAlign: 'left',
+        cursor: 'pointer',
+        width: '100%',
+        background: isSelected ? '#818CF80D' : 'var(--raise)',
+        borderColor: isSelected ? '#818CF855' : 'var(--line)',
+        transition: '.15s',
+      }}
     >
-      <div className="flex items-start gap-3">
-        <div className={`p-2 rounded-lg border ${
-          isSelected
-            ? 'bg-blue-500/15 border-blue-500/30'
-            : 'bg-white/5 border-white/5 group-hover:border-white/10'
-        }`}>
-          <FileJson size={16} className={isSelected ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className={`font-medium text-sm ${isSelected ? 'text-blue-400' : 'text-slate-300'}`}>
-              {typeLabel}
-            </span>
-            <span className="px-1.5 py-0.5 text-[8px] font-bold rounded bg-white/5 text-slate-500 border border-white/5 uppercase tracking-wider">
-              JSON Schema
-            </span>
-          </div>
-          <div className="text-[11px] text-slate-500 mt-1 font-mono">{schema.filename}</div>
-          {schemaData && (
-            <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-600 font-mono">
-              <span>{Object.keys(
-                schemaData.properties || schemaData.items?.properties ||
-                (schemaData.patternProperties && Object.values(schemaData.patternProperties)[0]?.properties) ||
-                schemaData.$defs || schemaData.definitions || {}
-              ).length} properties</span>
-              <span className="text-slate-700">|</span>
-              <span>{(
-                schemaData.required || schemaData.items?.required ||
-                (schemaData.patternProperties && Object.values(schemaData.patternProperties)[0]?.required) ||
-                []
-              ).length} required</span>
-            </div>
-          )}
-        </div>
-        <ChevronRight size={14} className={`mt-1 transition-transform ${isSelected ? 'text-blue-400 rotate-90' : 'text-slate-600'}`} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <span className="mono" style={{ color: 'var(--indigo)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {filename}
+        </span>
+        <span className="tag ok">VALID</span>
+      </div>
+      <div className="l" style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+        <span>{propCount(schemaData)} props</span>
+        <span style={{ color: 'var(--faint)' }}>·</span>
+        <span>{reqCount(schemaData)} required</span>
       </div>
     </button>
   );
@@ -97,21 +82,29 @@ const SchemaPropertyRow = memo(({ name, prop, required, depth = 0 }) => {
 
   return (
     <>
-      <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-        <td className="px-4 py-2.5 font-mono text-xs text-blue-400" style={{ paddingLeft: `${16 + depth * 20}px` }}>
-          <div className="flex items-center gap-1.5">
-            {hasChildren && (
-              <button onClick={() => setExpanded(!expanded)} className="p-0.5 hover:bg-white/10 rounded transition-colors">
-                {expanded ? <ChevronDown size={12} className="text-slate-500" /> : <ChevronRight size={12} className="text-slate-500" />}
-              </button>
-            )}
-            {name}
-            {required && <span className="text-rose-400 text-[10px]">*</span>}
-          </div>
-        </td>
-        <td className="px-4 py-2.5 text-xs text-purple-400 font-mono">{prop.type || 'object'}</td>
-        <td className="px-4 py-2.5 text-xs text-slate-500 max-w-xs truncate">{prop.description || '—'}</td>
-      </tr>
+      <div
+        className="ctrl"
+        style={{ cursor: hasChildren ? 'pointer' : 'default', paddingLeft: 20 + depth * 20 }}
+        onClick={hasChildren ? () => setExpanded((e) => !e) : undefined}
+      >
+        <div className="nm" style={{ minWidth: 0 }}>
+          {hasChildren ? (
+            expanded ? <ChevronDown size={13} style={{ color: 'var(--faint)', flexShrink: 0 }} />
+              : <ChevronRight size={13} style={{ color: 'var(--faint)', flexShrink: 0 }} />
+          ) : (
+            <span style={{ width: 13, flexShrink: 0 }} />
+          )}
+          <span className="mono" style={{ color: 'var(--indigo)', fontSize: 12.5 }}>{name}</span>
+          {required && <span style={{ color: 'var(--red)', fontSize: 11 }}>*</span>}
+          <span className="mono" style={{ color: 'var(--ash)', fontSize: 11 }}>{prop.type || 'object'}</span>
+        </div>
+        <span
+          className="mono"
+          style={{ color: 'var(--faint)', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 280 }}
+        >
+          {prop.description || '—'}
+        </span>
+      </div>
       {expanded && Object.entries(childProps).map(([childName, childProp]) => (
         <SchemaPropertyRow
           key={`${name}.${childName}`}
@@ -179,172 +172,149 @@ export const SchemaTab = memo(() => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-500 text-sm">Loading schemas...</p>
-        </div>
+      <div className="mono" style={{ color: 'var(--ash)', padding: '40px 0' }}>
+        Loading schemas…
       </div>
     );
   }
 
   if (error || schemas.length === 0) {
     return (
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-8 text-center`}>
-        <Code2 size={40} className="mx-auto mb-3 text-slate-600" />
-        <p className="text-slate-400 text-sm">{error || 'No schema files available'}</p>
-        <p className="text-slate-600 text-xs mt-1">Schemas will appear after the next pipeline run</p>
+      <div className="panel" style={{ padding: '40px 24px', textAlign: 'center' }}>
+        <Code2 size={32} style={{ color: 'var(--faint)', margin: '0 auto 14px' }} />
+        <p style={{ color: 'var(--ash)', fontSize: 14 }}>{error || 'No schema files available'}</p>
+        <p className="mono" style={{ color: 'var(--faint)', fontSize: 11, marginTop: 6 }}>
+          Schemas will appear after the next pipeline run
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-white font-bold text-lg tracking-tight">JSON Schemas</h2>
-            <p className="text-slate-500 text-xs mt-1 uppercase tracking-wider font-mono">
-              {schemas.length} schema{schemas.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-400 text-[9px] font-bold border border-purple-500/20 tracking-wider uppercase">
-              Validation Ready
-            </span>
-          </div>
-        </div>
+    <div className="stack">
+      {/* header */}
+      <div>
+        <div className="kick">{'{}'} — MACHINE-READABLE</div>
+        <h1 className="big">Schemas &amp; <span className="g">contracts</span></h1>
+        <p className="lede">
+          JSON Schemas for every published artifact, so agency tooling can validate and ingest automatically.
+          <span className="mono" style={{ color: 'var(--signal)', marginLeft: 10 }}>
+            {schemas.length} schema{schemas.length !== 1 ? 's' : ''} · validation ready
+          </span>
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Schema List */}
-        <div className="lg:col-span-4 space-y-2">
-          {schemas.map((schema, idx) => (
-            <SchemaCard
-              key={schema.path}
-              schema={schema}
-              isSelected={idx === selectedIndex}
-              onClick={() => setSelectedIndex(idx)}
-              schemaData={schemaData[schema.path]}
-            />
-          ))}
+      {/* schema cards */}
+      <div className="g2">
+        {schemas.map((schema, idx) => (
+          <SchemaCard
+            key={schema.path}
+            schema={schema}
+            isSelected={idx === selectedIndex}
+            onClick={() => setSelectedIndex(idx)}
+            schemaData={schemaData[schema.path]}
+          />
+        ))}
+      </div>
+
+      {/* schema viewer panel */}
+      <div className="panel">
+        {/* panel header */}
+        <div className="ph">
+          <h4 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Code2 size={14} style={{ color: 'var(--indigo)' }} />
+            {currentSchema?.path.split('/').pop()}
+          </h4>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="seg">
+              {['tree', 'raw'].map((mode) => (
+                <button
+                  key={mode}
+                  className={viewMode === mode ? 'on' : ''}
+                  onClick={() => setViewMode(mode)}
+                >
+                  {mode.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={handleCopy}
+              title="Copy to clipboard"
+              className="mono"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: copied ? 'var(--signal)' : 'var(--ash)', display: 'inline-flex', alignItems: 'center' }}
+            >
+              {copied ? <Check size={15} /> : <Copy size={15} />}
+            </button>
+            <button
+              onClick={handleDownload}
+              title="Download schema"
+              className="mono"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ash)', display: 'inline-flex', alignItems: 'center' }}
+            >
+              <Download size={15} />
+            </button>
+          </div>
         </div>
 
-        {/* Schema Viewer */}
-        <div className="lg:col-span-8">
-          <div className={`${THEME.panel} rounded-xl border ${THEME.border} overflow-hidden`}>
-            {/* Toolbar */}
-            <div className="px-4 py-3 border-b border-white/5 bg-[#09090b] flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Code2 size={14} className="text-blue-400" />
-                <span className="text-white font-medium text-sm">
-                  {currentSchema?.path.split('/').pop()}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex bg-[#09090b] rounded-md p-0.5 border border-white/10">
-                  {['tree', 'raw'].map(mode => (
-                    <button
-                      key={mode}
-                      onClick={() => setViewMode(mode)}
-                      className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded transition-all ${
-                        viewMode === mode
-                          ? 'bg-white/10 text-white shadow-sm border border-white/5'
-                          : 'text-slate-500 hover:text-slate-300'
-                      }`}
-                    >
-                      {mode}
-                    </button>
+        {/* content */}
+        <div style={{ maxHeight: 600, overflow: 'auto' }}>
+          {!currentData ? (
+            <div className="mono" style={{ color: 'var(--ash)', padding: '40px 18px' }}>
+              Loading schema…
+            </div>
+          ) : viewMode === 'tree' ? (
+            (() => {
+              // Resolve properties from various schema structures:
+              // - standard: { properties: {...} }
+              // - array type: { type: "array", items: { properties: {...} } }
+              // - patternProperties: { patternProperties: { "^pattern$": { properties: {...} } } }
+              // - $defs / definitions
+              let topProps = currentData.properties
+                || currentData.items?.properties
+                || null;
+
+              // For patternProperties schemas, extract the first pattern's properties
+              if (!topProps && currentData.patternProperties) {
+                const firstPattern = Object.values(currentData.patternProperties)[0];
+                topProps = firstPattern?.properties || null;
+              }
+
+              topProps = topProps || currentData.$defs || currentData.definitions || null;
+
+              const topRequired = currentData.required
+                || currentData.items?.required
+                || (currentData.patternProperties && Object.values(currentData.patternProperties)[0]?.required)
+                || [];
+
+              if (!topProps || Object.keys(topProps).length === 0) {
+                return (
+                  <div className="mono" style={{ color: 'var(--ash)', padding: '40px 18px', textAlign: 'center' }}>
+                    <Code2 size={22} style={{ color: 'var(--faint)', margin: '0 auto 12px' }} />
+                    <p style={{ fontSize: 12 }}>No properties to display in tree view</p>
+                    <p style={{ fontSize: 10, color: 'var(--faint)', marginTop: 4 }}>Switch to RAW to inspect the full schema</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div>
+                  {Object.entries(topProps).map(([name, prop]) => (
+                    <SchemaPropertyRow
+                      key={name}
+                      name={name}
+                      prop={prop}
+                      required={Array.isArray(topRequired) && topRequired.includes(name)}
+                    />
                   ))}
                 </div>
-                <button
-                  onClick={handleCopy}
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors text-slate-500 hover:text-white"
-                  title="Copy to clipboard"
-                >
-                  {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                </button>
-                <button
-                  onClick={handleDownload}
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors text-slate-500 hover:text-white"
-                  title="Download schema"
-                >
-                  <Download size={14} />
-                </button>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="max-h-[600px] overflow-auto scrollbar-thin scrollbar-thumb-white/10">
-              {!currentData ? (
-                <div className="flex items-center justify-center h-64">
-                  <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-                </div>
-              ) : viewMode === 'tree' ? (
-                (() => {
-                  // Resolve properties from various schema structures:
-                  // - standard: { properties: {...} }
-                  // - array type: { type: "array", items: { properties: {...} } }
-                  // - patternProperties: { patternProperties: { "^pattern$": { properties: {...} } } }
-                  // - $defs / definitions
-                  let topProps = currentData.properties
-                    || currentData.items?.properties
-                    || null;
-
-                  // For patternProperties schemas, extract the first pattern's properties
-                  if (!topProps && currentData.patternProperties) {
-                    const firstPattern = Object.values(currentData.patternProperties)[0];
-                    topProps = firstPattern?.properties || null;
-                  }
-
-                  topProps = topProps || currentData.$defs || currentData.definitions || null;
-
-                  const topRequired = currentData.required
-                    || currentData.items?.required
-                    || (currentData.patternProperties && Object.values(currentData.patternProperties)[0]?.required)
-                    || [];
-
-                  if (!topProps || Object.keys(topProps).length === 0) {
-                    return (
-                      <div className="flex flex-col items-center justify-center h-64 text-slate-500">
-                        <Code2 size={24} className="mb-3 opacity-40" />
-                        <p className="text-xs font-medium">No properties to display in tree view</p>
-                        <p className="text-[10px] text-slate-600 mt-1">Switch to Raw view to inspect the full schema</p>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-white/10 bg-[#09090b]">
-                          <th className="px-4 py-2.5 text-left text-[9px] text-slate-500 uppercase tracking-wider font-bold">Property</th>
-                          <th className="px-4 py-2.5 text-left text-[9px] text-slate-500 uppercase tracking-wider font-bold">Type</th>
-                          <th className="px-4 py-2.5 text-left text-[9px] text-slate-500 uppercase tracking-wider font-bold">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Object.entries(topProps).map(([name, prop]) => (
-                          <SchemaPropertyRow
-                            key={name}
-                            name={name}
-                            prop={prop}
-                            required={Array.isArray(topRequired) && topRequired.includes(name)}
-                          />
-                        ))}
-                      </tbody>
-                    </table>
-                  );
-                })()
-              ) : (
-                <pre
-                  className="p-4 text-xs font-mono leading-relaxed overflow-x-auto"
-                  dangerouslySetInnerHTML={{ __html: highlightJson(currentData) }}
-                />
-              )}
-            </div>
-          </div>
+              );
+            })()
+          ) : (
+            <div
+              className="code"
+              dangerouslySetInnerHTML={{ __html: highlightJson(currentData) }}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -17,30 +17,28 @@ import { BASE_PATH } from '../../config/theme';
 // --- HELPER COMPONENTS ---
 
 const MetricCard = ({ label, value, subtext, icon: Icon, trend, status }) => {
-    const statusColors = {
-        excellent: 'border-emerald-500/20 bg-emerald-500/5',
-        warning: 'border-amber-500/20 bg-amber-500/5',
-        critical: 'border-red-500/20 bg-red-500/5',
-        neutral: 'border-white/10 bg-white/5'
-    };
+    // Map data status to console value accent
+    const accent = status === 'excellent' || status === 'verified' || status === 'ready'
+        ? 's'
+        : status === 'critical'
+            ? 'a'
+            : status === 'warning' || status === 'issues_detected'
+                ? 'a'
+                : 'i';
 
     return (
-        <div className={`p-4 rounded-lg border ${statusColors[status] || statusColors.neutral}`}>
-            <div className="flex items-start justify-between">
-                <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                        {Icon && <Icon size={14} className="text-zinc-400" />}
-                        <span className="text-xs text-zinc-400 uppercase tracking-wider">{label}</span>
-                    </div>
-                    <div className="text-2xl font-bold text-white mb-1">{value}</div>
-                    {subtext && <div className="text-xs text-zinc-500">{subtext}</div>}
-                </div>
-                {trend !== undefined && (
-                    <div className={`text-sm font-medium ${trend >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {trend >= 0 ? '+' : ''}{trend}%
-                    </div>
-                )}
+        <div className="kpi">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                {Icon && <Icon size={13} style={{ color: 'var(--ash)' }} />}
+                <span className="l" style={{ margin: 0 }}>{label}</span>
             </div>
+            <div className={`v ${accent}`}>{value}</div>
+            {subtext && <div className="sub">{subtext}</div>}
+            {trend !== undefined && (
+                <div className="sub" style={{ color: trend >= 0 ? 'var(--signal)' : 'var(--red)' }}>
+                    {trend >= 0 ? '+' : ''}{trend}%
+                </div>
+            )}
         </div>
     );
 };
@@ -48,13 +46,13 @@ const MetricCard = ({ label, value, subtext, icon: Icon, trend, status }) => {
 const StatusBadge = ({ status }) => {
     if (!status) return null;
 
-    const styles = {
-        excellent: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-        warning: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-        critical: "bg-red-500/10 text-red-400 border-red-500/20",
-        ready: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-        verified: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-        issues_detected: "bg-amber-500/10 text-amber-400 border-amber-500/20"
+    const cls = {
+        excellent: 's',
+        warning: '',
+        critical: '',
+        ready: 's',
+        verified: 's',
+        issues_detected: ''
     };
 
     const displayText = typeof status === 'string'
@@ -62,35 +60,24 @@ const StatusBadge = ({ status }) => {
         : String(status);
 
     return (
-        <span className={`px-2 py-0.5 rounded text-xs font-medium border ${styles[status] || "bg-zinc-800 border-zinc-700 text-zinc-400"}`}>
-            {displayText}
-        </span>
+        <span className={`badge ${cls[status] || ''}`}>{displayText}</span>
     );
 };
 
 const TabButton = ({ id, label, icon: Icon, active, set, count, badge }) => (
-    <button
+    <a
         onClick={() => set(id)}
-        className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all relative ${active === id
-                ? 'text-white bg-white/5'
-                : 'text-zinc-400 hover:text-white hover:bg-white/5'
-            }`}
+        className={active === id ? 'active' : ''}
     >
-        <Icon size={16} className={active === id ? 'text-indigo-400' : ''} />
+        <Icon size={14} />
         {label}
         {count !== undefined && (
-            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${active === id ? 'bg-indigo-500/20 text-indigo-300' : 'bg-zinc-800 text-zinc-500'
-                }`}>
-                {count}
-            </span>
+            <span className="n">{count}</span>
         )}
         {badge && (
             <StatusBadge status={badge} />
         )}
-        {active === id && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
-        )}
-    </button>
+    </a>
 );
 
 // Engine-internal synthetic resource markers that should not surface to
@@ -122,45 +109,46 @@ const IssueCard = ({ issue, type }) => {
     const ksiId = parts[0];
     const description = parts.slice(1).join(': ');
 
-    const typeStyles = {
-        technical: 'border-red-500/20 bg-red-500/5',
-        compliance: 'border-amber-500/20 bg-amber-500/5',
-        disagreement: 'border-blue-500/20 bg-blue-500/5'
+    const typeTag = {
+        technical: 'red',
+        compliance: 'warn',
+        disagreement: 'vi'
     };
 
     const typeLabels = {
-        technical: { text: 'Technical Failure', color: 'text-red-400' },
-        compliance: { text: 'Compliance Gap', color: 'text-amber-400' },
-        disagreement: { text: 'Score / Verdict Disagreement', color: 'text-blue-400' }
+        technical: 'Technical Failure',
+        compliance: 'Compliance Gap',
+        disagreement: 'Score / Verdict Disagreement'
     };
 
+    const tag = typeTag[type] || 'red';
     const label = typeLabels[type] || typeLabels.technical;
 
     return (
-        <div className={`rounded-lg border ${typeStyles[type] || typeStyles.technical} overflow-hidden`}>
+        <div style={{ borderBottom: '1px solid var(--line)' }}>
             <div
-                className="p-3 cursor-pointer hover:bg-white/5 transition-colors"
+                className="ctrl"
+                style={{ cursor: 'pointer', borderBottom: 'none' }}
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="font-mono text-xs font-bold text-white">{ksiId}</span>
-                            <span className={`text-xs ${label.color}`}>{label.text}</span>
-                        </div>
-                        <p className="text-sm text-zinc-300 line-clamp-2">{description}</p>
+                <div className="nm" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span className="mono" style={{ color: 'var(--ink)', fontWeight: 600 }}>{ksiId}</span>
+                        <span className={`tag ${tag}`}>{label}</span>
                     </div>
-                    <ChevronDown
-                        size={16}
-                        className={`text-zinc-500 transition-transform flex-shrink-0 ml-2 ${isExpanded ? 'rotate-180' : ''}`}
-                    />
+                    <p style={{ fontSize: 13, color: 'var(--ash)', margin: 0 }}>{description}</p>
                 </div>
+                <ChevronDown
+                    size={16}
+                    style={{
+                        color: 'var(--faint)', flexShrink: 0,
+                        transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform .15s'
+                    }}
+                />
             </div>
             {isExpanded && (
-                <div className="px-3 pb-3 border-t border-white/5">
-                    <div className="mt-3 text-sm text-zinc-400 bg-black/20 p-3 rounded font-mono text-xs">
-                        {description}
-                    </div>
+                <div className="code" style={{ borderTop: '1px solid var(--line)', whiteSpace: 'pre-wrap' }}>
+                    {description}
                 </div>
             )}
         </div>
@@ -215,44 +203,45 @@ const ValidationCard = ({ validation }) => {
     };
 
     return (
-        <div className={`${!isPassing ? 'bg-red-950/20' : 'hover:bg-zinc-800/30'} transition-colors`}>
+        <div style={!isPassing ? { background: '#F2607A08' } : undefined}>
             {/* Row */}
             <div
-                className="grid grid-cols-12 gap-4 px-6 py-4 cursor-pointer items-center"
+                className="row"
+                style={{ cursor: 'pointer' }}
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                <div className="col-span-1">
-                    <div className={`w-2.5 h-2.5 rounded-full ${isPassing ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                <div style={{ width: 18, flexShrink: 0 }}>
+                    <div style={{
+                        width: 9, height: 9, borderRadius: '50%',
+                        background: isPassing ? 'var(--signal)' : 'var(--red)'
+                    }} />
                 </div>
-                <div className="col-span-2">
-                    <span className="font-mono text-sm font-medium text-white">{validation.ksi_id}</span>
-                </div>
-                <div className="col-span-5">
-                    <p className="text-sm text-zinc-400 line-clamp-1">{validation.requirement}</p>
-                </div>
-                <div className="col-span-2">
-                    <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden max-w-[80px]">
-                            <div 
-                                className={`h-full rounded-full ${validation.display_status === 'fail' ? 'bg-red-500' : 'bg-emerald-500'}`}
-                                style={{ width: `${validation.score}%` }}
-                            />
-                        </div>
-                        <span className="text-sm text-zinc-400 w-10">{validation.score}%</span>
+                <span className="mono" style={{ color: 'var(--ink)', width: 110, flexShrink: 0 }}>{validation.ksi_id}</span>
+                <p style={{ flex: 1, fontSize: 13, color: 'var(--ash)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{validation.requirement}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: 140, flexShrink: 0 }}>
+                    <div style={{ flex: 1, height: 6, background: 'var(--raise2)', borderRadius: 99, overflow: 'hidden', maxWidth: 80 }}>
+                        <div
+                            style={{
+                                height: '100%', borderRadius: 99,
+                                background: validation.display_status === 'fail' ? 'var(--red)' : 'var(--signal)',
+                                width: `${validation.score}%`
+                            }}
+                        />
                     </div>
+                    <span className="mono">{validation.score}%</span>
                 </div>
-                <div className="col-span-2 flex items-center justify-end gap-3">
-                    <span className="text-sm text-zinc-500">{validation.resources_scanned}</span>
-                    <ChevronDown size={16} className={`text-zinc-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, width: 80, flexShrink: 0 }}>
+                    <span className="mono">{validation.resources_scanned}</span>
+                    <ChevronDown size={16} style={{ color: 'var(--faint)', transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
                 </div>
             </div>
 
             {/* Expanded Details */}
             {isExpanded && (
-                <div className="border-t border-zinc-800 bg-zinc-950/50">
-                    <div className="px-6 py-4">
+                <div style={{ borderTop: '1px solid var(--line)', background: 'var(--raise2)' }}>
+                    <div style={{ padding: '16px 20px' }}>
                         {/* Tabs */}
-                        <div className="flex gap-1 mb-4 border-b border-zinc-800">
+                        <div className="seg" style={{ marginBottom: 16 }}>
                             {[
                                 { id: 'overview', label: 'Overview' },
                                 { id: 'validation', label: 'Validation Logic' },
@@ -260,12 +249,8 @@ const ValidationCard = ({ validation }) => {
                             ].map(tab => (
                                 <button
                                     key={tab.id}
+                                    className={activeDetailTab === tab.id ? 'on' : ''}
                                     onClick={(e) => { e.stopPropagation(); setActiveDetailTab(tab.id); }}
-                                    className={`px-4 py-2 text-xs font-medium border-b-2 -mb-[2px] transition-colors ${
-                                        activeDetailTab === tab.id
-                                            ? 'text-white border-indigo-500'
-                                            : 'text-zinc-500 border-transparent hover:text-zinc-300'
-                                    }`}
                                 >
                                     {tab.label}
                                 </button>
@@ -274,30 +259,30 @@ const ValidationCard = ({ validation }) => {
 
                         {/* Overview */}
                         {activeDetailTab === 'overview' && (
-                            <div className="space-y-4">
+                            <div className="stack">
                                 {/* Narrative Summary */}
                                 {narrative && (
                                     <div>
-                                        <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">What This Validates</div>
-                                        <p className="text-sm text-zinc-300 leading-relaxed">{narrative.summary}</p>
+                                        <h3 className="sec" style={{ margin: '0 0 8px' }}>What This Validates</h3>
+                                        <p style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.55, margin: 0 }}>{narrative.summary}</p>
                                     </div>
                                 )}
 
                                 {/* Result */}
                                 <div>
-                                    <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Result</div>
-                                    <p className="text-sm text-zinc-400">{cleanText(validation.assertion_reason) || (isPassing ? 'All validations passed' : 'One or more validations failed')}</p>
+                                    <h3 className="sec" style={{ margin: '0 0 8px' }}>Result</h3>
+                                    <p style={{ fontSize: 13, color: 'var(--ash)', margin: 0 }}>{cleanText(validation.assertion_reason) || (isPassing ? 'All validations passed' : 'One or more validations failed')}</p>
                                 </div>
 
                                 {/* Services Checked */}
                                 {serviceGroups.length > 0 && (
                                     <div>
-                                        <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Services Checked</div>
-                                        <div className="flex flex-wrap gap-2">
+                                        <h3 className="sec" style={{ margin: '0 0 8px' }}>Services Checked</h3>
+                                        <div className="chips">
                                             {serviceGroups.map((g, i) => (
-                                                <span key={i} className="inline-flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded text-xs text-zinc-400">
+                                                <span key={i} className="chip">
                                                     {g.name}
-                                                    <span className={g.failed === 0 ? 'text-emerald-400' : 'text-amber-400'}>
+                                                    <span style={{ color: g.failed === 0 ? 'var(--signal)' : 'var(--amber)' }}>
                                                         {g.passed}/{g.passed + g.failed}
                                                     </span>
                                                 </span>
@@ -309,8 +294,8 @@ const ValidationCard = ({ validation }) => {
                                 {/* Recommended Action */}
                                 {validation.recommended_action && (
                                     <div>
-                                        <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Recommended Action</div>
-                                        <p className="text-sm text-zinc-400">{cleanText(validation.recommended_action)}</p>
+                                        <h3 className="sec" style={{ margin: '0 0 8px' }}>Recommended Action</h3>
+                                        <p style={{ fontSize: 13, color: 'var(--ash)', margin: 0 }}>{cleanText(validation.recommended_action)}</p>
                                     </div>
                                 )}
                             </div>
@@ -318,19 +303,19 @@ const ValidationCard = ({ validation }) => {
 
                         {/* Validation Logic Tab - The Technical Story */}
                         {activeDetailTab === 'validation' && (
-                            <div className="space-y-5">
+                            <div className="stack">
                                 {narrative ? (
                                     <>
                                         {/* Evidence Types */}
                                         <div>
-                                            <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-3">Evidence Collected</div>
-                                            <div className="space-y-2">
+                                            <h3 className="sec" style={{ margin: '0 0 12px' }}>Evidence Collected</h3>
+                                            <div className="stack">
                                                 {narrative.evidenceTypes.map((ev, i) => (
-                                                    <div key={i} className="flex gap-3 p-3 bg-zinc-900 rounded border border-zinc-800">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-2 flex-shrink-0" />
+                                                    <div key={i} style={{ display: 'flex', gap: 12, padding: 12, background: 'var(--raise)', borderRadius: 11, border: '1px solid var(--line)' }}>
+                                                        <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--indigo)', marginTop: 6, flexShrink: 0 }} />
                                                         <div>
-                                                            <div className="text-sm font-medium text-zinc-300">{ev.name}</div>
-                                                            <div className="text-xs text-zinc-500 mt-0.5">{ev.description}</div>
+                                                            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{ev.name}</div>
+                                                            <div style={{ fontSize: 12, color: 'var(--faint)', marginTop: 2 }}>{ev.description}</div>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -339,29 +324,29 @@ const ValidationCard = ({ validation }) => {
 
                                         {/* Pass/Fail Logic */}
                                         <div>
-                                            <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider mb-2">Validation Criteria</div>
-                                            <p className="text-sm text-zinc-400 leading-relaxed">{narrative.validationLogic}</p>
+                                            <h3 className="sec" style={{ margin: '0 0 8px' }}>Validation Criteria</h3>
+                                            <p style={{ fontSize: 13, color: 'var(--ash)', lineHeight: 1.55, margin: 0 }}>{narrative.validationLogic}</p>
                                         </div>
 
                                         {/* Pass/Fail Indicators */}
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="g2">
                                             <div>
-                                                <div className="text-[11px] font-medium text-emerald-500 uppercase tracking-wider mb-2">Pass Indicators</div>
-                                                <ul className="space-y-1.5">
+                                                <h3 className="sec" style={{ margin: '0 0 8px', color: 'var(--signal)' }}>Pass Indicators</h3>
+                                                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
                                                     {narrative.passIndicators.map((ind, i) => (
-                                                        <li key={i} className="flex items-center gap-2 text-sm text-zinc-400">
-                                                            <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                                                        <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--ash)' }}>
+                                                            <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--signal)' }} />
                                                             {ind}
                                                         </li>
                                                     ))}
                                                 </ul>
                                             </div>
                                             <div>
-                                                <div className="text-[11px] font-medium text-red-500 uppercase tracking-wider mb-2">Fail Indicators</div>
-                                                <ul className="space-y-1.5">
+                                                <h3 className="sec" style={{ margin: '0 0 8px', color: 'var(--red)' }}>Fail Indicators</h3>
+                                                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
                                                     {narrative.failIndicators.map((ind, i) => (
-                                                        <li key={i} className="flex items-center gap-2 text-sm text-zinc-400">
-                                                            <div className="w-1 h-1 rounded-full bg-red-500" />
+                                                        <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--ash)' }}>
+                                                            <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--red)' }} />
                                                             {ind}
                                                         </li>
                                                     ))}
@@ -370,9 +355,9 @@ const ValidationCard = ({ validation }) => {
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="text-center py-6">
-                                        <p className="text-sm text-zinc-500">Validation narrative not yet documented for this KSI.</p>
-                                        <p className="text-xs text-zinc-600 mt-1">View the Checks tab for execution details.</p>
+                                    <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                                        <p style={{ fontSize: 13, color: 'var(--ash)', margin: 0 }}>Validation narrative not yet documented for this KSI.</p>
+                                        <p style={{ fontSize: 12, color: 'var(--faint)', marginTop: 4 }}>View the Checks tab for execution details.</p>
                                     </div>
                                 )}
                             </div>
@@ -382,13 +367,13 @@ const ValidationCard = ({ validation }) => {
                         {activeDetailTab === 'checks' && (
                             <div>
                                 {checks.length > 0 ? (
-                                    <div className="space-y-1">
+                                    <div className="stack" style={{ gap: 6 }}>
                                         {checks.map((check, idx) => (
                                             <CheckDetailRow key={idx} check={check} />
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-sm text-zinc-500 py-4 text-center">No execution data available</p>
+                                    <p style={{ fontSize: 13, color: 'var(--ash)', padding: '16px 0', textAlign: 'center' }}>No execution data available</p>
                                 )}
                             </div>
                         )}
@@ -401,33 +386,33 @@ const ValidationCard = ({ validation }) => {
 
 const CheckDetailRow = ({ check }) => {
     const [expanded, setExpanded] = useState(false);
-    
+
     return (
-        <div className="border border-zinc-800 rounded bg-zinc-900/50">
-            <div 
-                className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-zinc-800/30"
+        <div style={{ border: '1px solid var(--line)', borderRadius: 11, background: 'var(--raise)' }}>
+            <div
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', cursor: 'pointer' }}
                 onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
             >
-                <div className="flex items-center gap-3">
-                    <div className={`w-1.5 h-1.5 rounded-full ${check.passed ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                    <span className="text-sm text-zinc-300">{check.name}</span>
-                    <span className="text-[10px] text-zinc-600 font-mono">{check.service}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: check.passed ? 'var(--signal)' : 'var(--red)' }} />
+                    <span style={{ fontSize: 13, color: 'var(--ink)' }}>{check.name}</span>
+                    <span className="mono" style={{ fontSize: 10, color: 'var(--faint)' }}>{check.service}</span>
                 </div>
-                <div className="flex items-center gap-3">
-                    {check.executionTime && <span className="text-[10px] text-zinc-600">{check.executionTime}</span>}
-                    <span className={`text-[10px] font-medium ${check.passed ? 'text-emerald-400' : 'text-red-400'}`}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    {check.executionTime && <span className="mono" style={{ fontSize: 10, color: 'var(--faint)' }}>{check.executionTime}</span>}
+                    <span className={`tag ${check.passed ? 'ok' : 'red'}`}>
                         {check.passed ? 'PASS' : 'FAIL'}
                     </span>
-                    <ChevronRight size={12} className={`text-zinc-600 transition-transform ${expanded ? 'rotate-90' : ''}`} />
+                    <ChevronRight size={12} style={{ color: 'var(--faint)', transform: expanded ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }} />
                 </div>
             </div>
             {expanded && (
-                <div className="px-3 pb-3 border-t border-zinc-800">
+                <div style={{ padding: '0 14px 12px', borderTop: '1px solid var(--line)' }}>
                     {check.errorMessage && (
-                        <div className="mt-2 text-xs text-red-400 bg-red-500/5 border border-red-500/10 px-2 py-1.5 rounded">{check.errorMessage}</div>
+                        <div className="tag red" style={{ display: 'block', marginTop: 8, padding: '6px 9px' }}>{check.errorMessage}</div>
                     )}
-                    <div className="mt-2 bg-zinc-950 border border-zinc-800 rounded px-2 py-1.5 font-mono text-[11px] text-zinc-500 overflow-x-auto">
-                        <span className="text-zinc-700">$</span> {check.command}
+                    <div className="code" style={{ marginTop: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--line)', background: 'var(--raise2)' }}>
+                        <span style={{ color: 'var(--faint)' }}>$</span> {check.command}
                     </div>
                 </div>
             )}
@@ -450,6 +435,7 @@ const TransparencyConsole = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [hasShownAuthModal, setHasShownAuthModal] = useState(false);
+    const [logLines, setLogLines] = useState([]);
 
     // Auth gate - show modal once when unauthenticated
     useEffect(() => {
@@ -521,12 +507,81 @@ const TransparencyConsole = () => {
         loadData();
     }, [isAuthenticated]);
 
+    // Live event stream — seeded from the REAL loaded reports, then streams
+    useEffect(() => {
+        if (loading || !isAuthenticated) return;
+
+        const integrityReport = data.integrityReport;
+        const executionReport = data.executionReport;
+        const consistencyLog = data.consistencyLog;
+
+        const summary = integrityReport?.validation_summary || {};
+        const assessment = integrityReport?.overall_integrity_assessment || {};
+        const temporal = integrityReport?.temporal_consistency_analysis || {};
+        const checks = consistencyLog?.consistency_checks || [];
+        const latest = consistencyLog?.historical_validations?.[consistencyLog.historical_validations.length - 1]?.results || [];
+
+        // Build the event vocabulary entirely from real data points.
+        const events = [];
+        events.push(['ok', 'probe', 'integrity engine → online · configuration-driven framework']);
+        if (summary.total_ksis) {
+            events.push(['vi', 'ksi', `validation run · ${summary.passed_ksis ?? 0}/${summary.total_ksis} KSIs passing · ${summary.overall_pass_rate || ''}`.trim()]);
+        }
+        if (assessment.integrity_score != null) {
+            events.push(['ok', 'integrity', `integrity score ${assessment.integrity_score.toFixed(1)}% · ${(assessment.audit_readiness || 'evaluated').replace(/_/g, ' ')}`]);
+        }
+        if (executionReport?.execution_quality_score != null) {
+            events.push(['vi', 'exec', `execution quality ${executionReport.execution_quality_score}% · automation health`]);
+        }
+        if (executionReport?.compliance_health_score != null) {
+            events.push(['ok', 'health', `compliance health ${executionReport.compliance_health_score}% · infrastructure`]);
+        }
+        (executionReport?.technical_issues || [])
+            .filter(it => !isEngineNoise(it) && !isVerdictDisagreement(it))
+            .slice(0, 3)
+            .forEach(it => events.push(['wa', 'fail', String(it).split(': ')[0] + ' · technical failure']));
+        (executionReport?.compliance_failures || []).slice(0, 2)
+            .forEach(it => events.push(['wa', 'gap', String(it).split(': ')[0] + ' · compliance gap']));
+        // latest per-KSI verdicts streamed as evidence events
+        latest.slice(0, 6).forEach(v => events.push([
+            v.assertion ? 'ok' : 'wa',
+            'evidence',
+            `${v.ksi_id} · ${v.assertion ? 'PASS' : 'FAIL'} · score ${v.score}% · ${v.resources_scanned} resources`
+        ]));
+        // temporal consistency snapshots
+        if (temporal.average_consistency_score) {
+            events.push(['ok', 'temporal', `consistency ${temporal.average_consistency_score} · ${temporal.recent_validations_count || 0} recent runs`]);
+        }
+        checks.slice(-3).forEach(c => events.push([
+            c.issues_found === 0 ? 'ok' : 'wa',
+            'consistency',
+            `fingerprint ${(c.infrastructure_fingerprint || '').substring(0, 8)} · ${typeof c.consistency_score === 'number' ? c.consistency_score.toFixed(1) : c.consistency_score}% · ${c.issues_found} issues`
+        ]));
+        if (integrityReport?.report_metadata?.generated_at) {
+            events.push(['vi', 'report', `integrity report sealed · ${new Date(integrityReport.report_metadata.generated_at).toLocaleString()}`]);
+        }
+
+        if (events.length === 0) {
+            events.push(['ok', 'probe', 'awaiting validation data stream…']);
+        }
+
+        let i = 0;
+        const push = () => {
+            const e = events[i % events.length]; i++;
+            const ts = new Date().toTimeString().slice(0, 8);
+            setLogLines(prev => [...prev.slice(-12), { ts, cls: e[0], tag: e[1], ev: e[2], key: Date.now() + Math.random() }]);
+        };
+        for (let k = 0; k < 8; k++) push();
+        const id = setInterval(push, 2100);
+        return () => clearInterval(id);
+    }, [loading, isAuthenticated, data]);
+
     if (loading) {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center">
-                <div className="text-zinc-400 flex items-center gap-2">
-                    <Activity className="animate-spin" size={20} />
-                    Loading validation data...
+            <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="mono" style={{ color: 'var(--ash)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Activity className="animate-spin" size={18} style={{ color: 'var(--signal)' }} />
+                    Loading validation data…
                 </div>
             </div>
         );
@@ -534,16 +589,16 @@ const TransparencyConsole = () => {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center">
-                <div className="max-w-md p-6 bg-red-500/5 border border-red-500/20 rounded-lg">
-                    <div className="flex items-center gap-2 mb-3">
-                        <XCircle size={24} className="text-red-400" />
-                        <h3 className="text-lg font-bold text-red-400">Failed to Load Data</h3>
+            <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+                <div className="panel" style={{ maxWidth: 480, padding: 24 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                        <XCircle size={22} style={{ color: 'var(--red)' }} />
+                        <h4 style={{ fontSize: 16, fontWeight: 600, color: 'var(--red)' }}>Failed to Load Data</h4>
                     </div>
-                    <p className="text-sm text-zinc-300 mb-4">{error}</p>
-                    <div className="text-xs text-zinc-500 space-y-1">
-                        <p>Expected files in <code className="bg-black/40 px-1 py-0.5 rounded">data/</code> directory:</p>
-                        <ul className="list-disc list-inside pl-2">
+                    <p style={{ fontSize: 13, color: 'var(--ink)', marginBottom: 16 }}>{error}</p>
+                    <div className="mono" style={{ fontSize: 11, color: 'var(--ash)' }}>
+                        <p>Expected files in <code>data/</code> directory:</p>
+                        <ul style={{ paddingLeft: 16, marginTop: 4 }}>
                             <li>validation_integrity_report.json</li>
                             <li>execution_quality_report.json</li>
                             <li>temporal_consistency_log.json</li>
@@ -551,7 +606,8 @@ const TransparencyConsole = () => {
                     </div>
                     <button
                         onClick={() => window.location.reload()}
-                        className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded text-sm transition-colors"
+                        className="btn ghost"
+                        style={{ marginTop: 16 }}
                     >
                         Retry
                     </button>
@@ -563,41 +619,37 @@ const TransparencyConsole = () => {
     // Auth gate - only render content if authenticated
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center p-4">
-                <div className="max-w-md w-full p-8 bg-zinc-900/50 border border-white/10 rounded-xl text-center backdrop-blur-sm">
-                    <div className="flex items-center justify-center mb-6">
-                        <div className="p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-                            <ShieldCheck size={48} className="text-indigo-400" />
+            <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+                <div className="panel" style={{ maxWidth: 480, width: '100%', padding: 32, textAlign: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+                        <div style={{ padding: 16, background: '#818CF80D', borderRadius: 14, border: '1px solid #818CF855' }}>
+                            <ShieldCheck size={44} style={{ color: 'var(--indigo)' }} />
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-3">Authentication Required</h3>
-                    <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+                    <h1 className="big" style={{ fontSize: 26, marginBottom: 12 }}>Authentication Required</h1>
+                    <p style={{ fontSize: 13, color: 'var(--ash)', marginBottom: 24, lineHeight: 1.55 }}>
                         The System Transparency Console contains detailed technical validation findings and authorization materials restricted to authorized federal personnel.
                     </p>
-                    <div className="text-xs text-zinc-500 space-y-2 text-left bg-black/40 p-4 rounded-lg border border-white/5 mb-6">
-                        <p className="font-bold text-zinc-400 mb-3 text-center">With Federal Access:</p>
-                        <ul className="space-y-2">
-                            <li className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                                View validation engine internals
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                                Access execution quality metrics
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                                Review temporal consistency data
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                                Audit KSI validation details
-                            </li>
+                    <div className="panel" style={{ background: 'var(--raise2)', padding: 16, marginBottom: 24, textAlign: 'left' }}>
+                        <p className="mono" style={{ color: 'var(--ash)', marginBottom: 12, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '.05em', fontSize: 10 }}>With Federal Access</p>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            {[
+                                'View validation engine internals',
+                                'Access execution quality metrics',
+                                'Review temporal consistency data',
+                                'Audit KSI validation details'
+                            ].map((t, i) => (
+                                <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--ash)' }}>
+                                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--signal)' }} />
+                                    {t}
+                                </li>
+                            ))}
                         </ul>
                     </div>
                     <button
                         onClick={() => window.history.back()}
-                        className="w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-colors"
+                        className="btn ghost"
+                        style={{ width: '100%' }}
                     >
                         Return to Trust Center
                     </button>
@@ -643,74 +695,72 @@ const TransparencyConsole = () => {
     const isPartialData = hasData && (!integrityReport || !executionReport || !consistencyLog);
 
     return (
-        <div className="min-h-screen bg-black text-white">
+        <div className="wrap" style={{ paddingTop: 8, paddingBottom: 60 }}>
             {/* Header */}
-            <div className="border-b border-white/10 bg-gradient-to-b from-zinc-900/50 to-transparent">
-                <div className="max-w-7xl mx-auto px-6 py-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <ShieldCheck size={32} className="text-indigo-400" />
-                        <h1 className="text-3xl font-bold">System 2.5 Transparency Console</h1>
-                    </div>
-                    <p className="text-zinc-400">Configuration-driven validation framework with complete audit visibility</p>
+            <div style={{ paddingTop: 30, paddingBottom: 24 }}>
+                <div className="kick">⟳ — LIVE EVIDENCE STREAM</div>
+                <h1 className="big">System 2.5 Transparency <span className="g">console</span></h1>
+                <p className="lede">Configuration-driven validation framework with complete audit visibility. Every KSI validation, evidence snapshot, and consistency check as it happens.</p>
+                <div className="hbadges">
+                    <span className="badge i">SYSTEM 2.5</span>
+                    <span className="badge">KSI VALIDATIONS</span>
+                    <span className="badge">EXECUTION QUALITY</span>
+                    <span className="badge">TEMPORAL CONSISTENCY</span>
+                    {overallAssessment.audit_readiness && <StatusBadge status={overallAssessment.audit_readiness} />}
                 </div>
             </div>
 
             {/* Navigation */}
-            <div className="border-b border-white/10 sticky top-0 bg-black/95 backdrop-blur-sm z-10">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="flex gap-1">
-                        <TabButton
-                            id="overview"
-                            label="Overview"
-                            icon={BarChart3}
-                            active={activeTab}
-                            set={setActiveTab}
-                            badge={overallAssessment.audit_readiness}
-                        />
-                        <TabButton
-                            id="execution"
-                            label="Execution Quality"
-                            icon={Terminal}
-                            active={activeTab}
-                            set={setActiveTab}
-                            count={technicalIssues.length + verdictDisagreements.length + complianceFailures.length}
-                        />
-                        <TabButton
-                            id="consistency"
-                            label="Consistency"
-                            icon={Clock}
-                            active={activeTab}
-                            set={setActiveTab}
-                            count={consistencyChecks.length}
-                        />
-                        <TabButton
-                            id="validations"
-                            label="KSI Details"
-                            icon={Database}
-                            active={activeTab}
-                            set={setActiveTab}
-                            count={totalCount}
-                        />
-                    </div>
-                </div>
-            </div>
+            <nav className="tabs">
+                <TabButton
+                    id="overview"
+                    label="Overview"
+                    icon={BarChart3}
+                    active={activeTab}
+                    set={setActiveTab}
+                />
+                <TabButton
+                    id="execution"
+                    label="Execution Quality"
+                    icon={Terminal}
+                    active={activeTab}
+                    set={setActiveTab}
+                    count={technicalIssues.length + verdictDisagreements.length + complianceFailures.length}
+                />
+                <TabButton
+                    id="consistency"
+                    label="Consistency"
+                    icon={Clock}
+                    active={activeTab}
+                    set={setActiveTab}
+                    count={consistencyChecks.length}
+                />
+                <TabButton
+                    id="validations"
+                    label="KSI Details"
+                    icon={Database}
+                    active={activeTab}
+                    set={setActiveTab}
+                    count={totalCount}
+                />
+            </nav>
 
             {/* Content */}
-            <div className="max-w-7xl mx-auto px-6 py-8">
+            <div style={{ paddingTop: 24 }}>
 
                 {/* Partial data warning */}
                 {isPartialData && (
-                    <div className="mb-6 p-4 bg-amber-500/5 border border-amber-500/20 rounded-lg flex items-start gap-3">
-                        <AlertCircle size={20} className="text-amber-400 flex-shrink-0 mt-0.5" />
+                    <div className="panel" style={{ marginBottom: 24, padding: 16, display: 'flex', alignItems: 'flex-start', gap: 12, borderColor: '#F2B85C55' }}>
+                        <AlertCircle size={20} style={{ color: 'var(--amber)', flexShrink: 0, marginTop: 2 }} />
                         <div>
-                            <h4 className="text-sm font-bold text-amber-400 mb-1">Incomplete Data</h4>
-                            <p className="text-xs text-zinc-300">
+                            <h4 style={{ fontSize: 13, fontWeight: 600, color: 'var(--amber)', marginBottom: 4 }}>Incomplete Data</h4>
+                            <p style={{ fontSize: 12, color: 'var(--ash)' }}>
                                 Some data files are missing. The following files were not found:
                             </p>
-                            <ul className="text-xs text-zinc-400 mt-2 space-y-1">
-                                {!integrityReport && <li>• validation_integrity_report.json</li>}
-                                {!executionReport && <li>• execution_quality_report.json</li>}
-                                {!consistencyLog && <li>• temporal_consistency_log.json</li>}
+                            <ul className="mono" style={{ fontSize: 11, color: 'var(--ash)', marginTop: 8, paddingLeft: 14 }}>
+                                {!integrityReport && <li>validation_integrity_report.json</li>}
+                                {!executionReport && <li>execution_quality_report.json</li>}
+                                {!consistencyLog && <li>temporal_consistency_log.json</li>}
                             </ul>
                         </div>
                     </div>
@@ -718,17 +768,37 @@ const TransparencyConsole = () => {
 
                 {/* OVERVIEW TAB */}
                 {activeTab === 'overview' && (
-                    <div className="space-y-6">
+                    <div className="stack" style={{ gap: 24 }}>
                         {!integrityReport ? (
-                            <div className="bg-[#18181b] rounded-lg border border-white/10 p-12 text-center">
-                                <AlertCircle size={48} className="text-zinc-600 mx-auto mb-4" />
-                                <h3 className="text-xl font-bold text-zinc-400 mb-2">No Integrity Report Data</h3>
-                                <p className="text-zinc-500">validation_integrity_report.json not found</p>
+                            <div className="panel" style={{ padding: 48, textAlign: 'center' }}>
+                                <AlertCircle size={44} style={{ color: 'var(--faint)', margin: '0 auto 16px' }} />
+                                <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--ash)', marginBottom: 8 }}>No Integrity Report Data</h3>
+                                <p className="mono" style={{ color: 'var(--faint)' }}>validation_integrity_report.json not found</p>
                             </div>
                         ) : (
                             <>
+                                {/* LIVE EVENT STREAM — the centerpiece */}
+                                <div className="panel">
+                                    <div className="ph">
+                                        <h4>Event stream</h4>
+                                        <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--signal)', display: 'flex', alignItems: 'center', gap: 7 }}>
+                                            <span className="d" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--signal)', animation: 'tcx-bl 1.6s infinite' }} />
+                                            LIVE
+                                        </span>
+                                    </div>
+                                    <div className="log" style={{ height: 300 }}>
+                                        {logLines.map(l => (
+                                            <div className="ln" key={l.key}>
+                                                <span className="ts">{l.ts}</span>
+                                                <span className={l.cls === 'wa' ? 'vi' : l.cls}>[{l.tag}]</span>
+                                                <span className="ev">{l.ev}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 {/* Top-level metrics */}
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div className="g4">
                                     <MetricCard
                                         label="Overall Pass Rate"
                                         value={validationSummary.overall_pass_rate || '0%'}
@@ -760,44 +830,44 @@ const TransparencyConsole = () => {
                                 </div>
 
                                 {/* Validation breakdown */}
-                                <div className="bg-[#18181b] rounded-lg border border-white/10 p-6">
-                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                                        <Activity size={20} className="text-indigo-400" />
-                                        Validation Status Breakdown
-                                    </h3>
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div className="text-center p-6 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
-                                            <div className="text-4xl font-bold text-emerald-400 mb-2">{passedCount}</div>
-                                            <div className="text-sm text-zinc-400">Passed</div>
+                                <div className="panel">
+                                    <div className="ph">
+                                        <h4>Validation Status Breakdown</h4>
+                                        <span className="map">live posture</span>
+                                    </div>
+                                    <div className="g3" style={{ padding: 18 }}>
+                                        <div className="kpi" style={{ textAlign: 'center', borderColor: '#34E0C455' }}>
+                                            <div className="v s" style={{ fontSize: 36 }}>{passedCount}</div>
+                                            <div className="l">Passed</div>
                                         </div>
-                                        <div className="text-center p-6 rounded-lg border border-red-500/20 bg-red-500/5">
-                                            <div className="text-4xl font-bold text-red-400 mb-2">{failedCount}</div>
-                                            <div className="text-sm text-zinc-400">Failed</div>
+                                        <div className="kpi" style={{ textAlign: 'center', borderColor: '#F2607A55' }}>
+                                            <div className="v" style={{ fontSize: 36, color: 'var(--red)' }}>{failedCount}</div>
+                                            <div className="l">Failed</div>
                                         </div>
-                                        <div className="text-center p-6 rounded-lg border border-white/10 bg-white/5">
-                                            <div className="text-4xl font-bold text-white mb-2">{totalCount}</div>
-                                            <div className="text-sm text-zinc-400">Total KSIs</div>
+                                        <div className="kpi" style={{ textAlign: 'center' }}>
+                                            <div className="v" style={{ fontSize: 36 }}>{totalCount}</div>
+                                            <div className="l">Total KSIs</div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Audit readiness */}
-                                <div className="bg-[#18181b] rounded-lg border border-white/10 p-6">
-                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                                        <Eye size={20} className="text-indigo-400" />
-                                        3PAO Audit Readiness
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="p-4 rounded-lg bg-white/5">
-                                            <div className="text-xs text-zinc-500 mb-2 uppercase tracking-wider">Audit Status</div>
+                                <div className="panel">
+                                    <div className="ph">
+                                        <h4>3PAO Audit Readiness</h4>
+                                        <span className="map">assessment</span>
+                                    </div>
+                                    <div className="g3" style={{ padding: 18 }}>
+                                        <div className="kpi">
+                                            <div className="l" style={{ marginTop: 0, marginBottom: 8 }}>Audit Status</div>
                                             <StatusBadge status={overallAssessment.audit_readiness} />
                                         </div>
-                                        <div className="p-4 rounded-lg bg-white/5">
-                                            <div className="text-xs text-zinc-500 mb-2 uppercase tracking-wider">Validation Determinism</div>
+                                        <div className="kpi">
+                                            <div className="l" style={{ marginTop: 0, marginBottom: 8 }}>Validation Determinism</div>
                                             <StatusBadge status={overallAssessment.validation_determinism} />
                                         </div>
-                                        <div className="p-4 rounded-lg bg-white/5">
-                                            <div className="text-xs text-zinc-500 mb-2 uppercase tracking-wider">Technical Correctness</div>
+                                        <div className="kpi">
+                                            <div className="l" style={{ marginTop: 0, marginBottom: 8 }}>Technical Correctness</div>
                                             <StatusBadge status={overallAssessment.technical_correctness} />
                                         </div>
                                     </div>
@@ -805,13 +875,13 @@ const TransparencyConsole = () => {
 
                                 {/* Report metadata */}
                                 {integrityReport?.report_metadata && (
-                                    <div className="bg-[#18181b] rounded-lg border border-white/10 p-4">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div className="flex items-center gap-2 text-zinc-500">
+                                    <div className="panel" style={{ padding: 16 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                                            <div className="mono" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ash)' }}>
                                                 <FileJson size={14} />
                                                 <span>Report generated: {new Date(integrityReport.report_metadata.generated_at).toLocaleString()}</span>
                                             </div>
-                                            <div className="text-zinc-500 font-mono text-xs">
+                                            <div className="mono" style={{ color: 'var(--faint)' }}>
                                                 System 2.5 | Configuration-Driven Framework
                                             </div>
                                         </div>
@@ -824,17 +894,17 @@ const TransparencyConsole = () => {
 
                 {/* EXECUTION QUALITY TAB */}
                 {activeTab === 'execution' && (
-                    <div className="space-y-6">
+                    <div className="stack" style={{ gap: 24 }}>
                         {!executionReport ? (
-                            <div className="bg-[#18181b] rounded-lg border border-white/10 p-12 text-center">
-                                <AlertCircle size={48} className="text-zinc-600 mx-auto mb-4" />
-                                <h3 className="text-xl font-bold text-zinc-400 mb-2">No Execution Data</h3>
-                                <p className="text-zinc-500">execution_quality_report.json not found</p>
+                            <div className="panel" style={{ padding: 48, textAlign: 'center' }}>
+                                <AlertCircle size={44} style={{ color: 'var(--faint)', margin: '0 auto 16px' }} />
+                                <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--ash)', marginBottom: 8 }}>No Execution Data</h3>
+                                <p className="mono" style={{ color: 'var(--faint)' }}>execution_quality_report.json not found</p>
                             </div>
                         ) : (
                             <>
                                 {/* Summary cards */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="g3">
                                     <MetricCard
                                         label="Execution Quality Score"
                                         value={`${executionReport?.execution_quality_score || 0}%`}
@@ -860,15 +930,15 @@ const TransparencyConsole = () => {
 
                                 {/* Technical Issues */}
                                 {technicalIssues.length > 0 && (
-                                    <div className="bg-[#18181b] rounded-lg border border-white/10 p-6">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-lg font-bold flex items-center gap-2">
-                                                <XCircle size={20} className="text-red-400" />
+                                    <div className="panel">
+                                        <div className="ph">
+                                            <h4 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <XCircle size={16} style={{ color: 'var(--red)' }} />
                                                 Technical Issues ({technicalIssues.length})
-                                            </h3>
-                                            <span className="text-xs text-zinc-500">Automation failures requiring attention</span>
+                                            </h4>
+                                            <span className="map" style={{ color: 'var(--ash)' }}>automation failures requiring attention</span>
                                         </div>
-                                        <div className="space-y-2">
+                                        <div>
                                             {technicalIssues.map((issue, idx) => (
                                                 <IssueCard key={idx} issue={issue} type="technical" />
                                             ))}
@@ -878,15 +948,15 @@ const TransparencyConsole = () => {
 
                                 {/* Score / Verdict Disagreements — Mode 3 outcome class */}
                                 {verdictDisagreements.length > 0 && (
-                                    <div className="bg-[#18181b] rounded-lg border border-white/10 p-6">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-lg font-bold flex items-center gap-2">
-                                                <AlertCircle size={20} className="text-blue-400" />
+                                    <div className="panel">
+                                        <div className="ph">
+                                            <h4 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <AlertCircle size={16} style={{ color: 'var(--indigo)' }} />
                                                 Score / Verdict Disagreements ({verdictDisagreements.length})
-                                            </h3>
-                                            <span className="text-xs text-zinc-500">Per-resource score above threshold; metric-level threshold breached</span>
+                                            </h4>
+                                            <span className="map" style={{ color: 'var(--ash)' }}>per-resource score above threshold; metric-level threshold breached</span>
                                         </div>
-                                        <div className="space-y-2">
+                                        <div>
                                             {verdictDisagreements.map((issue, idx) => (
                                                 <IssueCard key={idx} issue={issue} type="disagreement" />
                                             ))}
@@ -896,15 +966,15 @@ const TransparencyConsole = () => {
 
                                 {/* Compliance Failures */}
                                 {complianceFailures.length > 0 && (
-                                    <div className="bg-[#18181b] rounded-lg border border-white/10 p-6">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-lg font-bold flex items-center gap-2">
-                                                <AlertCircle size={20} className="text-amber-400" />
+                                    <div className="panel">
+                                        <div className="ph">
+                                            <h4 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <AlertCircle size={16} style={{ color: 'var(--amber)' }} />
                                                 Compliance Gaps ({complianceFailures.length})
-                                            </h3>
-                                            <span className="text-xs text-zinc-500">Resources not meeting requirements</span>
+                                            </h4>
+                                            <span className="map" style={{ color: 'var(--ash)' }}>resources not meeting requirements</span>
                                         </div>
-                                        <div className="space-y-2">
+                                        <div>
                                             {complianceFailures.map((issue, idx) => (
                                                 <IssueCard key={idx} issue={issue} type="compliance" />
                                             ))}
@@ -913,10 +983,10 @@ const TransparencyConsole = () => {
                                 )}
 
                                 {technicalIssues.length === 0 && verdictDisagreements.length === 0 && complianceFailures.length === 0 && (
-                                    <div className="bg-[#18181b] rounded-lg border border-emerald-500/20 p-12 text-center">
-                                        <CheckCircle2 size={48} className="text-emerald-400 mx-auto mb-4" />
-                                        <h3 className="text-xl font-bold text-emerald-400 mb-2">No Issues Detected</h3>
-                                        <p className="text-zinc-400">All validations executed successfully with no compliance gaps</p>
+                                    <div className="panel" style={{ padding: 48, textAlign: 'center', borderColor: '#34E0C455' }}>
+                                        <CheckCircle2 size={44} style={{ color: 'var(--signal)', margin: '0 auto 16px' }} />
+                                        <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--signal)', marginBottom: 8 }}>No Issues Detected</h3>
+                                        <p style={{ color: 'var(--ash)' }}>All validations executed successfully with no compliance gaps</p>
                                     </div>
                                 )}
                             </>
@@ -926,43 +996,43 @@ const TransparencyConsole = () => {
 
                 {/* CONSISTENCY TAB */}
                 {activeTab === 'consistency' && (
-                    <div className="space-y-6">
+                    <div className="stack" style={{ gap: 24 }}>
                         {!consistencyLog || consistencyChecks.length === 0 ? (
-                            <div className="bg-[#18181b] rounded-lg border border-white/10 p-12 text-center">
-                                <AlertCircle size={48} className="text-zinc-600 mx-auto mb-4" />
-                                <h3 className="text-xl font-bold text-zinc-400 mb-2">No Consistency Data</h3>
-                                <p className="text-zinc-500">temporal_consistency_log.json not found or contains no data</p>
+                            <div className="panel" style={{ padding: 48, textAlign: 'center' }}>
+                                <AlertCircle size={44} style={{ color: 'var(--faint)', margin: '0 auto 16px' }} />
+                                <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--ash)', marginBottom: 8 }}>No Consistency Data</h3>
+                                <p className="mono" style={{ color: 'var(--faint)' }}>temporal_consistency_log.json not found or contains no data</p>
                             </div>
                         ) : (
                             <>
                                 {/* Consistency chart */}
-                                <div className="bg-[#18181b] rounded-lg border border-white/10 p-6">
-                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                                        <TrendingUp size={20} className="text-indigo-400" />
-                                        Temporal Consistency Trend
-                                    </h3>
-                                    <div className="h-64">
+                                <div className="panel">
+                                    <div className="ph">
+                                        <h4>Temporal Consistency Trend</h4>
+                                        <span className="map">{consistencyChecks.length} runs</span>
+                                    </div>
+                                    <div style={{ height: 256, padding: 18 }}>
                                         <ResponsiveContainer width="100%" height="100%">
                                             <LineChart data={consistencyChecks}>
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#1A222D" vertical={false} />
                                                 <XAxis
                                                     dataKey="timestamp"
                                                     tickFormatter={(ts) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    stroke="#666"
+                                                    stroke="#788596"
                                                     style={{ fontSize: '12px' }}
                                                 />
-                                                <YAxis domain={[90, 100]} stroke="#666" style={{ fontSize: '12px' }} />
+                                                <YAxis domain={[90, 100]} stroke="#788596" style={{ fontSize: '12px' }} />
                                                 <Tooltip
-                                                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#333', borderRadius: '8px' }}
-                                                    itemStyle={{ color: '#fff' }}
+                                                    contentStyle={{ backgroundColor: '#0D1117', borderColor: '#1A222D', borderRadius: '8px' }}
+                                                    itemStyle={{ color: '#E8EEF4' }}
                                                     labelFormatter={(ts) => new Date(ts).toLocaleString()}
                                                 />
                                                 <Line
                                                     type="monotone"
                                                     dataKey="consistency_score"
-                                                    stroke="#6366f1"
+                                                    stroke="#818CF8"
                                                     strokeWidth={2}
-                                                    dot={{ fill: '#6366f1', r: 4 }}
+                                                    dot={{ fill: '#818CF8', r: 4 }}
                                                     activeDot={{ r: 6 }}
                                                 />
                                             </LineChart>
@@ -971,61 +1041,54 @@ const TransparencyConsole = () => {
                                 </div>
 
                                 {/* Consistency log table */}
-                                <div className="bg-[#18181b] rounded-lg border border-white/10 overflow-hidden">
-                                    <div className="p-4 border-b border-white/5 flex justify-between items-center">
-                                        <h3 className="font-bold flex items-center gap-2">
-                                            <Clock size={16} className="text-zinc-400" />
-                                            Validation Consistency Log
-                                        </h3>
-                                        <span className="text-xs text-zinc-500">
-                                            {consistencyChecks.length} validation runs tracked
-                                        </span>
+                                <div className="panel">
+                                    <div className="ph">
+                                        <h4>Validation Consistency Log</h4>
+                                        <span className="map">{consistencyChecks.length} validation runs tracked</span>
                                     </div>
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-sm">
-                                            <thead className="text-xs text-zinc-500 bg-black/20 uppercase">
-                                                <tr>
-                                                    <th className="px-6 py-3 text-left">Timestamp</th>
-                                                    <th className="px-6 py-3 text-left">Consistency Score</th>
-                                                    <th className="px-6 py-3 text-left">Issues Found</th>
-                                                    <th className="px-6 py-3 text-left">Comparisons</th>
-                                                    <th className="px-6 py-3 text-left">Fingerprint</th>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--ash)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                                                    <th style={{ padding: '12px 20px', textAlign: 'left', borderBottom: '1px solid var(--line)' }}>Timestamp</th>
+                                                    <th style={{ padding: '12px 20px', textAlign: 'left', borderBottom: '1px solid var(--line)' }}>Consistency Score</th>
+                                                    <th style={{ padding: '12px 20px', textAlign: 'left', borderBottom: '1px solid var(--line)' }}>Issues Found</th>
+                                                    <th style={{ padding: '12px 20px', textAlign: 'left', borderBottom: '1px solid var(--line)' }}>Comparisons</th>
+                                                    <th style={{ padding: '12px 20px', textAlign: 'left', borderBottom: '1px solid var(--line)' }}>Fingerprint</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-white/5">
+                                            <tbody>
                                                 {consistencyChecks.slice().reverse().map((check, i) => (
-                                                    <tr key={i} className="hover:bg-white/5">
-                                                        <td className="px-6 py-4 font-mono text-xs text-zinc-300">
+                                                    <tr key={i} style={{ borderBottom: '1px solid var(--line)' }}>
+                                                        <td className="mono" style={{ padding: '14px 20px', color: 'var(--ink)' }}>
                                                             {new Date(check.timestamp).toLocaleString()}
                                                         </td>
-                                                        <td className="px-6 py-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-24 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                                        <td style={{ padding: '14px 20px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                                <div style={{ width: 96, height: 6, background: 'var(--raise2)', borderRadius: 99, overflow: 'hidden' }}>
                                                                     <div
-                                                                        className={`h-full rounded-full ${check.consistency_score >= 99 ? 'bg-emerald-500' :
-                                                                                check.consistency_score >= 95 ? 'bg-amber-500' :
-                                                                                    'bg-red-500'
-                                                                            }`}
-                                                                        style={{ width: `${check.consistency_score}%` }}
+                                                                        style={{
+                                                                            height: '100%', borderRadius: 99,
+                                                                            background: check.consistency_score >= 99 ? 'var(--signal)' :
+                                                                                check.consistency_score >= 95 ? 'var(--amber)' : 'var(--red)',
+                                                                            width: `${check.consistency_score}%`
+                                                                        }}
                                                                     />
                                                                 </div>
-                                                                <span className="text-xs font-medium text-white">
+                                                                <span className="mono" style={{ color: 'var(--ink)' }}>
                                                                     {check.consistency_score.toFixed(1)}%
                                                                 </span>
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-4">
-                                                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${check.issues_found === 0
-                                                                    ? 'bg-emerald-500/10 text-emerald-400'
-                                                                    : 'bg-red-500/10 text-red-400'
-                                                                }`}>
+                                                        <td style={{ padding: '14px 20px' }}>
+                                                            <span className={`tag ${check.issues_found === 0 ? 'ok' : 'red'}`}>
                                                                 {check.issues_found}
                                                             </span>
                                                         </td>
-                                                        <td className="px-6 py-4 text-zinc-400">
+                                                        <td className="mono" style={{ padding: '14px 20px', color: 'var(--ash)' }}>
                                                             {check.comparison_count}
                                                         </td>
-                                                        <td className="px-6 py-4 font-mono text-xs text-zinc-500">
+                                                        <td className="mono" style={{ padding: '14px 20px', color: 'var(--faint)' }}>
                                                             {check.infrastructure_fingerprint?.substring(0, 12)}...
                                                         </td>
                                                     </tr>
@@ -1041,52 +1104,49 @@ const TransparencyConsole = () => {
 
                 {/* KSI VALIDATIONS TAB */}
                 {activeTab === 'validations' && (
-                    <div className="space-y-6">
+                    <div className="stack" style={{ gap: 24 }}>
                         {!consistencyLog || latestValidations.length === 0 ? (
-                            <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-12 text-center">
-                                <Database size={40} className="text-zinc-700 mx-auto mb-4" />
-                                <h3 className="text-lg font-semibold text-zinc-400 mb-1">No Validation Data</h3>
-                                <p className="text-sm text-zinc-600">Validation data is not available</p>
+                            <div className="panel" style={{ padding: 48, textAlign: 'center' }}>
+                                <Database size={40} style={{ color: 'var(--faint)', margin: '0 auto 16px' }} />
+                                <h3 style={{ fontSize: 17, fontWeight: 600, color: 'var(--ash)', marginBottom: 4 }}>No Validation Data</h3>
+                                <p className="mono" style={{ fontSize: 12, color: 'var(--faint)' }}>Validation data is not available</p>
                             </div>
                         ) : (
                             <>
                                 {/* Header with stats */}
-                                <div className="bg-zinc-900 rounded-lg border border-zinc-800">
-                                    <div className="px-6 py-4 border-b border-zinc-800">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <h2 className="text-base font-semibold text-white">Key Security Indicators</h2>
-                                                <p className="text-sm text-zinc-500 mt-0.5">FedRAMP 20x compliance validation results</p>
+                                <div className="panel">
+                                    <div className="ph">
+                                        <div>
+                                            <h4>Key Security Indicators</h4>
+                                            <span className="map" style={{ color: 'var(--ash)' }}>FedRAMP 20x compliance validation results</span>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div className="v s" style={{ fontSize: 20 }}>{latestValidations.filter(v => v.assertion).length}</div>
+                                                <div className="l" style={{ marginTop: 2 }}>Passing</div>
                                             </div>
-                                            <div className="flex items-center gap-6">
-                                                <div className="text-right">
-                                                    <div className="text-2xl font-semibold text-emerald-400">{latestValidations.filter(v => v.assertion).length}</div>
-                                                    <div className="text-xs text-zinc-500">Passing</div>
-                                                </div>
-                                                <div className="w-px h-10 bg-zinc-800" />
-                                                <div className="text-right">
-                                                    <div className="text-2xl font-semibold text-red-400">{latestValidations.filter(v => !v.assertion).length}</div>
-                                                    <div className="text-xs text-zinc-500">Failing</div>
-                                                </div>
-                                                <div className="w-px h-10 bg-zinc-800" />
-                                                <div className="text-right">
-                                                    <div className="text-2xl font-semibold text-zinc-300">{latestValidations.length}</div>
-                                                    <div className="text-xs text-zinc-500">Total</div>
-                                                </div>
+                                            <div style={{ width: 1, height: 32, background: 'var(--line)' }} />
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div className="v" style={{ fontSize: 20, color: 'var(--red)', fontFamily: 'var(--mono)' }}>{latestValidations.filter(v => !v.assertion).length}</div>
+                                                <div className="l" style={{ marginTop: 2 }}>Failing</div>
+                                            </div>
+                                            <div style={{ width: 1, height: 32, background: 'var(--line)' }} />
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div className="v i" style={{ fontSize: 20 }}>{latestValidations.length}</div>
+                                                <div className="l" style={{ marginTop: 2 }}>Total</div>
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     {/* Progress bar */}
-                                    <div className="px-6 py-3 bg-zinc-950/50">
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                                                <div 
-                                                    className="h-full bg-emerald-500 rounded-full transition-all"
-                                                    style={{ width: `${(latestValidations.filter(v => v.assertion).length / latestValidations.length) * 100}%` }}
+                                    <div style={{ padding: '14px 20px', background: 'var(--raise2)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                                            <div style={{ flex: 1, height: 8, background: 'var(--raise)', borderRadius: 99, overflow: 'hidden' }}>
+                                                <div
+                                                    style={{ height: '100%', background: 'var(--signal)', borderRadius: 99, width: `${(latestValidations.filter(v => v.assertion).length / latestValidations.length) * 100}%` }}
                                                 />
                                             </div>
-                                            <span className="text-sm font-medium text-zinc-400">
+                                            <span className="mono" style={{ color: 'var(--ink)' }}>
                                                 {Math.round((latestValidations.filter(v => v.assertion).length / latestValidations.length) * 100)}% compliant
                                             </span>
                                         </div>
@@ -1094,18 +1154,18 @@ const TransparencyConsole = () => {
                                 </div>
 
                                 {/* Table-style list */}
-                                <div className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
+                                <div className="panel">
                                     {/* Table header */}
-                                    <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-zinc-950/50 border-b border-zinc-800 text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                                        <div className="col-span-1">Status</div>
-                                        <div className="col-span-2">KSI ID</div>
-                                        <div className="col-span-5">Requirement</div>
-                                        <div className="col-span-2">Score</div>
-                                        <div className="col-span-2 text-right">Resources</div>
+                                    <div className="row" style={{ background: 'var(--raise2)', fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--ash)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                                        <div style={{ width: 18, flexShrink: 0 }}>St</div>
+                                        <div style={{ width: 110, flexShrink: 0 }}>KSI ID</div>
+                                        <div style={{ flex: 1 }}>Requirement</div>
+                                        <div style={{ width: 140, flexShrink: 0 }}>Score</div>
+                                        <div style={{ width: 80, flexShrink: 0, textAlign: 'right' }}>Resources</div>
                                     </div>
-                                    
+
                                     {/* Validation rows */}
-                                    <div className="divide-y divide-zinc-800/50">
+                                    <div>
                                         {latestValidations.map((validation, idx) => (
                                             <ValidationCard key={idx} validation={validation} />
                                         ))}

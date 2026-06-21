@@ -1,117 +1,81 @@
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
-  FileText, Download, Eye, Calendar, Clock, Shield, ExternalLink,
-  FileJson, FileCode, ChevronRight, AlertCircle, CheckCircle2, FileDown
+  FileText, FileJson, FileCode, AlertCircle
 } from 'lucide-react';
 import { useTrustCenterData } from '../../hooks/useTrustCenterData';
 
-const THEME = {
-  panel: 'bg-[#121217]',
-  border: 'border-white/10',
-};
-
 const REPORT_TYPE_CONFIG = {
-  vdr: { label: 'VDR', color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', description: 'Vulnerability Detection & Response' },
-  oar: { label: 'OAR', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', description: 'Ongoing Authorization Report' },
-  scn: { label: 'SCN', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', description: 'Significant Change Notification' },
-  qar: { label: 'QAR', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', description: 'Quarterly Authorization Review' },
+  vdr: { label: 'VDR', description: 'Vulnerability Detection & Response' },
+  oar: { label: 'OAR', description: 'Ongoing Authorization Report' },
+  scn: { label: 'SCN', description: 'Significant Change Notification' },
+  qar: { label: 'QAR', description: 'Quarterly Authorization Review' },
 };
 
-const ReportCard = memo(({ report, manifestEntry, onViewJson, onViewHtml, onDownload }) => {
+// Compliance report as a telemetry-console list row.
+const ReportRow = memo(({ report, manifestEntry, onViewJson, onViewHtml, onDownload }) => {
   const typeConfig = REPORT_TYPE_CONFIG[report.report_type] || {
     label: report.report_type?.toUpperCase() || 'RPT',
-    color: 'text-slate-400',
-    bg: 'bg-white/5',
-    border: 'border-white/10',
     description: report.title
   };
 
   const isLive = report.data_type === 'live' || manifestEntry?.data_type === 'live';
 
+  // Build a mono-style descriptor line from the available metadata.
+  const descParts = [typeConfig.label];
+  if (isLive) descParts.push('LIVE DATA');
+  else if (report.data_type === 'sample') descParts.push('SAMPLE');
+  if (manifestEntry?.validation_errors === 0) descParts.push('SCHEMA VALID');
+  if (manifestEntry?.frr_requirements && manifestEntry.frr_requirements.length > 0) {
+    descParts.push(manifestEntry.frr_requirements.map(frr => frr.split(' (')[0]).join(' · '));
+  }
+  const desc = descParts.join(' · ');
+
+  // Primary row action: prefer JSON view, then HTML, then download.
+  const primary = onViewJson || onViewHtml || onDownload || undefined;
+
   return (
-    <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-5 hover:border-white/20 transition-all group`}>
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className={`p-2.5 rounded-lg border ${typeConfig.border} ${typeConfig.bg}`}>
-            <FileText size={18} className={typeConfig.color} />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-white font-medium text-sm">{typeConfig.description}</span>
-              <span className={`px-1.5 py-0.5 text-[8px] font-bold rounded ${typeConfig.bg} ${typeConfig.color} border ${typeConfig.border} uppercase tracking-wider`}>
-                {typeConfig.label}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-              {isLive && (
-                <span className="flex items-center gap-1 text-[9px] text-emerald-400 font-bold uppercase tracking-wider">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Live Data
-                </span>
-              )}
-              {!isLive && report.data_type === 'sample' && (
-                <span className="text-[9px] text-amber-400 font-bold uppercase tracking-wider">Sample</span>
-              )}
-              {manifestEntry?.validation_errors === 0 && (
-                <span className="flex items-center gap-1 text-[9px] text-emerald-400">
-                  <CheckCircle2 size={10} />
-                  Schema Valid
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
+    <div className="lrow" onClick={primary}>
+      <div>
+        <div className="t">{typeConfig.description}</div>
+        <div className="d">{desc}</div>
       </div>
-
-      {/* FRR Requirements */}
-      {manifestEntry?.frr_requirements && manifestEntry.frr_requirements.length > 0 && (
-        <div className="mb-4">
-          <div className="text-[9px] text-slate-600 uppercase tracking-wider font-bold mb-2">FRR Requirements</div>
-          <div className="flex flex-wrap gap-1.5">
-            {manifestEntry.frr_requirements.map((frr, i) => (
-              <span key={i} className="px-2 py-0.5 text-[9px] text-slate-400 bg-white/5 rounded border border-white/5 font-mono">
-                {frr.split(' (')[0]}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className="flex items-center gap-2 pt-3 border-t border-white/5">
+      <div className="meta" onClick={(e) => e.stopPropagation()}>
         {onViewJson && (
           <button
             onClick={onViewJson}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all border border-white/5"
+            className="badge"
+            style={{ cursor: 'pointer', background: 'none' }}
           >
-            <FileJson size={12} />
-            JSON
+            <FileJson size={11} style={{ color: 'var(--amber)' }} /> JSON
           </button>
         )}
         {onViewHtml && (
           <button
             onClick={onViewHtml}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all border border-white/5"
+            className="badge i"
+            style={{ cursor: 'pointer', background: 'none' }}
           >
-            <FileCode size={12} />
-            HTML
+            <FileCode size={11} /> HTML
           </button>
         )}
         {onDownload && (
           <button
             onClick={onDownload}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-wider transition-all border border-blue-500/20 ml-auto"
+            className="badge s"
+            style={{ cursor: 'pointer', background: 'none' }}
           >
-            <Download size={12} />
-            Download
+            GET
           </button>
         )}
+        <span className="pub">OPEN ACCESS</span>
+        <span className="ar">→</span>
       </div>
     </div>
   );
 });
 
-const AssessmentCard = memo(({ assessment, onDownload }) => {
+// Assessment document as a telemetry-console list row.
+const AssessmentRow = memo(({ assessment, onDownload }) => {
   // Handle both string and object formats for assessor/result
   const assessorName = typeof assessment.assessor === 'object'
     ? `${assessment.assessor.name} — ${assessment.assessor.organization}`
@@ -124,51 +88,31 @@ const AssessmentCard = memo(({ assessment, onDownload }) => {
   const assessmentDate = assessment.date || assessment.assessment_date;
   const description = assessment.scope?.description || assessment.description || '';
 
+  // Compose a mono descriptor: date · assessor · result, plus optional detail.
+  const descParts = [];
+  if (assessmentDate) descParts.push(assessmentDate);
+  if (assessorName) descParts.push(assessorName);
+  if (description) descParts.push(description);
+  if (typeof assessment.result === 'object' && assessment.result.passed !== undefined) {
+    descParts.push(`${assessment.result.passed}/${assessment.result.total} passed`);
+    if (assessment.result.observations > 0) descParts.push(`${assessment.result.observations} observations`);
+    if (assessment.result.critical_findings > 0) {
+      descParts.push(`${assessment.result.critical_findings} critical finding${assessment.result.critical_findings > 1 ? 's' : ''}`);
+    }
+  }
+  const desc = descParts.join(' · ');
+
   return (
-    <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-5 hover:border-white/20 transition-all`}>
-      <div className="flex items-start gap-4">
-        <div className="p-2.5 rounded-lg border border-cyan-500/20 bg-cyan-500/10">
-          <Shield size={18} className="text-cyan-400" />
-        </div>
-        <div className="flex-1">
-          <div className="text-white font-medium text-sm">{assessment.title}</div>
-          {description && <p className="text-slate-500 text-xs mt-1">{description}</p>}
-          <div className="flex flex-wrap items-center gap-4 mt-3 text-[10px] text-slate-500">
-            <span className="flex items-center gap-1">
-              <Calendar size={10} />
-              {assessmentDate}
-            </span>
-            <span className="font-mono">{assessorName}</span>
-            <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-              isPass
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-            }`}>
-              {resultStatus}
-            </span>
-          </div>
-          {/* Show result details if available */}
-          {typeof assessment.result === 'object' && assessment.result.passed !== undefined && (
-            <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-600 font-mono">
-              <span>{assessment.result.passed}/{assessment.result.total} passed</span>
-              {assessment.result.observations > 0 && (
-                <span>{assessment.result.observations} observations</span>
-              )}
-              {assessment.result.critical_findings > 0 && (
-                <span className="text-amber-500">{assessment.result.critical_findings} critical finding{assessment.result.critical_findings > 1 ? 's' : ''}</span>
-              )}
-            </div>
-          )}
-        </div>
-        {onDownload && (
-          <button
-            onClick={onDownload}
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors text-slate-500 hover:text-white border border-white/5"
-            title="Download PDF"
-          >
-            <FileDown size={16} />
-          </button>
+    <div className="lrow" onClick={onDownload || undefined}>
+      <div>
+        <div className="t">{assessment.title}</div>
+        {desc && <div className="d">{desc}</div>}
+      </div>
+      <div className="meta">
+        {resultStatus && (
+          <span className={isPass ? 'pub' : 'nda'}>{resultStatus}</span>
         )}
+        {onDownload && <span className="ar">↓</span>}
       </div>
     </div>
   );
@@ -182,22 +126,22 @@ const ContentViewer = memo(({ content, url, format, title, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[80] flex items-center justify-center p-4" onClick={onClose}>
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} w-full ${isHtml ? 'max-w-7xl h-[90vh]' : 'max-w-5xl max-h-[85vh]'} flex flex-col overflow-hidden shadow-2xl`} onClick={e => e.stopPropagation()}>
-        <div className="px-5 py-3 border-b border-white/5 bg-[#09090b] flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-2">
-            {format === 'json' ? <FileJson size={14} className="text-amber-400" /> : <FileCode size={14} className="text-blue-400" />}
-            <span className="text-white font-medium text-sm">{title}</span>
-            <span className="px-1.5 py-0.5 text-[8px] font-bold rounded bg-white/5 text-slate-500 border border-white/5 uppercase">
-              {format}
-            </span>
-          </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors text-sm font-bold">
+      <div className={`panel w-full ${isHtml ? 'max-w-7xl h-[90vh]' : 'max-w-5xl max-h-[85vh]'} flex flex-col overflow-hidden shadow-2xl`} onClick={e => e.stopPropagation()}>
+        <div className="ph" style={{ flexShrink: 0 }}>
+          <h4 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {format === 'json'
+              ? <FileJson size={14} style={{ color: 'var(--amber)' }} />
+              : <FileCode size={14} style={{ color: 'var(--indigo)' }} />}
+            {title}
+            <span className="badge" style={{ textTransform: 'uppercase' }}>{format}</span>
+          </h4>
+          <button onClick={onClose} className="map" style={{ cursor: 'pointer', background: 'none', border: 'none', color: 'var(--ash)' }}>
             ESC
           </button>
         </div>
         <div className="flex-1 overflow-auto">
           {format === 'json' ? (
-            <pre className="p-5 text-xs font-mono text-slate-300 leading-relaxed whitespace-pre-wrap">
+            <pre className="code" style={{ whiteSpace: 'pre-wrap', color: 'var(--ink)' }}>
               {typeof content === 'string' ? content : JSON.stringify(content, null, 2)}
             </pre>
           ) : (
@@ -315,8 +259,8 @@ export const ReportsTab = memo(() => {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-500 text-sm">Loading reports...</p>
+          <div className="w-8 h-8 rounded-full animate-spin mx-auto mb-4" style={{ border: '2px solid #818CF833', borderTopColor: 'var(--indigo)' }} />
+          <p className="lede" style={{ marginBottom: 0 }}>Loading reports…</p>
         </div>
       </div>
     );
@@ -324,10 +268,10 @@ export const ReportsTab = memo(() => {
 
   if (error) {
     return (
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-8 text-center`}>
-        <AlertCircle size={40} className="mx-auto mb-3 text-slate-600" />
-        <p className="text-slate-400 text-sm">Unable to load reports</p>
-        <p className="text-slate-600 text-xs mt-1">{error}</p>
+      <div className="panel" style={{ padding: 32, textAlign: 'center' }}>
+        <AlertCircle size={40} style={{ margin: '0 auto 12px', color: 'var(--faint)' }} />
+        <p style={{ color: 'var(--ink)' }}>Unable to load reports</p>
+        <p className="mono" style={{ marginTop: 4 }}>{error}</p>
       </div>
     );
   }
@@ -338,57 +282,51 @@ export const ReportsTab = memo(() => {
     : (assessmentManifest?.assessments || []);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header with next report date */}
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6`}>
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-white font-bold text-lg tracking-tight">Reports & Assessments</h2>
-            <p className="text-slate-500 text-xs mt-1 uppercase tracking-wider font-mono">
-              Reports &amp; Assessments
-            </p>
-          </div>
+    <div className="animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="kick">▣ — AUTHORIZATION ARTIFACTS</div>
+      <h1 className="big">Reports &amp; <span className="g">evidence</span></h1>
+      <p className="lede">
+        Machine-readable authorization data and audited artifacts. Public items stream openly;
+        access-controlled items unlock for authorized reviewers.
+      </p>
+
+      {/* Schedule + last-generated telemetry */}
+      {(nextReportDate || reportManifest) && (
+        <div className="g3" style={{ marginBottom: 8 }}>
           {nextReportDate && (
-            <div className="flex items-center gap-4 px-4 py-2.5 rounded-lg bg-[#09090b] border border-white/5">
-              <div className="text-center">
-                <div className="text-[9px] text-slate-600 uppercase tracking-wider font-bold">Next Report</div>
-                <div className="text-white font-mono text-sm font-bold">{nextReportDate.next_ongoing_report}</div>
+            <>
+              <div className="kpi">
+                <div className="v i">{nextReportDate.next_ongoing_report}</div>
+                <div className="l">Next Report</div>
               </div>
-              <div className="w-px h-8 bg-white/10" />
-              <div className="text-center">
-                <div className="text-[9px] text-slate-600 uppercase tracking-wider font-bold">Next Review</div>
-                <div className="text-white font-mono text-sm font-bold">{nextReportDate.next_quarterly_review}</div>
+              <div className="kpi">
+                <div className="v i">{nextReportDate.next_quarterly_review}</div>
+                <div className="l">Next Review</div>
               </div>
+            </>
+          )}
+          {reportManifest && (
+            <div className="kpi">
+              <div className="v s">{new Date(reportManifest.generation_timestamp).toLocaleDateString()}</div>
+              <div className="l">Last Generated</div>
             </div>
           )}
         </div>
-      </div>
-
-      {/* Report Generation Info - timestamp only */}
-      {reportManifest && (
-        <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-4`}>
-          <div className="flex items-center gap-3 text-xs text-slate-500">
-            <Clock size={12} />
-            <span>Last generated <span className="text-slate-400 font-mono">{new Date(reportManifest.generation_timestamp).toLocaleDateString()}</span></span>
-          </div>
-        </div>
       )}
 
-      {/* Compliance Reports Section */}
+      {/* Compliance Reports */}
       {reportTypes.length > 0 && (
-        <div>
-          <h3 className="text-white font-bold text-sm mb-4 flex items-center gap-2">
-            <FileText size={14} className="text-blue-400" />
-            Compliance Reports
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <>
+          <h3 className="sec">Compliance Reports</h3>
+          <div className="panel">
             {reportTypes.map(type => {
               const jsonReport = jsonReports.find(r => r.report_type === type);
               const htmlReport = htmlReports.find(r => r.report_type === type);
               const manifestEntry = reportManifest?.reports?.find(r => r.type === type);
 
               return (
-                <ReportCard
+                <ReportRow
                   key={type}
                   report={jsonReport}
                   manifestEntry={manifestEntry}
@@ -399,34 +337,31 @@ export const ReportsTab = memo(() => {
               );
             })}
           </div>
-        </div>
+        </>
       )}
 
-      {/* Assessment Documents Section */}
+      {/* Assessment Documents */}
       {assessmentItems.length > 0 && (
-        <div>
-          <h3 className="text-white font-bold text-sm mb-4 flex items-center gap-2">
-            <Shield size={14} className="text-cyan-400" />
-            Assessment Documents
-          </h3>
-          <div className="grid grid-cols-1 gap-4">
+        <>
+          <h3 className="sec">Assessment Documents</h3>
+          <div className="panel">
             {assessmentItems.map((assessment, i) => (
-              <AssessmentCard
+              <AssessmentRow
                 key={i}
                 assessment={assessment}
                 onDownload={() => handleAssessmentDownload(assessment)}
               />
             ))}
           </div>
-        </div>
+        </>
       )}
 
       {/* Empty State */}
       {reportTypes.length === 0 && assessmentItems.length === 0 && (
-        <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-8 text-center`}>
-          <FileText size={40} className="mx-auto mb-3 text-slate-600" />
-          <p className="text-slate-400 text-sm">No reports or assessments available</p>
-          <p className="text-slate-600 text-xs mt-1">Content will appear after the next pipeline run</p>
+        <div className="panel" style={{ padding: 32, textAlign: 'center' }}>
+          <FileText size={40} style={{ margin: '0 auto 12px', color: 'var(--faint)' }} />
+          <p style={{ color: 'var(--ink)' }}>No reports or assessments available</p>
+          <p className="mono" style={{ marginTop: 4 }}>Content will appear after the next pipeline run</p>
         </div>
       )}
 
