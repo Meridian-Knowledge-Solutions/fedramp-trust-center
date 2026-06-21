@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, memo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import {
     Shield, Users, Cloud, Server, Search, ChevronDown, ChevronRight,
     Building2, UserCheck, Layers, FileText, Filter, X, Sparkles,
@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { THEME, BASE_PATH } from '../../config/theme';
 import { getRouteSegments, setRoute, onRouteChange } from '../../utils/hashRoute';
-import { Card, Badge, Eyebrow } from './ui';
 
 // ───────── Theme tokens ─────────
 const RESP_THEMES = {
@@ -45,38 +44,56 @@ const coverageTheme = (coverage) => {
 const Header = ({ summary, mode }) => {
     const m = mode === 'cloud' ? summary?.cloud_fedramp : summary?.on_prem;
     return (
-        <Card className="relative overflow-hidden p-7 md:p-8">
-            <div className="absolute -top-20 -right-12 w-64 h-64 rounded-full bg-sky-500/10 blur-[100px] pointer-events-none" />
-            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-sky-500/40 to-transparent" />
+        <div className="relative overflow-hidden bg-gradient-to-br from-[#0f1729] via-[#121217] to-[#0a0a0f] border border-white/10 rounded-2xl p-6 md:p-8">
+            <div className="absolute -top-12 -right-12 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-60" />
             <div className="relative flex flex-col lg:flex-row gap-6 lg:items-end justify-between">
                 <div>
-                    <Eyebrow className="mb-2">Shared Responsibility</Eyebrow>
-                    <h2 className="text-2xl font-bold text-white tracking-tight">Customer Responsibility Matrix</h2>
-                    <p className="text-[13px] text-slate-400 mt-1 max-w-2xl leading-relaxed">
-                        Who does what — across NIST 800-53 Rev 5, FedRAMP 20x KSIs, and CMMC 2.0 L2 / CUI.
-                    </p>
-                    <div className="flex flex-wrap gap-1.5 mt-4">
-                        {['NIST SP 800-53 Rev 5', 'Moderate Baseline', 'FedRAMP 20x KSI', 'CMMC 2.0 Level 2', 'CUI / DoD'].map(b => (
-                            <Badge key={b} variant="neutral">{b}</Badge>
-                        ))}
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                            <Layers className="w-5 h-5 text-blue-400" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-bold text-white tracking-tight">Customer Responsibility Matrix</h2>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                                Who does what — across NIST 800-53 Rev 5, FedRAMP 20x KSIs, and CMMC 2.0 L2 / CUI
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-4">
+                        <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-1 rounded-md border border-white/10 font-semibold tracking-wide uppercase">
+                            NIST SP 800-53 Rev 5
+                        </span>
+                        <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-1 rounded-md border border-white/10 font-semibold tracking-wide uppercase">
+                            Moderate Baseline
+                        </span>
+                        <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-1 rounded-md border border-blue-500/20 font-semibold tracking-wide uppercase">
+                            FedRAMP 20x KSI Mapped
+                        </span>
+                        <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-md border border-emerald-500/20 font-semibold tracking-wide uppercase">
+                            CMMC 2.0 Level 2
+                        </span>
+                        <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded-md border border-indigo-500/20 font-semibold tracking-wide uppercase">
+                            CUI / DoD Cross-Ref
+                        </span>
                     </div>
                 </div>
-                <div className="flex flex-col items-start lg:items-end gap-3">
-                    <div className="lg:text-right">
-                        <Eyebrow>Controls in scope</Eyebrow>
-                        <div className="text-4xl font-bold text-white font-mono leading-none mt-1.5">{m?.total ?? 0}</div>
+                <div className="flex flex-col items-end gap-3">
+                    <div className="text-right">
+                        <div className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Controls in scope</div>
+                        <div className="text-4xl font-extrabold text-white font-mono leading-none mt-1">{m?.total ?? 0}</div>
                     </div>
                     <a
                         href={`${BASE_PATH}Meridian_LMS_CRM_NIST_800-53_Rev5_CMMC_CUI.xlsx`}
                         download
-                        className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 hover:bg-white/10 hover:text-white transition-all"
+                        className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/10 hover:text-white transition-all"
                         title="NIST 800-53 Rev 5 + FedRAMP 20x KSI + CMMC 2.0 L2 / CUI cross-reference"
                     >
-                        <Download className="w-3.5 h-3.5" /> Download XLSX
+                        <Download className="w-3 h-3" /> Download XLSX
                     </a>
                 </div>
             </div>
-        </Card>
+        </div>
     );
 };
 
@@ -115,37 +132,21 @@ const ModeToggle = ({ mode, setMode }) => (
     </div>
 );
 
-// ───────── Ownership chip (single, calm party indicator) ─────────
-// Replaces the old stack of per-party pills on each row. The control's
-// `responsibility` already names the owning party, so one chip says it all.
-const OwnershipChip = ({ responsibility }) => {
-    const t = RESP_THEMES[responsibility] || RESP_THEMES.Customer;
-    const Icon = t.icon || Circle;
-    return (
-        <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-md border ${t.bg} ${t.border} ${t.text}`}>
-            <Icon className="w-3 h-3" />
-            {t.label}
-        </span>
-    );
-};
-
-const RESP_ORDER = ['Customer', 'Shared', 'Meridian', 'Inherited (AWS)'];
-
-// ───────── Ownership digest ─────────
-// "Who owns what" at a glance — the calm, large-type summary that leads the
-// section so a reviewer understands the split before drilling into 185 rows.
-const OwnershipDigest = ({ counts, total }) => {
-    const entries = Object.entries(counts || {}).filter(([, v]) => v > 0)
-        .sort((a, b) => RESP_ORDER.indexOf(a[0]) - RESP_ORDER.indexOf(b[0]));
+// ───────── Responsibility split ─────────
+const ResponsibilitySplit = ({ counts, total }) => {
+    const entries = Object.entries(counts || {}).filter(([, v]) => v > 0);
+    // Order parties consistently
+    const order = ['Customer', 'Shared', 'Meridian', 'Inherited (AWS)'];
+    entries.sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]));
 
     return (
-        <div className="bg-[#121217] border border-white/10 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
-                <h3 className="text-sm font-bold text-white uppercase tracking-wide">Who owns what</h3>
-                <span className="text-xs text-slate-500">{total} controls assessed</span>
+        <div className="bg-[#121217] border border-white/10 rounded-xl p-5">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <div className="text-[10px] text-slate-500 uppercase tracking-[0.15em] font-bold">Who Owns What</div>
+                <span className="text-[10px] text-slate-600">{total} controls assessed</span>
             </div>
             {/* Segmented bar */}
-            <div className="flex h-4 rounded-full overflow-hidden bg-zinc-900 mb-5">
+            <div className="flex h-3 rounded-full overflow-hidden bg-zinc-900 mb-4">
                 {entries.map(([k, v]) => {
                     const t = RESP_THEMES[k];
                     const pct = (v / total) * 100;
@@ -160,86 +161,20 @@ const OwnershipDigest = ({ counts, total }) => {
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {entries.map(([k, v]) => {
-                    const t = RESP_THEMES[k] || { color: '#71717a', text: 'text-zinc-400', bg: 'bg-zinc-800/40', label: k };
+                    const t = RESP_THEMES[k] || { color: '#71717a', text: 'text-zinc-400', bg: 'bg-zinc-800/40' };
                     const Icon = t.icon || Circle;
                     const pct = ((v / total) * 100).toFixed(0);
                     return (
-                        <div key={k} className={`rounded-xl p-4 border border-white/5 ${t.bg}`}>
-                            <div className="flex items-center gap-2 mb-2">
-                                <Icon className={`w-4 h-4 ${t.text}`} />
-                                <span className={`text-xs font-bold ${t.text}`}>{t.label || k}</span>
+                        <div key={k} className={`rounded-lg p-3 border border-white/5 ${t.bg}`}>
+                            <div className="flex items-center gap-2 mb-1.5">
+                                <Icon className={`w-3.5 h-3.5 ${t.text}`} />
+                                <span className={`text-[10px] uppercase font-bold tracking-wide ${t.text}`}>{k}</span>
                             </div>
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-3xl font-extrabold text-white font-mono leading-none">{v}</span>
-                                <span className="text-xs text-slate-500">{pct}%</span>
+                            <div className="flex items-baseline gap-1.5">
+                                <span className="text-2xl font-extrabold text-white font-mono">{v}</span>
+                                <span className="text-[10px] text-slate-500">{pct}%</span>
                             </div>
                         </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
-};
-
-// ───────── Family overview ─────────
-// A calm grid of the NIST 800-53 families. Each card shows the family's control
-// count and a mini ownership bar, and acts as the entry point into the detailed
-// browser (click → opens the browser filtered to that family). This lets a
-// reviewer grasp the structure without scrolling the full list.
-const FamilyOverview = ({ controls, activeFamily, onSelectFamily }) => {
-    const families = useMemo(() => {
-        const map = new Map();
-        controls.forEach(c => {
-            if (c.applicability === 'Not Applicable') return;
-            const key = familyKey(c.family);
-            if (!key) return;
-            if (!map.has(key)) map.set(key, { id: key, full: c.family, count: 0, resp: {} });
-            const e = map.get(key);
-            e.count += 1;
-            e.resp[c.responsibility] = (e.resp[c.responsibility] || 0) + 1;
-        });
-        return Array.from(map.values()).sort((a, b) => a.id.localeCompare(b.id));
-    }, [controls]);
-
-    return (
-        <div className="bg-[#121217] border border-white/10 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-                <h3 className="text-sm font-bold text-white uppercase tracking-wide">Control families</h3>
-                <span className="text-xs text-slate-500">{families.length} families · click to browse</span>
-            </div>
-            <p className="text-xs text-slate-500 mb-5">Each NIST 800-53 family at a glance — the bar shows how ownership splits within it.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {families.map(f => {
-                    const accent = familyAccent(f.full);
-                    const label = (f.full || '').split(' - ')[1] || f.full;
-                    const on = activeFamily === f.id;
-                    const respEntries = RESP_ORDER.filter(k => f.resp[k]);
-                    return (
-                        <button
-                            key={f.id}
-                            onClick={() => onSelectFamily(f.id)}
-                            className={`text-left rounded-xl border p-4 transition-all ${on
-                                ? 'border-white/25 bg-white/[0.05]'
-                                : 'border-white/[0.06] bg-[#0f0f12] hover:border-white/15 hover:bg-white/[0.03]'}`}
-                        >
-                            <div className="flex items-center justify-between gap-2 mb-2.5">
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                    <span className="text-base font-mono font-extrabold" style={{ color: accent }}>{f.id}</span>
-                                    <span className="text-xs text-slate-400 truncate">{label}</span>
-                                </div>
-                                <span className="text-lg font-bold text-white font-mono shrink-0">{f.count}</span>
-                            </div>
-                            <div className="flex h-1.5 rounded-full overflow-hidden bg-zinc-900">
-                                {respEntries.map(k => {
-                                    const t = RESP_THEMES[k];
-                                    return (
-                                        <div key={k} className="h-full"
-                                            style={{ width: `${(f.resp[k] / f.count) * 100}%`, background: t?.color || '#71717a' }}
-                                            title={`${k}: ${f.resp[k]}`} />
-                                    );
-                                })}
-                            </div>
-                        </button>
                     );
                 })}
             </div>
@@ -304,7 +239,10 @@ const FamilyFilter = ({ families, activeFamily, setActiveFamily }) => (
 
 // ───────── Control row ─────────
 const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
+    const resp = RESP_THEMES[ctrl.responsibility] || RESP_THEMES.Customer;
     const accent = familyAccent(ctrl.family);
+    const RespIcon = resp.icon || Circle;
+    const isNA = ctrl.applicability === 'Not Applicable';
 
     return (
         <div className={`rounded-xl border transition-all ${isExpanded ? 'border-white/20 bg-white/[0.03]' : 'border-white/[0.06] bg-[#0f0f12] hover:border-white/10'}`}>
@@ -314,25 +252,52 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
             >
                 <div className="w-1 self-stretch rounded-full shrink-0" style={{ background: accent }} />
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2.5 flex-wrap mb-1.5">
-                        <span className="text-sm font-mono font-bold text-white">{ctrl.control_id}</span>
-                        <OwnershipChip responsibility={ctrl.responsibility} />
+                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                        <span className="text-xs font-mono font-bold text-white">{ctrl.control_id}</span>
+                        <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">{familyKey(ctrl.family)}</span>
                         {ctrl.applicability === 'Not Applicable' && (
-                            <span className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded font-semibold uppercase tracking-wide">N/A</span>
+                            <span className="text-[9px] bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded font-bold uppercase">N/A</span>
                         )}
                         {ctrl.applicability === 'Voluntary' && (
-                            <span className="text-[10px] bg-cyan-500/10 text-cyan-300 px-1.5 py-0.5 rounded font-semibold uppercase tracking-wide">Voluntary</span>
+                            <span className="text-[9px] bg-cyan-500/10 text-cyan-400 px-1.5 py-0.5 rounded font-bold uppercase">Voluntary</span>
                         )}
                     </div>
-                    <div className="text-[15px] text-slate-100 font-medium leading-snug pr-4">{ctrl.control_name}</div>
-                    {/* Quiet metadata line — family + KSI/CMMC presence, no competing colors */}
-                    <div className="flex items-center gap-2 flex-wrap mt-2 text-[11px] text-slate-500">
-                        <span className="font-semibold uppercase tracking-wide" style={{ color: accent }}>{familyKey(ctrl.family)}</span>
-                        <span className="text-slate-600 truncate">{(ctrl.family || '').split(' - ')[1] || ''}</span>
-                        {ctrl.ksis?.length > 0 && (
-                            <span>· {ctrl.ksis.length} KSI{ctrl.ksis.length === 1 ? '' : 's'}</span>
+                    <div className="text-sm text-slate-200 font-semibold leading-snug pr-4">{ctrl.control_name}</div>
+                    <div className="flex items-center gap-2 flex-wrap mt-2">
+                        {/* Party badges */}
+                        {ctrl.meridian && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                Meridian
+                            </span>
                         )}
-                        {ctrl.cmmc && <span className="text-indigo-400/80 font-semibold">· CMMC L2</span>}
+                        {ctrl.customer && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                Customer
+                            </span>
+                        )}
+                        {mode === 'cloud' && ctrl.csp && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                AWS
+                            </span>
+                        )}
+                        <span className="text-slate-600">·</span>
+                        <span className={`text-[10px] font-bold ${resp.text}`}>{ctrl.responsibility}</span>
+                        {ctrl.ksis?.length > 0 && (
+                            <>
+                                <span className="text-slate-600">·</span>
+                                <span className="text-[10px] text-slate-500 font-mono">
+                                    {ctrl.ksis.length} KSI{ctrl.ksis.length === 1 ? '' : 's'}
+                                </span>
+                            </>
+                        )}
+                        {ctrl.cmmc && (
+                            <>
+                                <span className="text-slate-600">·</span>
+                                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                                    CMMC L2
+                                </span>
+                            </>
+                        )}
                     </div>
                 </div>
                 <div className="shrink-0 self-center">
@@ -343,7 +308,7 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
                 <div className="px-4 pb-4 pl-8 border-t border-white/5 pt-3 space-y-3">
                     {ctrl.implementation_notes && (
                         <div>
-                            <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
+                            <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
                                 <FileText className="w-3 h-3" /> Implementation Notes
                             </div>
                             <p className="text-xs text-slate-300 leading-relaxed">
@@ -357,7 +322,7 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
                     )}
                     {ctrl.applicability_rationale && (
                         <div>
-                            <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
+                            <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
                                 <AlertCircle className="w-3 h-3" /> Applicability Rationale
                             </div>
                             <p className="text-xs text-slate-400 leading-relaxed">{ctrl.applicability_rationale}</p>
@@ -365,7 +330,7 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
                     )}
                     {ctrl.ksis?.length > 0 && (
                         <div>
-                            <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
+                            <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
                                 <KeyRound className="w-3 h-3" /> KSI Mapping
                             </div>
                             <div className="flex flex-wrap gap-1.5">
@@ -379,12 +344,12 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
                     )}
                     {(ctrl.cmmc || ctrl.cui_obligation || ctrl.cui_disposition) && (
                         <div className="rounded-lg border border-indigo-500/15 bg-indigo-500/[0.04] p-3">
-                            <div className="text-[10px] text-indigo-400 uppercase tracking-wider font-bold mb-2 flex items-center gap-1.5">
+                            <div className="text-[9px] text-indigo-400 uppercase tracking-wider font-bold mb-2 flex items-center gap-1.5">
                                 <Landmark className="w-3 h-3" /> CMMC 2.0 L2 / CUI / DoD Cross-Reference
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <div>
-                                    <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1">CMMC L2 Practice <span className="text-slate-600 normal-case">(800-171)</span></div>
+                                    <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1">CMMC L2 Practice <span className="text-slate-600 normal-case">(800-171)</span></div>
                                     {ctrl.cmmc ? (
                                         <div className="flex flex-wrap gap-1">
                                             {ctrl.cmmc.split(',').map(p => (
@@ -398,11 +363,11 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
                                     )}
                                 </div>
                                 <div>
-                                    <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1">CUI Obligation <span className="text-slate-600 normal-case">(DoDI 5200.48)</span></div>
+                                    <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1">CUI Obligation <span className="text-slate-600 normal-case">(DoDI 5200.48)</span></div>
                                     <div className="text-[11px] text-slate-300 leading-snug">{ctrl.cui_obligation || '—'}</div>
                                 </div>
                                 <div>
-                                    <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1">Coverage Disposition</div>
+                                    <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1">Coverage Disposition</div>
                                     {ctrl.cui_disposition ? (
                                         <div className={`inline-flex items-start gap-1.5 text-[10px] leading-snug px-2 py-1 rounded border ${coverageTheme(ctrl.cui_disposition).bg} ${coverageTheme(ctrl.cui_disposition).border} ${coverageTheme(ctrl.cui_disposition).text}`}>
                                             <span className="w-1.5 h-1.5 rounded-full mt-1 shrink-0" style={{ background: coverageTheme(ctrl.cui_disposition).dot }} />
@@ -420,8 +385,9 @@ const ControlRow = memo(({ ctrl, isExpanded, onToggle, mode }) => {
 });
 
 // ───────── Control browser ─────────
-const ControlBrowser = ({ controls, mode, activeFamily, setActiveFamily, onCollapse }) => {
+const ControlBrowser = ({ controls, mode }) => {
     const [search, setSearch] = useState('');
+    const [activeFamily, setActiveFamily] = useState(null);
     const [activeResp, setActiveResp] = useState(null);
     const [expanded, setExpanded] = useState(new Set());
     const [hideNA, setHideNA] = useState(true);
@@ -483,25 +449,15 @@ const ControlBrowser = ({ controls, mode, activeFamily, setActiveFamily, onColla
                         Showing <span className="text-slate-300 font-bold font-mono">{filtered.length}</span> of {controls.length} controls
                     </div>
                 </div>
-                <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 text-[11px] text-slate-400 cursor-pointer select-none">
-                        <input
-                            type="checkbox"
-                            checked={hideNA}
-                            onChange={e => setHideNA(e.target.checked)}
-                            className="accent-blue-500"
-                        />
-                        Hide N/A controls
-                    </label>
-                    {onCollapse && (
-                        <button
-                            onClick={onCollapse}
-                            className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 hover:text-white transition-colors"
-                        >
-                            <ChevronDown className="w-3.5 h-3.5 rotate-180" /> Collapse
-                        </button>
-                    )}
-                </div>
+                <label className="flex items-center gap-2 text-[11px] text-slate-400 cursor-pointer select-none">
+                    <input
+                        type="checkbox"
+                        checked={hideNA}
+                        onChange={e => setHideNA(e.target.checked)}
+                        className="accent-blue-500"
+                    />
+                    Hide N/A controls
+                </label>
             </div>
 
             {/* Search */}
@@ -577,57 +533,10 @@ const ControlBrowser = ({ controls, mode, activeFamily, setActiveFamily, onColla
     );
 };
 
-// ───────── Controls section (summary-first composition) ─────────
-// Leads with the calm overview (ownership digest + family cards), then keeps the
-// dense 185-row browser behind an explicit toggle so the default view stays
-// readable. Selecting a family card opens the browser pre-filtered to it.
-const ControlsSection = ({ controls, modeSummary, mode, setMode }) => {
-    const [browserOpen, setBrowserOpen] = useState(false);
-    const [activeFamily, setActiveFamily] = useState(null);
-    const browserRef = useRef(null);
-
-    const openBrowserAt = (familyId) => {
-        setActiveFamily(familyId);
-        setBrowserOpen(true);
-        requestAnimationFrame(() => browserRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-    };
-
-    return (
-        <div className="space-y-6">
-            <ModeToggle mode={mode} setMode={setMode} />
-            <ModeLegend mode={mode} />
-            <OwnershipDigest counts={modeSummary?.by_responsibility} total={modeSummary?.total} />
-            <FamilyOverview controls={controls} activeFamily={browserOpen ? activeFamily : null} onSelectFamily={openBrowserAt} />
-
-            <div ref={browserRef}>
-                {browserOpen ? (
-                    <ControlBrowser
-                        controls={controls}
-                        mode={mode}
-                        activeFamily={activeFamily}
-                        setActiveFamily={setActiveFamily}
-                        onCollapse={() => setBrowserOpen(false)}
-                    />
-                ) : (
-                    <button
-                        onClick={() => setBrowserOpen(true)}
-                        className="w-full flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-[#121217] hover:bg-white/[0.04] py-4 text-sm font-bold text-slate-200 transition-all"
-                    >
-                        <Search className="w-4 h-4 text-blue-400" />
-                        Browse &amp; search all {controls.length} controls
-                        <ChevronDown className="w-4 h-4 text-slate-500" />
-                    </button>
-                )}
-            </div>
-        </div>
-    );
-};
-
 // ───────── App Security Controls capsule ─────────
 const AppSecCapsule = ({ items, summary, embedded = false }) => {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
-    const [activeCategory, setActiveCategory] = useState(null);
     const categories = useMemo(() => {
         const map = {};
         items.forEach(i => {
@@ -639,18 +548,15 @@ const AppSecCapsule = ({ items, summary, embedded = false }) => {
 
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
-        return items.filter(i => {
-            if (activeCategory && (i.category || 'Other') !== activeCategory) return false;
-            if (!q) return true;
-            return (
-                (i.config_id || '').toLowerCase().includes(q) ||
-                (i.title || '').toLowerCase().includes(q) ||
-                (i.functional_area || '').toLowerCase().includes(q) ||
-                i.nist?.some(n => n.toLowerCase().includes(q)) ||
-                i.ksis?.some(k => k.toLowerCase().includes(q))
-            );
-        });
-    }, [items, search, activeCategory]);
+        if (!q) return items;
+        return items.filter(i =>
+            (i.config_id || '').toLowerCase().includes(q) ||
+            (i.title || '').toLowerCase().includes(q) ||
+            (i.functional_area || '').toLowerCase().includes(q) ||
+            i.nist?.some(n => n.toLowerCase().includes(q)) ||
+            i.ksis?.some(k => k.toLowerCase().includes(q))
+        );
+    }, [items, search]);
 
     const header = (
         <div className="flex items-center gap-3">
@@ -677,23 +583,14 @@ const AppSecCapsule = ({ items, summary, embedded = false }) => {
             )}
             {(embedded || open) && (
                 <div className="px-5 pb-5 border-t border-white/5">
-                    {/* Category tiles — click to filter the list */}
+                    {/* Category tiles */}
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mt-4">
-                        {categories.map(([c, count]) => {
-                            const on = activeCategory === c;
-                            return (
-                                <button
-                                    key={c}
-                                    onClick={() => setActiveCategory(on ? null : c)}
-                                    className={`text-left rounded-lg p-3 border transition-all ${on
-                                        ? 'border-cyan-500/40 bg-cyan-500/[0.06]'
-                                        : 'border-white/5 bg-[#0f0f12] hover:border-white/15 hover:bg-white/[0.03]'}`}
-                                >
-                                    <div className="text-[10px] text-slate-400 uppercase tracking-wide font-semibold mb-1 truncate">{c}</div>
-                                    <div className="text-2xl font-extrabold text-white font-mono">{count}</div>
-                                </button>
-                            );
-                        })}
+                        {categories.map(([c, count]) => (
+                            <div key={c} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3">
+                                <div className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1">{c}</div>
+                                <div className="text-xl font-extrabold text-white font-mono">{count}</div>
+                            </div>
+                        ))}
                     </div>
                     <div className="relative mt-4">
                         <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -705,50 +602,37 @@ const AppSecCapsule = ({ items, summary, embedded = false }) => {
                             className="w-full bg-[#09090b] border border-white/10 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/40"
                         />
                     </div>
-                    <div className="flex items-center justify-between gap-3 mt-3 flex-wrap">
-                        <div className="text-xs text-slate-500">
-                            Showing <span className="text-slate-300 font-bold font-mono">{Math.min(filtered.length, 100)}</span> of {filtered.length}
-                        </div>
-                        {activeCategory && (
-                            <button
-                                onClick={() => setActiveCategory(null)}
-                                className="flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-300"
-                            >
-                                <Filter className="w-3 h-3" /> Filtered to <span className="text-slate-300 font-semibold">{activeCategory}</span>
-                                <span className="text-cyan-400 underline">Clear</span>
-                            </button>
-                        )}
-                    </div>
-                    <div className="mt-2 space-y-1.5 max-h-[420px] overflow-y-auto pr-1">
+                    <div className="mt-3 space-y-1.5 max-h-[360px] overflow-y-auto pr-1">
                         {filtered.slice(0, 100).map(i => (
-                            <div key={i.config_id} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3.5">
-                                <div className="flex items-center gap-2.5 flex-wrap mb-1.5">
-                                    <span className="text-[11px] font-mono font-bold text-cyan-400">{i.config_id}</span>
-                                    <span className="text-[10px] text-slate-500 uppercase tracking-wide">{i.category}</span>
-                                    {i.subarea && <span className="text-[10px] text-slate-600">/ {i.subarea}</span>}
-                                </div>
-                                <div className="text-sm text-slate-100 leading-snug">{i.title}</div>
-                                {(i.nist?.length || i.ksis?.length) && (
-                                    <div className="flex flex-wrap gap-1.5 mt-2">
-                                        {i.nist?.map(n => (
-                                            <span key={n} className="text-[10px] font-mono bg-white/[0.04] text-slate-400 px-1.5 py-0.5 rounded border border-white/5">
-                                                {n}
-                                            </span>
-                                        ))}
-                                        {i.ksis?.map(k => (
-                                            <span key={k} className="text-[10px] font-mono bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">
-                                                {k}
-                                            </span>
-                                        ))}
+                            <div key={i.config_id} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                                            <span className="text-[10px] font-mono font-bold text-cyan-400">{i.config_id}</span>
+                                            <span className="text-[9px] text-slate-500 uppercase tracking-wider">{i.category}</span>
+                                            {i.subarea && <span className="text-[9px] text-slate-600">/ {i.subarea}</span>}
+                                        </div>
+                                        <div className="text-xs text-slate-200 leading-snug">{i.title}</div>
+                                        {(i.nist?.length || i.ksis?.length) && (
+                                            <div className="flex flex-wrap gap-1 mt-2">
+                                                {i.nist?.map(n => (
+                                                    <span key={n} className="text-[9px] font-mono bg-white/[0.04] text-slate-400 px-1.5 py-0.5 rounded border border-white/5">
+                                                        {n}
+                                                    </span>
+                                                ))}
+                                                {i.ksis?.map(k => (
+                                                    <span key={k} className="text-[9px] font-mono bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">
+                                                        {k}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                </div>
                             </div>
                         ))}
-                        {filtered.length === 0 && (
-                            <div className="text-center text-sm text-slate-500 py-8">No settings match the current filters.</div>
-                        )}
                         {filtered.length > 100 && (
-                            <div className="text-center text-[11px] text-slate-500 py-2">
+                            <div className="text-center text-[10px] text-slate-500 py-2">
                                 Showing first 100 of {filtered.length}. Refine search to see more.
                             </div>
                         )}
@@ -798,19 +682,16 @@ const KSIRef = ({ items, embedded = false }) => {
                 <div className="px-5 pb-5 border-t border-white/5 space-y-4 mt-4">
                     {themes.map(([theme, list]) => (
                         <div key={theme}>
-                            <div className="flex items-center gap-2 mb-2.5">
-                                <span className="text-xs uppercase tracking-wide font-bold text-blue-400">{theme}</span>
-                                <span className="text-[10px] text-slate-600 font-mono">{list.length}</span>
-                            </div>
+                            <div className="text-[10px] uppercase tracking-wider font-bold text-blue-400 mb-2">{theme}</div>
                             <div className="space-y-1.5">
                                 {list.map(k => (
-                                    <div key={k.ksi_id} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3.5">
+                                    <div key={k.ksi_id} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3">
                                         <div className="flex items-start gap-3">
-                                            <span className="text-[11px] font-mono font-bold text-blue-400 shrink-0 mt-0.5">{k.ksi_id}</span>
+                                            <span className="text-[10px] font-mono font-bold text-blue-400 shrink-0">{k.ksi_id}</span>
                                             <div className="flex-1">
-                                                <div className="text-sm text-slate-100 leading-snug">{k.description}</div>
+                                                <div className="text-xs text-slate-200">{k.description}</div>
                                                 {k.nist_controls && (
-                                                    <div className="text-[11px] text-slate-500 font-mono mt-1.5">
+                                                    <div className="text-[10px] text-slate-500 font-mono mt-1">
                                                         NIST: <span className="text-slate-400">{k.nist_controls}</span>
                                                     </div>
                                                 )}
@@ -835,7 +716,7 @@ const CmmcCuiMapping = ({ map, summary, embedded = false }) => {
     const CoverageBadge = ({ value }) => {
         const t = coverageTheme(value);
         return (
-            <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2 py-0.5 rounded border ${t.bg} ${t.border} ${t.text} whitespace-nowrap`}>
+            <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded border ${t.bg} ${t.border} ${t.text} whitespace-nowrap`}>
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: t.dot }} />
                 {value}
             </span>
@@ -850,7 +731,7 @@ const CmmcCuiMapping = ({ map, summary, embedded = false }) => {
             <div>
                 <div className="text-sm font-bold text-white flex items-center gap-2">
                     CMMC 2.0 Level 2 &amp; CUI / DoD Coverage Map
-                    <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold uppercase tracking-wide">RFP Crosswalk</span>
+                    <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 font-bold uppercase tracking-wide">RFP Crosswalk</span>
                 </div>
                 <div className="text-[11px] text-slate-500 mt-0.5">
                     NIST SP 800-171 Rev 2 · DoDI 5200.48 / DAFI 16-1403 · {summary?.cmmc_families ?? 14} CMMC L2 domains · {summary?.cui_handling_requirements ?? 7} CUI handling requirements
@@ -887,26 +768,26 @@ const CmmcCuiMapping = ({ map, summary, embedded = false }) => {
                     {/* CUI handling requirements */}
                     {map.cui_handling?.length > 0 && (
                         <div>
-                            <div className="text-[11px] uppercase tracking-wider font-bold text-indigo-400 mb-2.5 flex items-center gap-1.5">
+                            <div className="text-[10px] uppercase tracking-wider font-bold text-indigo-400 mb-2 flex items-center gap-1.5">
                                 <Stamp className="w-3.5 h-3.5" /> CUI Handling Requirements — DoDI 5200.48 / DAFI 16-1403
                             </div>
                             <div className="overflow-x-auto rounded-lg border border-white/10">
                                 <table className="w-full text-left border-collapse min-w-[640px]">
                                     <thead>
-                                        <tr className="bg-white/[0.03] text-[10px] uppercase tracking-wider text-slate-500">
-                                            <th className="px-3 py-2.5 font-bold">Requirement</th>
-                                            <th className="px-3 py-2.5 font-bold">Primary Controls</th>
-                                            <th className="px-3 py-2.5 font-bold">Coverage</th>
-                                            <th className="px-3 py-2.5 font-bold">Responsibility &amp; Notes</th>
+                                        <tr className="bg-white/[0.03] text-[9px] uppercase tracking-wider text-slate-500">
+                                            <th className="px-3 py-2 font-bold">Requirement</th>
+                                            <th className="px-3 py-2 font-bold">Primary Controls</th>
+                                            <th className="px-3 py-2 font-bold">Coverage</th>
+                                            <th className="px-3 py-2 font-bold">Responsibility &amp; Notes</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {map.cui_handling.map((row, i) => (
                                             <tr key={i} className="border-t border-white/5 align-top">
-                                                <td className="px-3 py-3 text-xs font-semibold text-slate-200 whitespace-nowrap">{row.requirement}</td>
-                                                <td className="px-3 py-3 text-[11px] font-mono text-slate-400">{row.primary_controls}</td>
-                                                <td className="px-3 py-3"><CoverageBadge value={row.coverage} /></td>
-                                                <td className="px-3 py-3 text-xs text-slate-400 leading-relaxed">{row.notes}</td>
+                                                <td className="px-3 py-2.5 text-[11px] font-semibold text-slate-200 whitespace-nowrap">{row.requirement}</td>
+                                                <td className="px-3 py-2.5 text-[10px] font-mono text-slate-400">{row.primary_controls}</td>
+                                                <td className="px-3 py-2.5"><CoverageBadge value={row.coverage} /></td>
+                                                <td className="px-3 py-2.5 text-[11px] text-slate-400 leading-relaxed">{row.notes}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -918,24 +799,24 @@ const CmmcCuiMapping = ({ map, summary, embedded = false }) => {
                     {/* Family coverage */}
                     {map.family_coverage?.length > 0 && (
                         <div>
-                            <div className="text-[11px] uppercase tracking-wider font-bold text-indigo-400 mb-2.5 flex items-center gap-1.5">
+                            <div className="text-[10px] uppercase tracking-wider font-bold text-indigo-400 mb-2 flex items-center gap-1.5">
                                 <ShieldCheck className="w-3.5 h-3.5" /> NIST 800-171 / CMMC Level 2 Family Coverage ({map.family_coverage.length} domains)
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 {map.family_coverage.map((row, i) => (
-                                    <div key={i} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3.5">
-                                        <div className="flex items-center justify-between gap-2 mb-2">
-                                            <span className="text-sm font-bold text-slate-100">{row.domain}</span>
+                                    <div key={i} className="bg-[#0f0f12] border border-white/5 rounded-lg p-3">
+                                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                                            <span className="text-[11px] font-bold text-slate-200">{row.domain}</span>
                                             <CoverageBadge value={row.coverage} />
                                         </div>
-                                        <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+                                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                                             {(row.ksi_family || '').split(',').map(f => f.trim()).filter(Boolean).map(f => (
-                                                <span key={f} className="text-[10px] font-mono bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 font-bold">
+                                                <span key={f} className="text-[9px] font-mono bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 font-bold">
                                                     {f.includes('(') || f.includes('Inherited') ? f : `KSI-${f}`}
                                                 </span>
                                             ))}
                                         </div>
-                                        <div className="text-[11px] text-slate-500 leading-relaxed">{row.notes}</div>
+                                        <div className="text-[10px] text-slate-500 leading-relaxed">{row.notes}</div>
                                     </div>
                                 ))}
                             </div>
@@ -945,7 +826,7 @@ const CmmcCuiMapping = ({ map, summary, embedded = false }) => {
                     {/* Scope notes */}
                     {map.scope_notes?.length > 0 && (
                         <div>
-                            <div className="text-[11px] uppercase tracking-wider font-bold text-indigo-400 mb-2.5 flex items-center gap-1.5">
+                            <div className="text-[10px] uppercase tracking-wider font-bold text-indigo-400 mb-2 flex items-center gap-1.5">
                                 <ScrollText className="w-3.5 h-3.5" /> Scope &amp; Shared-Responsibility Notes
                             </div>
                             <div className="space-y-1.5">
@@ -1075,7 +956,12 @@ const CustomerResponsibilityMatrix = () => {
             <SectionNav active={section} onChange={handleSectionChange} counts={counts} />
 
             {section === 'controls' && (
-                <ControlsSection controls={controls} modeSummary={modeSummary} mode={mode} setMode={setMode} />
+                <div className="space-y-6">
+                    <ModeToggle mode={mode} setMode={setMode} />
+                    <ModeLegend mode={mode} />
+                    <ResponsibilitySplit counts={modeSummary?.by_responsibility} total={modeSummary?.total} />
+                    <ControlBrowser controls={controls} mode={mode} />
+                </div>
             )}
             {section === 'cmmc' && (
                 <CmmcCuiMapping map={data.cmmc_cui} summary={summary.cmmc_cui} embedded />
