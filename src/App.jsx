@@ -79,117 +79,7 @@ const SidebarItem = memo(({ icon: Icon, label, badge, isActive, onClick, locked 
   </button>
 ));
 
-const StatsCard = memo(({ title, value, contextMetric, statusLabel, statusColor, subtitle }) => (
-  <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-5 group hover:border-white/20 transition-all shadow-sm`}>
-    <div className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">{title}</div>
-    <div className="text-2xl font-bold text-white mb-2 tracking-tight font-mono tabular-nums">{value}</div>
-    {subtitle && <div className="text-slate-500 text-[10px] mb-2 leading-snug">{subtitle}</div>}
-    <div className="flex items-center justify-between text-[10px]">
-      <span className={`font-medium ${statusColor}`}>{statusLabel}</span>
-      <span className="text-slate-400 font-mono tabular-nums">{contextMetric}</span>
-    </div>
-  </div>
-));
-
 // --- DASHBOARD COMPONENTS ---
-
-const ImpactBanner = memo(() => {
-  const { metadata } = useData();
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const handleRefresh = useCallback(() => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
-  }, []);
-
-  if (!metadata) return null;
-
-  const lastRunDate = metadata.validation_date ? new Date(metadata.validation_date) : new Date();
-  const level = metadata.impact_level || 'MODERATE';
-  const timeElapsed = getTimeElapsed(lastRunDate);
-
-  const styles = {
-    'HIGH': { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/20', solid: 'bg-rose-500' },
-    'MODERATE': { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', solid: 'bg-amber-500' },
-    'LOW': { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20', solid: 'bg-emerald-500' }
-  }[level] || { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', solid: 'bg-blue-500' };
-
-  return (
-    <div className={`relative overflow-hidden rounded-xl border ${THEME.border} ${THEME.panel} p-0 mb-8 shadow-md group`}>
-      <div className={`h-1 w-full ${styles.solid} opacity-80`} />
-
-      <div className="p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-        <div className="flex items-center gap-5 w-full md:w-auto">
-          <div className={`p-3 rounded-xl border ${styles.border} ${styles.bg}`}>
-            <Activity size={20} className={styles.text} />
-          </div>
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h2 className="text-white font-bold text-lg tracking-tight">Continuous Validation Pipeline</h2>
-              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${styles.border} ${styles.bg} ${styles.text}`}>
-                {level} Impact
-              </span>
-            </div>
-            <p className="text-slate-400 text-xs flex items-center gap-2">
-              Automated testing against {metadata.impact_thresholds?.min || '80%'} control baselines
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-12 px-8 border-x border-white/5 hidden md:flex">
-          <div className="text-center">
-            <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Pass Rate</div>
-            <div className="text-white font-mono font-bold text-2xl tabular-nums">{metadata.pass_rate}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Control Status</div>
-            <div className="text-white font-mono font-bold text-2xl flex items-center gap-2 tabular-nums">
-              <span className="text-emerald-400">{metadata.passed}</span>
-              <span className="text-slate-600 text-lg">/</span>
-              <span className="text-slate-400 text-lg">{metadata.total_validated}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center gap-2 text-[10px] text-slate-400 bg-white/5 px-2 py-1 rounded border border-white/5">
-              <Calendar size={10} />
-              <span className="text-slate-300 font-mono tabular-nums">
-                {lastRunDate.toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
-              </span>
-              <Clock size={10} className="ml-1" />
-              <span className="text-slate-300 font-mono tabular-nums">
-                {lastRunDate.toLocaleTimeString(undefined, {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit'
-                })}
-              </span>
-            </div>
-            <div className="text-[9px] text-slate-500 font-mono">
-              Last validated {timeElapsed}
-            </div>
-          </div>
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-blue-400 hover:text-blue-300 transition-colors"
-          >
-            <RefreshCw size={10} className={isRefreshing ? 'animate-spin' : ''} />
-            Sync Now
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-});
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -619,10 +509,10 @@ const AppShell = () => {
             )}
           </nav>
 
-          <div className="p-4 border-t border-white/5 bg-[#09090b]">
+          <div className="p-4" style={{ borderTop: "1px solid var(--line)" }}>
             <button
               onClick={() => { setSettingsOpen(true); setMobileMenuOpen(false); }}
-              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase"
+              className="btn ghost" style={{ width: "100%", fontSize: 10, justifyContent: "center" }}
             >
               <Database size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> Manage Data
             </button>
@@ -737,10 +627,10 @@ const AppShell = () => {
             )}
           </nav>
 
-          <div className="p-4 border-t border-white/5 bg-[#09090b]">
+          <div className="p-4" style={{ borderTop: "1px solid var(--line)" }}>
             <button
               onClick={() => setSettingsOpen(true)}
-              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase"
+              className="btn ghost" style={{ width: "100%", fontSize: 10, justifyContent: "center" }}
             >
               <Database size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> Manage Data
             </button>
@@ -787,9 +677,9 @@ const AppShell = () => {
               activeView === 'register' ? <RemediationRegister initialFilters={registerFilters} /> :
               !isAuthenticated ? (
                 <div className="flex items-center justify-center min-h-[60vh]">
-                  <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-10 rounded-2xl border border-gray-700 max-w-lg">
-                    <div className="w-16 h-16 mb-5 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
-                      <Lock size={28} className="text-blue-400" />
+                  <div className="panel max-w-lg" style={{ padding: 40 }}>
+                    <div className="w-16 h-16 mb-5 bg-[#818cf8]/10 rounded-2xl flex items-center justify-center border border-[#818cf8]/30">
+                      <Lock size={28} className="text-[#818cf8]" />
                     </div>
                     <h3 className="font-semibold text-white text-xl mb-3">Verified federal access required</h3>
                     <p className="text-sm text-gray-400 mb-4 leading-relaxed">
@@ -800,13 +690,13 @@ const AppShell = () => {
                     </p>
                     <p className="text-sm text-gray-400 mb-6 leading-relaxed">
                       No registration is needed for our public transparency views:
-                      <button onClick={() => navigate('trust')} className="text-blue-400 hover:text-blue-300 font-medium mx-1">Trust Center</button>,
-                      <button onClick={() => navigate('dashboard')} className="text-blue-400 hover:text-blue-300 font-medium mx-1">Overview</button>, and the
-                      <button onClick={() => navigate('register')} className="text-blue-400 hover:text-blue-300 font-medium mx-1">Remediation Register</button>.
+                      <button onClick={() => navigate('trust')} className="font-medium mx-1" style={{ color: "var(--indigo)" }}>Trust Center</button>,
+                      <button onClick={() => navigate('dashboard')} className="font-medium mx-1" style={{ color: "var(--indigo)" }}>Overview</button>, and the
+                      <button onClick={() => navigate('register')} className="font-medium mx-1" style={{ color: "var(--indigo)" }}>Remediation Register</button>.
                     </p>
                     <button
                       onClick={() => openModal('registration')}
-                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-900/30"
+                      className="btn ind"
                     >
                       Register with government email
                     </button>
