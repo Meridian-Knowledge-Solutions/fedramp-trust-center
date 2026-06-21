@@ -144,7 +144,7 @@ h3.sec::after{content:"";flex:1;height:1px;background:var(--line)}
     <header class="bar">
       <div class="ttl" id="ptitle">Overview<small id="psub">system-wide posture</small></div>
       <div class="right">
-        <span class="pill"><span class="d"></span> OPERATIONAL</span>
+        <span class="pill"><span class="d"></span> KSI VALIDATED · 2H AGO</span>
         <span>FR2527956755</span>
       </div>
     </header>
@@ -181,10 +181,41 @@ const FW=[['FedRAMP 20x','AUTHORIZED'],['NIST 800-53 R5','MODERATE'],['FedRAMP K
 const V={};
 
 V.dashboard=()=>`
-  <div class="kick">LIVE · CONTINUOUSLY MONITORED · FR2527956755</div>
-  <h1 class="big">Authorization, observed in <span class="g">real time.</span></h1>
-  <p class="lede">A living view of how Meridian LMS maintains its FedRAMP 20x Moderate authorization — KSI posture, vulnerability data, and the evidence beneath them, streaming as it is collected.</p>
-  <div class="console">
+  <div class="kick">LIVE · CONTINUOUSLY MONITORED · MODERATE IMPACT</div>
+  <h1 class="big">Continuous validation, <span class="g">observed live.</span></h1>
+  <p class="lede">System-wide posture for the FedRAMP 20x Moderate authorization — Key Security Indicators validated continuously, with evidence sealed daily.</p>
+
+  <div class="panel" style="margin-bottom:14px">
+    <div class="ph"><h4 style="display:flex;align-items:center;gap:10px"><span style="color:var(--signal)">◢ Operational</span> <span class="tag ok">MODERATE</span></h4><span class="map" style="cursor:pointer">↻ SYNC NOW</span></div>
+    <div class="g4" style="padding:18px">
+      <div class="kpi"><div class="v s">93.4%</div><div class="l">Pass rate</div></div>
+      <div class="kpi"><div class="v">90%</div><div class="l">Target</div></div>
+      <div class="kpi"><div class="v">61</div><div class="l">KSI controls</div></div>
+      <div class="kpi"><div class="v i">57</div><div class="l">Passing</div><div class="sub">validated 2 hours ago</div></div>
+    </div>
+  </div>
+
+  <div class="g4" style="margin-bottom:8px">
+    ${[['Critical',0,'z'],['High',1,'r'],['Medium',3,'h'],['Low',0,'z']].map(v=>`<div class="vbox" style="cursor:pointer">${v[1]===0?'<div class="glow"></div>':''}<div class="big ${v[2]}">${v[1]}</div><div class="lab">${v[0]} · backlog</div></div>`).join('')}
+  </div>
+
+  <h3 class="sec">KSI control matrix</h3>
+  <div style="display:flex;flex-direction:column;gap:14px">
+    ${[['Identity & Access','KSI-IAM',[['KSI-IAM-01','MFA enforced org-wide',1],['KSI-IAM-03','PIV/CAC certificate validation',1],['KSI-IAM-05','Session timeout policy',1]]],
+       ['Monitoring & Logging','KSI-MLA',[['KSI-MLA-01','Centralized audit logging',1],['KSI-MLA-02','Anomaly detection',1],['KSI-MLA-06','Log retention · 1yr',0]]],
+       ['Third-Party','KSI-TPR',[['KSI-TPR-01','Subprocessor inventory',1],['KSI-TPR-02','Attestation refresh',0]]]
+      ].map(g=>`<div class="panel"><div class="ph"><h4>${g[0]}</h4><span class="map">${g[2].some(c=>!c[2])?'<span style="color:var(--red)">1 requiring action</span>':'all operational'}</span></div>${g[2].map(c=>`<div class="ctrl"><div class="nm"><span class="ck" style="color:${c[2]?'var(--signal)':'var(--red)'}">${c[2]?'✓':'✕'}</span><span class="mono" style="color:var(--indigo)">${c[0]}</span><span>${c[1]}</span></div><span class="tag ${c[2]?'ok':'red'}">${c[2]?'PASS':'FAIL'}</span></div>`).join('')}</div>`).join('')}
+  </div>
+
+  <h3 class="sec">Validation velocity</h3>
+  <div class="panel"><div class="ph"><h4>Compliance trend</h4><span class="map">14 historical runs</span></div>
+    <div class="row"><span class="svc" style="width:130px">Compliance %</span><div class="spark" style="max-width:none;height:50px">${trendBars}</div><span class="mono" style="margin-left:14px;color:var(--signal)">82% → 93.4%</span></div></div>`;
+
+V.trust=()=>`
+  <div class="kick">02 — AUTHORIZATION RECORD</div>
+  <h1 class="big">FedRAMP <span class="g">Trust Center</span></h1>
+  <p class="lede">The public authorization record for Meridian LMS — posture, controls, and artifacts for agency reviewers.</p>
+  <div class="console" style="margin-bottom:18px">
     <div class="console-top"><div class="dots"><i></i><i></i><i></i></div><span class="ttl">meridian://trust/live</span><span class="r"><span class="d"></span> STREAMING</span></div>
     <div class="cgrid">
       <div class="cstat"><div class="fig s">99.99%</div><div class="lab">Uptime / 90d</div></div>
@@ -194,14 +225,7 @@ V.dashboard=()=>`
     </div>
     <div class="log" id="log"></div>
   </div>
-  <div class="marquee"><div class="mtrack">${[...FW,...FW].map(f=>`<span><b>${f[0]}</b> <span class="v">◆ ${f[1]}</span></span>`).join('')}</div></div>
-  <h3 class="sec">System status</h3>
-  <div class="panel">${[['API','99.99%','ok'],['Dashboard','99.98%','ok'],['Authentication','100%','ok'],['Evidence pipeline','99.97%','ok'],['Webhooks','99.81%','warn'],['Object storage','99.99%','ok']].map((s,i)=>`<div class="row"><span class="svc" style="width:160px">${s[0]}</span><div class="spark">${bars(i+1,48,s[2]==='warn')}</div><span class="mono" style="width:64px;text-align:right;margin-left:auto">${s[1]}</span><span style="margin-left:14px"><span class="tag ${s[2]==='ok'?'ok':'warn'}">${s[2]==='ok'?'OPERATIONAL':'DEGRADED'}</span></span></div>`).join('')}</div>`;
-
-V.trust=()=>`
-  <div class="kick">02 — AUTHORIZATION RECORD</div>
-  <h1 class="big">FedRAMP <span class="g">Trust Center</span></h1>
-  <p class="lede">The public authorization record for Meridian LMS — posture, controls, and artifacts for agency reviewers.</p>
+  <div class="marquee" style="margin-bottom:18px"><div class="mtrack">${[...FW,...FW].map(f=>`<span><b>${f[0]}</b> <span class="v">◆ ${f[1]}</span></span>`).join('')}</div></div>
   <div class="bset">${FW.map(f=>`<span class="badge ${f[1]==='AUTHORIZED'?'s':''}">${f[1]==='AUTHORIZED'?'● ':''}${f[0]}</span>`).join('')}</div>
   <div class="grid g4">
     <div class="kpi"><div class="v s">93.4%</div><div class="l">KSI compliance</div><div class="sub">57 / 61 passing</div></div>
