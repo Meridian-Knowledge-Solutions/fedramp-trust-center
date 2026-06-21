@@ -3,7 +3,7 @@ import {
   LayoutDashboard, ShieldAlert, User, LogOut,
   Menu, Activity, Calendar, Clock,
   FileText, RefreshCw, BarChart3, Eye, X, Shield, Layers,
-  BookOpen, Code2, FileBarChart, Database, ListTodo, Lock
+  BookOpen, Code2, FileBarChart, Database, ListTodo, Lock, Megaphone
 } from 'lucide-react';
 
 import {
@@ -31,6 +31,7 @@ import { SchemaTab } from './components/trust/SchemaTab';
 import { ReportsTab } from './components/trust/ReportsTab';
 import { RemediationRegister } from './components/trust/RemediationRegister';
 import { RemediationHeatmap } from './components/trust/RemediationHeatmap';
+import { ScnView } from './components/trust/ScnView';
 import { TrustCenterDataProvider } from './hooks/useTrustCenterData';
 
 import { THEME, BASE_PATH } from './config/theme';
@@ -323,13 +324,14 @@ const DashboardContent = memo(({ onOpenRegister }) => {
 // --- APP SHELL ---
 
 const KNOWN_VIEWS = new Set([
-  'dashboard', 'trust', 'vdr', 'transparency', 'metrics',
+  'dashboard', 'trust', 'scn', 'vdr', 'transparency', 'metrics',
   'failures', 'register', 'mas', 'policies', 'schema', 'reports',
 ]);
 
 const VIEW_TITLES = {
   dashboard: ['Overview', 'system-wide posture'],
   trust: ['Trust Center', 'authorization, live'],
+  scn: ['Significant Changes', 'change notifications'],
   vdr: ['VDR Security', 'vulnerability data'],
   transparency: ['Transparency Console', 'live evidence stream'],
   metrics: ['Pipeline Metrics', 'validation telemetry'],
@@ -430,6 +432,12 @@ const AppShell = () => {
               label="Trust Center"
               isActive={activeView === 'trust'}
               onClick={() => { navigate('trust'); setMobileMenuOpen(false); }}
+            />
+            <SidebarItem
+              icon={Megaphone}
+              label="Significant Changes"
+              isActive={activeView === 'scn'}
+              onClick={() => { navigate('scn'); setMobileMenuOpen(false); }}
             />
             <SidebarItem
               icon={Shield}
@@ -548,6 +556,12 @@ const AppShell = () => {
               label="Trust Center"
               isActive={activeView === 'trust'}
               onClick={() => navigate('trust')}
+            />
+            <SidebarItem
+              icon={Megaphone}
+              label="Significant Changes"
+              isActive={activeView === 'scn'}
+              onClick={() => navigate('scn')}
             />
             <SidebarItem
               icon={Shield}
@@ -674,6 +688,7 @@ const AppShell = () => {
           <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto relative z-10">
             {activeView === 'dashboard' ? <DashboardContent onOpenRegister={goToRegister} /> :
               activeView === 'trust' ? <TrustCenterView /> :
+              activeView === 'scn' ? <ScnView /> :
               activeView === 'register' ? <RemediationRegister initialFilters={registerFilters} /> :
               !isAuthenticated ? (
                 <div className="flex items-center justify-center min-h-[60vh]">

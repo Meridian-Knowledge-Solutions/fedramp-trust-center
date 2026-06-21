@@ -135,15 +135,15 @@ export const RegistrationModal = () => {
       variant="dark"
     >
       <div className="mb-6">
-        <div className="bg-gradient-to-br from-blue-900/30 to-blue-800/30 border border-blue-500/30 rounded-xl p-5 flex items-start gap-3 shadow-lg">
-          <div className="p-2 bg-blue-500/20 rounded-lg border border-blue-500/30 flex-shrink-0">
-            <Shield className="text-blue-400" size={20} />
+        <div className="bg-[#818cf8]/[0.06] border border-[#818cf8]/30 rounded-xl p-5 flex items-start gap-3">
+          <div className="p-2 bg-[#818cf8]/10 rounded-lg border border-[#818cf8]/30 flex-shrink-0">
+            <Shield className="text-[#818CF8]" size={20} />
           </div>
           <div className="text-sm">
-            <p className="text-white font-bold mb-2">
+            <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#818CF8] mb-2">
               Federal Agency Personnel Only
             </p>
-            <p className="text-gray-300 leading-relaxed">
+            <p className="text-[#788596] leading-relaxed">
               Access to detailed technical validation findings and authorization package materials
               is restricted to authorized federal personnel with valid .gov or .mil email addresses.
             </p>
@@ -154,8 +154,8 @@ export const RegistrationModal = () => {
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Email */}
         <div>
-          <label htmlFor="email" className="block text-sm font-bold text-white mb-2">
-            <Mail size={14} className="inline mr-1 text-blue-400" />
+          <label htmlFor="email" className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.08em] text-[#788596] mb-2">
+            <Mail size={14} className="inline mr-1 text-[#818CF8]" />
             Official Email Address *
           </label>
           <input
@@ -165,23 +165,23 @@ export const RegistrationModal = () => {
             value={formData.email}
             onChange={handleChange}
             placeholder="e.g., john.smith@agency.gov"
-            className={`w-full px-4 py-3 bg-gray-900 border ${errors.email ? 'border-red-500/50' : 'border-gray-700'
-              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all`}
+            className={`w-full px-4 py-3 bg-[#0A0E13] border ${errors.email ? 'border-[#F2607A]/60' : 'border-[#1A222D]'
+              } rounded-lg focus:ring-1 focus:ring-[#818cf8]/30 focus:border-[#818cf8]/60 text-[#E8EEF4] placeholder-[#424E5C] font-mono text-[13px] outline-none transition-all`}
             required
           />
           {errors.email && (
-            <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
+            <p className="text-[11px] text-[#F2607A] mt-2 flex items-center gap-1 font-mono">
               <AlertCircle size={12} />
               {errors.email}
             </p>
           )}
-          <p className="text-xs text-gray-500 mt-1.5">Must be a .gov, .mil, or .fed.us email address</p>
+          <p className="text-[11px] text-[#424E5C] mt-1.5 font-mono">Must be a .gov, .mil, or .fed.us email address</p>
         </div>
 
         {/* Agency */}
         <div>
-          <label htmlFor="agency" className="block text-sm font-bold text-white mb-2">
-            <Shield size={14} className="inline mr-1 text-blue-400" />
+          <label htmlFor="agency" className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.08em] text-[#788596] mb-2">
+            <Shield size={14} className="inline mr-1 text-[#818CF8]" />
             Agency/Organization Name *
           </label>
           <input
@@ -191,12 +191,12 @@ export const RegistrationModal = () => {
             value={formData.agency}
             onChange={handleChange}
             placeholder="e.g., Department of Defense"
-            className={`w-full px-4 py-3 bg-gray-900 border ${errors.agency ? 'border-red-500/50' : 'border-gray-700'
-              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all`}
+            className={`w-full px-4 py-3 bg-[#0A0E13] border ${errors.agency ? 'border-[#F2607A]/60' : 'border-[#1A222D]'
+              } rounded-lg focus:ring-1 focus:ring-[#818cf8]/30 focus:border-[#818cf8]/60 text-[#E8EEF4] placeholder-[#424E5C] font-mono text-[13px] outline-none transition-all`}
             required
           />
           {errors.agency && (
-            <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
+            <p className="text-[11px] text-[#F2607A] mt-2 flex items-center gap-1 font-mono">
               <AlertCircle size={12} />
               {errors.agency}
             </p>
@@ -205,8 +205,8 @@ export const RegistrationModal = () => {
 
         {/* Contact Name */}
         <div>
-          <label htmlFor="contact" className="block text-sm font-bold text-white mb-2">
-            <User size={14} className="inline mr-1 text-blue-400" />
+          <label htmlFor="contact" className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.08em] text-[#788596] mb-2">
+            <User size={14} className="inline mr-1 text-[#818CF8]" />
             Contact Name *
           </label>
           <input
@@ -216,12 +216,12 @@ export const RegistrationModal = () => {
             value={formData.contact}
             onChange={handleChange}
             placeholder="e.g., John Smith"
-            className={`w-full px-4 py-3 bg-gray-900 border ${errors.contact ? 'border-red-500/50' : 'border-gray-700'
-              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all`}
+            className={`w-full px-4 py-3 bg-[#0A0E13] border ${errors.contact ? 'border-[#F2607A]/60' : 'border-[#1A222D]'
+              } rounded-lg focus:ring-1 focus:ring-[#818cf8]/30 focus:border-[#818cf8]/60 text-[#E8EEF4] placeholder-[#424E5C] font-mono text-[13px] outline-none transition-all`}
             required
           />
           {errors.contact && (
-            <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
+            <p className="text-[11px] text-[#F2607A] mt-2 flex items-center gap-1 font-mono">
               <AlertCircle size={12} />
               {errors.contact}
             </p>
@@ -230,8 +230,8 @@ export const RegistrationModal = () => {
 
         {/* System Name (Optional) */}
         <div>
-          <label htmlFor="system" className="block text-sm font-bold text-white mb-2">
-            <FileText size={14} className="inline mr-1 text-blue-400" />
+          <label htmlFor="system" className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.08em] text-[#788596] mb-2">
+            <FileText size={14} className="inline mr-1 text-[#818CF8]" />
             System/Project Name
           </label>
           <input
@@ -241,14 +241,14 @@ export const RegistrationModal = () => {
             value={formData.system}
             onChange={handleChange}
             placeholder="e.g., Agency Training Platform"
-            className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 transition-all"
+            className="w-full px-4 py-3 bg-[#0A0E13] border border-[#1A222D] rounded-lg focus:ring-1 focus:ring-[#818cf8]/30 focus:border-[#818cf8]/60 text-[#E8EEF4] placeholder-[#424E5C] font-mono text-[13px] outline-none transition-all"
           />
-          <p className="text-xs text-gray-500 mt-1.5">Optional</p>
+          <p className="text-[11px] text-[#424E5C] mt-1.5 font-mono">Optional</p>
         </div>
 
         {/* Purpose (Optional) */}
         <div>
-          <label htmlFor="purpose" className="block text-sm font-bold text-white mb-2">
+          <label htmlFor="purpose" className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.08em] text-[#788596] mb-2">
             Access Purpose
           </label>
           <textarea
@@ -258,18 +258,18 @@ export const RegistrationModal = () => {
             onChange={handleChange}
             placeholder="e.g., Authorization review for new system deployment"
             rows={3}
-            className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500 resize-none transition-all"
+            className="w-full px-4 py-3 bg-[#0A0E13] border border-[#1A222D] rounded-lg focus:ring-1 focus:ring-[#818cf8]/30 focus:border-[#818cf8]/60 text-[#E8EEF4] placeholder-[#424E5C] font-mono text-[13px] resize-none outline-none transition-all"
           />
-          <p className="text-xs text-gray-500 mt-1.5">Optional</p>
+          <p className="text-[11px] text-[#424E5C] mt-1.5 font-mono">Optional</p>
         </div>
 
         {/* Submit Status */}
         {submitStatus && (
           <div className={`p-4 rounded-lg border ${submitStatus.type === 'success'
-              ? 'bg-green-500/10 border-green-500/30 text-green-400'
-              : 'bg-red-500/10 border-red-500/30 text-red-400'
+              ? 'bg-[#34E0C4]/10 border-[#34E0C4]/30 text-[#34E0C4]'
+              : 'bg-[#F2607A]/10 border-[#F2607A]/30 text-[#F2607A]'
             }`}>
-            <p className="font-medium">{submitStatus.message}</p>
+            <p className="font-mono text-[13px]">{submitStatus.message}</p>
           </div>
         )}
 
@@ -278,26 +278,26 @@ export const RegistrationModal = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="group relative flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 disabled:from-gray-700 disabled:to-gray-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-900/30 disabled:shadow-none disabled:cursor-not-allowed overflow-hidden"
+            className="group relative flex-1 px-6 py-4 bg-[#818CF8] hover:bg-[#9aa3fa] disabled:bg-[#1A222D] text-[#07090C] disabled:text-[#788596] rounded-xl font-mono text-[13px] font-semibold tracking-wide transition-all hover:shadow-[0_0_24px_-4px_#818CF8] disabled:shadow-none disabled:cursor-not-allowed overflow-hidden"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             <span className="relative flex items-center justify-center gap-2">
-              <Shield size={18} />
-              {isSubmitting ? 'Submitting...' : 'Register for Access'}
+              <Shield size={16} />
+              {isSubmitting ? 'Submitting…' : 'Register for Access'}
             </span>
           </button>
           <button
             type="button"
             onClick={handleClose}
-            className="px-6 py-4 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl font-medium transition-colors border border-gray-700"
+            className="px-6 py-4 bg-transparent hover:border-[#788596] text-[#E8EEF4] rounded-xl font-mono text-[13px] transition-colors border border-[#1A222D]"
           >
             Cancel
           </button>
         </div>
       </form>
 
-      <div className="mt-6 pt-6 border-t border-gray-800">
-        <p className="text-xs text-gray-500 text-center leading-relaxed">
+      <div className="mt-6 pt-6 border-t border-[#1A222D]">
+        <p className="text-[11px] text-[#788596] text-center leading-relaxed font-mono">
           By registering, you acknowledge that access is restricted to federal personnel
           for official government use only.
         </p>
