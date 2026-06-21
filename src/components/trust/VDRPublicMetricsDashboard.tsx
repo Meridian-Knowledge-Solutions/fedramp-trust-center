@@ -176,7 +176,7 @@ export default function VDRDashboard() {
 
   // Severity donut data — supports data.severity_distribution, data.snapshot.severity, and data.risk.severity
   const sevDonut = useMemo(() => {
-    const sev = data?.severity_distribution ?? data?.snapshot?.severity ?? data?.risk?.severity;
+    const sev = data?.risk?.severity_assessed ?? data?.severity_distribution ?? data?.snapshot?.severity ?? data?.risk?.severity;
     if (!sev) return [];
     return Object.entries(sev)
       .filter(([, v]) => (v as number) > 0)
@@ -240,7 +240,7 @@ export default function VDRDashboard() {
   const compliance = data.compliance || {};
   const kpi = data.kpi || {
     total_vulnerabilities: snap.total_vulnerabilities ?? 0,
-    critical_count: snap.critical_findings ?? risk.critical ?? risk.severity?.CRITICAL ?? snap.severity?.CRITICAL ?? 0,
+    critical_count: snap.critical_findings ?? risk.critical ?? risk.severity_assessed?.CRITICAL ?? risk.severity?.CRITICAL ?? snap.severity?.CRITICAL ?? 0,
     lev_count: snap.lev_count ?? risk.lev_count ?? 0,
     irv_count: snap.irv_count ?? risk.irv_count ?? 0,
     kev_count: snap.kev_matches ?? risk.kev_matches ?? 0,
@@ -289,8 +289,13 @@ export default function VDRDashboard() {
   const d7 = kpi.delta_7d ?? buildDelta(data.deltas?.vs_7d);
   const d30 = kpi.delta_30d ?? buildDelta(data.deltas?.vs_30d);
 
-  // Severity counters for the four .vbox tiles (critical/high/medium/low)
-  const sevSource = data?.severity_distribution ?? data?.snapshot?.severity ?? data?.risk?.severity ?? {};
+  // Severity counters for the four .vbox tiles (critical/high/medium/low).
+  // VDR-assessed (post-contextual-scoring) is the authoritative headline; fall
+  // back to legacy risk.severity. The raw scanner severity is shown separately.
+  const sevSource = data?.risk?.severity_assessed ?? data?.severity_distribution ?? data?.snapshot?.severity ?? data?.risk?.severity ?? {};
+  const sevOriginal = data?.risk?.severity_original ?? null;
+  const sevNote = data?.risk?.severity_note ?? null;
+  const ORIG_BUCKETS = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"];
   const sevCounts: { label: string; value: number }[] = [
     { label: "Critical", value: sevSource.CRITICAL ?? kpi.critical_count ?? 0 },
     { label: "High", value: sevSource.HIGH ?? 0 },
@@ -312,9 +317,16 @@ export default function VDRDashboard() {
       </p>
 
       {/* ──────────────────────────────────────────────
-          SEVERITY COUNTERS — four .vbox tiles
+          SEVERITY BREAKDOWN — VDR-assessed (authoritative) headline tiles,
+          with the original scanner severity as a muted comparison row
          ────────────────────────────────────────────── */}
-      <div className="g4" style={{ marginBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 9, margin: "0 0 9px" }}>
+        <span className="mono" style={{ fontSize: 10, letterSpacing: ".06em", textTransform: "uppercase", color: SIGNAL }}>
+          VDR-Assessed
+        </span>
+        <span className="tag ok" style={{ fontSize: 9 }}>AUTHORITATIVE</span>
+      </div>
+      <div className="g4" style={{ marginBottom: sevOriginal ? 10 : 14 }}>
         {sevCounts.map((s, i) => {
           const cls = s.value === 0 ? "z" : i === 0 ? "r" : "h";
           return (
@@ -326,6 +338,33 @@ export default function VDRDashboard() {
           );
         })}
       </div>
+
+      {sevOriginal && (
+        <div className="panel" style={{ marginBottom: sevNote ? 8 : 14, padding: "12px 16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <span className="mono" style={{ fontSize: 10, letterSpacing: ".06em", textTransform: "uppercase", color: ASH }}>
+              Original scanner
+            </span>
+            <span className="mono" style={{ fontSize: 9, letterSpacing: ".04em", textTransform: "uppercase", color: FAINT }}>
+              pre-assessment
+            </span>
+            <div style={{ display: "flex", gap: 18, marginLeft: "auto", flexWrap: "wrap" }}>
+              {ORIG_BUCKETS.map((b) => (
+                <span key={b} className="mono" style={{ fontSize: 12, color: ASH }}>
+                  {b.charAt(0) + b.slice(1).toLowerCase()}{" "}
+                  <span style={{ color: (sevOriginal[b] ?? 0) > 0 ? INDIGO : FAINT, fontWeight: 600 }}>{sevOriginal[b] ?? 0}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {sevNote && (
+        <p className="mono" style={{ fontSize: 11, color: FAINT, lineHeight: 1.6, margin: "0 0 16px" }}>
+          {sevNote}
+        </p>
+      )}
 
       {/* ──────────────────────────────────────────────
           POSTURE + ATTACK SURFACE — two panels
