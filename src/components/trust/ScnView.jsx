@@ -1,19 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Megaphone, GitBranch, Clock, ShieldCheck, AlertTriangle,
-  CheckCircle2, FileText, Send, History, Boxes
+  Megaphone, GitBranch, Clock, ShieldCheck, CheckCircle2,
+  FileText, Send, History, Boxes, GitCommitHorizontal
 } from 'lucide-react';
 
-// Data lives under the public `data/` tree (same base path the rest of the app uses).
-const DATA = import.meta.env.BASE_URL.endsWith('/')
-  ? `${import.meta.env.BASE_URL}data`
-  : `${import.meta.env.BASE_URL}/data`;
+// All SCN data is sourced from the real, redactor-processed, manifest-tracked
+// trust-center publication tree — never the `samples/` fixtures.
+const TC = import.meta.env.BASE_URL.endsWith('/')
+  ? `${import.meta.env.BASE_URL}trust-center`
+  : `${import.meta.env.BASE_URL}/trust-center`;
 
-const SCN_REPORT = `${DATA}/reports/samples/scn-sample-report.json`;
-const SCN_HISTORY = `${DATA}/scn_history.jsonl`;
-const SCN_HTML = `${DATA}/reports/html/scn-report.html`;
-const SCN_SCHEMA = `${DATA}/reports/schemas/scn-schema.json`;
-const OAR = `${DATA}/ongoing_authorization_report_Q4_2025.json`;
+const SCN_REPORT = `${TC}/reports/json/scn-report.json`;       // latest live notification
+const SCN_EVENTS = `${TC}/reports/json/scn-recent-events.json`; // real recent-events feed
+const SCN_HTML = `${TC}/reports/html/scn-report.html`;
+const SCN_SCHEMA = `${TC}/schemas/scn-schema.json`;
 
 // --- formatting helpers --------------------------------------------------
 const fmt = (ts) => {
@@ -30,14 +30,16 @@ const fmtDate = (ts) => {
     year: 'numeric', month: 'short', day: 'numeric'
   });
 };
-const titleize = (s) => (s || '').replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+const titleize = (s) => (s || '').toString().replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
-// Change tier → console accent. routine = healthy/teal, adaptive = amber, transformative = red.
+// Change tier → console accent. routine = healthy/teal, adaptive = amber,
+// transformative / critical = red.
 const tierMeta = (tier) => {
   const t = (tier || '').toLowerCase();
-  if (t.includes('transformative')) return { label: 'Transformative', tag: 'red', ck: 's' };
-  if (t.includes('adaptive')) return { label: 'Adaptive', tag: 'warn', ck: 's' };
-  return { label: 'Routine / Recurring', tag: 'ok', ck: 'p' };
+  if (t.includes('critical')) return { label: 'Critical', tag: 'red' };
+  if (t.includes('transformative')) return { label: 'Transformative', tag: 'red' };
+  if (t.includes('adaptive')) return { label: 'Adaptive', tag: 'warn' };
+  return { label: 'Routine', tag: 'ok' };
 };
 const impactTag = (impact) => {
   const i = (impact || '').toLowerCase();
@@ -59,10 +61,68 @@ const Empty = ({ children }) => (
   </div>
 );
 
+// One real change event from the SCN pipeline feed.
+const EventRow = ({ e }) => {
+  const t = tierMeta(e.tier);
+  const hasMetrics = (e.commit_count || 0) > 0 || (e.files_changed || 0) > 0 || (e.repositories_with_changes || 0) > 0;
+  const sic = Object.entries(e.service_impact_categories || {});
+  const failed = e.source_change_id === 'MAS-FAILED';
+
+  return (
+    <div style={{ padding: '15px 20px', borderBottom: '1px solid var(--line)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <span className="mono" style={{ color: 'var(--indigo)', fontSize: 13 }}>{e.notification_id}</span>
+        <span className="mono" style={{ color: 'var(--faint)', fontSize: 11 }}>{fmt(e.observed_at)}</span>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, flexShrink: 0 }}>
+          {e.reclassification && <span className="tag vi">RECLASSIFIED</span>}
+          <span className={`tag ${t.tag}`}>{t.label}</span>
+        </div>
+      </div>
+
+      {hasMetrics && (
+        <div className="mono" style={{ color: 'var(--ash)', fontSize: 11.5, marginTop: 9, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <GitCommitHorizontal size={12} style={{ color: 'var(--faint)' }} />
+          {e.repositories_with_changes} repo{e.repositories_with_changes === 1 ? '' : 's'} ·{' '}
+          {e.commit_count} commit{e.commit_count === 1 ? '' : 's'} ·{' '}
+          {e.files_changed} file{e.files_changed === 1 ? '' : 's'} changed
+          {(e.production_files_changed || 0) > 0 && (
+            <span style={{ color: 'var(--amber)' }}> · {e.production_files_changed} production</span>
+          )}
+        </div>
+      )}
+
+      {e.component_types?.length > 0 && (
+        <div className="chips" style={{ marginTop: 9 }}>
+          {e.component_types.map((c) => (
+            <span className="badge" key={c} style={{ fontSize: 9, padding: '3px 7px' }}>{titleize(c)}</span>
+          ))}
+        </div>
+      )}
+
+      {sic.length > 0 && (
+        <div className="mono" style={{ color: 'var(--faint)', fontSize: 10.5, marginTop: 8 }}>
+          impact · {sic.map(([k, v]) => `${titleize(k)} ×${v}`).join('  ·  ')}
+        </div>
+      )}
+
+      {e.reclassification && (
+        <div style={{ color: 'var(--amber)', fontSize: 12, marginTop: 8, lineHeight: 1.5 }}>
+          ↳ Reclassified from <b>{titleize(e.reclassification.original_tier)}</b> — {e.reclassification.rationale}
+        </div>
+      )}
+
+      {failed && !hasMetrics && (
+        <div className="mono" style={{ color: 'var(--red)', fontSize: 11, marginTop: 8 }}>
+          MAS continuous-validation failure event
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const ScnView = () => {
-  const [scn, setScn] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [snapshot, setSnapshot] = useState(null);
+  const [report, setReport] = useState(null);
+  const [feed, setFeed] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -70,38 +130,26 @@ export const ScnView = () => {
     const cb = Date.now();
 
     const loadReport = fetch(`${SCN_REPORT}?t=${cb}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .catch(() => null);
+      .then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    const loadFeed = fetch(`${SCN_EVENTS}?t=${cb}`)
+      .then((r) => (r.ok ? r.json() : null)).catch(() => null);
 
-    const loadHistory = fetch(`${SCN_HISTORY}?t=${cb}`)
-      .then((r) => (r.ok ? r.text() : ''))
-      .then((txt) => txt.split('\n').map((l) => l.trim()).filter(Boolean)
-        .map((l) => { try { return JSON.parse(l); } catch { return null; } })
-        .filter(Boolean))
-      .catch(() => []);
-
-    const loadSnapshot = fetch(`${OAR}?t=${cb}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => d?.scn_snapshot || null)
-      .catch(() => null);
-
-    Promise.all([loadReport, loadHistory, loadSnapshot]).then(([rep, hist, snap]) => {
+    Promise.all([loadReport, loadFeed]).then(([rep, fd]) => {
       if (!alive) return;
-      setScn(rep);
-      setHistory(hist || []);
-      setSnapshot(snap);
+      setReport(rep);
+      setFeed(fd);
       setLoading(false);
     });
 
     return () => { alive = false; };
   }, []);
 
-  const breakdown = snapshot?.breakdown || {};
+  const scn = report;
   const tier = tierMeta(scn?.change_classification?.tier);
-
-  const sortedHistory = useMemo(
-    () => [...history].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)),
-    [history]
+  const counts = feed?.tier_counts || {};
+  const events = useMemo(
+    () => [...(feed?.events || [])].sort((a, b) => new Date(b.observed_at) - new Date(a.observed_at)),
+    [feed]
   );
 
   if (loading) {
@@ -117,48 +165,60 @@ export const ScnView = () => {
   return (
     <div className="space-y-6">
       <div className="kick">
-        SCN PROGRAM · FEDRAMP 20x{scn?.report_type ? ` · ${scn.report_type.toUpperCase()} NOTIFICATION` : ''}
+        SCN PIPELINE · FEDRAMP 20x{scn?.report_type ? ` · ${scn.report_type.toUpperCase()} NOTIFICATION` : ''}
       </div>
       <h1 className="big">Significant changes, <span className="g">documented.</span></h1>
       <p className="lede">
         Every change to the authorization boundary is classified, verified, and notified under the
-        FedRAMP 20x Significant Change Notification process — published here for agency reviewers and
-        the 3PAO as it happens.
+        FedRAMP 20x Significant Change Notification process — captured by the SCN pipeline and
+        published here as it happens.
       </p>
 
-      {/* ---- current period snapshot ---- */}
-      <h3 className="sec"><GitBranch size={13} /> Current authorization period</h3>
-      <div className="g4">
-        <div className="kpi">
-          <div className="v">{snapshot?.total_changes ?? 0}</div>
-          <div className="l">Total changes</div>
-        </div>
-        <div className="kpi">
-          <div className="v s">{breakdown.routine_recurring ?? 0}</div>
-          <div className="l">Routine</div>
-        </div>
-        <div className="kpi">
-          <div className="v a">{breakdown.adaptive ?? 0}</div>
-          <div className="l">Adaptive</div>
-        </div>
-        <div className="kpi">
-          <div className="v" style={{ color: (breakdown.transformative ?? 0) > 0 ? 'var(--red)' : 'var(--ink)' }}>
-            {breakdown.transformative ?? 0}
-          </div>
-          <div className="l">Transformative</div>
-          <div className="sub">{snapshot?.boundary_impact || snapshot?.terraform_changes ? 'boundary affected' : 'no boundary impact'}</div>
-        </div>
-      </div>
-
-      {!scn ? (
-        <Empty>No significant change notification has been published yet.</Empty>
-      ) : (
+      {/* ---- real recent-activity summary (from the events feed) ---- */}
+      {feed && (
         <>
-          {/* ---- latest notification ---- */}
+          <h3 className="sec">
+            <GitBranch size={13} /> Recent change activity
+            {feed.lookback_days ? ` · last ${feed.lookback_days} days` : ''}
+          </h3>
+          <div className="g4">
+            <div className="kpi">
+              <div className="v">{feed.event_count ?? events.length}</div>
+              <div className="l">Change events</div>
+              {feed.window_start && feed.window_end && (
+                <div className="sub">{fmtDate(feed.window_start)} – {fmtDate(feed.window_end)}</div>
+              )}
+            </div>
+            <div className="kpi">
+              <div className="v a">{counts.adaptive ?? 0}</div>
+              <div className="l">Adaptive</div>
+            </div>
+            <div className="kpi">
+              <div className="v" style={{ color: (counts.critical ?? 0) > 0 ? 'var(--red)' : 'var(--ink)' }}>
+                {counts.critical ?? 0}
+              </div>
+              <div className="l">Critical</div>
+            </div>
+            <div className="kpi">
+              <div className="v" style={{ color: (counts.transformative ?? 0) > 0 ? 'var(--red)' : 'var(--ink)' }}>
+                {counts.transformative ?? 0}
+              </div>
+              <div className="l">Transformative</div>
+              {feed.reclassifications_applied != null && (
+                <div className="sub">{feed.reclassifications_applied} reclassified</div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ---- latest live notification (from scn-report.json) ---- */}
+      {scn && (
+        <>
           <h3 className="sec"><Megaphone size={13} /> Latest notification</h3>
           <div className="panel">
             <div className="ph">
-              <h4 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <h4 style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                 <span className="mono" style={{ color: 'var(--indigo)' }}>{scn.notification_id}</span>
                 <span className={`tag ${tier.tag}`}>{tier.label}</span>
                 {scn.change_classification?.is_emergency && <span className="tag red">EMERGENCY</span>}
@@ -168,9 +228,7 @@ export const ScnView = () => {
               </span>
             </div>
             <div style={{ padding: 20 }}>
-              <div style={{ fontWeight: 600, fontSize: 17, marginBottom: 8 }}>
-                {scn.change_summary?.title}
-              </div>
+              <div style={{ fontWeight: 600, fontSize: 17, marginBottom: 8 }}>{scn.change_summary?.title}</div>
               <p style={{ color: 'var(--ash)', fontSize: 14, lineHeight: 1.6, marginBottom: 18 }}>
                 {scn.change_summary?.description}
               </p>
@@ -196,7 +254,7 @@ export const ScnView = () => {
             </div>
           </div>
 
-          {/* ---- affected components ---- */}
+          {/* affected components */}
           {scn.change_summary?.affected_components?.length > 0 && (
             <div className="panel">
               <div className="ph">
@@ -218,7 +276,7 @@ export const ScnView = () => {
             </div>
           )}
 
-          {/* ---- timeline ---- */}
+          {/* timeline */}
           <div className="panel">
             <div className="ph"><h4><Clock size={13} style={{ verticalAlign: -2, marginRight: 7 }} />Change timeline</h4></div>
             {[
@@ -236,7 +294,7 @@ export const ScnView = () => {
             ))}
           </div>
 
-          {/* ---- security controls impact ---- */}
+          {/* security controls impact */}
           {scn.security_impact_assessment?.controls_affected?.length > 0 && (
             <div className="panel">
               <div className="ph">
@@ -258,7 +316,7 @@ export const ScnView = () => {
             </div>
           )}
 
-          {/* ---- controls verification ---- */}
+          {/* controls verification */}
           {scn.controls_verification?.results?.length > 0 && (
             <div className="panel">
               <div className="ph">
@@ -270,9 +328,7 @@ export const ScnView = () => {
               {scn.controls_verification.results.map((r, i) => (
                 <div className="ctrl" key={i}>
                   <div className="nm" style={{ flexWrap: 'wrap' }}>
-                    <span className={`ck ${r.status === 'operational' ? 'p' : 's'}`}>
-                      {r.status === 'operational' ? '✓' : '!'}
-                    </span>
+                    <span className={`ck ${r.status === 'operational' ? 'p' : 's'}`}>{r.status === 'operational' ? '✓' : '!'}</span>
                     <span className="mono" style={{ color: 'var(--indigo)' }}>{r.control_id}</span>
                     <span>{r.control_name}</span>
                     <span style={{ color: 'var(--ash)', fontSize: 12.5 }}>— {r.verification_detail}</span>
@@ -288,7 +344,7 @@ export const ScnView = () => {
             </div>
           )}
 
-          {/* ---- notification recipients ---- */}
+          {/* notification recipients */}
           {scn.notification_recipients && (
             <div className="panel">
               <div className="ph"><h4><Send size={13} style={{ verticalAlign: -2, marginRight: 7 }} />Notification recipients</h4></div>
@@ -309,7 +365,7 @@ export const ScnView = () => {
             </div>
           )}
 
-          {/* ---- audit trail ---- */}
+          {/* audit trail */}
           {scn.audit_trail?.evaluation_activities?.length > 0 && (
             <div className="panel">
               <div className="ph">
@@ -328,12 +384,8 @@ export const ScnView = () => {
               ))}
               {scn.audit_trail.integrity_hash && (
                 <div className="row" style={{ gap: 18, flexWrap: 'wrap' }}>
-                  <span className="mono" style={{ fontSize: 10.5, color: 'var(--faint)' }}>
-                    SHA-256 · {scn.audit_trail.integrity_hash}
-                  </span>
-                  <span className="mono" style={{ fontSize: 10.5, color: 'var(--faint)', marginLeft: 'auto' }}>
-                    retained until {fmtDate(scn.audit_trail.retention_until)}
-                  </span>
+                  <span className="mono" style={{ fontSize: 10.5, color: 'var(--faint)' }}>SHA-256 · {scn.audit_trail.integrity_hash}</span>
+                  <span className="mono" style={{ fontSize: 10.5, color: 'var(--faint)', marginLeft: 'auto' }}>retained until {fmtDate(scn.audit_trail.retention_until)}</span>
                 </div>
               )}
             </div>
@@ -341,28 +393,18 @@ export const ScnView = () => {
         </>
       )}
 
-      {/* ---- change history ---- */}
-      <h3 className="sec"><History size={13} /> Change history</h3>
-      {sortedHistory.length === 0 ? (
-        <Empty>No change-detection events recorded yet.</Empty>
+      {/* ---- real recent-events feed ---- */}
+      <h3 className="sec"><History size={13} /> Change event feed</h3>
+      {events.length === 0 ? (
+        <Empty>No change events recorded in this window.</Empty>
       ) : (
         <div className="panel">
-          {sortedHistory.map((h, i) => {
-            const t = tierMeta(h.classification);
-            return (
-              <div className="ctrl" key={i}>
-                <div className="nm" style={{ flexWrap: 'wrap' }}>
-                  <span className="mono" style={{ color: 'var(--indigo)' }}>{h.change_id}</span>
-                  <span>{h.description}</span>
-                  <span className="mono" style={{ color: 'var(--faint)', fontSize: 11 }}>{fmt(h.timestamp)}</span>
-                </div>
-                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                  <span className={`tag ${t.tag}`}>{t.label}</span>
-                  {h.status && <span className="tag ok">{titleize(h.status)}</span>}
-                </div>
-              </div>
-            );
-          })}
+          {events.map((e, i) => <EventRow e={e} key={e.notification_id || i} />)}
+          {feed?.notes && (
+            <div className="mono" style={{ fontSize: 10.5, color: 'var(--faint)', padding: '14px 20px', lineHeight: 1.6 }}>
+              {feed.notes}
+            </div>
+          )}
         </div>
       )}
 
@@ -371,7 +413,7 @@ export const ScnView = () => {
       <div className="dlg">
         <a className="dl" href={SCN_HTML} target="_blank" rel="noopener noreferrer">
           <div>
-            <div className="t">Full SCN report</div>
+            <div className="t">Latest SCN report</div>
             <div className="f">Rendered notification · HTML</div>
           </div>
           <span className="get">VIEW →</span>
