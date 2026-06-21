@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, memo, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../contexts/ModalContext';
 import { useSystemStatus } from '../../hooks/useSystemStatus';
@@ -6,588 +6,389 @@ import { API_CONFIG, QUARTERLY_REGISTRATION_URL } from '../../config/api';
 import { BASE_PATH } from '../../config/theme';
 import { getRouteSegments, setRoute, onRouteChange } from '../../utils/hashRoute';
 import {
-    Shield, ShieldCheck, Network, Activity, Layers, Download, ExternalLink,
-    FileJson, Landmark, Calendar, Clock, Video, CheckCircle2, ArrowRight,
-    Lock, Globe, Users, MessageSquare, Send, Mail, Database, Cpu, Server,
-    Eye, AlertTriangle, TrendingUp, CheckSquare, Info, User,
-    GitCommit, CircleDot, Gauge,
+    Download, ExternalLink, Lock, Video, Calendar, Clock, Mail, Send, MessageSquare,
+    ArrowUpRight, FileJson, ChevronRight,
 } from 'lucide-react';
 import {
-    cn, Card, Badge, Eyebrow, SectionHeader, StatCard, Fact, Sparkline, SURFACE_2,
-} from './ui';
-import CustomerResponsibilityMatrix from './CustomerResponsibilityMatrix';
+    cn, C, RULE, PANEL, Kicker, Rule, Stamp, Tag, Figure, DefRow, Section, Sparkline,
+} from './dossier';
+import ComplianceLedger from './ComplianceLedger';
 
 // ============================================================================
-// TRUST CENTER — agency/assessor-facing authorization & posture surface.
-// Redesigned around a single design system (./ui): lead with authorization
-// status + live posture, then progressive disclosure per focus area.
+// TRUST CENTER — "Authorization Dossier"
+// A formal, living public record: warm paper, editorial serif, a numbered
+// section index, ruled ledgers and figures. Same data, original identity.
 // ============================================================================
 
-const TABS = [
-    { id: 'overview', label: 'Overview', icon: Shield, desc: 'Authorization & posture' },
-    { id: 'compliance', label: 'Compliance', icon: ShieldCheck, desc: 'NIST · KSI · CMMC · CUI' },
-    { id: 'architecture', label: 'Architecture', icon: Network, desc: 'Data flow & boundary' },
-    { id: 'changes', label: 'Change Activity', icon: Activity, desc: 'Significant changes' },
-    { id: 'resources', label: 'Services & Resources', icon: Layers, desc: 'Scope & artifacts' },
+const SECTIONS = [
+    { id: 'posture', num: '01', label: 'Posture' },
+    { id: 'profile', num: '02', label: 'Service Profile' },
+    { id: 'responsibility', num: '03', label: 'Shared Responsibility' },
+    { id: 'architecture', num: '04', label: 'Architecture' },
+    { id: 'changes', num: '05', label: 'Change Activity' },
+    { id: 'services', num: '06', label: 'Services & Artifacts' },
 ];
-const TAB_IDS = new Set(TABS.map(t => t.id));
 
-// ───────── Federal data-flow stages (OMB A-130 lifecycle) ─────────
 const FLOW_STAGES = [
-    { id: 'entry', icon: User, accent: '#34d399', title: 'Federal User Entry', phase: 'Collected', desc: 'Federal users reach the Application Load Balancer over HTTPS/TLS 1.2+.', security: ['TLS 1.2+', 'PIV/CAC'], data: ['Access Logs', 'Source IP', 'Session ID'], ksis: ['KSI-IAM-01', 'KSI-IAM-02', 'KSI-SVC-02'] },
-    { id: 'auth', icon: ShieldCheck, accent: '#818cf8', title: 'Identity & Auth', phase: 'Collected', desc: 'Okta Federal Gov SAML 2.0 SSO with PIV/CAC validation and MFA.', security: ['SAML 2.0', 'FIPS 140-2', 'MFA'], data: ['SAML Assertions', 'UPN Data', 'Group Membership'], ksis: ['KSI-IAM-01', 'KSI-IAM-03', 'KSI-SVC-03'] },
-    { id: 'processing', icon: Cpu, accent: '#38bdf8', title: 'Application Processing', phase: 'Processed', desc: 'LMS web tier (ASP.NET on EC2) processes training, assessments, and content.', security: ['WAF', 'HTTPS', 'RBAC'], data: ['Training Records', 'Assessments', 'Completions'], ksis: ['KSI-SVC-01', 'KSI-SVC-02', 'KSI-MLA-01'] },
-    { id: 'storage', icon: Database, accent: '#a78bfa', title: 'Encrypted Storage', phase: 'Maintained', desc: 'RDS, S3, and FSx with AES-256 at rest and KMS-managed keys.', security: ['AES-256', 'KMS', 'Backups'], data: ['User Records', 'Learning Data', 'Audit Logs'], ksis: ['KSI-CNA-01', 'KSI-CNA-04', 'KSI-INR-01'] },
-    { id: 'dissemination', icon: Send, accent: '#fbbf24', title: 'Third-Party Dissemination', phase: 'Disseminated', desc: 'Content providers receive scoped PII via SAML SSO and xAPI/SCORM.', security: ['xAPI', 'SCORM', 'SAML SSO'], data: ['Employee Names', 'Email', 'Progress'], ksis: ['KSI-TPR-01', 'KSI-TPR-02', 'KSI-PIY-02'] },
-    { id: 'monitoring', icon: Eye, accent: '#fb7185', title: 'Security Monitoring', phase: 'Maintained', desc: 'CloudWatch, CloudTrail, GuardDuty, and Config provide continuous monitoring.', security: ['24/7', 'SIEM', 'Alerts'], data: ['CloudTrail Logs', 'Flow Logs', 'Config'], ksis: ['KSI-MLA-01', 'KSI-MLA-02', 'KSI-CNA-07'] },
+    { phase: 'Collected', title: 'Federal User Entry', desc: 'Federal users reach the Application Load Balancer over HTTPS/TLS 1.2+.', security: ['TLS 1.2+', 'PIV/CAC'], data: ['Access Logs', 'Source IP', 'Session ID'], ksis: ['KSI-IAM-01', 'KSI-IAM-02'] },
+    { phase: 'Collected', title: 'Identity & Authentication', desc: 'Okta Federal Gov SAML 2.0 SSO with PIV/CAC validation and MFA.', security: ['SAML 2.0', 'FIPS 140-2', 'MFA'], data: ['SAML Assertions', 'UPN Data', 'Groups'], ksis: ['KSI-IAM-01', 'KSI-IAM-03'] },
+    { phase: 'Processed', title: 'Application Processing', desc: 'LMS web tier (ASP.NET on EC2) processes training, assessments, and content.', security: ['WAF', 'HTTPS', 'RBAC'], data: ['Training Records', 'Assessments'], ksis: ['KSI-SVC-01', 'KSI-MLA-01'] },
+    { phase: 'Maintained', title: 'Encrypted Storage', desc: 'RDS, S3, and FSx with AES-256 at rest and KMS-managed keys.', security: ['AES-256', 'KMS', 'Backups'], data: ['User Records', 'Learning Data', 'Audit Logs'], ksis: ['KSI-CNA-01', 'KSI-INR-01'] },
+    { phase: 'Disseminated', title: 'Third-Party Dissemination', desc: 'Content providers receive scoped PII via SAML SSO and xAPI/SCORM.', security: ['xAPI', 'SCORM', 'SAML SSO'], data: ['Names', 'Email', 'Progress'], ksis: ['KSI-TPR-01', 'KSI-PIY-02'] },
+    { phase: 'Maintained', title: 'Security Monitoring', desc: 'CloudWatch, CloudTrail, GuardDuty, and Config provide continuous monitoring.', security: ['24/7', 'SIEM', 'Alerts'], data: ['CloudTrail', 'Flow Logs', 'Config'], ksis: ['KSI-MLA-01', 'KSI-CNA-07'] },
 ];
 
-const SCN_TIER = {
-    transformative: { label: 'Transformative', variant: 'danger', dot: '#fb7185' },
-    adaptive: { label: 'Adaptive', variant: 'info', dot: '#38bdf8' },
-    routine_recurring: { label: 'Routine', variant: 'success', dot: '#34d399' },
-    impact_categorization: { label: 'Impact', variant: 'warning', dot: '#fbbf24' },
-    critical: { label: 'Critical', variant: 'danger', dot: '#f43f5e' },
-};
+const SCN_TONE = { transformative: 'oxblood', adaptive: 'navy', routine_recurring: 'good', critical: 'oxblood', impact_categorization: 'warn' };
+
+const SERVICES = [
+    ['Course Management', 'SCORM / AICC / xAPI delivery & multimedia.'],
+    ['User Management', 'SSO, RBAC, and hierarchy management.'],
+    ['Assessment Engine', 'Quizzes, exams, and competency validation.'],
+    ['Compliance Tracking', 'Regulatory reporting and audit trails.'],
+    ['Analytics', 'Real-time dashboards and data exports.'],
+    ['Learning Record Store', 'Native xAPI-compliant LRS.'],
+    ['Career Development', 'IDP and skills-gap analysis.'],
+    ['Notifications', 'Automated engagement engine.'],
+    ['API Gateway', 'RESTful enterprise connectivity.'],
+];
+const EXCLUDED = ['On-premise / self-hosted installations', 'Private-cloud customer-specific instances', 'Custom development outside core', 'Third-party content libraries', 'Professional / consulting services', 'Native mobile applications'];
 
 // ─────────────────────────────────────────────────────────────────────────
-// HERO
+// MASTHEAD
 // ─────────────────────────────────────────────────────────────────────────
-const Hero = ({ cso, status, lastRefresh }) => {
+const Masthead = ({ cso, status, asOf }) => {
     const operational = (status?.status || 'operational') === 'operational';
     return (
-        <Card className="relative overflow-hidden p-7 md:p-8">
-            <div className="absolute -top-24 -right-16 w-80 h-80 rounded-full bg-sky-500/10 blur-[110px] pointer-events-none" />
-            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-sky-500/40 to-transparent" />
-            <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                <div className="flex items-start gap-5 min-w-0">
-                    <div className="w-16 h-16 rounded-2xl bg-[#0b1220] border border-white/10 flex items-center justify-center p-3 shrink-0">
-                        <img src={`${BASE_PATH}meridian-favicon.png`} alt="Meridian" className="w-full h-full object-contain" />
+        <header>
+            <div className="flex items-center justify-between gap-4 pb-3">
+                <Kicker>FedRAMP Trust Center · Public Dossier</Kicker>
+                <Kicker>As of {asOf || '—'}</Kicker>
+            </div>
+            <Rule className="border-t-[#1c1b17]/30" />
+            <div className="grid lg:grid-cols-[1fr_auto] gap-8 pt-7 pb-8">
+                <div>
+                    <h1 className="font-serif text-[40px] md:text-[52px] leading-[0.98] tracking-tight text-[#1c1b17]">
+                        {cso?.cso_name || 'Meridian LMS'}
+                    </h1>
+                    <p className="mt-3 text-[15px] text-[#4a473f] max-w-xl leading-relaxed">
+                        {cso?.provider_name || 'Meridian Knowledge Solutions'} — continuous-monitoring authorization record for {cso?.authorization_type || 'FedRAMP 20x'} {cso?.impact_level || 'Moderate'}.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 mt-5">
+                        <Tag tone="navy" mono>{cso?.package_id || '—'}</Tag>
+                        <Tag tone="ink">{cso?.impact_level || 'Moderate'} Impact</Tag>
+                        <Tag tone="ink">{cso?.service_model || 'SaaS'}</Tag>
+                        <span className="inline-flex items-center gap-1.5 text-[12px] text-[#2f6b46]">
+                            <span className="relative flex h-1.5 w-1.5"><span className={cn('absolute inline-flex h-full w-full rounded-full opacity-60', operational ? 'bg-[#2f6b46] animate-ping' : 'bg-[#8a5e1c]')} /><span className={cn('relative inline-flex rounded-full h-1.5 w-1.5', operational ? 'bg-[#2f6b46]' : 'bg-[#8a5e1c]')} /></span>
+                            {operational ? 'Operational' : 'Degraded'}
+                        </span>
                     </div>
-                    <div className="min-w-0">
-                        <Eyebrow className="mb-1.5">FedRAMP Trust Center</Eyebrow>
-                        <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{cso?.cso_name || 'Meridian LMS'}</h1>
-                        <p className="text-[13px] text-slate-400 mt-1">{cso?.provider_name || 'Meridian Knowledge Solutions'}</p>
-                        <div className="flex flex-wrap items-center gap-2 mt-4">
-                            <Badge variant="success" icon={ShieldCheck}>Authorized</Badge>
-                            <Badge variant="info">{cso?.authorization_type || 'FedRAMP 20x'}</Badge>
-                            <Badge variant="neutral">{cso?.impact_level || 'Moderate'} Impact</Badge>
-                            <Badge variant="neutral">{cso?.service_model || 'SaaS'}</Badge>
-                        </div>
+                    <div className="flex flex-wrap gap-4 mt-5 text-[13px]">
+                        {cso?.marketplace_url && (
+                            <a href={cso.marketplace_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[#1e3a5f] hover:underline font-medium">
+                                FedRAMP Marketplace <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+                            </a>
+                        )}
+                        <a href={`${BASE_PATH}cso_public_info.json`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[#6c685f] hover:text-[#1c1b17] font-medium">
+                            <FileJson className="w-3.5 h-3.5" /> Machine-readable JSON
+                        </a>
                     </div>
                 </div>
 
-                <div className="lg:text-right shrink-0">
-                    <div className={cn('inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[12px] font-semibold',
-                        operational ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25' : 'bg-amber-500/10 text-amber-300 border-amber-500/25')}>
-                        <span className="relative flex h-2 w-2">
-                            <span className={cn('absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping', operational ? 'bg-emerald-400' : 'bg-amber-400')} />
-                            <span className={cn('relative inline-flex rounded-full h-2 w-2', operational ? 'bg-emerald-400' : 'bg-amber-400')} />
-                        </span>
-                        {operational ? 'All Systems Operational' : 'Degraded'}
+                {/* Seal */}
+                <div className="flex lg:flex-col items-center lg:items-end gap-5 lg:gap-4">
+                    <div className="w-24 h-24 border border-[#1c1b17]/15 bg-[#fbfaf6] flex items-center justify-center p-4" style={{ borderRadius: 3 }}>
+                        <img src={`${BASE_PATH}meridian-favicon.png`} alt="Meridian" className="w-full h-full object-contain" />
                     </div>
-                    <div className="mt-4 flex flex-col gap-1.5 text-[12px] text-slate-400 lg:items-end">
-                        <span className="font-mono text-slate-300">{cso?.package_id || '—'}</span>
-                        <div className="flex flex-wrap gap-3 lg:justify-end">
-                            {cso?.marketplace_url && (
-                                <a href={cso.marketplace_url} target="_blank" rel="noreferrer"
-                                    className="inline-flex items-center gap-1.5 text-sky-400 hover:text-sky-300 font-semibold">
-                                    <Landmark className="w-3.5 h-3.5" /> Marketplace <ExternalLink className="w-3 h-3 opacity-60" />
-                                </a>
-                            )}
-                            <a href={`${BASE_PATH}cso_public_info.json`} target="_blank" rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white font-semibold">
-                                <FileJson className="w-3.5 h-3.5" /> JSON
-                            </a>
-                        </div>
-                        {lastRefresh && <span className="text-slate-600">Updated {lastRefresh}</span>}
-                    </div>
+                    <Stamp>Authorized</Stamp>
                 </div>
             </div>
-        </Card>
+            <Rule className="border-t-[#1c1b17]/30" />
+        </header>
     );
 };
 
-// ───────── Tab bar ─────────
-const TabBar = ({ active, onChange }) => (
-    <div className="sticky top-0 z-30 -mx-1 px-1 py-3 bg-[#0a0a0c]/90 backdrop-blur-md">
-        <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-            {TABS.map(t => {
-                const Icon = t.icon;
-                const on = active === t.id;
+// ─────────────────────────────────────────────────────────────────────────
+// INDEX RAIL (scroll-spy)
+// ─────────────────────────────────────────────────────────────────────────
+const IndexRail = ({ active, onJump }) => (
+    <nav className="hidden lg:block sticky top-8 self-start w-[176px] shrink-0">
+        <Kicker className="block mb-4">Contents</Kicker>
+        <ul className="space-y-0.5">
+            {SECTIONS.map(s => {
+                const on = active === s.id;
                 return (
-                    <button key={t.id} onClick={() => onChange(t.id)} title={t.desc} aria-current={on ? 'page' : undefined}
-                        className={cn('group flex items-center gap-2 px-4 py-2.5 rounded-xl border whitespace-nowrap transition-all shrink-0',
-                            on ? 'bg-sky-500/10 border-sky-500/30 text-white' : 'bg-white/[0.02] border-white/[0.06] text-slate-400 hover:text-slate-200 hover:border-white/[0.12]')}>
-                        <Icon className={cn('w-4 h-4', on ? 'text-sky-400' : 'text-slate-500 group-hover:text-slate-300')} />
-                        <span className="text-[13px] font-semibold tracking-tight">{t.label}</span>
-                    </button>
+                    <li key={s.id}>
+                        <button onClick={() => onJump(s.id)}
+                            className={cn('group flex items-baseline gap-2.5 w-full text-left py-1.5 transition-colors',
+                                on ? 'text-[#1c1b17]' : 'text-[#6c685f] hover:text-[#1c1b17]')}>
+                            <span className={cn('font-mono text-[11px] pt-0.5', on ? 'text-[#1e3a5f]' : 'text-[#928d81]')}>{s.num}</span>
+                            <span className={cn('text-[13px] leading-snug border-b', on ? 'border-[#1c1b17]/40 font-medium' : 'border-transparent')}>{s.label}</span>
+                        </button>
+                    </li>
                 );
             })}
-        </div>
-    </div>
+        </ul>
+    </nav>
 );
 
 // ─────────────────────────────────────────────────────────────────────────
-// OVERVIEW
+// SECTION BODIES
 // ─────────────────────────────────────────────────────────────────────────
-const PostureStrip = ({ oar, vdr, status }) => {
+const Posture = ({ oar, vdr, status }) => {
     const ex = oar?.executive_summary;
     const trend = oar?.compliance_trend?.data_points?.map(p => p.compliance_rate) || [];
     const improving = oar?.compliance_trend?.trend_direction === 'improving';
     const uptime = status?.uptime_percent ? `${parseFloat(status.uptime_percent).toFixed(2)}%` : '—';
-
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <StatCard label="KSI Compliance" value={ex ? `${ex.compliance_rate}%` : '—'} accent="text-emerald-400" icon={Gauge}
-                sub={ex ? `${ex.passed_ksis} of ${ex.total_ksis} indicators passing` : undefined}>
-                <div className="mt-3 flex items-center justify-between">
-                    <Sparkline data={trend} stroke="#34d399" />
-                    {improving && <Badge variant="success" icon={TrendingUp}>Improving</Badge>}
+        <div className={cn('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-8 py-7 border-y', RULE)}>
+            <div>
+                <Figure value={ex ? `${ex.compliance_rate}%` : '—'} label="KSI Compliance" accent
+                    sub={ex ? `${ex.passed_ksis} of ${ex.total_ksis} indicators passing` : undefined} />
+                <div className="mt-3 flex items-center gap-3">
+                    <Sparkline data={trend} />
+                    {improving && <span className="text-[11px] text-[#2f6b46] font-medium">▲ Improving</span>}
                 </div>
-            </StatCard>
-
-            <StatCard label="Active Gaps" value={ex?.active_gaps ?? '—'} accent={ex?.active_gaps ? 'text-amber-400' : 'text-emerald-400'} icon={AlertTriangle}
-                sub="KSI gaps in active remediation">
-                <div className="mt-4 text-[12px] text-slate-500">
-                    {oar?.data_sources?.ksi_history_entries?.toLocaleString() || '—'} validation runs to date
-                </div>
-            </StatCard>
-
-            <StatCard label="Open Vulnerabilities" value={vdr?.vdr_acceptance?.active ?? vdr?.snapshot?.total_vulnerabilities ?? '—'}
-                accent="text-white" icon={Shield}
-                sub={vdr ? `${vdr.risk?.critical ?? 0} critical · ${vdr.vdr_acceptance?.accepted ?? 0} accepted` : undefined}>
-                <div className="mt-4 flex items-center gap-2">
-                    {vdr?.posture?.rating && <Badge variant="success">{vdr.posture.rating} · {vdr.posture.score}</Badge>}
-                </div>
-            </StatCard>
-
-            <StatCard label="Platform Uptime" value={uptime} accent="text-emerald-400" icon={Activity}
-                sub={status?.avg_latency ? `${status.avg_latency} avg latency` : 'Continuously monitored'}>
-                <div className="mt-4 text-[12px] text-slate-500">
-                    {ex?.evidence_snapshots?.daily || '—'} daily evidence snapshots
-                </div>
-            </StatCard>
+            </div>
+            <Figure value={ex?.active_gaps ?? '—'} label="Active Gaps"
+                sub={`${oar?.data_sources?.ksi_history_entries?.toLocaleString() || '—'} validation runs`} />
+            <Figure value={vdr?.vdr_acceptance?.active ?? vdr?.snapshot?.total_vulnerabilities ?? '—'} label="Open Vulnerabilities"
+                sub={vdr ? `${vdr.risk?.critical ?? 0} critical · ${vdr.vdr_acceptance?.accepted ?? 0} accepted` : undefined} />
+            <Figure value={uptime} label="Platform Uptime"
+                sub={vdr?.posture?.rating ? `VDR posture ${vdr.posture.rating} (${vdr.posture.score})` : 'Continuously monitored'} />
         </div>
     );
 };
 
-const ServiceProfile = ({ cso }) => (
-    <Card className="p-7">
-        <SectionHeader icon={Info} title="Service Profile" accent="text-sky-400"
-            desc="What the platform is and how it is deployed." />
-        <p className="text-[14px] text-slate-400 leading-relaxed max-w-3xl">
-            {cso?.service_description ||
-                'Enterprise SaaS platform for workforce training, compliance tracking, and professional development.'}
-        </p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
-            <Fact label="Deployment" value={cso?.deployment_model || 'Multi-Tenant Public Cloud'} />
-            <Fact label="Cloud" value={cso?.cloud_provider || 'AWS Commercial (US-East-1)'} />
-            <Fact label="UEI" value={cso?.uei || '—'} mono sub="SAM.gov" />
-            <Fact label="Category" value={cso?.business_category || 'Learning Management'} />
-            <Fact label="Access" value={cso?.access_methods?.primary || 'HTTPS (Port 443)'} />
-            <Fact label="Authentication" value={cso?.access_methods?.authentication || 'SAML 2.0 SSO with MFA'} />
-            <Fact label="API" value={cso?.access_methods?.api || 'REST · OAuth 2.0 / API Key'} />
-            <Fact label="Authorization" value={cso?.authorization_type || 'FedRAMP 20x'} sub={`${cso?.impact_level || 'Moderate'} baseline`} />
-        </div>
-    </Card>
-);
-
-const ContinuousMonitoring = ({ schedule, meeting }) => {
+const Profile = ({ cso, schedule, meeting }) => {
     const registrationUrl = QUARTERLY_REGISTRATION_URL || meeting?.registrationUrl;
-    const dateLabel = meeting?.nextDate
-        ? new Date(meeting.nextDate + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
-        : 'To be announced';
-
+    const dateLabel = meeting?.nextDate ? new Date(meeting.nextDate + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : 'To be announced';
     return (
-        <Card className="p-7">
-            <SectionHeader icon={Calendar} title="Continuous Monitoring" accent="text-indigo-400"
-                desc="Reporting cadence and the collaborative review (FRR-CCM-QR-02)." />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <Fact label="Next Ongoing Report" value={schedule?.next_ongoing_report || 'TBD'} mono />
-                <Fact label="Next Quarterly Review" value={schedule?.next_quarterly_review || 'TBD'} mono />
-                <Fact label="Last Data Refresh" value={schedule?.last_data_refresh || 'TBD'} mono />
-            </div>
-            {meeting && (
-                <div className={cn('mt-4 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4', SURFACE_2)}>
-                    <div className="flex items-start gap-3 min-w-0">
-                        <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 shrink-0">
-                            <Video className="w-5 h-5 text-indigo-400" />
-                        </div>
+        <div className="grid lg:grid-cols-[1.1fr_1fr] gap-x-12 gap-y-8">
+            <div>
+                <p className="font-serif text-[19px] leading-relaxed text-[#2c2a23]">
+                    {cso?.service_description || 'Enterprise SaaS platform for workforce training, compliance tracking, and professional development.'}
+                </p>
+                <div className="mt-6">
+                    <Kicker>Reporting Cadence</Kicker>
+                    <div className="mt-1">
+                        <DefRow label="Next Ongoing Report" value={schedule?.next_ongoing_report || 'TBD'} mono />
+                        <DefRow label="Next Quarterly Review" value={schedule?.next_quarterly_review || 'TBD'} mono />
+                        <DefRow label="Last Data Refresh" value={schedule?.last_data_refresh || 'TBD'} mono />
+                    </div>
+                </div>
+                {meeting && (
+                    <div className={cn('mt-5 flex items-start justify-between gap-4 border rounded-sm p-4', RULE, PANEL)}>
                         <div className="min-w-0">
-                            <div className="text-sm font-semibold text-white">{meeting.meetingTitle || 'Quarterly Continuous Monitoring Review'}</div>
-                            {meeting.description && <p className="text-[13px] text-slate-400 mt-0.5 leading-relaxed max-w-xl">{meeting.description}</p>}
-                            <div className="flex flex-wrap items-center gap-3 mt-2 text-[12px] text-slate-400">
-                                <span className="inline-flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-indigo-400" />{dateLabel}</span>
-                                {meeting.time && <span className="inline-flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-indigo-400" />{meeting.time}</span>}
-                                <span className="text-slate-600">· Microsoft Teams</span>
+                            <div className="flex items-center gap-2 text-[13px] font-medium text-[#1c1b17]"><Video className="w-4 h-4 text-[#1e3a5f]" />{meeting.meetingTitle || 'Quarterly Continuous Monitoring Review'}</div>
+                            <div className="flex flex-wrap items-center gap-3 mt-1.5 text-[12px] text-[#6c685f]">
+                                <span className="inline-flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{dateLabel}</span>
+                                {meeting.time && <span className="inline-flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{meeting.time}</span>}
+                                <span>· Microsoft Teams</span>
                             </div>
                         </div>
+                        {registrationUrl && (
+                            <button onClick={() => window.open(registrationUrl, '_blank', 'noopener')}
+                                className="shrink-0 inline-flex items-center gap-1.5 bg-[#1e3a5f] hover:bg-[#16304f] text-white text-[12px] font-medium px-3.5 py-2 rounded-sm transition-colors">
+                                Register <ChevronRight className="w-3.5 h-3.5" />
+                            </button>
+                        )}
                     </div>
-                    {registrationUrl && (
-                        <button onClick={() => window.open(registrationUrl, '_blank', 'noopener')}
-                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold text-[13px] transition-all shrink-0">
-                            <Video className="w-4 h-4" /> Register
-                        </button>
-                    )}
-                </div>
-            )}
-        </Card>
-    );
-};
-
-const Responsibilities = ({ items }) => {
-    if (!items?.length) return null;
-    return (
-        <Card className="p-7">
-            <SectionHeader icon={Users} title="Customer Responsibilities" accent="text-amber-400"
-                desc="What your agency owns under the shared-responsibility model (ADS-CSO-PUB)." />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                {items.map((r, i) => (
-                    <div key={i} className={cn('flex items-start gap-3 rounded-xl p-4', SURFACE_2)}>
-                        <CheckSquare className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
-                        <span className="text-[13px] text-slate-300 leading-relaxed">{r}</span>
-                    </div>
-                ))}
+                )}
             </div>
-        </Card>
+            <div>
+                <Kicker>System of Record</Kicker>
+                <div className="mt-1">
+                    <DefRow label="Deployment" value={cso?.deployment_model || 'Multi-Tenant Public Cloud'} />
+                    <DefRow label="Cloud" value={cso?.cloud_provider || 'AWS Commercial (US-East-1)'} />
+                    <DefRow label="UEI" value={cso?.uei || '—'} mono sub="SAM.gov" />
+                    <DefRow label="Category" value={cso?.business_category || 'Learning Management'} />
+                    <DefRow label="Access" value={cso?.access_methods?.primary || 'HTTPS (Port 443)'} />
+                    <DefRow label="Authentication" value={cso?.access_methods?.authentication || 'SAML 2.0 SSO with MFA'} />
+                    <DefRow label="API" value={cso?.access_methods?.api || 'REST · OAuth 2.0 / API Key'} />
+                </div>
+                {cso?.customer_responsibilities?.length > 0 && (
+                    <div className="mt-7">
+                        <Kicker>Customer Responsibilities</Kicker>
+                        <ol className="mt-2 space-y-2">
+                            {cso.customer_responsibilities.map((r, i) => (
+                                <li key={i} className="flex gap-3 text-[13px] text-[#3a382f] leading-snug">
+                                    <span className="font-mono text-[11px] text-[#928d81] pt-0.5">{String(i + 1).padStart(2, '0')}</span>
+                                    <span>{r}</span>
+                                </li>
+                            ))}
+                        </ol>
+                    </div>
+                )}
+            </div>
+        </div>
     );
 };
 
-const OverviewTab = ({ cso, oar, vdr, status, schedule, meeting }) => (
-    <div className="space-y-6">
-        <PostureStrip oar={oar} vdr={vdr} status={status} />
-        <ServiceProfile cso={cso} />
-        <ContinuousMonitoring schedule={schedule} meeting={meeting} />
-        <Responsibilities items={cso?.customer_responsibilities} />
+const Architecture = () => {
+    const [open, setOpen] = useState(null);
+    return (
+        <div>
+            <div className={cn('border rounded-sm overflow-hidden', RULE, PANEL)}>
+                {FLOW_STAGES.map((s, i) => {
+                    const on = open === i;
+                    return (
+                        <div key={i} className={cn('border-t first:border-t-0', RULE)}>
+                            <button onClick={() => setOpen(on ? null : i)} className={cn('w-full text-left flex items-start gap-4 px-4 md:px-5 py-4 hover:bg-[#f3f1ea]/70 transition-colors', on && 'bg-[#f3f1ea]/60')}>
+                                <span className="font-serif text-[22px] text-[#1e3a5f] leading-none w-8 shrink-0">{['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'Ⅵ'][i]}</span>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2.5 flex-wrap">
+                                        <span className="text-[14px] font-medium text-[#1c1b17]">{s.title}</span>
+                                        <Tag tone="ink">{s.phase}</Tag>
+                                    </div>
+                                    <p className="text-[13px] text-[#6c685f] mt-1 leading-snug">{s.desc}</p>
+                                </div>
+                                <ChevronRight className={cn('w-4 h-4 text-[#928d81] mt-1 shrink-0 transition-transform', on && 'rotate-90')} />
+                            </button>
+                            {on && (
+                                <div className="px-4 md:pl-[68px] pb-4 grid sm:grid-cols-3 gap-x-6 gap-y-3 text-[12px]">
+                                    <div><Kicker>Data Elements</Kicker><div className="mt-1.5 space-y-1">{s.data.map(d => <div key={d} className="font-mono text-[12px] text-[#3a382f]">{d}</div>)}</div></div>
+                                    <div><Kicker>Controls</Kicker><div className="mt-1.5 flex flex-wrap gap-1.5">{s.security.map(x => <Tag key={x}>{x}</Tag>)}</div></div>
+                                    <div><Kicker>KSIs</Kicker><div className="mt-1.5 flex flex-wrap gap-1.5">{s.ksis.map(k => <Tag key={k} tone="navy" mono>{k}</Tag>)}</div></div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+            <div className="grid sm:grid-cols-3 gap-x-8 mt-7">
+                <DefRow label="Hosting" value="AWS Commercial US-East-1" sub="Inherited FedRAMP controls" />
+                <DefRow label="Tenancy" value="Multi-Tenant SaaS" sub="Logical isolation per agency" />
+                <DefRow label="Encryption" value="AES-256 · TLS 1.2+" sub="KMS-managed keys" />
+            </div>
+        </div>
+    );
+};
+
+const Changes = ({ oar }) => {
+    const t = oar?.transformative_changes;
+    const changes = t?.changes || [];
+    return (
+        <div>
+            <div className={cn('grid grid-cols-3 gap-6 py-6 border-y mb-7', RULE)}>
+                <Figure value={oar?.data_sources?.scn_history_entries ?? '—'} label="SCN entries tracked" accent />
+                <Figure value={t?.total_count ?? changes.length} label="Transformative" />
+                <Figure value={oar?.planned_changes?.changes?.length ?? 0} label="Planned (90d)" />
+            </div>
+            {changes.length ? (
+                <div className={cn('border rounded-sm overflow-hidden', RULE, PANEL)}>
+                    {changes.map((c, i) => (
+                        <div key={i} className={cn('flex items-baseline gap-4 px-4 py-3 border-t first:border-t-0', RULE)}>
+                            <span className="font-mono text-[12px] text-[#928d81] shrink-0 w-24">{c.date}</span>
+                            <Tag tone={SCN_TONE[c.type] || 'navy'}>{(c.type || '').replace('_', ' ')}</Tag>
+                            <span className="text-[13px] text-[#1c1b17] flex-1">{c.description}</span>
+                            <span className="hidden md:block font-mono text-[11px] text-[#928d81] shrink-0">{c.scn_id}</span>
+                        </div>
+                    ))}
+                </div>
+            ) : <p className="text-[13px] text-[#928d81]">No significant changes in the current reporting window.</p>}
+            {t?.note && <p className="text-[12px] text-[#928d81] mt-4">{t.note}</p>}
+        </div>
+    );
+};
+
+const Services = ({ cso, isAuthenticated, onDownloadPackage, onViewConfig, onDownloadConfig, onApiDocs, feedback }) => (
+    <div className="space-y-9">
+        <div className="grid lg:grid-cols-[1fr_1fr] gap-x-12 gap-y-8">
+            <div>
+                <Kicker>In Scope</Kicker>
+                <div className="mt-1">
+                    {SERVICES.map(([t, d]) => (
+                        <div key={t} className={cn('flex items-baseline justify-between gap-4 py-2.5 border-t', RULE)}>
+                            <span className="text-[14px] text-[#1c1b17]">{t}</span>
+                            <span className="text-[12px] text-[#807b70] text-right max-w-[60%]">{d}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div>
+                <Kicker>Not Included</Kicker>
+                <ul className="mt-1">
+                    {EXCLUDED.map((e, i) => (
+                        <li key={i} className={cn('flex gap-3 py-2.5 border-t text-[13px] text-[#6c685f]', RULE)}>
+                            <span className="text-[#8c2f2f]">✕</span>{e}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            <Kicker>Machine-Readable Artifacts</Kicker>
+            <div className="mt-3 grid sm:grid-cols-2 gap-3">
+                <button onClick={onDownloadPackage} className="flex items-center justify-between gap-3 bg-[#1e3a5f] hover:bg-[#16304f] text-white rounded-sm px-5 py-4 transition-colors text-left">
+                    <span>
+                        <span className="flex items-center gap-2 text-[14px] font-medium">{isAuthenticated ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />}Authorization Package</span>
+                        <span className="block text-[12px] text-white/70 mt-0.5">Full OSCAL artifact bundle</span>
+                    </span>
+                    <ArrowUpRight className="w-4 h-4" />
+                </button>
+                <div className={cn('flex items-center justify-between gap-3 border rounded-sm px-5 py-4', RULE, PANEL)}>
+                    <span>
+                        <span className="block text-[14px] font-medium text-[#1c1b17]">Secure Configuration Guide</span>
+                        <span className="block text-[12px] text-[#807b70] mt-0.5">Recommended hardening</span>
+                    </span>
+                    <span className="flex gap-2 shrink-0">
+                        <button onClick={onViewConfig} className="text-[12px] font-medium text-[#1e3a5f] border border-[#1e3a5f]/30 rounded-sm px-2.5 py-1.5 hover:bg-[#1e3a5f]/[0.05]">View</button>
+                        <button onClick={onDownloadConfig} aria-label="Download" className="text-[#6c685f] border border-[#1c1b17]/15 rounded-sm px-2.5 py-1.5 hover:text-[#1c1b17]"><Download className="w-4 h-4" /></button>
+                    </span>
+                </div>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-[13px]">
+                <button onClick={onApiDocs} className="inline-flex items-center gap-1.5 text-[#1e3a5f] hover:underline font-medium">API Documentation <ArrowUpRight className="w-3.5 h-3.5" /></button>
+                <a href={cso?.marketplace_url || '#'} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[#1e3a5f] hover:underline font-medium">FedRAMP Marketplace <ArrowUpRight className="w-3.5 h-3.5" /></a>
+                <a href={`${BASE_PATH}cso_public_info.json`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[#6c685f] hover:text-[#1c1b17] font-medium"><FileJson className="w-3.5 h-3.5" /> CSO Metadata JSON</a>
+            </div>
+        </div>
+
+        <Feedback entries={feedback} cso={cso} />
     </div>
 );
 
-// ─────────────────────────────────────────────────────────────────────────
-// ARCHITECTURE — federal data-flow pipeline
-// ─────────────────────────────────────────────────────────────────────────
-const FlowCard = ({ stage, active, onClick }) => {
-    const Icon = stage.icon;
+const Feedback = memo(({ entries, cso }) => {
+    const [q, setQ] = useState(''); const [email, setEmail] = useState(''); const [sent, setSent] = useState(false);
+    const to = cso?.contacts?.fedramp || 'fedramp_20x@meridianks.com';
+    const submit = (e) => {
+        e.preventDefault(); if (!q.trim()) return;
+        window.open(`mailto:${to}?subject=${encodeURIComponent('FedRAMP Trust Center Feedback')}&body=${encodeURIComponent(`Question/Feedback:\n${q}\n\nSubmitter: ${email || 'Anonymous'}`)}`, '_self');
+        setSent(true); setQ(''); setEmail(''); setTimeout(() => setSent(false), 5000);
+    };
     return (
-        <button onClick={() => onClick(stage.id)}
-            className={cn('relative text-left w-full rounded-2xl border p-4 transition-all min-w-0',
-                active ? 'border-white/20 bg-white/[0.05]' : 'border-white/[0.06] bg-[#0f0f12] hover:border-white/15 hover:bg-white/[0.03]')}>
-            <div className="absolute top-0 left-4 right-4 h-px rounded-full" style={{ background: stage.accent, opacity: 0.6 }} />
-            <div className="flex items-start gap-3 mb-3">
-                <div className="p-2 rounded-lg border shrink-0" style={{ borderColor: `${stage.accent}40`, background: `${stage.accent}14` }}>
-                    <Icon className="w-4 h-4" style={{ color: stage.accent }} />
-                </div>
-                <div className="min-w-0">
-                    <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500">{stage.phase}</div>
-                    <div className="text-sm font-semibold text-white leading-tight truncate">{stage.title}</div>
-                </div>
+        <div className="grid lg:grid-cols-2 gap-x-12 gap-y-6">
+            <div>
+                <Kicker>Submit Feedback</Kicker>
+                <p className="text-[13px] text-[#6c685f] mt-2 mb-3 leading-relaxed">Questions about security posture, KSI validation, or authorization data (FRR-CCM-04 / 05). Responses are summarized anonymously in the Ongoing Authorization Report.</p>
+                <form onSubmit={submit} className="space-y-2.5">
+                    <textarea value={q} onChange={e => setQ(e.target.value)} rows={3} required placeholder="e.g., How is multi-AZ resilience measured?"
+                        className="w-full bg-[#fbfaf6] border border-[#1c1b17]/15 rounded-sm px-3 py-2.5 text-[13px] text-[#1c1b17] placeholder:text-[#928d81] focus:outline-none focus:border-[#1e3a5f]/50 resize-none" />
+                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@agency.gov (optional)"
+                        className="w-full bg-[#fbfaf6] border border-[#1c1b17]/15 rounded-sm px-3 py-2.5 text-[13px] text-[#1c1b17] placeholder:text-[#928d81] focus:outline-none focus:border-[#1e3a5f]/50" />
+                    <button type="submit" className="w-full inline-flex items-center justify-center gap-2 bg-[#1e3a5f] hover:bg-[#16304f] text-white text-[13px] font-medium py-2.5 rounded-sm transition-colors"><Send className="w-4 h-4" /> Submit</button>
+                    {sent && <div className="text-[12px] text-[#2f6b46]">Your email client should open with the message pre-filled.</div>}
+                    <div className="flex items-center gap-1.5 text-[12px] text-[#6c685f]"><Mail className="w-3.5 h-3.5" /> Direct: <a href={`mailto:${to}`} className="text-[#1e3a5f] hover:underline">{to}</a></div>
+                </form>
             </div>
-            <p className="text-[12px] leading-relaxed text-slate-400 line-clamp-2">{stage.desc}</p>
-        </button>
-    );
-};
-
-const FlowDetail = ({ stage }) => {
-    const Icon = stage.icon;
-    const Col = ({ icon: I, title, children }) => (
-        <div className={cn('rounded-xl p-4', SURFACE_2)}>
-            <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide font-bold text-slate-500 mb-3"><I className="w-3.5 h-3.5" />{title}</div>
-            {children}
-        </div>
-    );
-    return (
-        <Card className="p-6">
-            <div className="flex items-center gap-4 mb-5 pb-5 border-b border-white/[0.06]">
-                <div className="p-3 rounded-xl border shrink-0" style={{ borderColor: `${stage.accent}40`, background: `${stage.accent}14` }}>
-                    <Icon className="w-5 h-5" style={{ color: stage.accent }} />
-                </div>
-                <div>
-                    <h4 className="text-lg font-semibold text-white">{stage.title}</h4>
-                    <p className="text-[13px] text-slate-400 mt-0.5">{stage.desc}</p>
-                </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Col icon={Database} title="Data Elements">
-                    <div className="space-y-2">
-                        {stage.data.map((d, i) => (
-                            <div key={i} className="flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full" style={{ background: stage.accent }} />
-                                <span className="text-[13px] text-slate-300 font-mono">{d}</span>
+            <div>
+                <div className="flex items-center gap-2"><Kicker>Feedback Summary</Kicker><Tag tone="good">CCM-05</Tag></div>
+                {entries?.length ? (
+                    <div className="mt-3 max-h-[300px] overflow-y-auto">
+                        {entries.map((e, i) => (
+                            <div key={i} className={cn('py-3 border-t', RULE)}>
+                                <p className="text-[13px] text-[#1c1b17] font-medium leading-snug">{e.question}</p>
+                                <p className="text-[12.5px] text-[#6c685f] leading-relaxed mt-1.5 pl-3 border-l-2 border-[#1e3a5f]/25">{e.answer}</p>
+                                {e.date && <div className="text-[11px] text-[#928d81] mt-1.5 font-mono">{e.date}</div>}
                             </div>
                         ))}
                     </div>
-                </Col>
-                <Col icon={Lock} title="Security Controls">
-                    <div className="flex flex-wrap gap-1.5">
-                        {stage.security.map((s, i) => <Badge key={i} variant="neutral">{s}</Badge>)}
-                    </div>
-                </Col>
-                <Col icon={Shield} title="FedRAMP 20x KSIs">
-                    <div className="flex flex-wrap gap-1.5">
-                        {stage.ksis.map((k, i) => <Badge key={i} variant="info">{k}</Badge>)}
-                    </div>
-                </Col>
-            </div>
-        </Card>
-    );
-};
-
-const ArchitectureTab = () => {
-    const [active, setActive] = useState(null);
-    const activeStage = FLOW_STAGES.find(s => s.id === active);
-    return (
-        <div className="space-y-6">
-            <Card className="p-7">
-                <SectionHeader icon={Network} title="Federal Data Flow" accent="text-sky-400"
-                    desc="Complete data lifecycle per OMB A-130 classification. Select a stage to inspect controls and KSIs."
-                    action={<Badge variant="info" icon={CircleDot}>OMB A-130</Badge>} />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {FLOW_STAGES.map((s) => (
-                        <FlowCard key={s.id} stage={s} active={active === s.id} onClick={(id) => setActive(p => p === id ? null : id)} />
-                    ))}
-                </div>
-            </Card>
-            {activeStage && <FlowDetail stage={activeStage} />}
-            <Card className="p-7">
-                <SectionHeader icon={Server} title="Authorization Boundary" accent="text-violet-400"
-                    desc="The boundary inherits physical and lower-stack controls from AWS's FedRAMP authorization." />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <Fact label="Hosting" value="AWS Commercial US-East-1" sub="Inherited FedRAMP controls" />
-                    <Fact label="Tenancy" value="Multi-Tenant SaaS" sub="Logical isolation per agency" />
-                    <Fact label="Encryption" value="AES-256 · TLS 1.2+" sub="KMS-managed keys" />
-                </div>
-            </Card>
-        </div>
-    );
-};
-
-// ─────────────────────────────────────────────────────────────────────────
-// CHANGE ACTIVITY — sourced from the Ongoing Authorization Report
-// ─────────────────────────────────────────────────────────────────────────
-const ChangesTab = ({ oar }) => {
-    const transformative = oar?.transformative_changes;
-    const planned = oar?.planned_changes;
-    const scnTotal = oar?.data_sources?.scn_history_entries;
-    const changes = transformative?.changes || [];
-
-    return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <StatCard label="SCN Entries Tracked" value={scnTotal ?? '—'} icon={GitCommit} accent="text-white"
-                    sub="Significant change notifications on record" />
-                <StatCard label="Transformative Changes" value={transformative?.total_count ?? changes.length} icon={Activity} accent="text-rose-400"
-                    sub="Current reporting window" />
-                <StatCard label="Planned Changes" value={planned?.changes?.length ?? 0} icon={Calendar} accent="text-emerald-400"
-                    sub={`Next ${planned?.window_days ?? 90}-day window`} />
-            </div>
-
-            <Card className="p-7">
-                <SectionHeader icon={Activity} title="Significant Change Activity" accent="text-sky-400"
-                    desc="Transformative changes from the current Ongoing Authorization Report (FRR-SCN)."
-                    action={<Badge variant="success">FRR-SCN Compliant</Badge>} />
-                {changes.length ? (
-                    <div className="space-y-2.5">
-                        {changes.map((c, i) => {
-                            const tier = SCN_TIER[c.type] || SCN_TIER.adaptive;
-                            return (
-                                <div key={i} className={cn('flex items-start gap-3 rounded-xl p-4 border-l-2', SURFACE_2)} style={{ borderLeftColor: tier.dot }}>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2.5 flex-wrap mb-1">
-                                            <span className="text-[12px] font-mono font-semibold text-white">{c.scn_id}</span>
-                                            <Badge variant={tier.variant}>{tier.label}</Badge>
-                                        </div>
-                                        <p className="text-[13px] text-slate-300">{c.description}</p>
-                                    </div>
-                                    <span className="text-[12px] font-mono text-slate-500 shrink-0">{c.date}</span>
-                                </div>
-                            );
-                        })}
-                    </div>
                 ) : (
-                    <div className="text-center py-12 text-[13px] text-slate-500">No significant changes in the current reporting window.</div>
+                    <div className="mt-3 flex items-center gap-2 text-[13px] text-[#928d81]"><MessageSquare className="w-4 h-4" /> No feedback entries yet.</div>
                 )}
-                {transformative?.note && <p className="text-[12px] text-slate-600 mt-4">{transformative.note}</p>}
-            </Card>
-        </div>
-    );
-};
-
-// ─────────────────────────────────────────────────────────────────────────
-// SERVICES & RESOURCES
-// ─────────────────────────────────────────────────────────────────────────
-const SERVICES = [
-    { title: 'Course Management', desc: 'SCORM/AICC/xAPI delivery & multimedia.', features: ['Course catalog', 'Mobile player', 'Video delivery'] },
-    { title: 'User Management', desc: 'SSO, RBAC, and hierarchy management.', features: ['SAML 2.0 SSO', 'MFA support', 'Role hierarchy'] },
-    { title: 'Assessment Engine', desc: 'Quizzes, exams, and competency validation.', features: ['Auto-grading', 'Question banks', 'Certificates'] },
-    { title: 'Compliance Tracking', desc: 'Regulatory reporting and audit trails.', features: ['Rules engine', '21 CFR Part 11', 'Audit logs'] },
-    { title: 'Analytics', desc: 'Real-time dashboards and data exports.', features: ['Custom reports', 'Trend analysis', 'Scheduled exports'] },
-    { title: 'Learning Record Store', desc: 'Native xAPI-compliant LRS.', features: ['Statement capture', 'Learning analytics', 'Cross-platform'] },
-    { title: 'Career Development', desc: 'IDP and skills gap analysis.', features: ['Career paths', 'Skills inventory', 'IDP tracking'] },
-    { title: 'Notifications', desc: 'Automated engagement engine.', features: ['Deadline alerts', 'Manager notices', 'Templates'] },
-    { title: 'API Gateway', desc: 'RESTful enterprise connectivity.', features: ['REST API', 'Webhooks', 'HRIS sync'] },
-];
-const EXCLUDED = [
-    ['On-Premise', 'Self-hosted installations.'],
-    ['Private Cloud', 'Customer-specific instances.'],
-    ['Custom Dev', 'Bespoke software outside core.'],
-    ['Third-Party Content', 'External content libraries.'],
-    ['Pro Services', 'Consulting / implementation.'],
-    ['Native Mobile', 'Web-responsive only.'],
-];
-
-const ServiceCard = ({ s }) => (
-    <div className={cn('rounded-2xl p-5 flex flex-col h-full transition-all hover:border-white/15 border border-white/[0.07] bg-[#0f0f12]')}>
-        <div className="flex items-start justify-between gap-2 mb-2">
-            <h4 className="text-sm font-semibold text-white">{s.title}</h4>
-            <Badge variant="success">Auth</Badge>
-        </div>
-        <p className="text-[12px] text-slate-400 leading-relaxed mb-3">{s.desc}</p>
-        <div className="space-y-1.5 mt-auto">
-            {s.features.map((f, i) => (
-                <div key={i} className="flex items-center gap-2">
-                    <span className="w-1 h-1 rounded-full bg-sky-500" />
-                    <span className="text-[12px] text-slate-400">{f}</span>
-                </div>
-            ))}
-        </div>
-    </div>
-);
-
-const ResourcesTab = ({ cso, onDownloadPackage, onViewConfig, onDownloadConfig, onApiDocs, isAuthenticated, feedback }) => (
-    <div className="space-y-6">
-        <div>
-            <SectionHeader icon={Layers} title="Authorized Services" accent="text-sky-400"
-                desc="Capabilities within the FedRAMP authorization boundary." />
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {SERVICES.map((s, i) => <ServiceCard key={i} s={s} />)}
             </div>
         </div>
-
-        <Card className="p-7 border-rose-500/15 bg-rose-500/[0.02]">
-            <SectionHeader icon={AlertTriangle} title="Services Not Included" accent="text-rose-400"
-                desc="Explicitly outside the authorization boundary." />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                {EXCLUDED.map(([t, d], i) => (
-                    <div key={i} className={cn('rounded-xl p-4', SURFACE_2)}>
-                        <div className="text-[13px] font-semibold text-rose-300">{t}</div>
-                        <div className="text-[12px] text-slate-500 mt-0.5">{d}</div>
-                    </div>
-                ))}
-            </div>
-        </Card>
-
-        <Card className="p-7">
-            <SectionHeader icon={FileJson} title="Machine-Readable Artifacts" accent="text-sky-400"
-                desc="OSCAL-ready authorization data and documentation." />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <button onClick={onDownloadPackage}
-                    className="flex items-center justify-between gap-3 rounded-2xl p-5 bg-sky-600 hover:bg-sky-500 text-white transition-all">
-                    <div className="text-left">
-                        <div className="text-sm font-semibold flex items-center gap-2">
-                            {isAuthenticated ? <Download className="w-4 h-4" /> : <Lock className="w-4 h-4" />} Authorization Package
-                        </div>
-                        <div className="text-[12px] text-sky-100/80 mt-0.5">Full OSCAL artifact bundle</div>
-                    </div>
-                    <ArrowRight className="w-4 h-4" />
-                </button>
-                <div className={cn('rounded-2xl p-5 flex items-center justify-between gap-3', SURFACE_2)}>
-                    <div>
-                        <div className="text-sm font-semibold text-white">Secure Configuration Guide</div>
-                        <div className="text-[12px] text-slate-500 mt-0.5">Recommended hardening settings</div>
-                    </div>
-                    <div className="flex gap-2 shrink-0">
-                        <button onClick={onViewConfig} className="px-3 py-2 rounded-lg bg-white/[0.04] border border-white/10 text-[12px] font-semibold text-slate-300 hover:text-white">View</button>
-                        <button onClick={onDownloadConfig} aria-label="Download secure configuration" className="px-3 py-2 rounded-lg bg-white/[0.04] border border-white/10 text-slate-300 hover:text-white"><Download className="w-4 h-4" /></button>
-                    </div>
-                </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
-                <button onClick={onApiDocs} className={cn('rounded-2xl p-5 text-left hover:border-white/15 transition-all', SURFACE_2)}>
-                    <Globe className="w-4 h-4 text-sky-400 mb-2" />
-                    <div className="text-sm font-semibold text-white">API Documentation</div>
-                    <div className="text-[12px] text-slate-500 mt-0.5">REST · OAuth 2.0</div>
-                </button>
-                <a href={`${BASE_PATH}cso_public_info.json`} target="_blank" rel="noreferrer" className={cn('rounded-2xl p-5 hover:border-white/15 transition-all', SURFACE_2)}>
-                    <FileJson className="w-4 h-4 text-sky-400 mb-2" />
-                    <div className="text-sm font-semibold text-white">CSO Public Metadata</div>
-                    <div className="text-[12px] text-slate-500 mt-0.5">Machine-readable JSON</div>
-                </a>
-                <a href={cso?.marketplace_url || '#'} target="_blank" rel="noreferrer" className={cn('rounded-2xl p-5 hover:border-white/15 transition-all', SURFACE_2)}>
-                    <Landmark className="w-4 h-4 text-sky-400 mb-2" />
-                    <div className="text-sm font-semibold text-white">FedRAMP Marketplace</div>
-                    <div className="text-[12px] text-slate-500 mt-0.5">{cso?.package_id || 'Listing'}</div>
-                </a>
-            </div>
-        </Card>
-
-        <FeedbackBlock entries={feedback} cso={cso} />
-    </div>
-);
-
-// ───────── Feedback (FRR-CCM-04/05) ─────────
-const FeedbackBlock = memo(({ entries, cso }) => {
-    const [question, setQuestion] = useState('');
-    const [email, setEmail] = useState('');
-    const [submitted, setSubmitted] = useState(false);
-    const fedrampEmail = cso?.contacts?.fedramp || 'fedramp_20x@meridianks.com';
-
-    const submit = (e) => {
-        e.preventDefault();
-        if (!question.trim()) return;
-        const subject = encodeURIComponent('FedRAMP Trust Center Feedback');
-        const body = encodeURIComponent(`Question/Feedback:\n${question}\n\nSubmitter Email: ${email || 'Anonymous'}`);
-        window.open(`mailto:${fedrampEmail}?subject=${subject}&body=${body}`, '_self');
-        setSubmitted(true); setQuestion(''); setEmail('');
-        setTimeout(() => setSubmitted(false), 5000);
-    };
-
-    return (
-        <Card className="p-7">
-            <SectionHeader icon={MessageSquare} title="Feedback & Questions" accent="text-indigo-400"
-                desc="Asynchronous feedback mechanism (FRR-CCM-04 / CCM-05)." />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-7">
-                <form onSubmit={submit} className="space-y-3">
-                    <textarea value={question} onChange={e => setQuestion(e.target.value)} rows={3} required
-                        placeholder="e.g., How is multi-AZ resilience measured for load balancers?"
-                        className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl px-3.5 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none" />
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@agency.gov (optional)"
-                        className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl px-3.5 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50" />
-                    <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl flex items-center justify-center gap-2 text-[13px] transition-all">
-                        <Send className="w-4 h-4" /> Submit Feedback
-                    </button>
-                    {submitted && (
-                        <div className="flex items-center gap-2 text-emerald-300 text-[12px] bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2.5">
-                            <CheckCircle2 className="w-4 h-4" /> Your email client should open with the message pre-filled.
-                        </div>
-                    )}
-                    <div className="flex items-center gap-2 text-[12px] text-slate-500">
-                        <Mail className="w-3.5 h-3.5" /> Direct: <a href={`mailto:${fedrampEmail}`} className="text-sky-400 hover:text-sky-300">{fedrampEmail}</a>
-                    </div>
-                </form>
-                <div>
-                    <div className="flex items-center gap-2 mb-3">
-                        <h4 className="text-sm font-semibold text-white">Feedback Summary</h4>
-                        <Badge variant="success">CCM-05</Badge>
-                    </div>
-                    {entries?.length ? (
-                        <div className="space-y-2.5 max-h-[320px] overflow-y-auto pr-1">
-                            {entries.map((e, i) => (
-                                <div key={i} className={cn('rounded-xl p-4', SURFACE_2)}>
-                                    <p className="text-[13px] text-white font-medium leading-relaxed">{e.question}</p>
-                                    <p className="text-[12px] text-slate-400 leading-relaxed mt-2 pl-3 border-l-2 border-indigo-500/30">{e.answer}</p>
-                                    {e.date && <div className="text-[11px] text-slate-600 mt-2 text-right font-mono">{e.date}</div>}
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className={cn('rounded-xl p-8 text-center', SURFACE_2)}>
-                            <MessageSquare className="w-6 h-6 mx-auto mb-2 text-slate-600" />
-                            <p className="text-[13px] text-slate-500">No feedback entries yet.</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </Card>
     );
 });
 
@@ -606,118 +407,120 @@ export const TrustCenterView = () => {
     const [vdr, setVdr] = useState(null);
     const [feedback, setFeedback] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [active, setActive] = useState('posture');
+
     const rootRef = useRef(null);
-
-    const [activeTab, setActiveTab] = useState(() => {
-        const seg = getRouteSegments();
-        return seg[0] === 'trust' && TAB_IDS.has(seg[1]) ? seg[1] : 'overview';
-    });
-
-    const handleTabChange = useCallback((id) => {
-        setActiveTab(id);
-        setRoute(['trust', id]);
-        rootRef.current?.closest('main')?.scrollTo({ top: 0 });
-    }, []);
-
-    useEffect(() => {
-        const sync = () => {
-            const seg = getRouteSegments();
-            if (seg[0] === 'trust' && TAB_IDS.has(seg[1])) setActiveTab(seg[1]);
-        };
-        return onRouteChange(sync);
-    }, []);
+    const sectionRefs = useRef({});
+    const register = (id) => (el) => { if (el) sectionRefs.current[id] = el; };
 
     useEffect(() => {
         const ts = Date.now();
-        const grab = async (path) => { try { const r = await fetch(`${BASE_PATH}${path}?t=${ts}`); return r.ok ? r.json() : null; } catch { return null; } };
+        const grab = async (p) => { try { const r = await fetch(`${BASE_PATH}${p}?t=${ts}`); return r.ok ? r.json() : null; } catch { return null; } };
         (async () => {
-            const [csoD, schedD, meetD, oarD, vdrD] = await Promise.all([
-                grab('cso_public_info.json'),
-                grab('next_report_date.json'),
-                grab('quarterly_meetings.json'),
-                grab('reports/samples/oar-report.json'),
-                grab('vdr_public_metrics.json'),
+            const [a, b, c, d, e] = await Promise.all([
+                grab('cso_public_info.json'), grab('next_report_date.json'), grab('quarterly_meetings.json'),
+                grab('reports/samples/oar-report.json'), grab('vdr_public_metrics.json'),
             ]);
-            if (csoD) setCso(csoD);
-            if (schedD) setSchedule(schedD);
-            if (meetD) setMeeting(meetD);
-            if (oarD) { setOar(oarD); if (oarD.feedback_summary?.entries) setFeedback(oarD.feedback_summary.entries); }
-            if (vdrD) setVdr(vdrD);
+            if (a) setCso(a); if (b) setSchedule(b); if (c) setMeeting(c);
+            if (d) { setOar(d); if (d.feedback_summary?.entries) setFeedback(d.feedback_summary.entries); }
+            if (e) setVdr(e);
             setLoading(false);
         })();
     }, []);
 
-    const handleAction = (name) => {
-        if (!isAuthenticated) {
-            openModal('accessRequired', { featureName: name, benefits: ['Download machine-readable artifacts', 'View VDR data', 'Automated reviews'] });
-            return false;
-        }
-        return true;
+    // Scroll-spy on the app's scrolling <main>
+    useEffect(() => {
+        if (loading) return;
+        const root = rootRef.current?.closest('main') || null;
+        const obs = new IntersectionObserver((entries) => {
+            const vis = entries.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+            if (vis[0]) setActive(vis[0].target.id);
+        }, { root, rootMargin: '0px 0px -65% 0px', threshold: 0.01 });
+        Object.values(sectionRefs.current).forEach(el => el && obs.observe(el));
+        return () => obs.disconnect();
+    }, [loading]);
+
+    const jump = (id) => {
+        sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setActive(id); setRoute(['trust', id]);
     };
 
-    const API_DOCS_URL = 'https://meridian-knowledge-solutions.github.io/fedramp-20x-public/documentation/api/';
-    const triggerDownload = (blob, filename) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = filename;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-    };
-    const viewSecureConfig = async () => {
-        if (!handleAction('View Secure Configuration')) return;
-        try {
-            const res = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`);
-            openModal('markdown', { title: 'Secure Configuration', markdown: await res.text() });
-        } catch { alert('Load failed.'); }
-    };
-    const downloadSecureConfig = async () => {
-        if (!handleAction('Download Secure Configuration')) return;
-        try {
-            const res = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            triggerDownload(new Blob([await res.text()], { type: 'text/markdown' }), 'secure-configuration.md');
-        } catch (e) { alert(`Download failed: ${e.message}`); }
-    };
-    const handleDownloadPackage = async () => {
-        if (!handleAction('Download Authorization Package')) return;
-        try {
-            const token = localStorage.getItem(API_CONFIG.TOKEN_KEY);
-            if (!token) { alert('Session expired.'); return; }
-            const res = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PACKAGE_DOWNLOAD}`, { headers: { Authorization: `Bearer ${token}` } });
-            if (!res.ok) throw new Error('Access Denied');
-            const data = await res.json();
-            if (data.url) window.location.href = data.url;
-        } catch (e) { alert(`Download failed: ${e.message}`); }
-    };
-    const openApiDocs = () => window.open(API_DOCS_URL, '_blank');
+    useEffect(() => {
+        const seg = getRouteSegments();
+        if (seg[0] === 'trust' && SECTIONS.some(s => s.id === seg[1]) && !loading) {
+            setTimeout(() => sectionRefs.current[seg[1]]?.scrollIntoView({ block: 'start' }), 60);
+        }
+    }, [loading]);
+    useEffect(() => onRouteChange(() => {
+        const seg = getRouteSegments();
+        if (seg[0] === 'trust' && SECTIONS.some(s => s.id === seg[1])) sectionRefs.current[seg[1]]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }), []);
+
+    // Actions
+    const guard = (name) => { if (!isAuthenticated) { openModal('accessRequired', { featureName: name, benefits: ['Download machine-readable artifacts', 'View VDR data', 'Automated reviews'] }); return false; } return true; };
+    const dl = (blob, filename) => { const u = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = u; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); };
+    const viewConfig = async () => { if (!guard('View Secure Configuration')) return; try { const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`); openModal('markdown', { title: 'Secure Configuration', markdown: await r.text() }); } catch { alert('Load failed.'); } };
+    const downloadConfig = async () => { if (!guard('Download Secure Configuration')) return; try { const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`); if (!r.ok) throw new Error(`HTTP ${r.status}`); dl(new Blob([await r.text()], { type: 'text/markdown' }), 'secure-configuration.md'); } catch (e) { alert(`Download failed: ${e.message}`); } };
+    const downloadPackage = async () => { if (!guard('Download Authorization Package')) return; try { const tok = localStorage.getItem(API_CONFIG.TOKEN_KEY); if (!tok) { alert('Session expired.'); return; } const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PACKAGE_DOWNLOAD}`, { headers: { Authorization: `Bearer ${tok}` } }); if (!r.ok) throw new Error('Access Denied'); const j = await r.json(); if (j.url) window.location.href = j.url; } catch (e) { alert(`Download failed: ${e.message}`); } };
+    const apiDocs = () => window.open('https://meridian-knowledge-solutions.github.io/fedramp-20x-public/documentation/api/', '_blank');
 
     if (loading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-[#0a0a0c]">
+            <div className="-m-6 md:-m-8 min-h-screen bg-[#f3f1ea] flex items-center justify-center">
                 <div className="text-center animate-pulse">
-                    <div className="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-sky-500/50" />
-                    <div className="text-slate-500 font-mono text-sm">Loading authorization context…</div>
+                    <div className="w-10 h-10 mx-auto mb-4 border-2 border-[#1e3a5f]/40" style={{ borderRadius: 2 }} />
+                    <div className="text-[#928d81] font-mono text-[13px]">Compiling authorization dossier…</div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div ref={rootRef} className="-m-6 md:-m-8 min-h-screen bg-[#0a0a0c] text-slate-300 font-sans selection:bg-sky-500/30">
-            <div className="px-5 md:px-8 py-8 space-y-6 max-w-7xl mx-auto">
-                <Hero cso={cso} status={status} lastRefresh={schedule?.last_data_refresh} />
-                <TabBar active={activeTab} onChange={handleTabChange} />
+        <div ref={rootRef} className="-m-6 md:-m-8 min-h-screen bg-[#f3f1ea] text-[#1c1b17] selection:bg-[#1e3a5f]/15"
+            style={{ fontFeatureSettings: '"liga" 1, "calt" 1' }}>
+            <div className="max-w-[1180px] mx-auto px-6 md:px-10 lg:px-12 py-9">
+                <Masthead cso={cso} status={status} asOf={schedule?.last_data_refresh} />
 
-                {activeTab === 'overview' && <OverviewTab cso={cso} oar={oar} vdr={vdr} status={status} schedule={schedule} meeting={meeting} />}
-                {activeTab === 'compliance' && <CustomerResponsibilityMatrix />}
-                {activeTab === 'architecture' && <ArchitectureTab />}
-                {activeTab === 'changes' && <ChangesTab oar={oar} />}
-                {activeTab === 'resources' && (
-                    <ResourcesTab cso={cso} feedback={feedback} isAuthenticated={isAuthenticated}
-                        onDownloadPackage={handleDownloadPackage} onViewConfig={viewSecureConfig}
-                        onDownloadConfig={downloadSecureConfig} onApiDocs={openApiDocs} />
-                )}
+                <div className="flex gap-12 pt-10">
+                    <IndexRail active={active} onJump={jump} />
 
-                <div className="pt-2 pb-8 text-center text-[11px] text-slate-600">
-                    {cso?.cso_name || 'Meridian LMS'} · {cso?.package_id} · FedRAMP {cso?.authorization_type || '20x'} {cso?.impact_level || 'Moderate'} · Continuously monitored authorization
+                    <div className="min-w-0 flex-1 space-y-16">
+                        <Section id="posture" ref={register('posture')} num="01" title="Authorization Posture"
+                            desc="Live continuous-monitoring metrics for the current reporting period.">
+                            <Posture oar={oar} vdr={vdr} status={status} />
+                        </Section>
+
+                        <Section id="profile" ref={register('profile')} num="02" title="Service Profile"
+                            desc="What the platform is, how it is deployed, and the reporting cadence.">
+                            <Profile cso={cso} schedule={schedule} meeting={meeting} />
+                        </Section>
+
+                        <Section id="responsibility" ref={register('responsibility')} num="03" title="Shared Responsibility"
+                            desc="Control ownership across NIST 800-53 Rev 5, FedRAMP 20x KSIs, and CMMC 2.0 L2 / CUI.">
+                            <ComplianceLedger />
+                        </Section>
+
+                        <Section id="architecture" ref={register('architecture')} num="04" title="Architecture & Data Flow"
+                            desc="Federal data lifecycle per OMB A-130. Select a stage to inspect controls and KSIs.">
+                            <Architecture />
+                        </Section>
+
+                        <Section id="changes" ref={register('changes')} num="05" title="Change Activity"
+                            desc="Significant change activity from the current Ongoing Authorization Report (FRR-SCN).">
+                            <Changes oar={oar} />
+                        </Section>
+
+                        <Section id="services" ref={register('services')} num="06" title="Services & Artifacts"
+                            desc="Authorization scope, downloadable artifacts, and the feedback mechanism.">
+                            <Services cso={cso} isAuthenticated={isAuthenticated} onDownloadPackage={downloadPackage}
+                                onViewConfig={viewConfig} onDownloadConfig={downloadConfig} onApiDocs={apiDocs} feedback={feedback} />
+                        </Section>
+
+                        <footer className={cn('pt-8 mt-4 border-t text-[12px] text-[#928d81] flex flex-wrap justify-between gap-2', RULE)}>
+                            <span>{cso?.cso_name || 'Meridian LMS'} · {cso?.package_id} · FedRAMP {cso?.authorization_type || '20x'} {cso?.impact_level || 'Moderate'}</span>
+                            <span>Continuously monitored authorization · Public dossier</span>
+                        </footer>
+                    </div>
                 </div>
             </div>
         </div>
