@@ -34,6 +34,7 @@ import { RemediationHeatmap } from './components/trust/RemediationHeatmap';
 import { TrustCenterDataProvider } from './hooks/useTrustCenterData';
 
 import { THEME, BASE_PATH } from './config/theme';
+import './components/trust/console.css';
 
 const TRANSITIONS = {
   default: 'transition-all duration-200 ease-out',
@@ -69,19 +70,12 @@ const SidebarItem = memo(({ icon: Icon, label, badge, isActive, onClick, locked 
   <button
     onClick={onClick}
     title={locked ? `${label} — requires verified federal access` : undefined}
-    className={`group flex items-center w-full px-3 py-3 mx-2 mb-1 text-sm font-medium rounded-md cursor-pointer ${TRANSITIONS.default} border border-transparent
-    ${isActive ? THEME.active : `text-slate-400 ${THEME.hover} hover:text-slate-200`}`}
+    className={`nav ${isActive ? 'on' : ''}`}
   >
-    <Icon size={16} className={`mr-3 ${TRANSITIONS.default} ${isActive ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
-    <span className="flex-1 text-left tracking-wide">{label}</span>
-    {badge && (
-      <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded-sm ${badge.color} border border-white/5 tracking-wider`}>
-        {badge.text}
-      </span>
-    )}
-    {locked && (
-      <Lock size={12} className="text-slate-600 group-hover:text-slate-400 shrink-0" aria-label="Requires federal access" />
-    )}
+    <Icon className="ico" />
+    <span style={{ flex: 1 }}>{label}</span>
+    {badge && <span className="tag vi bdg" style={{ fontSize: 9, padding: '2px 6px' }}>{badge.text}</span>}
+    {locked && <Lock size={12} className="lk" aria-label="Requires federal access" />}
   </button>
 ));
 
@@ -491,6 +485,20 @@ const KNOWN_VIEWS = new Set([
   'failures', 'register', 'mas', 'policies', 'schema', 'reports',
 ]);
 
+const VIEW_TITLES = {
+  dashboard: ['Overview', 'system-wide posture'],
+  trust: ['Trust Center', 'authorization, live'],
+  vdr: ['VDR Security', 'vulnerability data'],
+  transparency: ['Transparency Console', 'live evidence stream'],
+  metrics: ['Pipeline Metrics', 'validation telemetry'],
+  failures: ['Failure History', 'KSI failure timeline'],
+  register: ['Remediation Register', 'open remediation'],
+  mas: ['Assessment Scope', 'boundary & data flow'],
+  policies: ['Policies', 'governance'],
+  schema: ['Schema', 'machine-readable'],
+  reports: ['Reports', 'authorization artifacts'],
+};
+
 const AppShell = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -536,7 +544,7 @@ const AppShell = () => {
   }, [navigate]);
 
   return (
-    <div className={`flex h-screen ${THEME.bg} text-slate-300 font-sans overflow-hidden selection:bg-blue-500/30`}>
+    <div className="tcx flex h-screen overflow-hidden">
 
       {mobileMenuOpen && (
         <div
@@ -547,26 +555,16 @@ const AppShell = () => {
 
       {/* Mobile Sidebar */}
       <aside
-        className={`fixed z-[70] h-full bg-[#0c0c10] border-r border-white/5 transition-transform duration-300 
+        className={`fixed z-[70] h-full bg-[#080B0F] border-r border-[#1A222D] transition-transform duration-300 
           w-[280px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:hidden
         `}
       >
         <div className="flex flex-col h-full">
-          <div className="h-16 flex items-center justify-between px-5 border-b border-white/5 mb-2">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-1 relative overflow-hidden">
-                <img
-                  src={`${import.meta.env.BASE_URL}meridian-favicon.png`}
-                  alt="Meridian Logo"
-                  className="w-full h-full object-contain relative z-10"
-                />
-                <div className="absolute inset-0 bg-blue-500/10 blur-xl"></div>
-              </div>
-              <div>
-                <div className="font-bold text-white tracking-tight leading-none text-sm">Meridian</div>
-                <div className="text-[9px] text-slate-500 font-mono mt-0.5 tracking-widest uppercase">Trust Center</div>
-              </div>
+          <div className="h-16 flex items-center justify-between px-5 border-b border-[#1A222D] mb-2">
+            <div className="sidehead">
+              <span className="orb" />
+              <div>Meridian<small>FEDRAMP&nbsp;20x&nbsp;CONSOLE</small></div>
             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
@@ -577,7 +575,7 @@ const AppShell = () => {
           </div>
 
           <nav className="flex-1 overflow-y-auto py-6 scrollbar-none pb-[env(safe-area-inset-bottom)]">
-            <div className="px-5 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Platform</div>
+            <div className="lbl">Platform</div>
 
             <SidebarItem
               icon={LayoutDashboard}
@@ -633,7 +631,7 @@ const AppShell = () => {
               onClick={() => { navigate('mas'); setMobileMenuOpen(false); }}
             />
 
-            <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Organization</div>
+            <div className="lbl">Organization</div>
 
             <SidebarItem
               icon={BookOpen}
@@ -657,7 +655,7 @@ const AppShell = () => {
               onClick={() => { navigate('reports'); setMobileMenuOpen(false); }}
             />
 
-            <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
+            <div className="lbl">User</div>
 
             {isAuthenticated ? (
               <>
@@ -682,30 +680,20 @@ const AppShell = () => {
 
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden lg:flex flex-col flex-shrink-0 h-full bg-[#0c0c10] border-r border-white/5 transition-all duration-300 overflow-hidden
+        className={`hidden lg:flex flex-col flex-shrink-0 h-full bg-[#080B0F] border-r border-[#1A222D] transition-all duration-300 overflow-hidden
           ${sidebarOpen ? 'w-64' : 'w-0'}
         `}
       >
         <div className="flex flex-col h-full min-w-[256px]">
-          <div className="h-16 flex items-center justify-between px-5 border-b border-white/5 mb-2">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-1 relative overflow-hidden">
-                <img
-                  src={`${import.meta.env.BASE_URL}meridian-favicon.png`}
-                  alt="Meridian Logo"
-                  className="w-full h-full object-contain relative z-10"
-                />
-                <div className="absolute inset-0 bg-blue-500/10 blur-xl"></div>
-              </div>
-              <div>
-                <div className="font-bold text-white tracking-tight leading-none text-sm">Meridian</div>
-                <div className="text-[9px] text-slate-500 font-mono mt-0.5 tracking-widest uppercase">Trust Center</div>
-              </div>
+          <div className="h-16 flex items-center justify-between px-5 border-b border-[#1A222D] mb-2">
+            <div className="sidehead">
+              <span className="orb" />
+              <div>Meridian<small>FEDRAMP&nbsp;20x&nbsp;CONSOLE</small></div>
             </div>
           </div>
 
           <nav className="flex-1 overflow-y-auto py-6 scrollbar-none">
-            <div className="px-5 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Platform</div>
+            <div className="lbl">Platform</div>
 
             <SidebarItem
               icon={LayoutDashboard}
@@ -761,7 +749,7 @@ const AppShell = () => {
               onClick={() => navigate('mas')}
             />
 
-            <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Organization</div>
+            <div className="lbl">Organization</div>
 
             <SidebarItem
               icon={BookOpen}
@@ -785,7 +773,7 @@ const AppShell = () => {
               onClick={() => navigate('reports')}
             />
 
-            <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
+            <div className="lbl">User</div>
 
             {isAuthenticated ? (
               <>
@@ -811,67 +799,35 @@ const AppShell = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
 
-        {/* Global Responsive Header */}
-        <header className={`h-16 bg-[#0c0c10]/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 lg:px-6 z-50 sticky top-0 ${scrollY > 0 ? 'shadow-lg shadow-black/20' : ''}`}>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-white transition-colors"
-            >
-              <Menu size={22} />
+        {/* Console top bar */}
+        <header className="bar" style={{ zIndex: 50 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+            <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden" style={{ color: 'var(--ash)', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <Menu size={20} />
             </button>
-
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="hidden lg:block text-slate-400 hover:text-white transition-colors">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="hidden lg:block" style={{ color: 'var(--ash)', background: 'none', border: 'none', cursor: 'pointer' }}>
               <Menu size={18} />
             </button>
-
-            <div className="hidden sm:flex items-center px-2 py-1">
-              <span className="text-slate-500 text-[10px] uppercase font-bold tracking-widest font-mono">
-                {activeView === 'dashboard' && 'Platform / Overview'}
-                {activeView === 'trust' && 'Platform / Trust Center'}
-                {activeView === 'vdr' && 'Platform / VDR Security'}
-                {activeView === 'transparency' && 'Platform / Transparency Console'}
-                {activeView === 'metrics' && 'Platform / Pipeline Metrics'}
-                {activeView === 'failures' && 'Platform / Failure History'}
-                {activeView === 'register' && 'Platform / Remediation Register'}
-                {activeView === 'mas' && 'Platform / Assessment Scope'}
-                {activeView === 'policies' && 'Organization / Policies'}
-                {activeView === 'schema' && 'Organization / Schema'}
-                {activeView === 'reports' && 'Organization / Reports'}
-              </span>
-            </div>
+            <div className="ttl">{(VIEW_TITLES[activeView] || ['Overview'])[0]}<small>{(VIEW_TITLES[activeView] || ['', ''])[1]}</small></div>
           </div>
 
-          <div className="flex items-center space-x-3 lg:space-x-6">
+          <div className="right">
             {freshness && (
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/15"
-                   title={`Last KSI continuous-validation run: ${new Date(freshness).toLocaleString()}. Key Security Indicators re-validate every 4 hours.`}>
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                </span>
-                <div className="leading-tight">
-                  <div className="text-[8px] text-slate-500 uppercase font-bold tracking-wider">KSI Validation</div>
-                  <div className="text-[10px] text-emerald-300 font-mono">Last run {getTimeElapsed(new Date(freshness))}</div>
-                </div>
-              </div>
+              <span className="pill" title={`Last KSI continuous-validation run: ${new Date(freshness).toLocaleString()}. Key Security Indicators re-validate every 4 hours.`}>
+                <span className="d" /> KSI validated · {getTimeElapsed(new Date(freshness))}
+              </span>
             )}
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden md:block">
-                <div className="text-xs font-bold text-white">{isAuthenticated ? user.agency : 'Public User'}</div>
-                <div className="text-[9px] text-slate-500 font-mono uppercase tracking-wider">{isAuthenticated ? 'Federal Access' : 'Limited View'}</div>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center text-white font-bold text-xs shadow-inner border border-white/10 ring-1 ring-white/5">
-                {isAuthenticated ? user.agency?.charAt(0) : 'P'}
-              </div>
-            </div>
+            <span className="hidden md:inline">{isAuthenticated ? user.agency : 'Public · limited view'}</span>
+            <span style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#1A222D,#0D1117)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink)', fontSize: 12, fontWeight: 600 }}>
+              {isAuthenticated ? user.agency?.charAt(0) : 'P'}
+            </span>
           </div>
         </header>
 
         {/* Scrollable Dashboard Canvas */}
-        <main className="flex-1 overflow-y-auto bg-[#09090b] relative scrollbar-thin scrollbar-thumb-white/10">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow" style={{ animationDelay: '1s' }} />
+        <main className="flex-1 overflow-y-auto bg-transparent relative scrollbar-thin scrollbar-thumb-white/10">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#34e0c4]/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#818cf8]/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow" style={{ animationDelay: '1s' }} />
 
           <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto relative z-10">
             {activeView === 'dashboard' ? <DashboardContent onOpenRegister={goToRegister} /> :

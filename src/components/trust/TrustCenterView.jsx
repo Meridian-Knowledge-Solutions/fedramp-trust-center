@@ -157,16 +157,7 @@ export const TrustCenterView = () => {
 
     return (
         <div ref={rootRef} className="tcx -m-6 md:-m-8">
-            {/* top bar */}
-            <header className="bar">
-                <div className="brand">
-                    <span className="orb" />
-                    {cso?.provider_name || 'Meridian'} <small>FEDRAMP&nbsp;TRUST&nbsp;CENTER</small>
-                </div>
-                <div className="bar-stat"><b style={{ animation: 'tcx-bl 1.6s infinite' }}>●</b> continuously monitored · {cso?.authorization_type || 'FedRAMP 20x'} {cso?.impact_level || 'Moderate'}</div>
-            </header>
-
-            {/* nav */}
+            {/* section nav */}
             <nav className="tabs">
                 {NAV.map(([id, label], i) => (
                     <a key={id} className={active === id ? 'active' : ''} onClick={() => jump(id)}>
