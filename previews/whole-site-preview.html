@@ -1,0 +1,324 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meridian — FedRAMP Trust Console (whole-site preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --base:#07090C;--raise:#0D1117;--raise2:#0A0E13;--line:#1A222D;--ink:#E8EEF4;--ash:#788596;--faint:#424E5C;
+  --signal:#34E0C4;--indigo:#818CF8;--amber:#F2B85C;--red:#F2607A;
+  --disp:'Geist','Inter',system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+::selection{background:var(--signal);color:var(--base)}
+html{scroll-behavior:smooth}
+body{background:var(--base);color:var(--ink);font-family:var(--disp);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+/* drifting grid */
+body::before{content:"";position:fixed;inset:-50%;z-index:0;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:46px 46px;opacity:.18;animation:drift 40s linear infinite}
+@keyframes drift{to{transform:translate(46px,46px)}}
+
+.app{display:flex;min-height:100vh;position:relative;z-index:1}
+
+/* ── sidebar ── */
+.side{width:248px;flex-shrink:0;border-right:1px solid var(--line);background:#080B0F;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.side .top{padding:18px 18px 14px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;font-weight:600;font-size:15px;letter-spacing:-.01em}
+.orb{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--signal),#0c8a78);animation:ring 2.4s infinite;flex-shrink:0}
+@keyframes ring{0%{box-shadow:0 0 0 0 #34E0C455}70%{box-shadow:0 0 0 8px #34E0C400}100%{box-shadow:0 0 0 0 #34E0C400}}
+.brand small{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;color:var(--signal);font-weight:400;margin-top:2px}
+.navg{flex:1;overflow-y:auto;padding:12px 10px}
+.navg .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--faint);padding:14px 10px 7px;text-transform:uppercase}
+.nav{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;font-size:13px;color:var(--ash);cursor:pointer;transition:.15s;border:1px solid transparent}
+.nav:hover{color:var(--ink);background:var(--raise)}
+.nav.on{color:var(--indigo);background:#818CF80D;border-color:#818CF833}
+.nav .ico{width:15px;height:15px;flex-shrink:0;opacity:.9}
+.nav .lk{margin-left:auto;width:11px;height:11px;color:var(--faint)}
+.side .foot{padding:12px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ash)}
+.side .foot .u{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px}
+.side .foot .u:hover{background:var(--raise);color:var(--ink);cursor:pointer}
+
+/* ── main ── */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px 28px;background:#07090CCC;backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar .ttl{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.bar .ttl small{display:block;font-family:var(--mono);font-size:10px;color:var(--ash);font-weight:400;letter-spacing:.04em;margin-top:1px}
+.bar .right{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:11px;color:var(--ash)}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:8px;border:1px solid #34E0C455;background:#34E0C40D;color:var(--signal);font-family:var(--mono);font-size:11px}
+.pill .d{width:6px;height:6px;border-radius:50%;background:var(--signal);animation:bl 1.6s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.25}}
+
+.view{display:none;padding:28px;max-width:1180px;animation:fade .4s}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.kick{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--signal);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.kick::before{content:"";width:18px;height:1px;background:var(--signal);box-shadow:0 0 8px var(--signal)}
+h1.big{font-size:clamp(30px,4vw,46px);font-weight:600;letter-spacing:-.03em;line-height:1.02;margin-bottom:16px}
+h1.big .g{background:linear-gradient(100deg,var(--signal),var(--indigo));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.lede{color:var(--ash);font-size:15px;max-width:600px;line-height:1.55;margin-bottom:26px}
+h3.sec{font-size:13px;font-family:var(--mono);letter-spacing:.06em;color:var(--ash);text-transform:uppercase;margin:30px 0 14px;display:flex;align-items:center;gap:10px}
+h3.sec::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* console banner */
+.console{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--raise),var(--raise2));overflow:hidden;box-shadow:0 20px 60px -30px #000}
+.console-top{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line);background:#0b1016}
+.console-top .dots{display:flex;gap:6px}.console-top .dots i{width:9px;height:9px;border-radius:50%;background:var(--faint)}.console-top .dots i:first-child{background:var(--signal)}
+.console-top .ttl{font-family:var(--mono);font-size:11px;color:var(--ash);margin-left:6px}
+.console-top .r{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--signal);display:flex;align-items:center;gap:7px}
+.console-top .r .d{width:6px;height:6px;border-radius:50%;background:var(--signal);animation:bl 1.6s infinite}
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr)}
+.cstat{padding:18px 20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.cstat:nth-child(4){border-right:none}
+.cstat .fig{font-family:var(--mono);font-size:27px;font-weight:500;letter-spacing:-.02em;line-height:1}.cstat .fig.s{color:var(--signal)}.cstat .fig.i{color:var(--indigo)}
+.cstat .lab{font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--ash);margin-top:8px;text-transform:uppercase}
+.log{padding:13px 18px;font-family:var(--mono);font-size:11.5px;line-height:1.95;height:150px;overflow:hidden;position:relative}
+.log::after{content:"";position:absolute;left:0;right:0;bottom:0;height:36px;background:linear-gradient(transparent,var(--raise2))}
+.log .ln{display:flex;gap:12px;opacity:0;animation:logIn .5s forwards}@keyframes logIn{to{opacity:1}}
+.log .ts{color:var(--faint)}.log .ev{color:var(--ash)}.log .ok{color:var(--signal)}.log .vi{color:var(--indigo)}.log .wa{color:var(--amber)}
+
+/* panels / rows */
+.panel{border:1px solid var(--line);border-radius:13px;background:var(--raise);overflow:hidden}
+.ph{display:flex;justify-content:space-between;align-items:center;padding:13px 18px;border-bottom:1px solid var(--line);background:#0b1016}
+.ph h4{font-size:14px;font-weight:600}.ph .map{font-family:var(--mono);font-size:11px;color:var(--indigo)}
+.row{display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:none}.row:hover{background:#34E0C407}
+.svc{font-weight:500;font-size:14px}.mono{font-family:var(--mono);font-size:12px;color:var(--ash)}
+.spark{display:flex;gap:2px;height:24px;align-items:flex-end;flex:1;max-width:320px}
+.spark i{flex:1;border-radius:1px;transform-origin:bottom;transform:scaleY(0);animation:grow .5s forwards}@keyframes grow{to{transform:scaleY(1)}}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.04em;padding:4px 9px;border-radius:6px;white-space:nowrap}
+.tag.ok{color:var(--signal);background:#34E0C414}.tag.warn{color:var(--amber);background:#F2B85C14}.tag.vi{color:var(--indigo);background:#818CF814}.tag.red{color:var(--red);background:#F2607A14}
+.grid{display:grid;gap:12px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.vbox{border:1px solid var(--line);border-radius:13px;background:var(--raise);padding:20px;position:relative;overflow:hidden}
+.vbox .big{font-family:var(--mono);font-size:38px;font-weight:500;line-height:1}.vbox .big.z{color:var(--signal)}.vbox .big.h{color:var(--amber)}.vbox .big.r{color:var(--red)}
+.vbox .lab{font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--ash);margin-top:9px;text-transform:uppercase}
+.vbox .glow{position:absolute;inset:0;background:radial-gradient(circle at 80% -20%,#34E0C418,transparent 60%);pointer-events:none}
+.kpi{border:1px solid var(--line);border-radius:13px;background:var(--raise);padding:18px}
+.kpi .v{font-family:var(--mono);font-size:26px;font-weight:500;letter-spacing:-.02em}.kpi .v.s{color:var(--signal)}.kpi .v.i{color:var(--indigo)}
+.kpi .l{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--ash);margin-top:8px;text-transform:uppercase}
+.kpi .sub{font-size:12px;color:var(--faint);margin-top:5px}
+.lrow{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:15px 18px;border-bottom:1px solid var(--line);cursor:pointer;transition:.15s}
+.lrow:last-child{border-bottom:none}.lrow:hover{background:#34E0C407;padding-left:24px}
+.lrow .t{font-weight:500;font-size:15px}.lrow .d{font-family:var(--mono);font-size:11px;color:var(--ash);margin-top:3px}
+.lrow .meta{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:10px;color:var(--faint)}
+.nda{color:var(--amber);background:#F2B85C14;padding:4px 9px;border-radius:6px}.pub{color:var(--signal);background:#34E0C414;padding:4px 9px;border-radius:6px}.ar{color:var(--signal)}
+.ctrl{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line)}.ctrl:last-child{border-bottom:none}
+.ck{font-family:var(--mono)}.ck.p{color:var(--signal)}.ck.s{color:var(--amber)}
+.badge{font-family:var(--mono);font-size:10px;letter-spacing:.04em;padding:5px 10px;border-radius:7px;border:1px solid var(--line);color:var(--ash);display:inline-flex;align-items:center;gap:6px}
+.badge.s{color:var(--signal);border-color:#34E0C455;background:#34E0C40D}.badge.i{color:var(--indigo);border-color:#818CF855;background:#818CF80D}
+.bset{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.node{flex:1;min-width:150px;border:1px solid var(--line);border-radius:11px;background:var(--raise);padding:14px;position:relative}
+.node .ph2{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+.node .nm{font-weight:500;font-size:13px;margin:5px 0 7px}.node .ks{font-family:var(--mono);font-size:10px;color:var(--indigo)}
+.arrow{display:flex;align-items:center;color:var(--faint);padding:0 6px;font-family:var(--mono)}
+.code{font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--ash);padding:16px 18px;white-space:pre;overflow-x:auto}
+.code .k{color:var(--indigo)}.code .v{color:var(--signal)}.code .s{color:#9fb0c0}
+.cta{display:flex;justify-content:space-between;align-items:center;gap:24px;border:1px solid #34E0C455;border-radius:13px;background:linear-gradient(120deg,#34E0C40D,#818CF80D);padding:24px 28px;margin-top:20px}
+.cta h3{font-size:19px;font-weight:600;max-width:520px}
+.btn{font-family:var(--mono);font-size:12px;padding:12px 20px;background:var(--signal);color:var(--base);border:none;border-radius:9px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn.ind{background:var(--indigo)}
+.marquee{margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--raise2);padding:13px 0;position:relative}
+.mtrack{display:flex;gap:44px;width:max-content;animation:slide 26s linear infinite;font-family:var(--mono);font-size:13px;color:var(--ash)}
+.mtrack span{display:flex;align-items:center;gap:9px;white-space:nowrap}.mtrack b{color:var(--ink);font-weight:500}.mtrack .v{color:var(--signal)}
+@keyframes slide{to{transform:translateX(-50%)}}
+.note{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:10px}
+@media(max-width:900px){.side{display:none}.cgrid,.g4,.g3{grid-template-columns:1fr 1fr}.spark{max-width:140px}}
+.previewtag{position:fixed;bottom:14px;right:14px;z-index:50;font-family:var(--mono);font-size:10px;color:var(--faint);background:#0b1016;border:1px solid var(--line);padding:6px 11px;border-radius:8px}
+</style></head>
+<body>
+<div class="previewtag">STATIC PREVIEW · mock data · not deployed</div>
+<div class="app">
+  <!-- sidebar -->
+  <aside class="side">
+    <div class="top"><div class="brand"><span class="orb"></span><div>Meridian<small>FEDRAMP&nbsp;20x&nbsp;CONSOLE</small></div></div></div>
+    <div class="navg" id="navg"></div>
+    <div class="foot">
+      <div class="u">◐ Agency Reviewer</div>
+      <div class="u">⎋ Register Access</div>
+    </div>
+  </aside>
+  <!-- main -->
+  <div class="main">
+    <header class="bar">
+      <div class="ttl" id="ptitle">Overview<small id="psub">system-wide posture</small></div>
+      <div class="right">
+        <span class="pill"><span class="d"></span> OPERATIONAL</span>
+        <span>FR2527956755</span>
+      </div>
+    </header>
+    <div id="stage"></div>
+  </div>
+</div>
+
+<script>
+const NAV=[
+ ['dashboard','Overview','▦','system-wide posture'],
+ ['trust','Trust Center','◈','authorization, live'],
+ ['vdr','VDR Security','⚠','vulnerability data'],
+ ['transparency','Transparency Console','⟳','live evidence stream'],
+ ['metrics','Pipeline Metrics','▤','validation telemetry'],
+ ['failures','Failure History','◷','KSI failure timeline'],
+ ['register','Remediation Register','✎','open remediation'],
+ ['mas','Assessment Scope','⬡','boundary & data flow'],
+ ['policies','Policies','§','governance'],
+ ['schema','Schema','{}','machine-readable'],
+ ['reports','Reports','▣','authorization artifacts'],
+];
+// sidebar
+const navg=document.getElementById('navg');
+navg.innerHTML='<div class="lbl">Console</div>'+NAV.map((n,i)=>`<div class="nav${i===0?' on':''}" data-v="${n[0]}"><span class="ico">${n[2]}</span>${n[1]}</div>`).join('');
+
+// helpers
+const bars=(seed,n=48,warnHi=false)=>Array.from({length:n},(_,i)=>{const r=Math.abs(Math.sin(seed*9.7+i*2.3));const h=22+r*78;const warn=warnHi&&r>.93;return `<i style="height:${h}%;background:${warn?'var(--amber)':'var(--signal)'};animation-delay:${i*9}ms"></i>`}).join('');
+const trend=[82,83.6,85.2,85.2,85.2,85.2,93.4,93.4,93.4,93.4,93.4,93.4,93.4,93.4];
+const trendBars=trend.map((v,i)=>`<i style="height:${((v-78)/(94-78))*82+18}%;background:var(--signal);animation-delay:${i*30}ms"></i>`).join('');
+
+const FW=[['FedRAMP 20x','AUTHORIZED'],['NIST 800-53 R5','MODERATE'],['FedRAMP KSI','MAPPED'],['CMMC 2.0 L2','CROSS-REF'],['CUI · DoDI 5200.48','ATTESTED'],['OMB A-130','ALIGNED']];
+
+// ── views ──
+const V={};
+
+V.dashboard=()=>`
+  <div class="kick">LIVE · CONTINUOUSLY MONITORED · FR2527956755</div>
+  <h1 class="big">Authorization, observed in <span class="g">real time.</span></h1>
+  <p class="lede">A living view of how Meridian LMS maintains its FedRAMP 20x Moderate authorization — KSI posture, vulnerability data, and the evidence beneath them, streaming as it is collected.</p>
+  <div class="console">
+    <div class="console-top"><div class="dots"><i></i><i></i><i></i></div><span class="ttl">meridian://trust/live</span><span class="r"><span class="d"></span> STREAMING</span></div>
+    <div class="cgrid">
+      <div class="cstat"><div class="fig s">99.99%</div><div class="lab">Uptime / 90d</div></div>
+      <div class="cstat"><div class="fig i">93.4%</div><div class="lab">KSI compliance</div></div>
+      <div class="cstat"><div class="fig s">0</div><div class="lab">Open criticals</div></div>
+      <div class="cstat"><div class="fig">57/61</div><div class="lab">KSIs passing</div></div>
+    </div>
+    <div class="log" id="log"></div>
+  </div>
+  <div class="marquee"><div class="mtrack">${[...FW,...FW].map(f=>`<span><b>${f[0]}</b> <span class="v">◆ ${f[1]}</span></span>`).join('')}</div></div>
+  <h3 class="sec">System status</h3>
+  <div class="panel">${[['API','99.99%','ok'],['Dashboard','99.98%','ok'],['Authentication','100%','ok'],['Evidence pipeline','99.97%','ok'],['Webhooks','99.81%','warn'],['Object storage','99.99%','ok']].map((s,i)=>`<div class="row"><span class="svc" style="width:160px">${s[0]}</span><div class="spark">${bars(i+1,48,s[2]==='warn')}</div><span class="mono" style="width:64px;text-align:right;margin-left:auto">${s[1]}</span><span style="margin-left:14px"><span class="tag ${s[2]==='ok'?'ok':'warn'}">${s[2]==='ok'?'OPERATIONAL':'DEGRADED'}</span></span></div>`).join('')}</div>`;
+
+V.trust=()=>`
+  <div class="kick">02 — AUTHORIZATION RECORD</div>
+  <h1 class="big">FedRAMP <span class="g">Trust Center</span></h1>
+  <p class="lede">The public authorization record for Meridian LMS — posture, controls, and artifacts for agency reviewers.</p>
+  <div class="bset">${FW.map(f=>`<span class="badge ${f[1]==='AUTHORIZED'?'s':''}">${f[1]==='AUTHORIZED'?'● ':''}${f[0]}</span>`).join('')}</div>
+  <div class="grid g4">
+    <div class="kpi"><div class="v s">93.4%</div><div class="l">KSI compliance</div><div class="sub">57 / 61 passing</div></div>
+    <div class="kpi"><div class="v">4</div><div class="l">Active gaps</div><div class="sub">in remediation</div></div>
+    <div class="kpi"><div class="v">11</div><div class="l">Open vulns</div><div class="sub">0 critical · 0 accepted</div></div>
+    <div class="kpi"><div class="v s">99.99%</div><div class="l">Uptime</div><div class="sub">continuously monitored</div></div>
+  </div>
+  <h3 class="sec">Service profile</h3>
+  <div class="panel">${[['Deployment','Multi-Tenant Public Cloud'],['Cloud','AWS Commercial · US-East-1'],['Authentication','SAML 2.0 SSO + MFA'],['UEI','MM9LQ3WBY5V7'],['Impact level','Moderate · FedRAMP 20x'],['Next OAR','2026-08-15']].map(r=>`<div class="row"><span class="svc">${r[0]}</span><span class="mono" style="margin-left:auto;color:var(--ink)">${r[1]}</span></div>`).join('')}</div>`;
+
+V.vdr=()=>`
+  <div class="kick">FRR-CVM · COORDINATED DISCLOSURE</div>
+  <h1 class="big">Vulnerability <span class="g">data</span></h1>
+  <p class="lede">Aggregate finding counts from the Vulnerability Disclosure Report, streamed openly. No sensitive data.</p>
+  <div class="grid g4" style="margin-bottom:14px">
+    ${[['Critical',0,'z'],['High',8,'h'],['Medium',3,'h'],['Low',0,'z']].map(v=>`<div class="vbox">${v[1]===0?'<div class="glow"></div>':''}<div class="big ${v[2]}">${v[1]}</div><div class="lab">${v[0]} · open</div></div>`).join('')}
+  </div>
+  <div class="grid g2">
+    <div class="panel"><div class="ph"><h4>Posture</h4><span class="map">FRR-CVM-04 · COMPLIANT</span></div>
+      ${[['Security posture','EXCELLENT · 8.6','ok'],['Active / accepted','11 active · 0 accepted','ok'],['KEV matches','0','ok'],['N-ratings','N3:8 · N2:3','warn']].map(r=>`<div class="row"><span class="svc" style="font-size:13px">${r[0]}</span><span class="mono" style="margin-left:auto">${r[1]}</span><span style="margin-left:12px"><span class="tag ${r[2]}">●</span></span></div>`).join('')}</div>
+    <div class="panel"><div class="ph"><h4>Attack surface</h4><span class="map">graph analysis</span></div>
+      ${[['Nodes','74'],['Edges','1,189'],['Paths','165'],['Critical paths','0'],['CSPM findings','139 · 1 critical']].map(r=>`<div class="row"><span class="svc" style="font-size:13px">${r[0]}</span><span class="mono" style="margin-left:auto;color:var(--ink)">${r[1]}</span></div>`).join('')}</div>
+  </div>
+  <div class="cta"><h3>Found a vulnerability? Report it through coordinated disclosure.</h3><button class="btn">Submit a report →</button></div>`;
+
+V.transparency=()=>`
+  <div class="kick">⟳ — LIVE EVIDENCE STREAM</div>
+  <h1 class="big">Transparency <span class="g">console</span></h1>
+  <p class="lede">Every KSI validation, evidence snapshot, and change notification as it happens. 1,096 validation runs to date.</p>
+  <div class="bset"><span class="badge i">FRR-CCM</span><span class="badge">KSI VALIDATIONS</span><span class="badge">EVIDENCE SNAPSHOTS</span><span class="badge">SCN EVENTS</span></div>
+  <div class="panel"><div class="ph"><h4>Event stream</h4><span class="r" style="font-family:var(--mono);font-size:11px;color:var(--signal);display:flex;align-items:center;gap:7px"><span style="width:6px;height:6px;border-radius:50%;background:var(--signal);animation:bl 1.6s infinite"></span>LIVE</span></div>
+    <div class="log" id="log2" style="height:300px"></div></div>`;
+
+V.metrics=()=>`
+  <div class="kick">▤ — PIPELINE TELEMETRY</div>
+  <h1 class="big">Validation <span class="g">metrics</span></h1>
+  <p class="lede">KSI compliance trend, evidence cadence, and validation throughput from the continuous-monitoring pipeline.</p>
+  <div class="grid g4">
+    <div class="kpi"><div class="v i">1,096</div><div class="l">Validation runs</div></div>
+    <div class="kpi"><div class="v s">230</div><div class="l">Daily snapshots</div></div>
+    <div class="kpi"><div class="v">33</div><div class="l">Weekly snapshots</div></div>
+    <div class="kpi"><div class="v">7</div><div class="l">Monthly snapshots</div></div>
+  </div>
+  <h3 class="sec">KSI compliance · 14-day trend</h3>
+  <div class="panel"><div class="row"><span class="svc" style="width:150px">Compliance rate</span><div class="spark" style="max-width:none;height:54px">${trendBars}</div><span class="mono" style="margin-left:14px;color:var(--signal)">82% → 93.4%</span></div></div>
+  <h3 class="sec">Throughput by surface</h3>
+  <div class="panel">${[['Identity & Access','100%'],['Configuration','94%'],['Monitoring & Logging','96%'],['Third-Party','89%'],['Cloud-Native Arch','97%']].map((s,i)=>`<div class="row"><span class="svc" style="width:170px">${s[0]}</span><div class="spark">${bars(i*3+2)}</div><span class="mono" style="margin-left:auto;color:var(--ink)">${s[1]}</span></div>`).join('')}</div>`;
+
+V.failures=()=>`
+  <div class="kick">◷ — KSI FAILURE TIMELINE</div>
+  <h1 class="big">Failure <span class="g">history</span></h1>
+  <p class="lede">Resolved and active KSI failures across the reporting window. Trend: 11 → 4 over 14 days (improving).</p>
+  <div class="panel">${[['2026-05-12','11 failing KSIs','IAM session timeout drift','RESOLVED','ok'],['2026-05-14','9 failing KSIs','Log retention below threshold','RESOLVED','ok'],['2026-05-18','4 failing KSIs','TPR attestation pending','ACTIVE','warn'],['2026-05-18','4 failing KSIs','CSPM medium findings','ACTIVE','warn']].map(r=>`<div class="row"><span class="mono" style="width:100px;color:var(--faint)">${r[0]}</span><span class="mono" style="width:120px;color:var(--indigo)">${r[1]}</span><span class="svc" style="flex:1;font-size:13px">${r[2]}</span><span class="tag ${r[4]}">${r[3]}</span></div>`).join('')}</div>`;
+
+V.register=()=>`
+  <div class="kick">✎ — REMEDIATION REGISTER</div>
+  <h1 class="big">Open <span class="g">remediation</span></h1>
+  <p class="lede">Active gaps with owner, severity, and target date. 4 active · tracked to closure.</p>
+  <div class="panel"><div class="ph"><h4>POA&M items</h4><span class="map">4 active</span></div>
+  ${[['POAM-0142','Third-party attestation refresh','Shared','Medium','2026-07-10'],['POAM-0139','CSPM medium remediation','Meridian','Medium','2026-06-30'],['POAM-0137','Evidence automation gap','Meridian','Low','2026-07-22'],['POAM-0131','Log retention tuning','Meridian','Low','2026-06-28']].map(r=>`<div class="ctrl"><div style="display:flex;align-items:center;gap:12px;min-width:0"><span class="mono" style="color:var(--indigo)">${r[0]}</span><span style="font-size:13px">${r[1]}</span></div><div style="display:flex;align-items:center;gap:12px"><span class="mono" style="color:var(--ash)">${r[2]}</span><span class="tag warn">${r[3]}</span><span class="mono" style="color:var(--faint)">${r[4]}</span></div></div>`).join('')}</div>`;
+
+V.mas=()=>`
+  <div class="kick">⬡ — MINIMUM ASSESSMENT SCOPE · FRR-MAS</div>
+  <h1 class="big">Boundary &amp; <span class="g">data flow</span></h1>
+  <p class="lede">Federal data lifecycle per OMB A-130. Physical and lower-stack controls inherited from AWS's FedRAMP authorization.</p>
+  <div class="flow">
+    ${[['Collected','User Entry','KSI-IAM'],['Collected','Identity & Auth','KSI-IAM'],['Processed','Application','KSI-SVC'],['Maintained','Encrypted Store','KSI-CNA'],['Disseminated','Third-Party','KSI-TPR'],['Maintained','Monitoring','KSI-MLA']].map((n,i,a)=>`<div class="node"><div class="ph2">${n[0]}</div><div class="nm">${n[1]}</div><div class="ks">${n[2]}</div></div>${i<a.length-1?'<div class="arrow">→</div>':''}`).join('')}
+  </div>
+  <h3 class="sec">Boundary</h3>
+  <div class="grid g3">
+    <div class="kpi"><div class="v" style="font-size:18px">AWS US-East-1</div><div class="l">Hosting</div><div class="sub">inherited FedRAMP controls</div></div>
+    <div class="kpi"><div class="v" style="font-size:18px">Multi-Tenant</div><div class="l">Tenancy</div><div class="sub">logical isolation per agency</div></div>
+    <div class="kpi"><div class="v" style="font-size:18px">AES-256 · TLS 1.2+</div><div class="l">Encryption</div><div class="sub">KMS-managed keys</div></div>
+  </div>`;
+
+V.policies=()=>`
+  <div class="kick">§ — GOVERNANCE</div>
+  <h1 class="big">Governing <span class="g">standards</span></h1>
+  <p class="lede">The FedRAMP 20x rule families and policies governing this authorization, published openly.</p>
+  <div class="panel">${[['Continuous Monitoring','FRR-CCM-01 … 07'],['Significant Change Notification','FRR-SCN'],['Key Security Indicators','FRR-KSI'],['Minimum Assessment Scope','FRR-MAS'],['Vulnerability Management','FRR-CVM'],['Information Security Policy','NIST 800-53 PL'],['Incident Response Plan','NIST 800-53 IR'],['Data Retention & Privacy','OMB A-130 · DoDI 5200.48']].map(p=>`<div class="lrow"><div class="t">${p[0]}</div><div class="meta">${p[1]} <span class="ar">→</span></div></div>`).join('')}</div>`;
+
+V.schema=()=>`
+  <div class="kick">{} — MACHINE-READABLE</div>
+  <h1 class="big">Schemas &amp; <span class="g">contracts</span></h1>
+  <p class="lede">JSON Schemas for every published artifact, so agency tooling can validate and ingest automatically.</p>
+  <div class="grid g2" style="margin-bottom:14px">${['oar-schema.json','vdr-schema.json','scn-schema.json','unified-ksi-validations-schema.json'].map(s=>`<div class="kpi" style="display:flex;justify-content:space-between;align-items:center"><span class="mono" style="color:var(--indigo)">${s}</span><span class="tag ok">VALID</span></div>`).join('')}</div>
+  <div class="panel"><div class="ph"><h4>oar-schema.json</h4><span class="map">draft-07</span></div>
+  <div class="code"><span class="k">"executive_summary"</span>: {
+  <span class="k">"compliance_rate"</span>: <span class="v">93.4</span>,
+  <span class="k">"passed_ksis"</span>: <span class="v">57</span>,
+  <span class="k">"total_ksis"</span>: <span class="v">61</span>,
+  <span class="k">"active_gaps"</span>: <span class="v">4</span>
+}</div></div>`;
+
+V.reports=()=>`
+  <div class="kick">▣ — AUTHORIZATION ARTIFACTS</div>
+  <h1 class="big">Reports &amp; <span class="g">evidence</span></h1>
+  <p class="lede">Machine-readable authorization data and audited artifacts. Public items stream openly; access-controlled items unlock for authorized reviewers.</p>
+  <div class="panel">${[['Ongoing Authorization Report (OAR)','Period ending 2026-05-15 · FRR-CCM','pub'],['Vulnerability Disclosure Report (VDR)','Release 25.09A · aggregate','pub'],['Significant Change Notifications','41 on record · FRR-SCN','pub'],['CSO Public Metadata','ADS-CSO-PUB · JSON','pub'],['3PAO Assessment Evidence','Independent assessor','nda'],['Authorization Package (OSCAL)','Full artifact bundle','nda']].map(d=>`<div class="lrow"><div><div class="t">${d[0]}</div><div class="d">${d[1]}</div></div><div class="meta">${d[2]==='nda'?'<span class="nda">ACCESS REQUIRED</span>':'<span class="pub">OPEN ACCESS</span>'}<span class="ar">→</span></div></div>`).join('')}</div>`;
+
+// render + nav
+const stage=document.getElementById('stage');
+let logTimer=null;
+function show(v){
+  document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('on',n.dataset.v===v));
+  const meta=NAV.find(n=>n[0]===v);
+  document.getElementById('ptitle').childNodes[0].nodeValue=meta[1];
+  document.getElementById('psub').textContent=meta[3];
+  stage.innerHTML=`<div class="view on">${(V[v]||V.dashboard)()}</div>`;
+  if(logTimer){clearInterval(logTimer);logTimer=null;}
+  const logEl=document.getElementById('log')||document.getElementById('log2');
+  if(logEl)startLog(logEl);
+  document.querySelector('.main').scrollTop=0;
+}
+const EVENTS=[['ok','probe','status endpoint → 200 OK · operational'],['vi','ksi','KSI validation run · 57/61 passing'],['ok','evidence','daily evidence snapshot sealed · 230 today'],['ok','vdr','VDR pipeline · 0 critical · 11 active'],['vi','scn','CHG-20260518-… · adaptive change'],['ok','cert','TLS 1.2+ chain validated'],['wa','gap','POAM-0142 · third-party attestation pending'],['vi','ccm','quarterly CM review · Aug 25 2026'],['ok','kms','KMS key rotation · 90d cycle'],['ok','probe','us-east-1 → 200 OK · 42ms']];
+function startLog(el){let i=0;const push=()=>{const e=EVENTS[i%EVENTS.length];i++;const ts=new Date().toTimeString().slice(0,8);const ln=document.createElement('div');ln.className='ln';ln.innerHTML=`<span class="ts">${ts}</span><span class="${e[0]}">[${e[1]}]</span><span class="ev">${e[2]}</span>`;el.appendChild(ln);const max=el.id==='log2'?13:6;while(el.children.length>max)el.removeChild(el.firstChild);};for(let k=0;k<6;k++)push();logTimer=setInterval(push,1900);}
+navg.addEventListener('click',e=>{const n=e.target.closest('.nav');if(n)show(n.dataset.v);});
+show('dashboard');
+</script>
+</body></html>
