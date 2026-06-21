@@ -198,7 +198,7 @@ const CustomTooltip = ({ active, payload, label }) => {
     const isPassing = value >= 90;
 
     return (
-      <div className="bg-[#18181b]/95 border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md min-w-[200px]">
+      <div className="bg-[#0D1117]/95 border border-[#1A222D] p-4 rounded-xl shadow-2xl backdrop-blur-md min-w-[200px]">
         <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/5">
           <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider font-mono">
             {new Date(data.timestamp).toLocaleString(undefined, {
@@ -257,7 +257,7 @@ const ComplianceChart = memo(() => {
 
   if (chartData.length === 0) {
     return (
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6 mb-8 shadow-sm flex items-center justify-center h-80`}>
+      <div className="panel" style={{ padding: 24, height: 320, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div className="text-center text-slate-500">
           <BarChart3 size={40} className="mx-auto mb-3 opacity-20" />
           <p className="text-sm font-medium">Initializing Trend Data...</p>
@@ -271,7 +271,7 @@ const ComplianceChart = memo(() => {
   const yDomainMin = Math.max(0, Math.floor(minRate - 5));
 
   return (
-    <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6 mb-8 shadow-lg relative overflow-hidden flex flex-col h-96 group`}>
+    <div className="panel" style={{ padding: 20, height: 384, display: "flex", flexDirection: "column" }}>
       <div className="flex justify-between items-center mb-6 relative z-10 shrink-0">
         <div>
           <h3 className="text-white font-bold text-lg mb-1 tracking-tight">Validation Velocity</h3>
@@ -282,18 +282,9 @@ const ComplianceChart = memo(() => {
           </p>
         </div>
 
-        <div className="flex bg-[#09090b] rounded-lg p-1 border border-white/10">
+        <div className="seg">
           {['area', 'bar'].map(type => (
-            <button
-              key={type}
-              onClick={() => setChartView(type)}
-              className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${chartView === type
-                ? 'bg-white/10 text-white shadow-sm border border-white/5'
-                : 'text-slate-500 hover:text-slate-300'
-                }`}
-            >
-              {type}
-            </button>
+            <button key={type} onClick={() => setChartView(type)} className={chartView === type ? 'on' : ''}>{type}</button>
           ))}
         </div>
       </div>
@@ -303,8 +294,8 @@ const ComplianceChart = memo(() => {
           <ChartComponent data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                <stop offset="5%" stopColor="#34E0C4" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#34E0C4" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
@@ -312,21 +303,21 @@ const ComplianceChart = memo(() => {
               dataKey="displayDate"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace', fontWeight: 600 }}
+              tick={{ fill: '#788596', fontSize: 10, fontFamily: 'Geist Mono, monospace', fontWeight: 500 }}
               dy={10}
               minTickGap={30}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace', fontWeight: 600 }}
+              tick={{ fill: '#788596', fontSize: 10, fontFamily: 'Geist Mono, monospace', fontWeight: 500 }}
               domain={[yDomainMin, 100]}
               allowDecimals={false}
               tickFormatter={(value) => `${value}%`}
             />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4', opacity: 0.5 }}
+              cursor={{ stroke: '#818CF8', strokeWidth: 1, strokeDasharray: '4 4', opacity: 0.5 }}
             />
             <ReferenceLine
               y={targetThreshold}
@@ -351,7 +342,7 @@ const ComplianceChart = memo(() => {
                 {chartData.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={entry.rate >= targetThreshold ? '#10b981' : '#f43f5e'}
+                    fill={entry.rate >= targetThreshold ? '#34E0C4' : '#F2607A'}
                   />
                 ))}
               </Bar>
@@ -359,14 +350,14 @@ const ComplianceChart = memo(() => {
               <Area
                 type="monotone"
                 dataKey="rate"
-                stroke="#10b981"
+                stroke="#34E0C4"
                 strokeWidth={3}
                 fill="url(#scoreGradient)"
                 activeDot={{
                   r: 6,
                   strokeWidth: 4,
-                  fill: '#09090b',
-                  stroke: '#10b981'
+                  fill: '#0D1117',
+                  stroke: '#34E0C4'
                 }}
                 animationDuration={1500}
               />
@@ -392,75 +383,36 @@ const DashboardContent = memo(({ onOpenRegister }) => {
 
   const globalStatus = metadata?.global_status || 'OPERATIONAL';
   const statusConfig = {
-    OPERATIONAL: { label: 'Operational', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', dot: 'bg-emerald-500', solid: 'bg-emerald-500' },
-    DEGRADED: { label: 'Degraded', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: 'bg-amber-500', solid: 'bg-amber-500' },
-    CIRCUIT_BROKEN: { label: 'Circuit Broken', color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', dot: 'bg-rose-500', solid: 'bg-rose-500' },
-  }[globalStatus] || { label: 'Unknown', color: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20', dot: 'bg-slate-500', solid: 'bg-slate-500' };
+    OPERATIONAL: { label: 'Operational', color: 'var(--signal)', tag: 'ok' },
+    DEGRADED: { label: 'Degraded', color: 'var(--amber)', tag: 'warn' },
+    CIRCUIT_BROKEN: { label: 'Circuit Broken', color: 'var(--red)', tag: 'red' },
+  }[globalStatus] || { label: 'Unknown', color: 'var(--ash)', tag: 'vi' };
 
   const lastRunDate = metadata?.validation_date ? new Date(metadata.validation_date) : null;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 slide-in-from-bottom-4">
+    <div className="space-y-6">
+      <div className="kick">LIVE · CONTINUOUSLY MONITORED · {metadata?.impact_level || 'MODERATE'} IMPACT</div>
+      <h1 className="big">Continuous validation, <span className="g">observed live.</span></h1>
 
-      {/* Single unified header: status + metrics + timestamp */}
-      <div className={`relative overflow-hidden rounded-xl border ${THEME.border} ${THEME.panel} shadow-md`}>
-        <div className={`h-1 w-full ${statusConfig.solid} opacity-80`} />
-        <div className="p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
-
-          {/* Left: Status headline */}
-          <div className="flex items-center gap-4">
-            <div className={`p-2.5 rounded-xl border ${statusConfig.border} ${statusConfig.bg}`}>
-              <Shield size={22} className={statusConfig.color} />
-            </div>
-            <div>
-              <div className="flex items-center gap-3 mb-0.5">
-                <h2 className={`text-xl font-bold ${statusConfig.color} tracking-tight`}>{statusConfig.label}</h2>
-                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${statusConfig.border} ${statusConfig.bg} ${statusConfig.color}`}>
-                  {metadata?.impact_level || 'MODERATE'}
-                </span>
-              </div>
-              <p className="text-slate-500 text-xs">
-                {parseInt(metrics.passed)} of {totalControls} controls passing
-                {lastRunDate && <> &middot; Validated {getTimeElapsed(lastRunDate)}</>}
-              </p>
-            </div>
-          </div>
-
-          {/* Center: Key metrics */}
-          <div className="flex items-center gap-8 lg:gap-10 px-0 lg:px-6 lg:border-x border-white/5">
-            <div className="text-center">
-              <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Pass Rate</div>
-              <div className="text-white font-mono font-bold text-xl tabular-nums">{metrics.score}%</div>
-            </div>
-            <div className="text-center">
-              <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Target</div>
-              <div className="text-white font-mono font-bold text-xl tabular-nums">{targetThreshold}%</div>
-            </div>
-          </div>
-
-          {/* Right: Timestamp + sync */}
-          <div className="flex items-center gap-3">
-            {lastRunDate && (
-              <div className="flex items-center gap-2 text-[10px] text-slate-400 bg-white/5 px-2.5 py-1.5 rounded border border-white/5">
-                <Calendar size={10} />
-                <span className="font-mono tabular-nums">
-                  {lastRunDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                </span>
-                <Clock size={10} />
-                <span className="font-mono tabular-nums">
-                  {lastRunDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-            )}
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-blue-400 hover:text-blue-300 transition-colors px-2.5 py-1.5 rounded border border-white/5 bg-white/5"
-            >
-              <RefreshCw size={10} className={isRefreshing ? 'animate-spin' : ''} />
-              Sync
-            </button>
-          </div>
+      {/* Posture header */}
+      <div className="panel">
+        <div className="ph">
+          <h4 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Shield size={16} style={{ color: statusConfig.color }} />
+            <span style={{ color: statusConfig.color }}>{statusConfig.label}</span>
+            <span className={`tag ${statusConfig.tag}`}>{metadata?.impact_level || 'MODERATE'}</span>
+          </h4>
+          <button onClick={handleRefresh} disabled={isRefreshing}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--indigo)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '.04em' }}>
+            <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} /> SYNC NOW
+          </button>
+        </div>
+        <div className="g4" style={{ padding: 18 }}>
+          <div className="kpi"><div className="v s">{metrics.score}%</div><div className="l">Pass rate</div></div>
+          <div className="kpi"><div className="v">{targetThreshold}%</div><div className="l">Target</div></div>
+          <div className="kpi"><div className="v">{totalControls}</div><div className="l">KSI controls</div></div>
+          <div className="kpi"><div className="v i">{parseInt(metrics.passed)}</div><div className="l">Passing</div>{lastRunDate && <div className="sub">validated {getTimeElapsed(lastRunDate)}</div>}</div>
         </div>
       </div>
 
