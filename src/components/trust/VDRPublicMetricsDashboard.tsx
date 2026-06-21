@@ -6,29 +6,41 @@ import {
 
 import { BASE_PATH } from '../../config/theme';
 
+// Console palette
+const SIGNAL = "#34E0C4";  // teal — live / healthy / pass
+const INDIGO = "#818CF8";  // brand / links
+const AMBER = "#F2B85C";
+const RED = "#F2607A";
+const ASH = "#788596";
+const FAINT = "#424E5C";
+const INK = "#E8EEF4";
+const LINE = "#1A222D";
+const RAISE = "#0D1117";
+
+// Severity / source colors recolored onto the console teal/indigo/amber/red scale
 const SEV_COLORS: Record<string, string> = {
-  CRITICAL: "#ef4444", HIGH: "#f97316", MEDIUM: "#eab308", LOW: "#3b82f6", INFO: "#6b7280"
+  CRITICAL: RED, HIGH: AMBER, MEDIUM: INDIGO, LOW: SIGNAL, INFO: FAINT
 };
 
 const SOURCE_COLORS: Record<string, string> = {
-  Inspector: "#3b82f6", "Security Hub": "#8b5cf6", Pentest: "#ec4899",
-  Audit: "#f97316", Incident: "#ef4444", SCA: "#10b981",
-  SAST: "#06b6d4", DAST: "#a855f7", External: "#64748b"
+  Inspector: INDIGO, "Security Hub": INDIGO, Pentest: AMBER,
+  Audit: AMBER, Incident: RED, SCA: SIGNAL,
+  SAST: SIGNAL, DAST: INDIGO, External: ASH
 };
 
-const mono: React.CSSProperties = { fontFamily: "'SF Mono', 'Fira Code', 'Cascadia Code', monospace" };
+const mono: React.CSSProperties = { fontFamily: "var(--mono)" };
 
 // --- Shared tooltip ---
 const ChartTip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-xs shadow-xl">
-      <div className="text-zinc-500 text-[10px] tracking-wide mb-1">{label}</div>
+    <div style={{ background: "#0b1016", border: `1px solid ${LINE}`, borderRadius: 8, padding: "8px 12px", fontSize: 12, boxShadow: "0 12px 40px -16px #000" }}>
+      <div style={{ ...mono, color: FAINT, fontSize: 10, letterSpacing: ".05em", marginBottom: 4 }}>{label}</div>
       {payload.map((p: any, i: number) => (
-        <div key={i} className="flex items-center gap-1.5 text-zinc-200">
-          <span className="w-2 h-2 rounded-full inline-block" style={{ background: p.color }} />
-          <span className="text-zinc-400">{p.name}:</span>
-          <span className="font-bold">{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}</span>
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, color: INK }}>
+          <span style={{ width: 8, height: 8, borderRadius: "50%", display: "inline-block", background: p.color }} />
+          <span style={{ color: ASH }}>{p.name}:</span>
+          <span style={{ ...mono, fontWeight: 600 }}>{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}</span>
         </div>
       ))}
     </div>
@@ -39,19 +51,19 @@ const ChartTip = ({ active, payload, label }: any) => {
 const Check = ({ ok }: { ok: boolean }) => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
     {ok ? (
-      <><circle cx="8" cy="8" r="7" fill="#065f4620" stroke="#10b981" strokeWidth="1.5" /><path d="M5 8l2 2 4-4" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></>
+      <><circle cx="8" cy="8" r="7" fill="#34E0C420" stroke={SIGNAL} strokeWidth="1.5" /><path d="M5 8l2 2 4-4" stroke={SIGNAL} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></>
     ) : (
-      <><circle cx="8" cy="8" r="7" fill="#7f1d1d20" stroke="#ef4444" strokeWidth="1.5" /><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" /></>
+      <><circle cx="8" cy="8" r="7" fill="#F2607A20" stroke={RED} strokeWidth="1.5" /><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke={RED} strokeWidth="1.5" strokeLinecap="round" /></>
     )}
   </svg>
 );
 
 // --- Delta arrow ---
 const DeltaArrow = ({ value, suffix = "" }: { value: number; suffix?: string }) => {
-  if (value === 0) return <span className="text-zinc-500 text-xs">-</span>;
+  if (value === 0) return <span style={{ ...mono, color: FAINT, fontSize: 12 }}>-</span>;
   const isDown = value < 0;
   return (
-    <span className={`text-xs font-semibold flex items-center gap-0.5 ${isDown ? "text-emerald-400" : "text-rose-400"}`}>
+    <span style={{ ...mono, fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 2, color: isDown ? SIGNAL : RED }}>
       <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
         {isDown
           ? <path d="M5 7L1 3h8z" />
@@ -65,24 +77,24 @@ const DeltaArrow = ({ value, suffix = "" }: { value: number; suffix?: string }) 
 // --- Circular gauge ---
 const RiskGauge = ({ label, value, max = 100 }: { label: string; value: number; max?: number }) => {
   const pct = max > 0 ? (value / max) * 100 : 0;
-  const color = pct === 0 ? "#10b981" : pct < 25 ? "#eab308" : pct < 50 ? "#f97316" : "#ef4444";
+  const color = pct === 0 ? SIGNAL : pct < 25 ? AMBER : pct < 50 ? AMBER : RED;
   const r = 36;
   const circ = 2 * Math.PI * r;
   const dashOffset = circ - (circ * Math.min(pct, 100)) / 100;
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
       <svg width="90" height="90" viewBox="0 0 90 90">
-        <circle cx="45" cy="45" r={r} fill="none" stroke="#27272a" strokeWidth="6" />
+        <circle cx="45" cy="45" r={r} fill="none" stroke={LINE} strokeWidth="6" />
         <circle cx="45" cy="45" r={r} fill="none" stroke={color} strokeWidth="6"
           strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={dashOffset}
           transform="rotate(-90 45 45)" style={{ transition: "stroke-dashoffset 0.6s ease" }} />
-        <text x="45" y="42" textAnchor="middle" fill={color} fontSize="18" fontWeight="800" style={mono}>
+        <text x="45" y="42" textAnchor="middle" fill={color} fontSize="18" fontWeight="600" style={mono}>
           {pct.toFixed(0)}%
         </text>
-        <text x="45" y="56" textAnchor="middle" fill="#71717a" fontSize="9">rate</text>
+        <text x="45" y="56" textAnchor="middle" fill={ASH} fontSize="9">rate</text>
       </svg>
-      <span className="text-[11px] text-zinc-400 font-medium">{label}</span>
+      <span style={{ ...mono, fontSize: 10, letterSpacing: ".04em", color: ASH, textTransform: "uppercase" }}>{label}</span>
     </div>
   );
 };
@@ -168,7 +180,7 @@ export default function VDRDashboard() {
     if (!sev) return [];
     return Object.entries(sev)
       .filter(([, v]) => (v as number) > 0)
-      .map(([name, value]) => ({ name, value: value as number, fill: SEV_COLORS[name] || "#6b7280" }));
+      .map(([name, value]) => ({ name, value: value as number, fill: SEV_COLORS[name] || FAINT }));
   }, [data]);
 
   // N-rating bar data — supports data.n_rating_distribution, data.snapshot.n_ratings, and data.risk.n_ratings
@@ -187,7 +199,7 @@ export default function VDRDashboard() {
     return Object.entries(ds).map(([name, info]: [string, any]) => {
       const displayName = name.charAt(0).toUpperCase() + name.slice(1);
       const count = typeof info === "number" ? info : info.count;
-      return { name: displayName, count, color: SOURCE_COLORS[displayName] || "#6b7280" };
+      return { name: displayName, count, color: SOURCE_COLORS[displayName] || ASH };
     });
   }, [data]);
 
@@ -208,16 +220,16 @@ export default function VDRDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
-        <div className="text-zinc-600 text-sm font-medium">Loading VDR metrics...</div>
+      <div className="wrap" style={{ padding: "80px 32px" }}>
+        <div className="mono" style={{ color: ASH }}>Loading VDR metrics…</div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
-        <div className="text-zinc-600 text-sm font-medium">VDR metrics not available</div>
+      <div className="wrap" style={{ padding: "80px 32px" }}>
+        <div className="mono" style={{ color: ASH }}>VDR metrics not available</div>
       </div>
     );
   }
@@ -277,523 +289,526 @@ export default function VDRDashboard() {
   const d7 = kpi.delta_7d ?? buildDelta(data.deltas?.vs_7d);
   const d30 = kpi.delta_30d ?? buildDelta(data.deltas?.vs_30d);
 
+  // Severity counters for the four .vbox tiles (critical/high/medium/low)
+  const sevSource = data?.severity_distribution ?? data?.snapshot?.severity ?? data?.risk?.severity ?? {};
+  const sevCounts: { label: string; value: number }[] = [
+    { label: "Critical", value: sevSource.CRITICAL ?? kpi.critical_count ?? 0 },
+    { label: "High", value: sevSource.HIGH ?? 0 },
+    { label: "Medium", value: sevSource.MEDIUM ?? 0 },
+    { label: "Low", value: sevSource.LOW ?? 0 },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-200 font-sans" style={{ fontFamily: "'DM Sans', 'Segoe UI', system-ui, sans-serif" }}>
-      <div className="max-w-[1200px] mx-auto px-4 py-6 space-y-5">
+    <div className="wrap" style={{ padding: "32px 32px 60px" }}>
 
-        {/* Header */}
-        <div className="flex items-start justify-between flex-wrap gap-4">
-          <div>
-            <div className="flex items-center gap-2.5 mb-1">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <h1 className="text-xl font-extrabold text-white tracking-tight">VDR Metrics</h1>
-              <span className="text-[10px] bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded font-semibold tracking-wide">PUBLIC</span>
-            </div>
-            <p className="text-xs text-zinc-600">FedRAMP 20x Vulnerability Detection &amp; Response</p>
-          </div>
-          {posture && (
-            <div className="text-right">
-              <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-bold mb-1">Security Score</div>
-              <div className="flex items-baseline gap-1.5 justify-end">
-                <span className="text-2xl font-extrabold text-blue-500" style={mono}>{posture.posture_score}</span>
-                <span className="text-xs text-zinc-600">/10</span>
-                <span className="text-[11px] font-bold text-blue-400 bg-blue-900/20 px-2 py-0.5 rounded ml-1">{posture.overall_rating}</span>
-              </div>
-            </div>
-          )}
-        </div>
+      {/* ── Header ── */}
+      <div className="kick">FRR-CVM · COORDINATED DISCLOSURE · PUBLIC</div>
+      <h1 className="big">Vulnerability <span className="g">data</span></h1>
+      <p className="lede">
+        FedRAMP 20x Vulnerability Detection &amp; Response — aggregate finding counts streamed openly. No sensitive data.
+        {posture && (
+          <> Security score <span className="mono" style={{ color: INDIGO }}>{posture.posture_score}/10</span> · <span className="mono" style={{ color: SIGNAL }}>{posture.overall_rating}</span>.</>
+        )}
+      </p>
 
-        {/* ──────────────────────────────────────────────
-            1. KPI STRIP — 6 large cards with 7-day deltas
-           ────────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      {/* ──────────────────────────────────────────────
+          SEVERITY COUNTERS — four .vbox tiles
+         ────────────────────────────────────────────── */}
+      <div className="g4" style={{ marginBottom: 14 }}>
+        {sevCounts.map((s, i) => {
+          const cls = s.value === 0 ? "z" : i === 0 ? "r" : "h";
+          return (
+            <div className="vbox" key={i}>
+              {s.value === 0 && <div className="glow" />}
+              <div className={`big ${cls}`} style={mono}>{s.value}</div>
+              <div className="lab">{s.label} · open</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ──────────────────────────────────────────────
+          POSTURE + ATTACK SURFACE — two panels
+         ────────────────────────────────────────────── */}
+      <div className="g2">
+        {/* Posture */}
+        <div className="panel">
+          <div className="ph"><h4>Posture</h4><span className="map">FRR-CVM-04 · {kpi.compliance_rate >= 100 ? "COMPLIANT" : "REVIEW"}</span></div>
           {[
-            { label: "Total", value: kpi.total_vulnerabilities, delta: d7.total, color: "#d97706" },
-            { label: "Critical", value: kpi.critical_count, delta: d7.critical, color: kpi.critical_count > 0 ? "#ef4444" : "#10b981" },
-            { label: "LEV", value: kpi.lev_count, delta: d7.lev, color: kpi.lev_count > 0 ? "#ef4444" : "#10b981" },
-            { label: "IRV", value: kpi.irv_count, delta: d7.irv, color: kpi.irv_count > 0 ? "#ef4444" : "#10b981" },
-            { label: "Compliance", value: `${kpi.compliance_rate}%`, delta: d7.compliance, color: "#10b981", suffix: "%" },
-            { label: "Unique CVEs", value: kpi.unique_cves, delta: d7.unique_cves, color: "#8b5cf6" },
-          ].map((k, i) => (
-            <div key={i} className="bg-[#141416] border border-white/[0.04] rounded-xl p-4 flex flex-col">
-              <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-1">{k.label}</div>
-              <div className="flex items-end justify-between">
-                <span className="text-2xl font-extrabold" style={{ ...mono, color: k.color, lineHeight: 1.1 }}>{k.value}</span>
-                <DeltaArrow value={k.delta} suffix={k.suffix || ""} />
-              </div>
-              <div className="text-[10px] text-zinc-700 mt-1">7-day change</div>
+            { l: "Security posture", v: posture ? `${posture.overall_rating} · ${posture.posture_score}` : "—", t: "ok" },
+            { l: "Active / accepted", v: `${vdrAcceptance?.active ?? 0} active · ${vdrAcceptance?.accepted ?? 0} accepted`, t: "ok" },
+            { l: "KEV matches", v: `${kpi.kev_count}`, t: kpi.kev_count > 0 ? "red" : "ok" },
+            { l: "LEV / IRV", v: `${kpi.lev_count} LEV · ${kpi.irv_count} IRV`, t: (kpi.lev_count > 0 || kpi.irv_count > 0) ? "warn" : "ok" },
+            { l: "Unique CVEs", v: `${kpi.unique_cves}`, t: "vi" },
+          ].map((r, i) => (
+            <div className="row" key={i}>
+              <span className="svc" style={{ fontSize: 13 }}>{r.l}</span>
+              <span className="mono" style={{ marginLeft: "auto" }}>{r.v}</span>
+              <span style={{ marginLeft: 12 }}><span className={`tag ${r.t}`}>●</span></span>
             </div>
           ))}
         </div>
 
-        {/* ──────────────────────────────────────────────
-            1b. OPERATIONAL STATUS — single-row summary
-           ────────────────────────────────────────────── */}
-        {vdrOutcome && (() => {
-          const verdictStyle = (v?: string) => {
-            const key = (v || "unknown").toLowerCase();
-            if (["pass", "passing", "clean", "operational", "met"].includes(key))
-              return { color: "#10b981", bg: "bg-emerald-900/20", border: "border-emerald-800/30", label: key.toUpperCase() };
-            if (["fail", "failing", "missing", "breached"].includes(key))
-              return { color: "#ef4444", bg: "bg-rose-900/20", border: "border-rose-800/30", label: key.toUpperCase() };
-            if (["partial", "degraded", "warning"].includes(key))
-              return { color: "#eab308", bg: "bg-yellow-900/20", border: "border-yellow-800/30", label: key.toUpperCase() };
-            return { color: "#71717a", bg: "bg-zinc-800/40", border: "border-zinc-700/40", label: key.toUpperCase() };
-          };
-          const overall = verdictStyle(vdrOutcome.overall_verdict);
-          const m2 = vdrOutcome.mode_2_output_rate;
-          const m3 = vdrOutcome.mode_3_critical_override;
-          const m2Metrics = m2?.metrics || {};
-          const remRate = m2Metrics.remediation_rate_pct;
-          const remTarget = m2Metrics.remediation_target_pct;
-          const breachCount = Array.isArray(m3?.breaches) ? m3.breaches.length : 0;
-          const remOk = typeof remRate === "number" && remRate >= (remTarget ?? 0);
-          const remColor = typeof remRate !== "number" ? "#71717a" : remOk ? "#10b981" : "#eab308";
-          const tiles: { label: string; value: React.ReactNode; sub?: React.ReactNode; color: string; bar?: number }[] = [];
-          if (typeof remRate === "number") {
-            tiles.push({
-              label: "Remediation Rate",
-              value: `${remRate}%`,
-              sub: typeof remTarget === "number" ? `${remTarget}% target` : undefined,
-              color: remColor,
-              bar: Math.min(remRate, 100),
-            });
-          }
-          if (m2Metrics.oldest_active_critical_days != null) {
-            tiles.push({
-              label: "Oldest Active Critical",
-              value: m2Metrics.oldest_active_critical_days,
-              sub: "days",
-              color: "#e4e4e7",
-            });
-          }
+        {/* Attack surface */}
+        <div className="panel">
+          <div className="ph"><h4>Attack surface</h4><span className="map">graph analysis</span></div>
+          {atk ? (
+            [
+              { l: "Nodes", v: atk.graph_node_count.toLocaleString() },
+              { l: "Edges", v: (atk.graph_edge_count ?? 0).toLocaleString() },
+              { l: "Paths", v: `${atk.total_attack_paths}` },
+              { l: "Critical paths", v: `${atk.critical_attack_paths}` },
+              { l: "Blast radius", v: atk.blast_radius_score.toFixed(1) },
+            ].map((r, i) => (
+              <div className="row" key={i}>
+                <span className="svc" style={{ fontSize: 13 }}>{r.l}</span>
+                <span className="mono" style={{ marginLeft: "auto", color: INK }}>{r.v}</span>
+              </div>
+            ))
+          ) : (
+            <div className="row"><span className="mono" style={{ color: ASH }}>No attack-surface data</span></div>
+          )}
+        </div>
+      </div>
+
+      {/* ──────────────────────────────────────────────
+          OPERATIONAL STATUS — KPI tiles + verdict
+         ────────────────────────────────────────────── */}
+      {vdrOutcome && (() => {
+        const verdictStyle = (v?: string) => {
+          const key = (v || "unknown").toLowerCase();
+          if (["pass", "passing", "clean", "operational", "met"].includes(key))
+            return { tag: "ok", label: key.toUpperCase() };
+          if (["fail", "failing", "missing", "breached"].includes(key))
+            return { tag: "red", label: key.toUpperCase() };
+          if (["partial", "degraded", "warning"].includes(key))
+            return { tag: "warn", label: key.toUpperCase() };
+          return { tag: "vi", label: key.toUpperCase() };
+        };
+        const overall = verdictStyle(vdrOutcome.overall_verdict);
+        const m2 = vdrOutcome.mode_2_output_rate;
+        const m3 = vdrOutcome.mode_3_critical_override;
+        const m2Metrics = m2?.metrics || {};
+        const remRate = m2Metrics.remediation_rate_pct;
+        const remTarget = m2Metrics.remediation_target_pct;
+        const breachCount = Array.isArray(m3?.breaches) ? m3.breaches.length : 0;
+        const remOk = typeof remRate === "number" && remRate >= (remTarget ?? 0);
+        const remAccent = typeof remRate !== "number" ? "" : remOk ? "s" : "a";
+        const tiles: { label: string; value: React.ReactNode; sub?: React.ReactNode; accent: string }[] = [];
+        if (typeof remRate === "number") {
           tiles.push({
-            label: "Critical SLA Breaches",
-            value: breachCount,
-            sub: breachCount === 1 ? "breach" : "breaches",
-            color: breachCount > 0 ? "#ef4444" : "#10b981",
+            label: "Remediation Rate",
+            value: `${remRate}%`,
+            sub: typeof remTarget === "number" ? `${remTarget}% target` : undefined,
+            accent: remAccent,
           });
-          const overdue = (m2Metrics.active_n5_overdue ?? 0) + (m2Metrics.active_n4_overdue ?? 0);
-          if (typeof m2Metrics.active_n5_overdue === "number" || typeof m2Metrics.active_n4_overdue === "number") {
-            tiles.push({
-              label: "Overdue Items",
-              value: overdue,
-              sub: "high & critical",
-              color: overdue > 0 ? "#f97316" : "#10b981",
-            });
-          }
-          return (
-            <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
-              <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-                <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold">Operational Status</div>
-                <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md border ${overall.bg} ${overall.border}`} style={{ color: overall.color }}>
-                  {overall.label}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {tiles.map((t, i) => (
-                  <div key={i} className="bg-zinc-900/40 rounded-lg p-4">
-                    <div className="text-[10px] text-zinc-600 uppercase tracking-wide font-bold mb-1.5">{t.label}</div>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-2xl font-extrabold" style={{ ...mono, color: t.color, lineHeight: 1.1 }}>{t.value}</span>
-                      {t.sub && <span className="text-[11px] text-zinc-500">{t.sub}</span>}
-                    </div>
-                    {typeof t.bar === "number" && (
-                      <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden mt-2">
-                        <div className="h-full rounded-full" style={{ width: `${t.bar}%`, background: t.color }} />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* ──────────────────────────────────────────────
-            1c. VDR ACCEPTANCE
-           ────────────────────────────────────────────── */}
-        {vdrAcceptance && (
-          <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold">VDR Acceptance</div>
-              <span className="text-[10px] text-zinc-500">SLA window</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="bg-zinc-900/40 rounded px-2 py-3 text-center">
-                <div className="text-[9px] uppercase tracking-wide text-zinc-500 font-bold">Threshold</div>
-                <div className="text-base font-extrabold text-zinc-100 mt-1" style={mono}>{vdrAcceptance.threshold_days ?? 0}d</div>
-              </div>
-              <div className="bg-zinc-900/40 rounded px-2 py-3 text-center">
-                <div className="text-[9px] uppercase tracking-wide text-zinc-500 font-bold">Accepted</div>
-                <div className="text-base font-extrabold text-emerald-400 mt-1" style={mono}>{vdrAcceptance.accepted ?? 0}</div>
-              </div>
-              <div className="bg-zinc-900/40 rounded px-2 py-3 text-center">
-                <div className="text-[9px] uppercase tracking-wide text-zinc-500 font-bold">Active</div>
-                <div className="text-base font-extrabold text-amber-400 mt-1" style={mono}>{vdrAcceptance.active ?? 0}</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ──────────────────────────────────────────────
-            2. TREND CHART — full-width line chart with toggle
-           ────────────────────────────────────────────── */}
-        <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-1">Remediation Trend</div>
-              <div className="text-xs text-zinc-500">
-                Peak: <span className="text-zinc-300 font-bold" style={mono}>{trendPeak.toLocaleString()}</span>
-                <span className="mx-2 text-zinc-700">→</span>
-                Current: <span className="text-zinc-300 font-bold" style={mono}>{kpi.total_vulnerabilities}</span>
-              </div>
-            </div>
-            <div className="flex gap-0.5 bg-zinc-900 rounded-lg p-0.5">
-              {(["daily", "weekly", "monthly"] as const).map(m => (
-                <button key={m} onClick={() => setTrendMode(m)}
-                  className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all ${
-                    trendMode === m ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-400"
-                  }`}>
-                  {m.charAt(0).toUpperCase() + m.slice(1)}
-                </button>
+        }
+        if (m2Metrics.oldest_active_critical_days != null) {
+          tiles.push({
+            label: "Oldest Active Critical",
+            value: m2Metrics.oldest_active_critical_days,
+            sub: "days",
+            accent: "",
+          });
+        }
+        tiles.push({
+          label: "Critical SLA Breaches",
+          value: breachCount,
+          sub: breachCount === 1 ? "breach" : "breaches",
+          accent: breachCount > 0 ? "a" : "s",
+        });
+        const overdue = (m2Metrics.active_n5_overdue ?? 0) + (m2Metrics.active_n4_overdue ?? 0);
+        if (typeof m2Metrics.active_n5_overdue === "number" || typeof m2Metrics.active_n4_overdue === "number") {
+          tiles.push({
+            label: "Overdue Items",
+            value: overdue,
+            sub: "high & critical",
+            accent: overdue > 0 ? "a" : "s",
+          });
+        }
+        return (
+          <>
+            <h3 className="sec">Operational status · <span className={`tag ${overall.tag}`} style={{ marginLeft: 6 }}>{overall.label}</span></h3>
+            <div className="g4">
+              {tiles.map((t, i) => (
+                <div className="kpi" key={i}>
+                  <div className={`v ${t.accent}`}>{t.value}</div>
+                  <div className="l">{t.label}</div>
+                  {t.sub && <div className="sub">{t.sub}</div>}
+                </div>
               ))}
             </div>
+          </>
+        );
+      })()}
+
+      {/* ──────────────────────────────────────────────
+          VDR ACCEPTANCE
+         ────────────────────────────────────────────── */}
+      {vdrAcceptance && (
+        <>
+          <h3 className="sec">VDR acceptance · SLA window</h3>
+          <div className="g3">
+            <div className="kpi"><div className="v">{vdrAcceptance.threshold_days ?? 0}d</div><div className="l">Threshold</div></div>
+            <div className="kpi"><div className="v s">{vdrAcceptance.accepted ?? 0}</div><div className="l">Accepted</div></div>
+            <div className="kpi"><div className="v a">{vdrAcceptance.active ?? 0}</div><div className="l">Active</div></div>
           </div>
+        </>
+      )}
+
+      {/* ──────────────────────────────────────────────
+          TREND CHART — full-width line chart with toggle
+         ────────────────────────────────────────────── */}
+      <h3 className="sec">Remediation trend</h3>
+      <div className="panel">
+        <div className="ph">
+          <h4>
+            Peak <span className="mono" style={{ color: ASH }}>{trendPeak.toLocaleString()}</span>
+            <span className="mono" style={{ color: FAINT, margin: "0 8px" }}>→</span>
+            Current <span className="mono" style={{ color: SIGNAL }}>{kpi.total_vulnerabilities}</span>
+          </h4>
+          <div className="seg">
+            {(["daily", "weekly", "monthly"] as const).map(m => (
+              <button key={m} className={trendMode === m ? "on" : ""} onClick={() => setTrendMode(m)}>
+                {m.charAt(0).toUpperCase() + m.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{ padding: "16px 12px 8px" }}>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={trendData}>
               <defs>
                 <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.15} />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                  <stop offset="0%" stopColor={SIGNAL} stopOpacity={0.15} />
+                  <stop offset="100%" stopColor={SIGNAL} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="#1e1e22" strokeDasharray="3 3" />
-              <XAxis dataKey="date" tick={{ fill: "#52525b", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={formatDate} interval="preserveStartEnd" />
-              <YAxis tick={{ fill: "#52525b", fontSize: 10 }} axisLine={false} tickLine={false} domain={["dataMin - 20", "dataMax + 20"]} />
+              <CartesianGrid stroke={LINE} strokeDasharray="3 3" />
+              <XAxis dataKey="date" tick={{ fill: ASH, fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={formatDate} interval="preserveStartEnd" />
+              <YAxis tick={{ fill: ASH, fontSize: 10 }} axisLine={false} tickLine={false} domain={["dataMin - 20", "dataMax + 20"]} />
               <Tooltip content={<ChartTip />} />
-              <Line type="monotone" dataKey="total_vulnerabilities" name="Total" stroke="#3b82f6" strokeWidth={2} dot={trendMode !== "daily" ? { r: 3, fill: "#3b82f6", stroke: "#09090b", strokeWidth: 2 } : false} />
+              <Line type="monotone" dataKey="total_vulnerabilities" name="Total" stroke={SIGNAL} strokeWidth={2} dot={trendMode !== "daily" ? { r: 3, fill: SIGNAL, stroke: RAISE, strokeWidth: 2 } : false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
+      </div>
 
-        {/* ──────────────────────────────────────────────
-            3. SEVERITY DONUT + N-RATING BAR (side-by-side)
-           ────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Severity Donut */}
-          <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
-            <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-3">Severity Distribution</div>
-            <div className="flex items-center gap-6">
-              <div className="w-[140px] h-[140px] flex-shrink-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={sevDonut} dataKey="value" cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={2} strokeWidth={0}>
-                      {sevDonut.map((e: any, i: number) => <Cell key={i} fill={e.fill} />)}
-                    </Pie>
-                    <Tooltip content={<ChartTip />} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex flex-col gap-2 flex-1">
-                {sevDonut.map((s: any, i: number) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: s.fill }} />
-                      <span className="text-xs text-zinc-400">{s.name}</span>
-                    </div>
-                    <span className="text-sm font-bold text-zinc-200" style={mono}>{s.value}</span>
-                  </div>
-                ))}
-                {sevDonut.length === 0 && <div className="text-xs text-zinc-600">No vulnerabilities</div>}
-              </div>
+      {/* ──────────────────────────────────────────────
+          SEVERITY DONUT + N-RATING BAR (side-by-side)
+         ────────────────────────────────────────────── */}
+      <div className="g2" style={{ marginTop: 12 }}>
+        {/* Severity Donut */}
+        <div className="panel">
+          <div className="ph"><h4>Severity distribution</h4><span className="map">open findings</span></div>
+          <div style={{ display: "flex", alignItems: "center", gap: 24, padding: "18px 20px" }}>
+            <div style={{ width: 140, height: 140, flexShrink: 0 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={sevDonut} dataKey="value" cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={2} strokeWidth={0}>
+                    {sevDonut.map((e: any, i: number) => <Cell key={i} fill={e.fill} />)}
+                  </Pie>
+                  <Tooltip content={<ChartTip />} />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-          </div>
-
-          {/* N-Rating Bar */}
-          <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
-            <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-3">N-Rating Distribution</div>
-            <div className="space-y-2.5 mt-2">
-              {nRatingData.map((n: any, i: number) => {
-                const total = kpi.total_vulnerabilities || 1;
-                const pct = (n.value / total) * 100;
-                const nColors: Record<string, string> = { N1: "#ef4444", N2: "#f97316", N3: "#eab308", N4: "#3b82f6", N5: "#10b981", unrated: "#3f3f46" };
-                return (
-                  <div key={i}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-zinc-400">{n.name}</span>
-                      <span className="text-xs font-bold text-zinc-300" style={mono}>{n.value}</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.max(pct, n.value > 0 ? 2 : 0)}%`, background: nColors[n.name] || "#3f3f46" }} />
-                    </div>
-                  </div>
-                );
-              })}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
+              {sevDonut.map((s: any, i: number) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ width: 9, height: 9, borderRadius: "50%", display: "inline-block", background: s.fill }} />
+                    <span style={{ fontSize: 13, color: ASH }}>{s.name}</span>
+                  </span>
+                  <span className="mono" style={{ color: INK }}>{s.value}</span>
+                </div>
+              ))}
+              {sevDonut.length === 0 && <div className="mono" style={{ color: SIGNAL }}>No vulnerabilities</div>}
             </div>
           </div>
         </div>
 
-        {/* ──────────────────────────────────────────────
-            4. DETECTION SOURCES BAR — 9 FedRAMP categories
-           ────────────────────────────────────────────── */}
-        {hasDetectionSources && (
-        <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
-          <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-4">Detection Sources — FedRAMP Required Categories</div>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={sourceBarData} barCategoryGap="16%">
-              <CartesianGrid stroke="#1e1e22" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="name" tick={{ fill: "#71717a", fontSize: 10 }} axisLine={false} tickLine={false} angle={-20} textAnchor="end" height={50} />
-              <YAxis tick={{ fill: "#3f3f46", fontSize: 10 }} axisLine={false} tickLine={false} />
-              <Tooltip content={<ChartTip />} />
-              <Bar dataKey="count" name="Findings" radius={[4, 4, 0, 0]}>
-                {sourceBarData.map((e: any, i: number) => <Cell key={i} fill={e.color} fillOpacity={e.count > 0 ? 1 : 0.25} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3">
-            {sourceBarData.map((s: any, i: number) => (
-              <div key={i} className="flex items-center gap-1.5 text-[11px]">
-                <span className="w-2 h-2 rounded-sm inline-block" style={{ background: s.color, opacity: s.count > 0 ? 1 : 0.3 }} />
-                <span className={s.count > 0 ? "text-zinc-400" : "text-zinc-600"}>{s.name}</span>
-                <span className="font-bold text-zinc-300" style={mono}>{s.count}</span>
+        {/* N-Rating Bar */}
+        <div className="panel">
+          <div className="ph"><h4>N-rating distribution</h4><span className="map">severity tiers</span></div>
+          <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+            {nRatingData.map((n: any, i: number) => {
+              const total = kpi.total_vulnerabilities || 1;
+              const pct = (n.value / total) * 100;
+              const nColors: Record<string, string> = { N1: RED, N2: AMBER, N3: AMBER, N4: INDIGO, N5: SIGNAL, unrated: FAINT };
+              return (
+                <div key={i}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, color: ASH }}>{n.name}</span>
+                    <span className="mono" style={{ color: INK }}>{n.value}</span>
+                  </div>
+                  <div style={{ height: 8, borderRadius: 4, background: "#0A0E13", overflow: "hidden" }}>
+                    <div style={{ height: "100%", borderRadius: 4, transition: "width .5s", width: `${Math.max(pct, n.value > 0 ? 2 : 0)}%`, background: nColors[n.name] || FAINT }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ──────────────────────────────────────────────
+          DETECTION SOURCES BAR — 9 FedRAMP categories
+         ────────────────────────────────────────────── */}
+      {hasDetectionSources && (
+      <>
+        <h3 className="sec">Detection sources · FedRAMP required categories</h3>
+        <div className="panel">
+          <div style={{ padding: "18px 12px 8px" }}>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={sourceBarData} barCategoryGap="16%">
+                <CartesianGrid stroke={LINE} strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: ASH, fontSize: 10 }} axisLine={false} tickLine={false} angle={-20} textAnchor="end" height={50} />
+                <YAxis tick={{ fill: FAINT, fontSize: 10 }} axisLine={false} tickLine={false} />
+                <Tooltip content={<ChartTip />} />
+                <Bar dataKey="count" name="Findings" radius={[4, 4, 0, 0]}>
+                  {sourceBarData.map((e: any, i: number) => <Cell key={i} fill={e.color} fillOpacity={e.count > 0 ? 1 : 0.25} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 16px", marginTop: 12 }}>
+              {sourceBarData.map((s: any, i: number) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: 2, display: "inline-block", background: s.color, opacity: s.count > 0 ? 1 : 0.3 }} />
+                  <span style={{ color: s.count > 0 ? ASH : FAINT }}>{s.name}</span>
+                  <span className="mono" style={{ color: INK }}>{s.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </>
+      )}
+
+      {/* ──────────────────────────────────────────────
+          RISK GAUGES — LEV / IRV / KEV circular meters
+         ────────────────────────────────────────────── */}
+      <h3 className="sec">Risk classification rates</h3>
+      <div className="panel">
+        <div style={{ display: "flex", justifyContent: "center", gap: 48, flexWrap: "wrap", padding: "24px 20px 8px" }}>
+          <RiskGauge label="LEV Rate" value={kpi.lev_count} max={kpi.total_vulnerabilities} />
+          <RiskGauge label="IRV Rate" value={kpi.irv_count} max={kpi.total_vulnerabilities} />
+          <RiskGauge label="KEV Rate" value={kpi.kev_count} max={kpi.total_vulnerabilities} />
+        </div>
+        <div className="mono" style={{ textAlign: "center", padding: "4px 20px 20px", fontSize: 11, color: ASH }}>
+          All rates at 0% — no laterally exploitable, internet-reachable, or known-exploited vulnerabilities
+        </div>
+      </div>
+
+      {/* ──────────────────────────────────────────────
+          ENVIRONMENT OVERVIEW — resource breakdown + posture
+         ────────────────────────────────────────────── */}
+      {env && (
+      <>
+        <h3 className="sec">Environment overview</h3>
+        <div className="g2">
+          {/* Resource Breakdown */}
+          <div className="panel">
+            <div className="ph"><h4>Resource breakdown</h4><span className="map">{env.total_resources} resources</span></div>
+            {Object.entries(env.resource_breakdown).map(([name, count]: [string, any]) => (
+              <div className="row" key={name}>
+                <span className="svc" style={{ fontSize: 13 }}>{name}</span>
+                <span className="mono" style={{ marginLeft: "auto", color: INK }}>{count}</span>
               </div>
             ))}
-          </div>
-        </div>
-        )}
-
-        {/* ──────────────────────────────────────────────
-            5. RISK GAUGES — LEV / IRV / KEV circular meters
-           ────────────────────────────────────────────── */}
-        <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
-          <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-4">Risk Classification Rates</div>
-          <div className="flex justify-center gap-12 flex-wrap">
-            <RiskGauge label="LEV Rate" value={kpi.lev_count} max={kpi.total_vulnerabilities} />
-            <RiskGauge label="IRV Rate" value={kpi.irv_count} max={kpi.total_vulnerabilities} />
-            <RiskGauge label="KEV Rate" value={kpi.kev_count} max={kpi.total_vulnerabilities} />
-          </div>
-          <div className="text-center mt-3 text-[11px] text-zinc-600">
-            All rates at 0% — no laterally exploitable, internet-reachable, or known-exploited vulnerabilities
-          </div>
-        </div>
-
-        {/* ──────────────────────────────────────────────
-            6. ENVIRONMENT OVERVIEW — resource breakdown + posture
-           ────────────────────────────────────────────── */}
-        {env && (
-        <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
-          <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-4">Environment Overview</div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Resource Breakdown */}
-            <div className="md:col-span-2">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {Object.entries(env.resource_breakdown).map(([name, count]: [string, any]) => (
-                  <div key={name} className="bg-zinc-900/60 rounded-lg px-3 py-2.5 flex items-center justify-between">
-                    <span className="text-xs text-zinc-400">{name}</span>
-                    <span className="text-sm font-bold text-zinc-200" style={mono}>{count}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-6 mt-3 text-xs text-zinc-500">
-                <span>Total Resources: <span className="text-zinc-300 font-bold" style={mono}>{env.total_resources}</span></span>
-                <span>Aggregation Ratio: <span className="text-zinc-300 font-bold" style={mono}>{env.aggregation_ratio}</span></span>
-              </div>
+            <div className="row">
+              <span className="svc" style={{ fontSize: 13 }}>Aggregation ratio</span>
+              <span className="mono" style={{ marginLeft: "auto", color: INK }}>{env.aggregation_ratio}</span>
             </div>
-            {/* Posture Score */}
-            <div className="bg-zinc-900/40 rounded-lg p-4 flex flex-col items-center justify-center">
-              <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-bold mb-2">Posture Score</div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold text-blue-500" style={mono}>{env.posture_score}</span>
-                <span className="text-sm text-zinc-600">/10</span>
+          </div>
+          {/* Posture Score */}
+          <div className="panel">
+            <div className="ph"><h4>Posture score</h4><span className="map">composite</span></div>
+            <div style={{ padding: "24px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                <span className="mono" style={{ fontSize: 40, fontWeight: 500, color: INDIGO, lineHeight: 1 }}>{env.posture_score}</span>
+                <span className="mono" style={{ color: ASH }}>/10</span>
               </div>
-              <div className="w-full bg-zinc-800 rounded-full h-2 mt-3 overflow-hidden">
-                <div className="h-full rounded-full bg-blue-500 transition-all" style={{ width: `${(env.posture_score / 10) * 100}%` }} />
+              <div style={{ width: "100%", background: "#0A0E13", borderRadius: 5, height: 8, overflow: "hidden" }}>
+                <div style={{ height: "100%", borderRadius: 5, background: INDIGO, transition: "width .5s", width: `${(env.posture_score / 10) * 100}%` }} />
               </div>
             </div>
           </div>
         </div>
-        )}
+      </>
+      )}
 
-        {/* ──────────────────────────────────────────────
-            7. DELTA COMPARISON CARDS — 7d and 30d changes
-           ────────────────────────────────────────────── */}
-        {hasDeltas && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* ──────────────────────────────────────────────
+          DELTA COMPARISON CARDS — 7d and 30d changes
+         ────────────────────────────────────────────── */}
+      {hasDeltas && (
+      <>
+        <h3 className="sec">Change comparison</h3>
+        <div className="g2">
           {[
             { period: "7-Day Change", delta: d7 },
             { period: "30-Day Change", delta: d30 },
           ].map((p, pi) => (
-            <div key={pi} className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
-              <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-3">{p.period}</div>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { label: "Total", value: p.delta.total },
-                  { label: "Critical", value: p.delta.critical },
-                  { label: "LEV", value: p.delta.lev },
-                  { label: "IRV", value: p.delta.irv },
-                  { label: "Compliance", value: p.delta.compliance, suffix: "%" },
-                  { label: "CVEs", value: p.delta.unique_cves },
-                ].map((item, i) => (
-                  <div key={i} className="bg-zinc-900/40 rounded-lg px-3 py-2.5 flex items-center justify-between">
-                    <span className="text-[11px] text-zinc-500">{item.label}</span>
-                    <DeltaArrow value={item.value} suffix={item.suffix || ""} />
-                  </div>
-                ))}
-              </div>
+            <div className="panel" key={pi}>
+              <div className="ph"><h4>{p.period}</h4><span className="map">delta</span></div>
+              {[
+                { label: "Total", value: p.delta.total },
+                { label: "Critical", value: p.delta.critical },
+                { label: "LEV", value: p.delta.lev },
+                { label: "IRV", value: p.delta.irv },
+                { label: "Compliance", value: p.delta.compliance, suffix: "%" },
+                { label: "CVEs", value: p.delta.unique_cves },
+              ].map((item, i) => (
+                <div className="row" key={i}>
+                  <span className="svc" style={{ fontSize: 13 }}>{item.label}</span>
+                  <span style={{ marginLeft: "auto" }}><DeltaArrow value={item.value} suffix={item.suffix || ""} /></span>
+                </div>
+              ))}
             </div>
           ))}
         </div>
-        )}
+      </>
+      )}
 
-        {/* ──────────────────────────────────────────────
-            8. COMPLIANCE BANNER
-           ────────────────────────────────────────────── */}
-        <div className="bg-[#141416] border border-white/[0.04] rounded-xl p-5">
-          <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
-            <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold">Compliance Status</div>
-            <div className="flex items-center gap-2">
-              {kpi.compliance_rate >= 100 ? (
-                <span className="text-[11px] font-bold text-emerald-400 bg-emerald-900/20 border border-emerald-800/30 px-2.5 py-1 rounded-md">COMPLIANT</span>
-              ) : (
-                <span className="text-[11px] font-bold text-rose-400 bg-rose-900/20 border border-rose-800/30 px-2.5 py-1 rounded-md">NON-COMPLIANT</span>
-              )}
-            </div>
-          </div>
+      {/* ──────────────────────────────────────────────
+          COMPLIANCE BANNER
+         ────────────────────────────────────────────── */}
+      <h3 className="sec">Compliance status · <span className={`tag ${kpi.compliance_rate >= 100 ? "ok" : "red"}`} style={{ marginLeft: 6 }}>{kpi.compliance_rate >= 100 ? "COMPLIANT" : "NON-COMPLIANT"}</span></h3>
+      <div className="panel">
+        <div style={{ padding: "18px 20px" }}>
           {meta.sla_threshold && (
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-zinc-500 mb-3">
-              <span>SLA Threshold: <span className="text-zinc-300 font-semibold">{meta.sla_threshold}</span></span>
+            <div className="mono" style={{ color: ASH, marginBottom: 12, fontSize: 12 }}>
+              SLA Threshold: <span style={{ color: INK }}>{meta.sla_threshold}</span>
             </div>
           )}
           {/* Compliance rate bar */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 bg-zinc-800 rounded-full h-3 overflow-hidden">
-              <div className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${kpi.compliance_rate}%`, background: kpi.compliance_rate >= 100 ? "#10b981" : kpi.compliance_rate >= 90 ? "#eab308" : "#ef4444" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ flex: 1, background: "#0A0E13", borderRadius: 6, height: 12, overflow: "hidden" }}>
+              <div style={{ height: "100%", borderRadius: 6, transition: "width .7s", width: `${kpi.compliance_rate}%`, background: kpi.compliance_rate >= 100 ? SIGNAL : kpi.compliance_rate >= 90 ? AMBER : RED }} />
             </div>
-            <span className="text-sm font-extrabold" style={{ ...mono, color: kpi.compliance_rate >= 100 ? "#10b981" : "#eab308" }}>
+            <span className="mono" style={{ fontSize: 16, fontWeight: 600, color: kpi.compliance_rate >= 100 ? SIGNAL : AMBER }}>
               {kpi.compliance_rate}%
             </span>
           </div>
           {/* FRR Requirements */}
           {data.compliance_requirements && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-4">
+            <div className="g2" style={{ marginTop: 16, gap: 6 }}>
               {data.compliance_requirements.map((req: any, i: number) => (
-                <div key={i} className="flex items-center gap-2 py-1">
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
                   <Check ok={req.status === "met"} />
-                  <span className="text-[11px] text-zinc-400">{req.id}</span>
-                  <span className="text-[11px] text-zinc-500 truncate">{req.description}</span>
+                  <span className="mono" style={{ color: ASH, fontSize: 11 }}>{req.id}</span>
+                  <span style={{ fontSize: 12, color: ASH, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{req.description}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
+      </div>
 
-        {/* ──────────────────────────────────────────────
-            9. SCAN SOURCES TABLE — expandable for 3PAO reviewers
-           ────────────────────────────────────────────── */}
-        {hasScanSources && (
-        <div className="bg-[#141416] border border-white/[0.04] rounded-xl overflow-hidden">
-          <button onClick={() => setScanTableOpen(!scanTableOpen)}
-            className="w-full flex items-center justify-between p-5 text-left hover:bg-white/[0.02] transition-colors">
-            <div>
-              <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold">Scan Sources Detail</div>
-              <div className="text-[11px] text-zinc-500 mt-0.5">{data.scan_sources?.length || 0} active scan sources — click to {scanTableOpen ? "collapse" : "expand"}</div>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={`text-zinc-500 transition-transform ${scanTableOpen ? "rotate-180" : ""}`}>
-              <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          {scanTableOpen && data.scan_sources && (
-            <div className="border-t border-white/[0.04] overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-white/[0.04]">
-                    <th className="text-left px-5 py-3 text-[10px] text-zinc-600 uppercase tracking-wider font-bold">Source</th>
-                    <th className="text-left px-5 py-3 text-[10px] text-zinc-600 uppercase tracking-wider font-bold">Type</th>
-                    <th className="text-left px-5 py-3 text-[10px] text-zinc-600 uppercase tracking-wider font-bold">Category</th>
-                    <th className="text-right px-5 py-3 text-[10px] text-zinc-600 uppercase tracking-wider font-bold">Findings</th>
-                    <th className="text-left px-5 py-3 text-[10px] text-zinc-600 uppercase tracking-wider font-bold">Last Scan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.scan_sources.map((src: any, i: number) => (
-                    <tr key={i} className="border-b border-white/[0.02] hover:bg-white/[0.02]">
-                      <td className="px-5 py-3 text-zinc-200 font-medium">{src.source_name}</td>
-                      <td className="px-5 py-3 text-zinc-400">{src.scan_type}</td>
-                      <td className="px-5 py-3">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold"
-                          style={{ background: `${SOURCE_COLORS[src.category] || "#3f3f46"}20`, color: SOURCE_COLORS[src.category] || "#71717a" }}>
-                          {src.category}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3 text-right font-bold text-zinc-200" style={mono}>{src.findings}</td>
-                      <td className="px-5 py-3 text-zinc-500">{new Date(src.last_scan).toLocaleDateString()}</td>
-                    </tr>
+      {/* ──────────────────────────────────────────────
+          SCAN SOURCES TABLE — expandable for 3PAO reviewers
+         ────────────────────────────────────────────── */}
+      {hasScanSources && (
+      <div className="panel" style={{ marginTop: 12 }}>
+        <div className="ph" style={{ cursor: "pointer" }} onClick={() => setScanTableOpen(!scanTableOpen)}>
+          <h4 style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            Scan sources detail
+            <span className="mono" style={{ color: ASH, fontSize: 11, fontWeight: 400 }}>{data.scan_sources?.length || 0} active scan sources — click to {scanTableOpen ? "collapse" : "expand"}</span>
+          </h4>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ color: ASH, transition: "transform .15s", transform: scanTableOpen ? "rotate(180deg)" : "none" }}>
+            <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        {scanTableOpen && data.scan_sources && (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ borderBottom: `1px solid ${LINE}` }}>
+                  {["Source", "Type", "Category", "Findings", "Last Scan"].map((h, i) => (
+                    <th key={i} className="mono" style={{ textAlign: i === 3 ? "right" : "left", padding: "12px 20px", fontSize: 10, letterSpacing: ".05em", color: ASH, textTransform: "uppercase", fontWeight: 500 }}>{h}</th>
                   ))}
-                </tbody>
-              </table>
+                </tr>
+              </thead>
+              <tbody>
+                {data.scan_sources.map((src: any, i: number) => (
+                  <tr key={i} style={{ borderBottom: `1px solid ${LINE}` }}>
+                    <td style={{ padding: "12px 20px", color: INK, fontWeight: 500 }}>{src.source_name}</td>
+                    <td style={{ padding: "12px 20px", color: ASH }}>{src.scan_type}</td>
+                    <td style={{ padding: "12px 20px" }}>
+                      <span className="mono" style={{ padding: "2px 8px", borderRadius: 6, fontSize: 10, background: `${SOURCE_COLORS[src.category] || FAINT}20`, color: SOURCE_COLORS[src.category] || ASH }}>
+                        {src.category}
+                      </span>
+                    </td>
+                    <td className="mono" style={{ padding: "12px 20px", textAlign: "right", color: INK }}>{src.findings}</td>
+                    <td style={{ padding: "12px 20px", color: ASH }}>{new Date(src.last_scan).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      )}
+
+      {/* ──────────────────────────────────────────────
+          ATTACK SURFACE CARD — collapsed by default
+         ────────────────────────────────────────────── */}
+      {atk && (
+        <div className="panel" style={{ marginTop: 12 }}>
+          <div className="ph" style={{ cursor: "pointer" }} onClick={() => setAttackSurfaceOpen(!attackSurfaceOpen)}>
+            <h4 style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              Attack surface analysis
+              <span className="mono" style={{ color: ASH, fontSize: 11, fontWeight: 400 }}>
+                {atk.total_attack_paths} attack paths · {atk.critical_attack_paths} critical · blast radius {atk.blast_radius_score.toFixed(1)}
+              </span>
+            </h4>
+            <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {atk.critical_attack_paths === 0 && (
+                <span className="tag ok">NO CRITICAL PATHS</span>
+              )}
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ color: ASH, transition: "transform .15s", transform: attackSurfaceOpen ? "rotate(180deg)" : "none" }}>
+                <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          </div>
+          {attackSurfaceOpen && (
+            <div style={{ padding: "18px 20px" }}>
+              <div className="g3">
+                {[
+                  { l: "Attack Paths", v: atk.total_attack_paths, a: "i" },
+                  { l: "Critical Paths", v: atk.critical_attack_paths, a: atk.critical_attack_paths > 0 ? "a" : "s" },
+                  { l: "Exploitable", v: atk.exploitable_paths, a: atk.exploitable_paths > 0 ? "a" : "s" },
+                  { l: "Blast Radius", v: atk.blast_radius_score.toFixed(1), a: atk.blast_radius_score > 0 ? "a" : "s" },
+                  { l: "Graph Nodes", v: atk.graph_node_count, a: "" },
+                  { l: "Graph Edges", v: (atk.graph_edge_count ?? 0).toLocaleString(), a: "" },
+                ].map((item, i) => (
+                  <div className="kpi" key={i}>
+                    <div className={`v ${item.a}`}>{item.v}</div>
+                    <div className="l">{item.l}</div>
+                  </div>
+                ))}
+              </div>
+              {atk.avg_path_risk_score != null && (
+                <div className="row" style={{ borderTop: `1px solid ${LINE}`, marginTop: 16 }}>
+                  <span className="svc" style={{ fontSize: 13 }}>Average path risk score</span>
+                  <span className="mono" style={{ marginLeft: "auto", color: INK }}>{atk.avg_path_risk_score}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
-        )}
+      )}
 
-        {/* ──────────────────────────────────────────────
-            10. ATTACK SURFACE CARD — collapsed by default
-           ────────────────────────────────────────────── */}
-        {atk && (
-          <div className="bg-[#141416] border border-white/[0.04] rounded-xl overflow-hidden">
-            <button onClick={() => setAttackSurfaceOpen(!attackSurfaceOpen)}
-              className="w-full flex items-center justify-between p-5 text-left hover:bg-white/[0.02] transition-colors">
-              <div className="flex items-center gap-3">
-                <div>
-                  <div className="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold">Attack Surface Analysis</div>
-                  <div className="text-[11px] text-zinc-500 mt-0.5">
-                    {atk.total_attack_paths} attack paths · {atk.critical_attack_paths} critical · blast radius {atk.blast_radius_score.toFixed(1)}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {atk.critical_attack_paths === 0 && (
-                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-900/20 px-2 py-0.5 rounded">NO CRITICAL PATHS</span>
-                )}
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={`text-zinc-500 transition-transform ${attackSurfaceOpen ? "rotate-180" : ""}`}>
-                  <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-            </button>
-            {attackSurfaceOpen && (
-              <div className="border-t border-white/[0.04] p-5">
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {[
-                    { l: "Attack Paths", v: atk.total_attack_paths, c: "#3b82f6" },
-                    { l: "Critical Paths", v: atk.critical_attack_paths, c: atk.critical_attack_paths > 0 ? "#ef4444" : "#10b981" },
-                    { l: "Exploitable", v: atk.exploitable_paths, c: atk.exploitable_paths > 0 ? "#ef4444" : "#10b981" },
-                    { l: "Blast Radius", v: atk.blast_radius_score.toFixed(1), c: atk.blast_radius_score > 0 ? "#d97706" : "#10b981" },
-                    { l: "Graph Nodes", v: atk.graph_node_count, c: "#d4d4d8" },
-                    { l: "Graph Edges", v: (atk.graph_edge_count ?? 0).toLocaleString(), c: "#d4d4d8" },
-                  ].map((item, i) => (
-                    <div key={i} className="bg-zinc-900/40 rounded-lg px-3 py-3 flex flex-col">
-                      <span className="text-[10px] text-zinc-600 uppercase tracking-wide font-bold mb-1">{item.l}</span>
-                      <span className="text-lg font-extrabold" style={{ ...mono, color: item.c }}>{item.v}</span>
-                    </div>
-                  ))}
-                </div>
-                {atk.avg_path_risk_score != null && (
-                  <div className="mt-3 bg-zinc-900/30 rounded-lg px-4 py-2.5 flex items-center justify-between text-xs">
-                    <span className="text-zinc-500">Average Path Risk Score</span>
-                    <span className="font-bold text-zinc-300" style={mono}>{atk.avg_path_risk_score}</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+      {/* ──────────────────────────────────────────────
+          CTA
+         ────────────────────────────────────────────── */}
+      <div className="cta">
+        <h3>Found a vulnerability? Report it through coordinated disclosure.</h3>
+        <button className="btn" onClick={() => window.location.href = "mailto:security@meridianks.com?subject=Vulnerability%20Disclosure"}>Submit a report →</button>
+      </div>
 
-        {/* Footer */}
-        <div className="pt-4 border-t border-white/[0.04] flex justify-end items-center text-[10px] text-zinc-700 flex-wrap gap-2">
-          <span>Generated {meta.generated_at ? new Date(meta.generated_at).toLocaleDateString() : "N/A"}</span>
-        </div>
+      {/* Footer */}
+      <div className="mono" style={{ paddingTop: 20, marginTop: 24, borderTop: `1px solid ${LINE}`, display: "flex", justifyContent: "flex-end", fontSize: 11, color: FAINT }}>
+        <span>Generated {meta.generated_at ? new Date(meta.generated_at).toLocaleDateString() : "N/A"}</span>
       </div>
     </div>
   );

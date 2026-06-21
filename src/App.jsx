@@ -34,6 +34,7 @@ import { RemediationHeatmap } from './components/trust/RemediationHeatmap';
 import { TrustCenterDataProvider } from './hooks/useTrustCenterData';
 
 import { THEME, BASE_PATH } from './config/theme';
+import './components/trust/console.css';
 
 const TRANSITIONS = {
   default: 'transition-all duration-200 ease-out',
@@ -69,133 +70,16 @@ const SidebarItem = memo(({ icon: Icon, label, badge, isActive, onClick, locked 
   <button
     onClick={onClick}
     title={locked ? `${label} — requires verified federal access` : undefined}
-    className={`group flex items-center w-full px-3 py-3 mx-2 mb-1 text-sm font-medium rounded-md cursor-pointer ${TRANSITIONS.default} border border-transparent
-    ${isActive ? THEME.active : `text-slate-400 ${THEME.hover} hover:text-slate-200`}`}
+    className={`nav ${isActive ? 'on' : ''}`}
   >
-    <Icon size={16} className={`mr-3 ${TRANSITIONS.default} ${isActive ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
-    <span className="flex-1 text-left tracking-wide">{label}</span>
-    {badge && (
-      <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded-sm ${badge.color} border border-white/5 tracking-wider`}>
-        {badge.text}
-      </span>
-    )}
-    {locked && (
-      <Lock size={12} className="text-slate-600 group-hover:text-slate-400 shrink-0" aria-label="Requires federal access" />
-    )}
+    <Icon className="ico" />
+    <span style={{ flex: 1 }}>{label}</span>
+    {badge && <span className="tag vi bdg" style={{ fontSize: 9, padding: '2px 6px' }}>{badge.text}</span>}
+    {locked && <Lock size={12} className="lk" aria-label="Requires federal access" />}
   </button>
 ));
 
-const StatsCard = memo(({ title, value, contextMetric, statusLabel, statusColor, subtitle }) => (
-  <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-5 group hover:border-white/20 transition-all shadow-sm`}>
-    <div className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">{title}</div>
-    <div className="text-2xl font-bold text-white mb-2 tracking-tight font-mono tabular-nums">{value}</div>
-    {subtitle && <div className="text-slate-500 text-[10px] mb-2 leading-snug">{subtitle}</div>}
-    <div className="flex items-center justify-between text-[10px]">
-      <span className={`font-medium ${statusColor}`}>{statusLabel}</span>
-      <span className="text-slate-400 font-mono tabular-nums">{contextMetric}</span>
-    </div>
-  </div>
-));
-
 // --- DASHBOARD COMPONENTS ---
-
-const ImpactBanner = memo(() => {
-  const { metadata } = useData();
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const handleRefresh = useCallback(() => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
-  }, []);
-
-  if (!metadata) return null;
-
-  const lastRunDate = metadata.validation_date ? new Date(metadata.validation_date) : new Date();
-  const level = metadata.impact_level || 'MODERATE';
-  const timeElapsed = getTimeElapsed(lastRunDate);
-
-  const styles = {
-    'HIGH': { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/20', solid: 'bg-rose-500' },
-    'MODERATE': { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', solid: 'bg-amber-500' },
-    'LOW': { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20', solid: 'bg-emerald-500' }
-  }[level] || { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20', solid: 'bg-blue-500' };
-
-  return (
-    <div className={`relative overflow-hidden rounded-xl border ${THEME.border} ${THEME.panel} p-0 mb-8 shadow-md group`}>
-      <div className={`h-1 w-full ${styles.solid} opacity-80`} />
-
-      <div className="p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-        <div className="flex items-center gap-5 w-full md:w-auto">
-          <div className={`p-3 rounded-xl border ${styles.border} ${styles.bg}`}>
-            <Activity size={20} className={styles.text} />
-          </div>
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h2 className="text-white font-bold text-lg tracking-tight">Continuous Validation Pipeline</h2>
-              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${styles.border} ${styles.bg} ${styles.text}`}>
-                {level} Impact
-              </span>
-            </div>
-            <p className="text-slate-400 text-xs flex items-center gap-2">
-              Automated testing against {metadata.impact_thresholds?.min || '80%'} control baselines
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-12 px-8 border-x border-white/5 hidden md:flex">
-          <div className="text-center">
-            <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Pass Rate</div>
-            <div className="text-white font-mono font-bold text-2xl tabular-nums">{metadata.pass_rate}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Control Status</div>
-            <div className="text-white font-mono font-bold text-2xl flex items-center gap-2 tabular-nums">
-              <span className="text-emerald-400">{metadata.passed}</span>
-              <span className="text-slate-600 text-lg">/</span>
-              <span className="text-slate-400 text-lg">{metadata.total_validated}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center gap-2 text-[10px] text-slate-400 bg-white/5 px-2 py-1 rounded border border-white/5">
-              <Calendar size={10} />
-              <span className="text-slate-300 font-mono tabular-nums">
-                {lastRunDate.toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
-              </span>
-              <Clock size={10} className="ml-1" />
-              <span className="text-slate-300 font-mono tabular-nums">
-                {lastRunDate.toLocaleTimeString(undefined, {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit'
-                })}
-              </span>
-            </div>
-            <div className="text-[9px] text-slate-500 font-mono">
-              Last validated {timeElapsed}
-            </div>
-          </div>
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-blue-400 hover:text-blue-300 transition-colors"
-          >
-            <RefreshCw size={10} className={isRefreshing ? 'animate-spin' : ''} />
-            Sync Now
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-});
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -204,7 +88,7 @@ const CustomTooltip = ({ active, payload, label }) => {
     const isPassing = value >= 90;
 
     return (
-      <div className="bg-[#18181b]/95 border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md min-w-[200px]">
+      <div className="bg-[#0D1117]/95 border border-[#1A222D] p-4 rounded-xl shadow-2xl backdrop-blur-md min-w-[200px]">
         <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/5">
           <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider font-mono">
             {new Date(data.timestamp).toLocaleString(undefined, {
@@ -263,7 +147,7 @@ const ComplianceChart = memo(() => {
 
   if (chartData.length === 0) {
     return (
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6 mb-8 shadow-sm flex items-center justify-center h-80`}>
+      <div className="panel" style={{ padding: 24, height: 320, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div className="text-center text-slate-500">
           <BarChart3 size={40} className="mx-auto mb-3 opacity-20" />
           <p className="text-sm font-medium">Initializing Trend Data...</p>
@@ -277,7 +161,7 @@ const ComplianceChart = memo(() => {
   const yDomainMin = Math.max(0, Math.floor(minRate - 5));
 
   return (
-    <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6 mb-8 shadow-lg relative overflow-hidden flex flex-col h-96 group`}>
+    <div className="panel" style={{ padding: 20, height: 384, display: "flex", flexDirection: "column" }}>
       <div className="flex justify-between items-center mb-6 relative z-10 shrink-0">
         <div>
           <h3 className="text-white font-bold text-lg mb-1 tracking-tight">Validation Velocity</h3>
@@ -288,18 +172,9 @@ const ComplianceChart = memo(() => {
           </p>
         </div>
 
-        <div className="flex bg-[#09090b] rounded-lg p-1 border border-white/10">
+        <div className="seg">
           {['area', 'bar'].map(type => (
-            <button
-              key={type}
-              onClick={() => setChartView(type)}
-              className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${chartView === type
-                ? 'bg-white/10 text-white shadow-sm border border-white/5'
-                : 'text-slate-500 hover:text-slate-300'
-                }`}
-            >
-              {type}
-            </button>
+            <button key={type} onClick={() => setChartView(type)} className={chartView === type ? 'on' : ''}>{type}</button>
           ))}
         </div>
       </div>
@@ -309,8 +184,8 @@ const ComplianceChart = memo(() => {
           <ChartComponent data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                <stop offset="5%" stopColor="#34E0C4" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#34E0C4" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
@@ -318,21 +193,21 @@ const ComplianceChart = memo(() => {
               dataKey="displayDate"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace', fontWeight: 600 }}
+              tick={{ fill: '#788596', fontSize: 10, fontFamily: 'Geist Mono, monospace', fontWeight: 500 }}
               dy={10}
               minTickGap={30}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace', fontWeight: 600 }}
+              tick={{ fill: '#788596', fontSize: 10, fontFamily: 'Geist Mono, monospace', fontWeight: 500 }}
               domain={[yDomainMin, 100]}
               allowDecimals={false}
               tickFormatter={(value) => `${value}%`}
             />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4', opacity: 0.5 }}
+              cursor={{ stroke: '#818CF8', strokeWidth: 1, strokeDasharray: '4 4', opacity: 0.5 }}
             />
             <ReferenceLine
               y={targetThreshold}
@@ -357,7 +232,7 @@ const ComplianceChart = memo(() => {
                 {chartData.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={entry.rate >= targetThreshold ? '#10b981' : '#f43f5e'}
+                    fill={entry.rate >= targetThreshold ? '#34E0C4' : '#F2607A'}
                   />
                 ))}
               </Bar>
@@ -365,14 +240,14 @@ const ComplianceChart = memo(() => {
               <Area
                 type="monotone"
                 dataKey="rate"
-                stroke="#10b981"
+                stroke="#34E0C4"
                 strokeWidth={3}
                 fill="url(#scoreGradient)"
                 activeDot={{
                   r: 6,
                   strokeWidth: 4,
-                  fill: '#09090b',
-                  stroke: '#10b981'
+                  fill: '#0D1117',
+                  stroke: '#34E0C4'
                 }}
                 animationDuration={1500}
               />
@@ -398,75 +273,36 @@ const DashboardContent = memo(({ onOpenRegister }) => {
 
   const globalStatus = metadata?.global_status || 'OPERATIONAL';
   const statusConfig = {
-    OPERATIONAL: { label: 'Operational', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', dot: 'bg-emerald-500', solid: 'bg-emerald-500' },
-    DEGRADED: { label: 'Degraded', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: 'bg-amber-500', solid: 'bg-amber-500' },
-    CIRCUIT_BROKEN: { label: 'Circuit Broken', color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', dot: 'bg-rose-500', solid: 'bg-rose-500' },
-  }[globalStatus] || { label: 'Unknown', color: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20', dot: 'bg-slate-500', solid: 'bg-slate-500' };
+    OPERATIONAL: { label: 'Operational', color: 'var(--signal)', tag: 'ok' },
+    DEGRADED: { label: 'Degraded', color: 'var(--amber)', tag: 'warn' },
+    CIRCUIT_BROKEN: { label: 'Circuit Broken', color: 'var(--red)', tag: 'red' },
+  }[globalStatus] || { label: 'Unknown', color: 'var(--ash)', tag: 'vi' };
 
   const lastRunDate = metadata?.validation_date ? new Date(metadata.validation_date) : null;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 slide-in-from-bottom-4">
+    <div className="space-y-6">
+      <div className="kick">LIVE · CONTINUOUSLY MONITORED · {metadata?.impact_level || 'MODERATE'} IMPACT</div>
+      <h1 className="big">Continuous validation, <span className="g">observed live.</span></h1>
 
-      {/* Single unified header: status + metrics + timestamp */}
-      <div className={`relative overflow-hidden rounded-xl border ${THEME.border} ${THEME.panel} shadow-md`}>
-        <div className={`h-1 w-full ${statusConfig.solid} opacity-80`} />
-        <div className="p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
-
-          {/* Left: Status headline */}
-          <div className="flex items-center gap-4">
-            <div className={`p-2.5 rounded-xl border ${statusConfig.border} ${statusConfig.bg}`}>
-              <Shield size={22} className={statusConfig.color} />
-            </div>
-            <div>
-              <div className="flex items-center gap-3 mb-0.5">
-                <h2 className={`text-xl font-bold ${statusConfig.color} tracking-tight`}>{statusConfig.label}</h2>
-                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${statusConfig.border} ${statusConfig.bg} ${statusConfig.color}`}>
-                  {metadata?.impact_level || 'MODERATE'}
-                </span>
-              </div>
-              <p className="text-slate-500 text-xs">
-                {parseInt(metrics.passed)} of {totalControls} controls passing
-                {lastRunDate && <> &middot; Validated {getTimeElapsed(lastRunDate)}</>}
-              </p>
-            </div>
-          </div>
-
-          {/* Center: Key metrics */}
-          <div className="flex items-center gap-8 lg:gap-10 px-0 lg:px-6 lg:border-x border-white/5">
-            <div className="text-center">
-              <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Pass Rate</div>
-              <div className="text-white font-mono font-bold text-xl tabular-nums">{metrics.score}%</div>
-            </div>
-            <div className="text-center">
-              <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Target</div>
-              <div className="text-white font-mono font-bold text-xl tabular-nums">{targetThreshold}%</div>
-            </div>
-          </div>
-
-          {/* Right: Timestamp + sync */}
-          <div className="flex items-center gap-3">
-            {lastRunDate && (
-              <div className="flex items-center gap-2 text-[10px] text-slate-400 bg-white/5 px-2.5 py-1.5 rounded border border-white/5">
-                <Calendar size={10} />
-                <span className="font-mono tabular-nums">
-                  {lastRunDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                </span>
-                <Clock size={10} />
-                <span className="font-mono tabular-nums">
-                  {lastRunDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-            )}
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-blue-400 hover:text-blue-300 transition-colors px-2.5 py-1.5 rounded border border-white/5 bg-white/5"
-            >
-              <RefreshCw size={10} className={isRefreshing ? 'animate-spin' : ''} />
-              Sync
-            </button>
-          </div>
+      {/* Posture header */}
+      <div className="panel">
+        <div className="ph">
+          <h4 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Shield size={16} style={{ color: statusConfig.color }} />
+            <span style={{ color: statusConfig.color }}>{statusConfig.label}</span>
+            <span className={`tag ${statusConfig.tag}`}>{metadata?.impact_level || 'MODERATE'}</span>
+          </h4>
+          <button onClick={handleRefresh} disabled={isRefreshing}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--indigo)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '.04em' }}>
+            <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} /> SYNC NOW
+          </button>
+        </div>
+        <div className="g4" style={{ padding: 18 }}>
+          <div className="kpi"><div className="v s">{metrics.score}%</div><div className="l">Pass rate</div></div>
+          <div className="kpi"><div className="v">{targetThreshold}%</div><div className="l">Target</div></div>
+          <div className="kpi"><div className="v">{totalControls}</div><div className="l">KSI controls</div></div>
+          <div className="kpi"><div className="v i">{parseInt(metrics.passed)}</div><div className="l">Passing</div>{lastRunDate && <div className="sub">validated {getTimeElapsed(lastRunDate)}</div>}</div>
         </div>
       </div>
 
@@ -490,6 +326,20 @@ const KNOWN_VIEWS = new Set([
   'dashboard', 'trust', 'vdr', 'transparency', 'metrics',
   'failures', 'register', 'mas', 'policies', 'schema', 'reports',
 ]);
+
+const VIEW_TITLES = {
+  dashboard: ['Overview', 'system-wide posture'],
+  trust: ['Trust Center', 'authorization, live'],
+  vdr: ['VDR Security', 'vulnerability data'],
+  transparency: ['Transparency Console', 'live evidence stream'],
+  metrics: ['Pipeline Metrics', 'validation telemetry'],
+  failures: ['Failure History', 'KSI failure timeline'],
+  register: ['Remediation Register', 'open remediation'],
+  mas: ['Assessment Scope', 'boundary & data flow'],
+  policies: ['Policies', 'governance'],
+  schema: ['Schema', 'machine-readable'],
+  reports: ['Reports', 'authorization artifacts'],
+};
 
 const AppShell = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -536,7 +386,7 @@ const AppShell = () => {
   }, [navigate]);
 
   return (
-    <div className={`flex h-screen ${THEME.bg} text-slate-300 font-sans overflow-hidden selection:bg-blue-500/30`}>
+    <div className="tcx flex h-screen overflow-hidden">
 
       {mobileMenuOpen && (
         <div
@@ -547,26 +397,16 @@ const AppShell = () => {
 
       {/* Mobile Sidebar */}
       <aside
-        className={`fixed z-[70] h-full bg-[#0c0c10] border-r border-white/5 transition-transform duration-300 
+        className={`fixed z-[70] h-full bg-[#080B0F] border-r border-[#1A222D] transition-transform duration-300 
           w-[280px] ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:hidden
         `}
       >
         <div className="flex flex-col h-full">
-          <div className="h-16 flex items-center justify-between px-5 border-b border-white/5 mb-2">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-1 relative overflow-hidden">
-                <img
-                  src={`${import.meta.env.BASE_URL}meridian-favicon.png`}
-                  alt="Meridian Logo"
-                  className="w-full h-full object-contain relative z-10"
-                />
-                <div className="absolute inset-0 bg-blue-500/10 blur-xl"></div>
-              </div>
-              <div>
-                <div className="font-bold text-white tracking-tight leading-none text-sm">Meridian</div>
-                <div className="text-[9px] text-slate-500 font-mono mt-0.5 tracking-widest uppercase">Trust Center</div>
-              </div>
+          <div className="h-16 flex items-center justify-between px-5 border-b border-[#1A222D] mb-2">
+            <div className="sidehead">
+              <span className="orb" />
+              <div>Meridian<small>FEDRAMP&nbsp;20x&nbsp;CONSOLE</small></div>
             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
@@ -577,7 +417,7 @@ const AppShell = () => {
           </div>
 
           <nav className="flex-1 overflow-y-auto py-6 scrollbar-none pb-[env(safe-area-inset-bottom)]">
-            <div className="px-5 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Platform</div>
+            <div className="lbl">Platform</div>
 
             <SidebarItem
               icon={LayoutDashboard}
@@ -633,7 +473,7 @@ const AppShell = () => {
               onClick={() => { navigate('mas'); setMobileMenuOpen(false); }}
             />
 
-            <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Organization</div>
+            <div className="lbl">Organization</div>
 
             <SidebarItem
               icon={BookOpen}
@@ -657,7 +497,7 @@ const AppShell = () => {
               onClick={() => { navigate('reports'); setMobileMenuOpen(false); }}
             />
 
-            <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
+            <div className="lbl">User</div>
 
             {isAuthenticated ? (
               <>
@@ -669,10 +509,10 @@ const AppShell = () => {
             )}
           </nav>
 
-          <div className="p-4 border-t border-white/5 bg-[#09090b]">
+          <div className="p-4" style={{ borderTop: "1px solid var(--line)" }}>
             <button
               onClick={() => { setSettingsOpen(true); setMobileMenuOpen(false); }}
-              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase"
+              className="btn ghost" style={{ width: "100%", fontSize: 10, justifyContent: "center" }}
             >
               <Database size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> Manage Data
             </button>
@@ -682,30 +522,20 @@ const AppShell = () => {
 
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden lg:flex flex-col flex-shrink-0 h-full bg-[#0c0c10] border-r border-white/5 transition-all duration-300 overflow-hidden
+        className={`hidden lg:flex flex-col flex-shrink-0 h-full bg-[#080B0F] border-r border-[#1A222D] transition-all duration-300 overflow-hidden
           ${sidebarOpen ? 'w-64' : 'w-0'}
         `}
       >
         <div className="flex flex-col h-full min-w-[256px]">
-          <div className="h-16 flex items-center justify-between px-5 border-b border-white/5 mb-2">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center p-1 relative overflow-hidden">
-                <img
-                  src={`${import.meta.env.BASE_URL}meridian-favicon.png`}
-                  alt="Meridian Logo"
-                  className="w-full h-full object-contain relative z-10"
-                />
-                <div className="absolute inset-0 bg-blue-500/10 blur-xl"></div>
-              </div>
-              <div>
-                <div className="font-bold text-white tracking-tight leading-none text-sm">Meridian</div>
-                <div className="text-[9px] text-slate-500 font-mono mt-0.5 tracking-widest uppercase">Trust Center</div>
-              </div>
+          <div className="h-16 flex items-center justify-between px-5 border-b border-[#1A222D] mb-2">
+            <div className="sidehead">
+              <span className="orb" />
+              <div>Meridian<small>FEDRAMP&nbsp;20x&nbsp;CONSOLE</small></div>
             </div>
           </div>
 
           <nav className="flex-1 overflow-y-auto py-6 scrollbar-none">
-            <div className="px-5 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Platform</div>
+            <div className="lbl">Platform</div>
 
             <SidebarItem
               icon={LayoutDashboard}
@@ -761,7 +591,7 @@ const AppShell = () => {
               onClick={() => navigate('mas')}
             />
 
-            <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">Organization</div>
+            <div className="lbl">Organization</div>
 
             <SidebarItem
               icon={BookOpen}
@@ -785,7 +615,7 @@ const AppShell = () => {
               onClick={() => navigate('reports')}
             />
 
-            <div className="px-5 pt-8 pb-2 text-[10px] font-bold uppercase text-slate-600 tracking-widest font-mono">User</div>
+            <div className="lbl">User</div>
 
             {isAuthenticated ? (
               <>
@@ -797,10 +627,10 @@ const AppShell = () => {
             )}
           </nav>
 
-          <div className="p-4 border-t border-white/5 bg-[#09090b]">
+          <div className="p-4" style={{ borderTop: "1px solid var(--line)" }}>
             <button
               onClick={() => setSettingsOpen(true)}
-              className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-slate-300 rounded-md flex items-center justify-center transition-all text-[10px] font-bold tracking-widest border border-white/5 gap-2 group uppercase"
+              className="btn ghost" style={{ width: "100%", fontSize: 10, justifyContent: "center" }}
             >
               <Database size={12} className="group-hover:rotate-90 transition-transform duration-500 text-slate-500" /> Manage Data
             </button>
@@ -811,67 +641,35 @@ const AppShell = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
 
-        {/* Global Responsive Header */}
-        <header className={`h-16 bg-[#0c0c10]/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 lg:px-6 z-50 sticky top-0 ${scrollY > 0 ? 'shadow-lg shadow-black/20' : ''}`}>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-white transition-colors"
-            >
-              <Menu size={22} />
+        {/* Console top bar */}
+        <header className="bar" style={{ zIndex: 50 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+            <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden" style={{ color: 'var(--ash)', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <Menu size={20} />
             </button>
-
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="hidden lg:block text-slate-400 hover:text-white transition-colors">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="hidden lg:block" style={{ color: 'var(--ash)', background: 'none', border: 'none', cursor: 'pointer' }}>
               <Menu size={18} />
             </button>
-
-            <div className="hidden sm:flex items-center px-2 py-1">
-              <span className="text-slate-500 text-[10px] uppercase font-bold tracking-widest font-mono">
-                {activeView === 'dashboard' && 'Platform / Overview'}
-                {activeView === 'trust' && 'Platform / Trust Center'}
-                {activeView === 'vdr' && 'Platform / VDR Security'}
-                {activeView === 'transparency' && 'Platform / Transparency Console'}
-                {activeView === 'metrics' && 'Platform / Pipeline Metrics'}
-                {activeView === 'failures' && 'Platform / Failure History'}
-                {activeView === 'register' && 'Platform / Remediation Register'}
-                {activeView === 'mas' && 'Platform / Assessment Scope'}
-                {activeView === 'policies' && 'Organization / Policies'}
-                {activeView === 'schema' && 'Organization / Schema'}
-                {activeView === 'reports' && 'Organization / Reports'}
-              </span>
-            </div>
+            <div className="ttl">{(VIEW_TITLES[activeView] || ['Overview'])[0]}<small>{(VIEW_TITLES[activeView] || ['', ''])[1]}</small></div>
           </div>
 
-          <div className="flex items-center space-x-3 lg:space-x-6">
+          <div className="right">
             {freshness && (
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/15"
-                   title={`Last KSI continuous-validation run: ${new Date(freshness).toLocaleString()}. Key Security Indicators re-validate every 4 hours.`}>
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                </span>
-                <div className="leading-tight">
-                  <div className="text-[8px] text-slate-500 uppercase font-bold tracking-wider">KSI Validation</div>
-                  <div className="text-[10px] text-emerald-300 font-mono">Last run {getTimeElapsed(new Date(freshness))}</div>
-                </div>
-              </div>
+              <span className="pill" title={`Last KSI continuous-validation run: ${new Date(freshness).toLocaleString()}. Key Security Indicators re-validate every 4 hours.`}>
+                <span className="d" /> KSI validated · {getTimeElapsed(new Date(freshness))}
+              </span>
             )}
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden md:block">
-                <div className="text-xs font-bold text-white">{isAuthenticated ? user.agency : 'Public User'}</div>
-                <div className="text-[9px] text-slate-500 font-mono uppercase tracking-wider">{isAuthenticated ? 'Federal Access' : 'Limited View'}</div>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center text-white font-bold text-xs shadow-inner border border-white/10 ring-1 ring-white/5">
-                {isAuthenticated ? user.agency?.charAt(0) : 'P'}
-              </div>
-            </div>
+            <span className="hidden md:inline">{isAuthenticated ? user.agency : 'Public · limited view'}</span>
+            <span style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#1A222D,#0D1117)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink)', fontSize: 12, fontWeight: 600 }}>
+              {isAuthenticated ? user.agency?.charAt(0) : 'P'}
+            </span>
           </div>
         </header>
 
         {/* Scrollable Dashboard Canvas */}
-        <main className="flex-1 overflow-y-auto bg-[#09090b] relative scrollbar-thin scrollbar-thumb-white/10">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow" style={{ animationDelay: '1s' }} />
+        <main className="flex-1 overflow-y-auto bg-transparent relative scrollbar-thin scrollbar-thumb-white/10">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#34e0c4]/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#818cf8]/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen animate-pulse-slow" style={{ animationDelay: '1s' }} />
 
           <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto relative z-10">
             {activeView === 'dashboard' ? <DashboardContent onOpenRegister={goToRegister} /> :
@@ -879,9 +677,9 @@ const AppShell = () => {
               activeView === 'register' ? <RemediationRegister initialFilters={registerFilters} /> :
               !isAuthenticated ? (
                 <div className="flex items-center justify-center min-h-[60vh]">
-                  <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-10 rounded-2xl border border-gray-700 max-w-lg">
-                    <div className="w-16 h-16 mb-5 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
-                      <Lock size={28} className="text-blue-400" />
+                  <div className="panel max-w-lg" style={{ padding: 40 }}>
+                    <div className="w-16 h-16 mb-5 bg-[#818cf8]/10 rounded-2xl flex items-center justify-center border border-[#818cf8]/30">
+                      <Lock size={28} className="text-[#818cf8]" />
                     </div>
                     <h3 className="font-semibold text-white text-xl mb-3">Verified federal access required</h3>
                     <p className="text-sm text-gray-400 mb-4 leading-relaxed">
@@ -892,13 +690,13 @@ const AppShell = () => {
                     </p>
                     <p className="text-sm text-gray-400 mb-6 leading-relaxed">
                       No registration is needed for our public transparency views:
-                      <button onClick={() => navigate('trust')} className="text-blue-400 hover:text-blue-300 font-medium mx-1">Trust Center</button>,
-                      <button onClick={() => navigate('dashboard')} className="text-blue-400 hover:text-blue-300 font-medium mx-1">Overview</button>, and the
-                      <button onClick={() => navigate('register')} className="text-blue-400 hover:text-blue-300 font-medium mx-1">Remediation Register</button>.
+                      <button onClick={() => navigate('trust')} className="font-medium mx-1" style={{ color: "var(--indigo)" }}>Trust Center</button>,
+                      <button onClick={() => navigate('dashboard')} className="font-medium mx-1" style={{ color: "var(--indigo)" }}>Overview</button>, and the
+                      <button onClick={() => navigate('register')} className="font-medium mx-1" style={{ color: "var(--indigo)" }}>Remediation Register</button>.
                     </p>
                     <button
                       onClick={() => openModal('registration')}
-                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-900/30"
+                      className="btn ind"
                     >
                       Register with government email
                     </button>

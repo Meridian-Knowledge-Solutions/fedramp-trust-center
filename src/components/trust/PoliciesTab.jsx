@@ -1,120 +1,114 @@
 import React, { useState, useEffect, memo } from 'react';
-import { FileText, ChevronRight, BookOpen, Search, ExternalLink } from 'lucide-react';
+import { BookOpen, Search, ExternalLink } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import { useTrustCenterData } from '../../hooks/useTrustCenterData';
 
-const THEME = {
-  panel: 'bg-[#121217]',
-  border: 'border-white/10',
-};
+// Derive a short governance reference (FRR / NIST family) from a policy's
+// filename or path, for the .meta column of each list row.
+const policyRef = (policy) => (policy?.filename || policy?.path || '').split('/').pop() || '';
 
 const PolicyCard = memo(({ policy, isSelected, onClick }) => (
-  <button
+  <div
+    className="lrow"
     onClick={onClick}
-    className={`w-full text-left p-4 rounded-lg border transition-all duration-200 group cursor-pointer ${
-      isSelected
-        ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
-        : `${THEME.panel} ${THEME.border} hover:border-white/20 text-slate-300 hover:text-white`
-    }`}
+    role="button"
+    tabIndex={0}
+    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+    style={isSelected ? { background: '#34E0C40D' } : undefined}
   >
-    <div className="flex items-start gap-3">
-      <div className={`p-2 rounded-lg border ${
-        isSelected
-          ? 'bg-blue-500/15 border-blue-500/30'
-          : 'bg-white/5 border-white/5 group-hover:border-white/10'
-      }`}>
-        <FileText size={16} className={isSelected ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'} />
+    <div style={{ minWidth: 0 }}>
+      <div className="t" style={{ color: isSelected ? 'var(--signal)' : 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {policy.title}
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="font-medium text-sm tracking-tight">{policy.title}</div>
-        <div className="text-[11px] text-slate-500 mt-1 font-mono">{policy.filename}</div>
-      </div>
-      <ChevronRight size={14} className={`mt-1 transition-transform ${isSelected ? 'text-blue-400 rotate-90' : 'text-slate-600'}`} />
+      <div className="d" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{policyRef(policy)}</div>
     </div>
-  </button>
+    <div className="meta">
+      <span className="ar" style={isSelected ? undefined : { color: 'var(--faint)' }}>→</span>
+    </div>
+  </div>
 ));
 
 const MarkdownRenderer = memo(({ content }) => (
-  <div className="max-w-none text-slate-300 text-sm leading-relaxed">
+  <div style={{ color: 'var(--ash)', fontSize: 14, lineHeight: 1.7 }}>
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[rehypeRaw, rehypeSanitize]}
       components={{
         h1: ({ children }) => (
-          <h1 className="text-2xl font-bold text-white tracking-tight mb-6 pb-3 border-b border-white/10">{children}</h1>
+          <h1 style={{ fontSize: 26, fontWeight: 600, letterSpacing: '-.03em', color: 'var(--ink)', marginBottom: 18, paddingBottom: 14, borderBottom: '1px solid var(--line)' }}>{children}</h1>
         ),
         h2: ({ children }) => (
-          <h2 className="text-lg font-bold text-white tracking-tight mt-10 mb-4 pb-2 border-b border-white/5">{children}</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginTop: 32, marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid var(--line)' }}>{children}</h2>
         ),
         h3: ({ children }) => (
-          <h3 className="text-base font-semibold text-white mt-8 mb-3">{children}</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)', marginTop: 26, marginBottom: 10 }}>{children}</h3>
         ),
         h4: ({ children }) => (
-          <h4 className="text-sm font-semibold text-slate-200 mt-6 mb-2">{children}</h4>
+          <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', marginTop: 20, marginBottom: 8 }}>{children}</h4>
         ),
         p: ({ children }) => (
-          <p className="text-slate-300 leading-relaxed mb-4">{children}</p>
+          <p style={{ color: 'var(--ash)', lineHeight: 1.7, marginBottom: 14 }}>{children}</p>
         ),
         ul: ({ children }) => (
-          <ul className="list-disc pl-6 mb-4 space-y-1.5 text-slate-300 marker:text-slate-600">{children}</ul>
+          <ul style={{ listStyle: 'disc', paddingLeft: 24, marginBottom: 14, color: 'var(--ash)' }}>{children}</ul>
         ),
         ol: ({ children }) => (
-          <ol className="list-decimal pl-6 mb-4 space-y-1.5 text-slate-300 marker:text-slate-500">{children}</ol>
+          <ol style={{ listStyle: 'decimal', paddingLeft: 24, marginBottom: 14, color: 'var(--ash)' }}>{children}</ol>
         ),
         li: ({ children }) => (
-          <li className="text-slate-300 leading-relaxed">{children}</li>
+          <li style={{ color: 'var(--ash)', lineHeight: 1.7, marginBottom: 4 }}>{children}</li>
         ),
         strong: ({ children }) => (
-          <strong className="font-semibold text-white">{children}</strong>
+          <strong style={{ fontWeight: 600, color: 'var(--ink)' }}>{children}</strong>
         ),
         em: ({ children }) => (
-          <em className="italic text-slate-200">{children}</em>
+          <em style={{ fontStyle: 'italic', color: 'var(--ink)' }}>{children}</em>
         ),
         a: ({ href, children }) => (
-          <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline underline-offset-2 decoration-blue-500/30 hover:decoration-blue-400/60 transition-colors">{children}</a>
+          <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--indigo)', textDecoration: 'underline', textUnderlineOffset: 2 }}>{children}</a>
         ),
         code: ({ className, children, ...props }) => {
           const isBlock = className?.includes('language-');
           if (isBlock) {
             return (
-              <code className={`block bg-[#09090b] text-emerald-400 text-xs font-mono rounded-lg p-4 my-4 overflow-x-auto border border-white/5 leading-relaxed whitespace-pre ${className || ''}`} {...props}>{children}</code>
+              <code className={`mono ${className || ''}`} style={{ display: 'block', background: 'var(--raise2)', color: 'var(--signal)', fontSize: 12, borderRadius: 10, padding: 16, margin: '16px 0', overflowX: 'auto', border: '1px solid var(--line)', lineHeight: 1.7, whiteSpace: 'pre' }} {...props}>{children}</code>
             );
           }
           return (
-            <code className="text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded text-xs border border-blue-500/20 font-mono" {...props}>{children}</code>
+            <code className="mono" style={{ color: 'var(--indigo)', background: '#818CF814', padding: '2px 6px', borderRadius: 5, fontSize: 12, border: '1px solid #818CF833' }} {...props}>{children}</code>
           );
         },
         pre: ({ children }) => (
-          <pre className="bg-[#09090b] rounded-lg my-4 overflow-x-auto border border-white/5">{children}</pre>
+          <pre style={{ background: 'var(--raise2)', borderRadius: 10, margin: '16px 0', overflowX: 'auto', border: '1px solid var(--line)' }}>{children}</pre>
         ),
         blockquote: ({ children }) => (
-          <blockquote className="border-l-2 border-blue-500/40 pl-4 my-4 text-slate-400 italic">{children}</blockquote>
+          <blockquote style={{ borderLeft: '2px solid var(--signal)', paddingLeft: 16, margin: '16px 0', color: 'var(--ash)', fontStyle: 'italic' }}>{children}</blockquote>
         ),
         hr: () => (
-          <hr className="border-white/10 my-8" />
+          <hr style={{ border: 'none', borderTop: '1px solid var(--line)', margin: '32px 0' }} />
         ),
         table: ({ children }) => (
-          <div className="overflow-x-auto my-4 rounded-lg border border-white/10">
-            <table className="w-full border-collapse text-sm">{children}</table>
+          <div style={{ overflowX: 'auto', margin: '16px 0', borderRadius: 10, border: '1px solid var(--line)' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>{children}</table>
           </div>
         ),
         thead: ({ children }) => (
-          <thead className="bg-white/5">{children}</thead>
+          <thead style={{ background: '#0b1016' }}>{children}</thead>
         ),
         th: ({ children }) => (
-          <th className="text-left text-slate-300 text-xs uppercase tracking-wider font-bold p-3 border-b border-white/10">{children}</th>
+          <th className="mono" style={{ textAlign: 'left', color: 'var(--ash)', fontSize: 10, letterSpacing: '.06em', textTransform: 'uppercase', padding: 12, borderBottom: '1px solid var(--line)' }}>{children}</th>
         ),
         td: ({ children }) => (
-          <td className="p-3 border-b border-white/5 text-slate-400">{children}</td>
+          <td style={{ padding: 12, borderBottom: '1px solid var(--line)', color: 'var(--ash)' }}>{children}</td>
         ),
         tr: ({ children }) => (
-          <tr className="hover:bg-white/[0.02] transition-colors">{children}</tr>
+          <tr>{children}</tr>
         ),
         img: ({ src, alt }) => (
-          <img src={src} alt={alt} className="rounded-lg border border-white/10 my-4 max-w-full" />
+          <img src={src} alt={alt} style={{ borderRadius: 10, border: '1px solid var(--line)', margin: '16px 0', maxWidth: '100%' }} />
         ),
       }}
     >
@@ -170,69 +164,63 @@ export const PoliciesTab = memo(() => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-500 text-sm">Loading policies...</p>
-        </div>
+      <div className="mono" style={{ color: 'var(--ash)', padding: '40px 0' }}>
+        Loading policies…
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-8 text-center`}>
-        <BookOpen size={40} className="mx-auto mb-3 text-slate-600" />
-        <p className="text-slate-400 text-sm">Unable to load policies</p>
-        <p className="text-slate-600 text-xs mt-1">{error}</p>
+      <div className="panel" style={{ padding: 32, textAlign: 'center' }}>
+        <BookOpen size={36} style={{ margin: '0 auto 12px', color: 'var(--faint)' }} />
+        <p style={{ color: 'var(--ink)', fontSize: 14 }}>Unable to load policies</p>
+        <p className="mono" style={{ color: 'var(--faint)', fontSize: 12, marginTop: 6 }}>{error}</p>
       </div>
     );
   }
 
   if (policies.length === 0) {
     return (
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-8 text-center`}>
-        <BookOpen size={40} className="mx-auto mb-3 text-slate-600" />
-        <p className="text-slate-400 text-sm">No policy documents available</p>
-        <p className="text-slate-600 text-xs mt-1">Policies will appear here after the next pipeline run</p>
+      <div className="panel" style={{ padding: 32, textAlign: 'center' }}>
+        <BookOpen size={36} style={{ margin: '0 auto 12px', color: 'var(--faint)' }} />
+        <p style={{ color: 'var(--ink)', fontSize: 14 }}>No policy documents available</p>
+        <p className="mono" style={{ color: 'var(--faint)', fontSize: 12, marginTop: 6 }}>Policies will appear here after the next pipeline run</p>
       </div>
     );
   }
 
+  const activePolicy = filteredPolicies[selectedIndex] || filteredPolicies[0];
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="stack">
       {/* Header */}
-      <div className={`${THEME.panel} rounded-xl border ${THEME.border} p-6`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-white font-bold text-lg tracking-tight">Policies</h2>
-            <p className="text-slate-500 text-xs mt-1 uppercase tracking-wider font-mono">
-              Governance Documents
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[9px] font-bold border border-emerald-500/20 tracking-wider uppercase">
-              Pipeline Synced
-            </div>
-          </div>
-        </div>
+      <div>
+        <div className="kick">§ — GOVERNANCE</div>
+        <h1 className="big">Governing <span className="g">standards</span></h1>
+        <p className="lede">
+          The FedRAMP 20x rule families and policies governing this authorization, published openly.
+        </p>
       </div>
 
       {/* Content Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Sidebar - Policy List */}
-        <div className="lg:col-span-4 space-y-3">
-          <div className="relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+      <div className="g2" style={{ gridTemplateColumns: 'minmax(0, 5fr) minmax(0, 7fr)', alignItems: 'start' }}>
+        {/* Policy list */}
+        <div className="stack">
+          <div className="search">
+            <Search size={15} />
             <input
               type="text"
-              placeholder="Search policies..."
+              placeholder="search policies…"
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setSelectedIndex(0); }}
-              className={`w-full pl-9 pr-4 py-2.5 rounded-lg ${THEME.panel} border ${THEME.border} text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:border-blue-500/30 focus:ring-1 focus:ring-blue-500/20 transition-all`}
             />
           </div>
-          <div className="space-y-2">
+          <div className="panel">
+            <div className="ph">
+              <h4>Policy register</h4>
+              <span className="map">{filteredPolicies.length} document{filteredPolicies.length === 1 ? '' : 's'}</span>
+            </div>
             {filteredPolicies.map((policy, idx) => (
               <PolicyCard
                 key={policy.path}
@@ -242,42 +230,43 @@ export const PoliciesTab = memo(() => {
               />
             ))}
             {filteredPolicies.length === 0 && (
-              <p className="text-slate-600 text-sm text-center py-4">No policies match your search</p>
+              <div className="mono" style={{ color: 'var(--faint)', fontSize: 12, textAlign: 'center', padding: '20px 0' }}>
+                No policies match your search
+              </div>
             )}
           </div>
         </div>
 
-        {/* Main Content - Policy Viewer */}
-        <div className="lg:col-span-8">
-          <div className={`${THEME.panel} rounded-xl border ${THEME.border} overflow-hidden`}>
-            {filteredPolicies.length > 0 && (
-              <div className="px-6 py-4 border-b border-white/5 bg-[#09090b] flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <BookOpen size={16} className="text-blue-400" />
-                  <span className="text-white font-medium text-sm">
-                    {(filteredPolicies[selectedIndex] || filteredPolicies[0])?.title}
-                  </span>
-                </div>
-                <a
-                  href={getFileUrl((filteredPolicies[selectedIndex] || filteredPolicies[0])?.path)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-[10px] text-slate-500 hover:text-blue-400 transition-colors uppercase tracking-wider font-bold"
-                >
-                  <ExternalLink size={10} />
-                  Raw
-                </a>
-              </div>
-            )}
-            <div className="p-6 min-h-[400px]">
-              {contentLoading ? (
-                <div className="flex items-center justify-center h-64">
-                  <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-                </div>
-              ) : (
-                <MarkdownRenderer content={policyContent} />
-              )}
+        {/* Policy viewer */}
+        <div className="panel">
+          {filteredPolicies.length > 0 && (
+            <div className="ph">
+              <h4 style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                <BookOpen size={15} style={{ color: 'var(--signal)', flexShrink: 0 }} />
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {activePolicy?.title}
+                </span>
+              </h4>
+              <a
+                className="map"
+                href={getFileUrl(activePolicy?.path)}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--signal)', whiteSpace: 'nowrap' }}
+              >
+                <ExternalLink size={11} />
+                RAW
+              </a>
             </div>
+          )}
+          <div style={{ padding: 22, minHeight: 400 }}>
+            {contentLoading ? (
+              <div className="mono" style={{ color: 'var(--ash)', padding: '40px 0' }}>
+                Loading document…
+              </div>
+            ) : (
+              <MarkdownRenderer content={policyContent} />
+            )}
           </div>
         </div>
       </div>

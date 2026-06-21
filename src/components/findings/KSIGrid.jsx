@@ -73,55 +73,67 @@ export const KSIGrid = () => {
     setStatusFilter('all');
   };
 
-  if (loading) return <div className="p-12 text-center text-gray-500">Loading compliance data...</div>;
+  if (loading) return <div className="mono" style={{ color: 'var(--ash)', padding: '48px 0', textAlign: 'center' }}>Loading telemetry…</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="stack">
+      <h3 className="sec">Key Security Indicators · live control matrix</h3>
+
       {/* Toolbar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-gray-900/50 p-2 rounded-xl border border-gray-700/50">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
         {/* Search */}
-        <div className="relative w-full md:w-96 group">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-gray-500 group-focus-within:text-blue-400 transition-colors" />
-          </div>
+        <div className="search" style={{ flex: 1, minWidth: 260 }}>
+          <Search size={15} />
           <input
             type="text"
-            className="block w-full pl-10 pr-10 py-2 border border-transparent rounded-lg leading-5 bg-gray-800 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-gray-800 transition-all text-sm"
-            placeholder="Search controls..."
+            placeholder="search control id, name, category…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           {searchTerm && (
-            <button onClick={() => setSearchTerm('')} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-300">
-              <X className="h-4 w-4" />
+            <button
+              onClick={() => setSearchTerm('')}
+              style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ash)', cursor: 'pointer', display: 'flex' }}
+              aria-label="Clear search"
+            >
+              <X size={14} />
             </button>
           )}
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex gap-1 p-1 bg-gray-800 rounded-lg overflow-x-auto w-full md:w-auto no-scrollbar border border-gray-700">
-          <FilterTab label="All" count={statusCounts.all} active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
-          <FilterTab label="Operational" count={statusCounts.passed} active={statusFilter === 'passed'} onClick={() => setStatusFilter('passed')} />
-          <FilterTab label="Failed" count={statusCounts.failed} active={statusFilter === 'failed'} onClick={() => setStatusFilter('failed')} />
+        <div className="chips">
+          <FilterTab label="All" count={statusCounts.all} active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} dot="var(--ash)" />
+          <FilterTab label="Operational" count={statusCounts.passed} active={statusFilter === 'passed'} onClick={() => setStatusFilter('passed')} dot="var(--signal)" />
+          <FilterTab label="Failed" count={statusCounts.failed} active={statusFilter === 'failed'} onClick={() => setStatusFilter('failed')} dot="var(--red)" />
           {statusCounts.meets_threshold > 0 && (
-            <FilterTab label="Meets Threshold" count={statusCounts.meets_threshold} active={statusFilter === 'meets_threshold'} onClick={() => setStatusFilter('meets_threshold')} />
+            <FilterTab label="Meets Threshold" count={statusCounts.meets_threshold} active={statusFilter === 'meets_threshold'} onClick={() => setStatusFilter('meets_threshold')} dot="var(--indigo)" />
           )}
           {statusCounts.warning > 0 && (
-            <FilterTab label="Conditional" count={statusCounts.warning} active={statusFilter === 'warning'} onClick={() => setStatusFilter('warning')} />
+            <FilterTab label="Conditional" count={statusCounts.warning} active={statusFilter === 'warning'} onClick={() => setStatusFilter('warning')} dot="var(--amber)" />
           )}
+          <span className="mono" style={{ color: 'var(--faint)', fontSize: 11, alignSelf: 'center', marginLeft: 4 }}>
+            {filteredKsis.length} / {ksis.length}
+          </span>
         </div>
       </div>
 
       {/* Category Sections */}
-      <div className="space-y-8">
+      <div className="stack">
         {Object.entries(groupedKsis).map(([category, items]) => (
           <CategorySection key={category} category={category} items={items} openModal={openModal} backlogByKsi={backlogByKsi} />
         ))}
 
         {filteredKsis.length === 0 && (
-          <div className="text-center py-20 text-gray-500 border-2 border-dashed border-gray-700 rounded-xl">
-            No controls match your current filters.
-            <button onClick={handleReset} className="block mx-auto mt-2 text-blue-400 hover:underline">Reset Filters</button>
+          <div className="panel" style={{ padding: '56px 20px', textAlign: 'center' }}>
+            <div className="mono" style={{ color: 'var(--ash)', fontSize: 13 }}>No controls match your current filters.</div>
+            <button
+              onClick={handleReset}
+              className="mono"
+              style={{ marginTop: 10, background: 'none', border: 'none', color: 'var(--indigo)', cursor: 'pointer', fontSize: 12 }}
+            >
+              Reset filters
+            </button>
           </div>
         )}
       </div>
@@ -136,57 +148,35 @@ const CategorySection = ({ category, items, openModal, backlogByKsi }) => {
   const failed = items.filter(i => i.assertion === false || i.assertion === "false").length;
 
   return (
-    <div className="border border-gray-700 rounded-xl bg-gray-800 overflow-hidden shadow-lg">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 bg-gray-800 hover:bg-gray-750 transition-colors border-b border-gray-700 text-left"
-      >
-        <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${failed > 0 ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
-            <Layers size={20} />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-white">{category}</h3>
-            <div className="flex items-center gap-3 text-xs font-medium text-gray-400 mt-0.5">
-              <span>{items.length} controls</span>
-              <span className="text-gray-600">&middot;</span>
-              <span className={failed > 0 ? 'text-red-400' : 'text-green-400'}>
-                {failed > 0 ? `${failed} requiring action` : 'All operational'}
-              </span>
-            </div>
-          </div>
-        </div>
+    <div className="panel">
+      <div className="ph" style={{ cursor: 'pointer' }} onClick={() => setIsExpanded(!isExpanded)}>
+        <h4 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          <Layers size={15} style={{ color: failed > 0 ? 'var(--red)' : 'var(--signal)' }} />
+          {category}
+          <span className="mono" style={{ color: 'var(--faint)', fontSize: 11 }}>· {items.length}</span>
+        </h4>
+        <span className="map" style={{ color: failed > 0 ? 'var(--red)' : 'var(--signal)' }}>
+          {failed > 0 ? `${failed} requiring action` : 'all operational'}
+        </span>
+      </div>
 
-        <div className="flex items-center gap-2">
-          {isExpanded ? <ChevronDown size={18} className="text-gray-500" /> : <ChevronRight size={18} className="text-gray-500" />}
-        </div>
-      </button>
-
-      {isExpanded && (
-        <div className="p-6 bg-[#0B0C10] animate-in slide-in-from-top-2 duration-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {items.map(ksi => (
-              <KSICard key={ksi.id} ksi={ksi} openModal={openModal} backlogStats={backlogByKsi?.[ksi.id]} />
-            ))}
-          </div>
-        </div>
-      )}
+      {isExpanded && items.map(ksi => (
+        <KSICard key={ksi.id} ksi={ksi} openModal={openModal} backlogStats={backlogByKsi?.[ksi.id]} />
+      ))}
     </div>
   );
 };
 
-const FilterTab = ({ label, count, active, onClick }) => (
+const FilterTab = ({ label, count, active, onClick, dot }) => (
   <button
+    className={`chip ${active ? 'on' : ''}`}
     onClick={onClick}
-    className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${active
-        ? 'bg-gray-700 text-white shadow-sm'
-        : 'text-gray-400 hover:text-white hover:bg-gray-800'
-      }`}
+    style={active ? { background: dot, borderColor: dot, color: 'var(--base)' } : {}}
   >
+    <span className="dot" style={{ background: active ? 'var(--base)' : dot }} />
     {label}
-    <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${active ? 'bg-gray-900 text-gray-300' : 'bg-gray-800 text-gray-600'}`}>
-      {count}
-    </span>
+    <span style={{ opacity: 0.7 }}>{count}</span>
   </button>
 );
 
@@ -196,38 +186,35 @@ const ModeChip = ({ ksi }) => {
   if (!ksi?.mode) return null;
 
   if (ksi.mode === 'output') {
-    return (
-      <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border bg-slate-900 text-slate-300 border-gray-700">
-        Output
-      </span>
-    );
+    return <span className="badge">Output</span>;
   }
 
   const cap = ksi.capability_status;
   const capColor =
-    cap === 'operational' ? 'text-emerald-400'
-    : cap === 'degraded' ? 'text-amber-400'
-    : cap === 'missing' ? 'text-red-400'
-    : 'text-slate-500';
+    cap === 'operational' ? 'var(--signal)'
+    : cap === 'degraded' ? 'var(--amber)'
+    : cap === 'missing' ? 'var(--red)'
+    : 'var(--faint)';
 
   return (
-    <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border bg-slate-900 text-slate-300 border-gray-700">
-      Capability{cap && <> · <span className={capColor}>{cap}</span></>}
+    <span className="badge">
+      Capability{cap && <> · <span style={{ color: capColor }}>{cap}</span></>}
     </span>
   );
 };
 
 const KSICard = ({ ksi, openModal, backlogStats }) => {
+  const [open, setOpen] = useState(false);
   const meta = Sanitizer.mapStatus(ksi.status);
 
-  // Color mapping — blue for meets_threshold to distinguish from green pass
-  const colors = {
-    'passed': { border: 'border-green-500', text: 'text-green-400', bg: 'bg-green-500/10' },
-    'meets_threshold': { border: 'border-blue-500', text: 'text-blue-400', bg: 'bg-blue-500/10' },
-    'failed': { border: 'border-red-500', text: 'text-red-400', bg: 'bg-red-500/10' },
-    'warning': { border: 'border-yellow-500', text: 'text-yellow-400', bg: 'bg-yellow-500/10' },
-    'info': { border: 'border-blue-500', text: 'text-blue-400', bg: 'bg-blue-500/10' }
-  }[ksi.status] || { border: 'border-gray-500', text: 'text-gray-400', bg: 'bg-gray-500/10' };
+  // Status → console tag class + accent color
+  const statusMeta = {
+    'passed': { tag: 'ok', color: 'var(--signal)', mark: '✓' },
+    'meets_threshold': { tag: 'vi', color: 'var(--indigo)', mark: '✓' },
+    'failed': { tag: 'red', color: 'var(--red)', mark: '✕' },
+    'warning': { tag: 'warn', color: 'var(--amber)', mark: '◷' },
+    'info': { tag: 'vi', color: 'var(--indigo)', mark: '◇' }
+  }[ksi.status] || { tag: 'warn', color: 'var(--ash)', mark: '◇' };
 
   const IconMap = { 'CheckCircle2': CheckCircle2, 'XCircle': XCircle, 'AlertTriangle': AlertTriangle, 'Info': Info };
   const Icon = IconMap[meta.icon] || Info;
@@ -238,49 +225,56 @@ const KSICard = ({ ksi, openModal, backlogStats }) => {
   const score = typeof ksi.score === 'number' ? ksi.score : (typeof ksi.score === 'string' ? parseFloat(ksi.score) : null);
 
   return (
-    <div
-      onClick={() => openModal('why', ksi)}
-      className={`group bg-gray-800 rounded-lg border border-gray-700 p-5 hover:border-blue-500/40 hover:bg-gray-800/80 transition-all cursor-pointer flex flex-col h-full relative overflow-hidden`}
-    >
-      {/* Colored Accent Line (Left) */}
-      <div className={`absolute left-0 top-0 bottom-0 w-1 ${colors.border}`}></div>
-
-      <div className="flex justify-between items-start mb-3 pl-3 gap-2">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-mono text-[10px] font-bold text-gray-500 bg-gray-900 px-2 py-1 rounded border border-gray-700">
-            {ksi.id}
+    <>
+      <div className="ctrl" style={{ cursor: 'pointer' }} onClick={() => setOpen(o => !o)}>
+        <div className="nm" style={{ minWidth: 0 }}>
+          <span className="ck" style={{ color: statusMeta.color, flexShrink: 0 }}>{statusMeta.mark}</span>
+          <span className="mono" style={{ color: 'var(--indigo)', fontSize: 12.5, flexShrink: 0 }}>{ksi.id}</span>
+          <span style={{ color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {ksi.description}
           </span>
-          <ModeChip ksi={ksi} />
-          {backlogStats?.hasRiskAccepted && (
-            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border border-purple-500/30 bg-purple-500/10 text-purple-300">
-              Risk-accepted
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          {isOutputMode && score != null && (
+            <span className="mono" style={{ fontSize: 11, color: score >= outputTarget ? 'var(--signal)' : score === 0 ? 'var(--red)' : 'var(--amber)' }}>
+              {score}%
             </span>
           )}
+          <ModeChip ksi={ksi} />
+          {backlogStats?.hasRiskAccepted && (
+            <span className="badge i">Risk-accepted</span>
+          )}
+          <span className={`tag ${statusMeta.tag}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <Icon size={11} /> {meta.label}
+          </span>
         </div>
-        <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap ${colors.bg} ${colors.text}`}>
-          <Icon size={12} /> {meta.label}
-        </span>
       </div>
 
-      {isOutputMode && score != null && (
-        <div className="pl-3 mb-2 text-[11px] font-mono">
-          <span className={score >= outputTarget ? 'text-emerald-400' : score === 0 ? 'text-red-400' : 'text-amber-400'}>
-            {score}%
-          </span>
-          <span className="text-gray-500"> (target {outputTarget}%)</span>
+      {open && (
+        <div className="cexp">
+          <div style={{ marginTop: 12, color: 'var(--ink)' }}>{ksi.description}</div>
+          {isOutputMode && score != null && (
+            <div className="mono" style={{ marginTop: 8, fontSize: 12 }}>
+              <span style={{ color: score >= outputTarget ? 'var(--signal)' : score === 0 ? 'var(--red)' : 'var(--amber)' }}>{score}%</span>
+              <span style={{ color: 'var(--faint)' }}> · target {outputTarget}%</span>
+            </div>
+          )}
+          <div className="kv">
+            <div><span style={{ color: 'var(--faint)' }}>Category · </span>{ksi.category || 'General Security'}</div>
+            <div><span style={{ color: 'var(--faint)' }}>Status · </span><span style={{ color: statusMeta.color }} className="mono">{meta.label}</span></div>
+            {ksi.mode && <div><span style={{ color: 'var(--faint)' }}>Mode · </span><span className="mono">{ksi.mode}</span></div>}
+            {ksi.capability_status && <div><span style={{ color: 'var(--faint)' }}>Capability · </span><span className="mono">{ksi.capability_status}</span></div>}
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); openModal('why', ksi); }}
+            className="mono"
+            style={{ marginTop: 14, background: 'none', border: 'none', color: 'var(--signal)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, padding: 0 }}
+          >
+            View {ksi.commands_executed} CLI checks
+            <ArrowRight size={12} />
+          </button>
         </div>
       )}
-
-      <h4 className="pl-3 text-sm font-medium text-gray-200 mb-2 group-hover:text-white transition-colors leading-relaxed flex-1">
-        {ksi.description}
-      </h4>
-
-      <div className="pl-3 pt-3 border-t border-gray-700 flex items-center justify-end">
-        <span className="text-xs font-bold text-gray-500 group-hover:text-blue-400 flex items-center gap-1 transition-colors">
-          View {ksi.commands_executed} CLI checks
-          <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-        </span>
-      </div>
-    </div>
+    </>
   );
 };

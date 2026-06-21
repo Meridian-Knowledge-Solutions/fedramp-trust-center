@@ -106,708 +106,52 @@ const CATEGORY_CONFIG = {
 };
 
 const STATUS_COLORS = {
-    healthy: '#10b981',
-    warning: '#f59e0b',
-    critical: '#f43f5e',
-    unknown: '#64748b'
+    healthy: '#34E0C4',
+    warning: '#F2B85C',
+    critical: '#F2607A',
+    unknown: '#788596'
 };
 
-const CIA_COLORS = {
-    High: '#94a3b8',      // Subtle slate for all - monochromatic
-    Moderate: '#64748b',
-    Low: '#475569'
+// Map a system/integration health string to a console .tag variant
+const healthTag = (health, connected) => {
+    if (connected === false) return 'vi';
+    if (health === 'healthy') return 'ok';
+    if (health === 'warning') return 'warn';
+    if (health === 'critical') return 'red';
+    return 'vi';
 };
 
 // ============================================
-// Subtle Badge Components - Monochromatic design
+// CIA Impact — compact mono triad, console-styled
 // ============================================
-const ConnectionStatusBadge = ({ connected, health, size = 'normal', showLabel = true }) => {
-    const sizeClasses = {
-        small: { badge: 'px-2 py-0.5 text-[9px] gap-1', dot: 'w-1.5 h-1.5' },
-        normal: { badge: 'px-2.5 py-1 text-[10px] gap-1.5', dot: 'w-1.5 h-1.5' },
-        large: { badge: 'px-3 py-1.5 text-xs gap-2', dot: 'w-2 h-2' }
-    };
-
-    const s = sizeClasses[size];
-
-    if (connected) {
-        return (
-            <div className={`flex items-center rounded-full font-medium ${s.badge} bg-emerald-500/10 text-emerald-400/90 border border-emerald-500/30`}>
-                <div className="relative flex items-center justify-center">
-                    <div className={`${s.dot} rounded-full bg-emerald-400`} />
-                </div>
-                {showLabel && <span>LIVE</span>}
-            </div>
-        );
-    }
-
-    return (
-        <div className={`flex items-center rounded-full font-medium ${s.badge} bg-slate-500/10 text-slate-500 border border-slate-500/20`}>
-            <div className={`${s.dot} rounded-full bg-slate-500`} />
-            {showLabel && <span>OFFLINE</span>}
-        </div>
-    );
-};
-
-// CIA Impact Badge - Subtle inline design
 const CIABadge = ({ impact }) => {
     if (!impact) return null;
-
-    const getOpacity = (level) => {
-        if (level === 'High') return 'opacity-100';
-        if (level === 'Moderate' || level === 'Mod') return 'opacity-60';
-        return 'opacity-30';
-    };
-
+    const op = (level) => (level === 'High' ? 1 : (level === 'Moderate' || level === 'Mod') ? 0.6 : 0.32);
     return (
-        <div className="flex items-center gap-px bg-slate-800/50 rounded px-1 py-0.5">
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
             {['C', 'I', 'A'].map((letter) => (
                 <span
                     key={letter}
-                    className={`text-[9px] font-mono text-slate-400 px-1 ${getOpacity(impact[letter])}`}
+                    className="mono"
+                    style={{ fontSize: 10, color: 'var(--signal)', opacity: op(impact[letter]), padding: '0 2px' }}
                     title={`${letter === 'C' ? 'Confidentiality' : letter === 'I' ? 'Integrity' : 'Availability'}: ${impact[letter]}`}
                 >
                     {letter}
                 </span>
             ))}
-        </div>
-    );
-};
-
-// Third-Party Status Badge - Minimal text
-const ThirdPartyBadge = ({ isThirdParty, isAuthorized }) => {
-    if (!isThirdParty) {
-        return <span className="text-[9px] text-slate-500">Internal</span>;
-    }
-
-    if (isAuthorized) {
-        return (
-            <span className="text-[9px] text-slate-400 flex items-center gap-1">
-                <CheckCircle size={10} className="text-emerald-500/70" />
-                FedRAMP
-            </span>
-        );
-    }
-
-    return (
-        <span className="text-[9px] text-slate-400 flex items-center gap-1">
-            <AlertTriangle size={10} className="text-amber-500/70" />
-            Non-FedRAMP
         </span>
     );
 };
 
-// Animated Flow Line Component
-const FlowLine = ({ startX, startY, endX, endY, color, thickness = 3, animated = true, dimmed = false }) => {
-    const midX = (startX + endX) / 2;
-    const controlY1 = startY;
-    const controlY2 = endY;
-
-    const path = `M ${startX} ${startY} C ${midX} ${controlY1}, ${midX} ${controlY2}, ${endX} ${endY}`;
-
-    return (
-        <g>
-            {/* Glow effect */}
-            <path
-                d={path}
-                fill="none"
-                stroke={color}
-                strokeWidth={thickness + 6}
-                strokeOpacity={dimmed ? 0.03 : 0.12}
-                strokeLinecap="round"
-            />
-            {/* Main line */}
-            <path
-                d={path}
-                fill="none"
-                stroke={color}
-                strokeWidth={thickness}
-                strokeOpacity={dimmed ? 0.15 : 0.5}
-                strokeLinecap="round"
-            />
-            {/* Animated particles */}
-            {animated && !dimmed && (
-                <>
-                    <circle r="5" fill={color} opacity="0.9">
-                        <animateMotion dur="2.5s" repeatCount="indefinite" path={path} />
-                    </circle>
-                    <circle r="5" fill={color} opacity="0.9">
-                        <animateMotion dur="2.5s" repeatCount="indefinite" path={path} begin="0.8s" />
-                    </circle>
-                    <circle r="5" fill={color} opacity="0.9">
-                        <animateMotion dur="2.5s" repeatCount="indefinite" path={path} begin="1.6s" />
-                    </circle>
-                </>
-            )}
-        </g>
-    );
+// Third-Party / FedRAMP status — console tag
+const ThirdPartyBadge = ({ isThirdParty, isAuthorized }) => {
+    if (!isThirdParty) return <span className="tag vi">INTERNAL</span>;
+    if (isAuthorized) return <span className="tag ok">FEDRAMP</span>;
+    return <span className="tag warn">COMMERCIAL</span>;
 };
 
 // ============================================
-// System Node Component - PROMINENT connection status
-// ============================================
-const SystemNode = ({ x, y, system, isHovered, onHover, onLeave, onClick, awsServices }) => {
-    const config = CATEGORY_CONFIG[system.category] || CATEGORY_CONFIG.application;
-    const Icon = config.icon;
-    const isConnected = system.connected;
-    const statusColor = isConnected ? STATUS_COLORS[system.health] || STATUS_COLORS.unknown : STATUS_COLORS.unknown;
-
-    // For AWS node, count actual services instead of generic resource count
-    const isAWS = system.id === 'aws' && awsServices;
-    const serviceCount = isAWS ? Object.keys(awsServices).length : system.resource_count;
-    const displayLabel = isAWS ? 'services' : 'resources';
-
-    return (
-        <g
-            transform={`translate(${x}, ${y})`}
-            onMouseEnter={() => onHover(system.id)}
-            onMouseLeave={onLeave}
-            onClick={() => onClick && onClick(system.id)}
-            style={{ cursor: 'pointer' }}
-        >
-            {/* Outer glow on hover */}
-            {isHovered && (
-                <circle
-                    r="65"
-                    fill="none"
-                    stroke={config.color}
-                    strokeWidth="2"
-                    opacity="0.6"
-                >
-                    <animate attributeName="r" values="60;68;60" dur="1.5s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="1.5s" repeatCount="indefinite" />
-                </circle>
-            )}
-
-            {/* PROMINENT: Animated connection ring for connected systems */}
-            {isConnected && (
-                <>
-                    {/* Outer pulse ring */}
-                    <circle
-                        r="58"
-                        fill="none"
-                        stroke={statusColor}
-                        strokeWidth="2"
-                        opacity="0.3"
-                    >
-                        <animate attributeName="r" values="55;62;55" dur="2s" repeatCount="indefinite" />
-                        <animate attributeName="opacity" values="0.4;0.1;0.4" dur="2s" repeatCount="indefinite" />
-                    </circle>
-                    {/* Rotating dashed ring */}
-                    <circle
-                        r="55"
-                        fill="none"
-                        stroke={statusColor}
-                        strokeWidth="2"
-                        strokeDasharray="12 6"
-                        opacity="0.5"
-                    >
-                        <animateTransform
-                            attributeName="transform"
-                            type="rotate"
-                            from="0"
-                            to="360"
-                            dur="15s"
-                            repeatCount="indefinite"
-                        />
-                    </circle>
-                </>
-            )}
-
-            {/* Background circle */}
-            <circle
-                r="50"
-                fill="#18181b"
-                stroke={isHovered ? config.color : (isConnected ? statusColor : '#374151')}
-                strokeWidth={isHovered ? 3 : 2}
-                opacity={isConnected ? 1 : 0.5}
-            />
-
-            {/* Status indicator ring - resource progress */}
-            {isConnected && (
-                <circle
-                    r="44"
-                    fill="none"
-                    stroke={statusColor}
-                    strokeWidth="4"
-                    strokeDasharray={`${Math.min((serviceCount / 40) * 276, 276)} 276`}
-                    transform="rotate(-90)"
-                    opacity="0.7"
-                    strokeLinecap="round"
-                />
-            )}
-
-            {/* Inner content */}
-            <foreignObject x="-40" y="-40" width="80" height="80">
-                <div className="flex flex-col items-center justify-center h-full">
-                    <Icon size={24} color={isConnected ? config.color : '#64748b'} />
-                    <div className={`text-base font-bold mt-1 ${isConnected ? 'text-white' : 'text-slate-500'}`}>
-                        {serviceCount || 0}
-                    </div>
-                    <div className="text-[8px] text-slate-500 uppercase tracking-wide">{displayLabel}</div>
-                </div>
-            </foreignObject>
-
-            {/* Drift badge */}
-            {system.drift_count > 0 && (
-                <g transform="translate(35, -35)">
-                    <circle r="14" fill="#f59e0b" />
-                    <text
-                        textAnchor="middle"
-                        dominantBaseline="central"
-                        fill="black"
-                        fontSize="11"
-                        fontWeight="bold"
-                    >
-                        {system.drift_count}
-                    </text>
-                </g>
-            )}
-
-            {/* Connection status indicator */}
-            <g transform="translate(0, 62)">
-                <foreignObject x="-32" y="-10" width="64" height="20">
-                    <div className="flex justify-center">
-                        {isConnected ? (
-                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                <span className="text-[8px] font-medium text-emerald-400/90">LIVE</span>
-                            </div>
-                        ) : (
-                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-700/30 border border-slate-600/30">
-                                <div className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                                <span className="text-[8px] font-medium text-slate-500">OFFLINE</span>
-                            </div>
-                        )}
-                    </div>
-                </foreignObject>
-            </g>
-        </g>
-    );
-};
-
-// ============================================
-// Integration Node Component - Third-party integrations (FRR-MAS-02/03)
-// Visually distinct: smaller, dashed border, muted colors
-// ============================================
-const IntegrationNode = ({ x, y, integration, isHovered, onHover, onLeave }) => {
-    const config = CATEGORY_CONFIG[integration.category] || CATEGORY_CONFIG.application;
-    const Icon = config.icon;
-    const isAuthorized = integration.is_fedramp_authorized;
-
-    return (
-        <g
-            transform={`translate(${x}, ${y})`}
-            onMouseEnter={() => onHover(integration.id)}
-            onMouseLeave={onLeave}
-            style={{ cursor: 'pointer' }}
-        >
-            {/* Hover glow */}
-            {isHovered && (
-                <circle
-                    r="42"
-                    fill="none"
-                    stroke={config.color}
-                    strokeWidth="1.5"
-                    opacity="0.5"
-                />
-            )}
-
-            {/* Dashed outer ring - indicates "documented" status */}
-            <circle
-                r="38"
-                fill="none"
-                stroke={isHovered ? config.color : '#475569'}
-                strokeWidth="1.5"
-                strokeDasharray="6 4"
-                opacity="0.6"
-            />
-
-            {/* Background circle - darker, more muted */}
-            <circle
-                r="32"
-                fill="#0f0f14"
-                stroke={isHovered ? config.color : '#374151'}
-                strokeWidth={isHovered ? 2 : 1}
-                opacity="0.9"
-            />
-
-            {/* Inner content */}
-            <foreignObject x="-28" y="-28" width="56" height="56">
-                <div className="flex flex-col items-center justify-center h-full">
-                    <Icon size={18} color={isHovered ? config.color : '#64748b'} />
-                    <div className="text-[8px] text-slate-500 mt-1 text-center leading-tight max-w-[52px] truncate">
-                        {integration.connection_type || 'API'}
-                    </div>
-                </div>
-            </foreignObject>
-
-            {/* FedRAMP indicator - subtle */}
-            <g transform="translate(24, -24)">
-                {isAuthorized ? (
-                    <circle r="8" fill="#0f0f14" stroke="#10b981" strokeWidth="1.5" opacity="0.8" />
-                ) : (
-                    <circle r="8" fill="#0f0f14" stroke="#f59e0b" strokeWidth="1.5" opacity="0.8" />
-                )}
-                <foreignObject x="-6" y="-6" width="12" height="12">
-                    <div className="flex items-center justify-center h-full">
-                        {isAuthorized ? (
-                            <CheckCircle size={10} className="text-emerald-500" />
-                        ) : (
-                            <AlertTriangle size={10} className="text-amber-500" />
-                        )}
-                    </div>
-                </foreignObject>
-            </g>
-
-            {/* Status indicator - "DOCUMENTED" */}
-            <g transform="translate(0, 44)">
-                <foreignObject x="-32" y="-8" width="64" height="16">
-                    <div className="flex justify-center">
-                        <span className="text-[7px] font-medium text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded-full border border-slate-700/50">
-                            CONFIGURED
-                        </span>
-                    </div>
-                </foreignObject>
-            </g>
-        </g>
-    );
-};
-
-// Integration Tooltip - Enhanced with full metadata from mas_architecture_map.json
-// FRR-MAS-05: Information flows and CIA impact documented
-const IntegrationTooltip = ({ integration, x, y, svgHeight = 720, onMouseEnter, onMouseLeave }) => {
-    const config = CATEGORY_CONFIG[integration.category] || CATEGORY_CONFIG.application;
-    const tooltipWidth = 300;
-
-    // Calculate dynamic height based on content
-    const hasControls = !integration.is_fedramp_authorized && integration.compensating_controls;
-    const hasDataFlow = integration.data_flow;
-    const tooltipHeight = 220 + (hasControls ? 50 : 0) + (hasDataFlow ? 60 : 0);
-
-    // Smart positioning - prefer right side, but flip if needed
-    let tooltipX = x + 55;
-    let tooltipY = y - tooltipHeight / 2;
-
-    // Flip to left if would overflow right
-    if (tooltipX + tooltipWidth > 880) {
-        tooltipX = x - tooltipWidth - 55;
-    }
-
-    // Clamp vertical position to stay in view
-    if (tooltipY < 10) tooltipY = 10;
-    if (tooltipY + tooltipHeight > svgHeight - 10) {
-        tooltipY = svgHeight - tooltipHeight - 10;
-    }
-
-    // Risk level styling
-    const riskColors = {
-        low: 'text-emerald-400',
-        medium: 'text-amber-400',
-        high: 'text-rose-400'
-    };
-
-    // Data flow classification styling (FRR-MAS-05)
-    const classificationColors = {
-        'federal-disseminated': { bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-400' },
-        'federal-collected': { bg: 'bg-violet-500/10', border: 'border-violet-500/30', text: 'text-violet-400' },
-        'federal-processed': { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400' },
-        'non-federal': { bg: 'bg-slate-500/10', border: 'border-slate-500/30', text: 'text-slate-400' },
-    };
-
-    const flowStyle = classificationColors[integration.data_flow?.classification] || classificationColors['non-federal'];
-
-    return (
-        <foreignObject x={tooltipX} y={tooltipY} width={tooltipWidth} height={tooltipHeight + 20}
-            onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} style={{ pointerEvents: 'all' }}>
-            <div className="bg-[#13131a] border border-slate-700/50 rounded-lg shadow-2xl overflow-hidden">
-                {/* Header */}
-                <div className="px-3 py-2.5 bg-slate-800/30 border-b border-slate-700/30">
-                    <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded flex items-center justify-center"
-                            style={{ backgroundColor: `${config.color}15` }}>
-                            {React.createElement(config.icon, { size: 14, color: config.color })}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="text-white font-medium text-sm truncate">{integration.name}</div>
-                            <div className="text-slate-500 text-[10px]">{integration.status || 'Configured'}</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Details Grid */}
-                <div className="px-3 py-2 space-y-2">
-                    {/* Connection & Auth Row */}
-                    <div className="grid grid-cols-2 gap-2">
-                        <div>
-                            <div className="text-[9px] text-slate-600 uppercase tracking-wide">Connection</div>
-                            <div className="text-[11px] text-slate-300">{integration.connection_type || 'API'}</div>
-                        </div>
-                        <div>
-                            <div className="text-[9px] text-slate-600 uppercase tracking-wide">Auth Method</div>
-                            <div className="text-[11px] text-slate-300">{integration.auth_method || 'N/A'}</div>
-                        </div>
-                    </div>
-
-                    {/* Risk & Status Row */}
-                    <div className="grid grid-cols-2 gap-2">
-                        <div>
-                            <div className="text-[9px] text-slate-600 uppercase tracking-wide">Risk Level</div>
-                            <div className={`text-[11px] capitalize ${riskColors[integration.risk] || 'text-slate-400'}`}>
-                                {integration.risk || 'N/A'}
-                            </div>
-                        </div>
-                        <div>
-                            <div className="text-[9px] text-slate-600 uppercase tracking-wide">FedRAMP</div>
-                            <div className="flex items-center gap-1">
-                                {integration.is_fedramp_authorized ? (
-                                    <>
-                                        <CheckCircle size={10} className="text-emerald-500" />
-                                        <span className="text-[11px] text-emerald-400">Authorized</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <AlertTriangle size={10} className="text-amber-500" />
-                                        <span className="text-[11px] text-amber-400">Commercial</span>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Data Flow Classification (FRR-MAS-05) */}
-                    {integration.data_flow && (
-                        <div className={`rounded p-2 ${flowStyle.bg} border ${flowStyle.border}`}>
-                            <div className="text-[9px] text-slate-500 uppercase tracking-wide mb-1">Data Flow (FRR-MAS-05)</div>
-                            <div className={`text-[10px] font-medium ${flowStyle.text}`}>
-                                {integration.data_flow.classification?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                            </div>
-                            {integration.data_flow.direction && (
-                                <div className="text-[9px] text-slate-500 mt-0.5">
-                                    Direction: {integration.data_flow.direction}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* PII Shared */}
-                    {integration.pii_shared?.length > 0 && (
-                        <div>
-                            <div className="text-[9px] text-slate-600 uppercase tracking-wide mb-1">PII Shared</div>
-                            <div className="flex flex-wrap gap-1">
-                                {integration.pii_shared.map((pii, idx) => (
-                                    <span key={idx} className="text-[9px] px-1.5 py-0.5 bg-slate-800/80 text-slate-400 rounded">
-                                        {pii}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* CIA Impact */}
-                    {integration.cia_impact && (
-                        <div className="flex items-center gap-3">
-                            <div>
-                                <div className="text-[9px] text-slate-600 uppercase tracking-wide mb-1">CIA Impact</div>
-                                <CIABadge impact={integration.cia_impact} />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Compensating Controls for non-FedRAMP */}
-                    {!integration.is_fedramp_authorized && integration.compensating_controls && (
-                        <div className="pt-1.5 border-t border-slate-700/30">
-                            <div className="text-[9px] text-amber-500/80 leading-relaxed">
-                                <span className="font-medium">Compensating Controls:</span>{' '}
-                                <span className="text-slate-500">{integration.compensating_controls}</span>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </foreignObject>
-    );
-};
-
-// Central Hub Component - Redesigned for clarity
-const CentralHub = ({ health, totalSystems, connectedSystems, totalResources, totalDrift, totalIntegrations = 0 }) => {
-    const statusColor = STATUS_COLORS[health] || STATUS_COLORS.unknown;
-    const totalScope = totalSystems + totalIntegrations;
-
-    return (
-        <g>
-            {/* Outer animated rings */}
-            <circle r="100" fill="none" stroke={statusColor} strokeWidth="1" opacity="0.2">
-                <animate attributeName="r" values="95;105;95" dur="3s" repeatCount="indefinite" />
-            </circle>
-            <circle r="110" fill="none" stroke={statusColor} strokeWidth="1" opacity="0.1">
-                <animate attributeName="r" values="105;115;105" dur="3s" repeatCount="indefinite" begin="0.5s" />
-            </circle>
-
-            {/* Main hub circle */}
-            <circle
-                r="90"
-                fill="url(#hubGradient)"
-                stroke={statusColor}
-                strokeWidth="3"
-            />
-
-            {/* Progress ring showing connected ratio */}
-            <circle
-                r="82"
-                fill="none"
-                stroke={statusColor}
-                strokeWidth="6"
-                strokeDasharray={`${(connectedSystems / totalSystems) * 515} 515`}
-                transform="rotate(-90)"
-                opacity="0.4"
-                strokeLinecap="round"
-            />
-
-            {/* Content */}
-            <foreignObject x="-75" y="-75" width="150" height="150">
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                    <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-1">Connected</div>
-                    <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-bold text-white">{connectedSystems}</span>
-                        <span className="text-lg text-slate-500">/ {totalSystems}</span>
-                    </div>
-                    <div className="text-[10px] text-slate-500 mt-1">systems</div>
-
-                    {/* Integrations count */}
-                    {totalIntegrations > 0 && (
-                        <div className="flex items-center gap-1.5 mt-3 px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
-                            <div className="w-1.5 h-1.5 rounded-full border border-dashed border-slate-500" />
-                            <span className="text-[9px] text-slate-400">
-                                +{totalIntegrations} integrations
-                            </span>
-                        </div>
-                    )}
-                </div>
-            </foreignObject>
-        </g>
-    );
-};
-
-// Enhanced Tooltip Component with CIA Impact and AWS Services
-// Hover-only quick preview — click opens the full detail panel
-const SystemTooltip = ({ system, x, y, awsServices, onMouseEnter, onMouseLeave }) => {
-    const config = CATEGORY_CONFIG[system.category] || CATEGORY_CONFIG.application;
-    const isAWS = system.id === 'aws' && awsServices;
-
-    // Dynamic height calculation
-    const baseHeight = 60; // header
-    const servicesHeight = isAWS ? 90 : 0;
-    const ciaHeight = system.cia_impact ? 80 + (system.cia_impact.rationale ? 30 : 0) : 0;
-    const gridHeight = 80;
-    const hintHeight = 28;
-    const padding = 32; // p-4 top+bottom
-    const tooltipHeight = baseHeight + servicesHeight + ciaHeight + gridHeight + hintHeight + padding + 20;
-
-    let tooltipY = y > 320 ? y - tooltipHeight - 10 : y + 70;
-    if (tooltipY < 10) tooltipY = 10;
-    const tooltipX = x > 600 ? x - 300 : x < 200 ? x + 20 : x - 150;
-
-    // Get top services by cost for AWS
-    const topServices = isAWS
-        ? Object.entries(awsServices)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 8)
-            .map(([name]) => name.replace('Amazon ', '').replace('AWS ', ''))
-        : [];
-
-    return (
-        <foreignObject x={tooltipX} y={tooltipY} width="300" height={tooltipHeight}
-            onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} style={{ pointerEvents: 'all' }}>
-            <div className="bg-[#1a1a1f] border border-white/20 rounded-xl p-4 shadow-2xl">
-                <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/10">
-                    <div className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: system.connected ? STATUS_COLORS[system.health] : '#64748b' }} />
-                        <div>
-                            <div className="text-white font-semibold text-sm">{system.name}</div>
-                            <div className="text-slate-500 text-[10px]">{config.label}</div>
-                        </div>
-                    </div>
-                    <ConnectionStatusBadge connected={system.connected} health={system.health} size="small" />
-                </div>
-
-                {/* AWS Services List */}
-                {isAWS && topServices.length > 0 && (
-                    <div className="mb-3 pb-3 border-b border-white/10">
-                        <div className="text-[10px] text-slate-500 uppercase mb-2 flex items-center gap-1">
-                            <Cloud size={10} />
-                            Active Services ({Object.keys(awsServices).length})
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                            {topServices.map((service, idx) => (
-                                <span
-                                    key={idx}
-                                    className="px-1.5 py-0.5 rounded text-[9px] bg-blue-500/15 text-blue-400 border border-blue-500/30"
-                                >
-                                    {service}
-                                </span>
-                            ))}
-                            {Object.keys(awsServices).length > 8 && (
-                                <span className="px-1.5 py-0.5 rounded text-[9px] bg-slate-500/15 text-slate-400">
-                                    +{Object.keys(awsServices).length - 8} more
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* CIA Impact Display */}
-                {system.cia_impact && (
-                    <div className="mb-3 pb-3 border-b border-white/10">
-                        <div className="text-[10px] text-slate-500 uppercase mb-1.5 flex items-center gap-1">
-                            <Info size={10} />
-                            CIA Impact (FRR-MAS-05)
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <CIABadge impact={system.cia_impact} />
-                            <ThirdPartyBadge isThirdParty={system.is_third_party} isAuthorized={system.is_fedramp_authorized} />
-                        </div>
-                        {system.cia_impact.rationale && (
-                            <div className="text-[9px] text-slate-400 mt-2 leading-relaxed">{system.cia_impact.rationale}</div>
-                        )}
-                    </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-3">
-                    <div>
-                        <div className="text-[10px] text-slate-500 uppercase">Health</div>
-                        <div className="text-sm font-medium capitalize" style={{ color: STATUS_COLORS[system.health] }}>
-                            {system.health || 'Unknown'}
-                        </div>
-                    </div>
-                    <div>
-                        <div className="text-[10px] text-slate-500 uppercase">{isAWS ? 'Services' : 'Resources'}</div>
-                        <div className="text-sm font-bold text-white">{isAWS ? Object.keys(awsServices).length : (system.resource_count || 0)}</div>
-                    </div>
-                    <div>
-                        <div className="text-[10px] text-slate-500 uppercase">Drift Items</div>
-                        <div className={`text-sm font-bold ${system.drift_count > 0 ? 'text-amber-400' : 'text-slate-400'}`}>
-                            {system.drift_count || 0}
-                        </div>
-                    </div>
-                    <div>
-                        <div className="text-[10px] text-slate-500 uppercase">Data Source</div>
-                        <div className="text-sm text-slate-300 truncate">{system.data_source || 'API'}</div>
-                    </div>
-                </div>
-
-                {/* Click hint */}
-                <div className="mt-3 pt-2 border-t border-white/5 text-center">
-                    <span className="text-[9px] text-slate-600">Click node for full details</span>
-                </div>
-            </div>
-        </foreignObject>
-    );
-};
-
-// ============================================
-// System Detail Panel — click-to-pin overlay with expandable services
-// Rendered as HTML overlay (not SVG foreignObject) for better scrolling/interactivity
+// System Detail Panel — click-to-open overlay, console-themed
 // ============================================
 const SystemDetailPanel = ({ system, awsServices, driftSummary, onClose }) => {
     const [expandedService, setExpandedService] = useState(null);
@@ -833,7 +177,6 @@ const SystemDetailPanel = ({ system, awsServices, driftSummary, onClose }) => {
                 const isDatabase = name.includes('Database') || name.includes('RDS');
                 const category = isSecurityService ? 'Security' : isNetworking ? 'Networking' :
                     isCompute ? 'Compute' : isStorage ? 'Storage' : isDatabase ? 'Database' : 'Management';
-                // Find related drift items
                 const relatedDrift = (driftSummary || []).filter(d =>
                     d.source === 'aws' && (
                         name.toLowerCase().includes(d.type.replace(/_/g, ' ')) ||
@@ -846,224 +189,151 @@ const SystemDetailPanel = ({ system, awsServices, driftSummary, onClose }) => {
         : [];
 
     const visibleServices = showAllServices ? allServices : allServices.slice(0, 10);
-
-    // Group services by category for the expanded view
-    const servicesByCategory = allServices.reduce((acc, svc) => {
-        if (!acc[svc.category]) acc[svc.category] = [];
-        acc[svc.category].push(svc);
-        return acc;
-    }, {});
+    const systemDrift = (driftSummary || []).filter(d => d.source === system.id);
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-start justify-center pt-20 pb-8 bg-black/40 backdrop-blur-sm" onClick={onClose}>
+        <div
+            style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 80, paddingBottom: 32, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
+            onClick={onClose}
+        >
             <div
-                className="bg-[#13131a] border border-white/15 rounded-xl shadow-2xl w-[460px] max-h-[80vh] overflow-hidden flex flex-col"
+                className="panel"
+                style={{ width: 480, maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 0 80px rgba(0,0,0,0.8)' }}
                 onClick={(e) => e.stopPropagation()}
-                style={{ boxShadow: '0 0 80px rgba(0,0,0,0.8), 0 0 40px rgba(59,130,246,0.08)' }}
             >
                 {/* Header */}
-                <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between flex-shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg flex items-center justify-center"
-                            style={{ backgroundColor: `${config.color}15`, border: `1px solid ${config.color}30` }}>
-                            <Icon size={18} color={config.color} />
-                        </div>
-                        <div>
-                            <div className="text-white font-semibold text-base">{system.name}</div>
-                            <div className="text-slate-500 text-xs">{config.label}</div>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <ConnectionStatusBadge connected={system.connected} health={system.health} size="normal" />
-                        <button
-                            onClick={onClose}
-                            className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
-                        >
-                            <XCircle size={14} />
+                <div className="ph" style={{ flexShrink: 0 }}>
+                    <h4 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <Icon size={16} color="var(--signal)" />
+                        {system.name}
+                        <span className="mono" style={{ fontSize: 11, color: 'var(--faint)' }}>{config.label}</span>
+                    </h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <span className={`tag ${healthTag(system.health, system.connected)}`}>
+                            {system.connected ? (system.health || 'unknown').toUpperCase() : 'DOCUMENTED'}
+                        </span>
+                        <button onClick={onClose} className="badge" style={{ cursor: 'pointer', background: 'none' }}>
+                            <XCircle size={13} />
                         </button>
                     </div>
                 </div>
 
                 {/* Scrollable content */}
-                <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
-                    {/* Summary stats */}
-                    <div className="grid grid-cols-4 gap-3">
-                        <div className="bg-white/5 rounded-lg p-2.5 text-center">
-                            <div className="text-[9px] text-slate-500 uppercase">Health</div>
-                            <div className="text-sm font-semibold capitalize mt-0.5" style={{ color: STATUS_COLORS[system.health] }}>
-                                {system.health || 'Unknown'}
-                            </div>
+                <div style={{ overflowY: 'auto', flex: 1, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    {/* Summary KPIs */}
+                    <div className="g4">
+                        <div className="kpi">
+                            <div className="v" style={{ fontSize: 14, color: STATUS_COLORS[system.health] || 'var(--ink)', textTransform: 'capitalize' }}>{system.health || 'Unknown'}</div>
+                            <div className="l">Health</div>
                         </div>
-                        <div className="bg-white/5 rounded-lg p-2.5 text-center">
-                            <div className="text-[9px] text-slate-500 uppercase">{isAWS ? 'Services' : 'Resources'}</div>
-                            <div className="text-sm font-bold text-white mt-0.5">
-                                {isAWS ? Object.keys(awsServices).length : (system.resource_count || 0)}
-                            </div>
+                        <div className="kpi">
+                            <div className="v s">{isAWS ? Object.keys(awsServices).length : (system.resource_count || 0)}</div>
+                            <div className="l">{isAWS ? 'Services' : 'Resources'}</div>
                         </div>
-                        <div className="bg-white/5 rounded-lg p-2.5 text-center">
-                            <div className="text-[9px] text-slate-500 uppercase">Drift</div>
-                            <div className={`text-sm font-bold mt-0.5 ${system.drift_count > 0 ? 'text-amber-400' : 'text-slate-400'}`}>
-                                {system.drift_count || 0}
-                            </div>
+                        <div className="kpi">
+                            <div className={`v ${system.drift_count > 0 ? 'a' : ''}`}>{system.drift_count || 0}</div>
+                            <div className="l">Drift</div>
                         </div>
-                        <div className="bg-white/5 rounded-lg p-2.5 text-center">
-                            <div className="text-[9px] text-slate-500 uppercase">Source</div>
-                            <div className="text-[11px] text-slate-300 mt-0.5 truncate">{system.data_source || 'API'}</div>
+                        <div className="kpi">
+                            <div className="v" style={{ fontSize: 12 }}>{system.data_source || 'API'}</div>
+                            <div className="l">Source</div>
                         </div>
                     </div>
 
                     {/* CIA Impact */}
                     {system.cia_impact && (
-                        <div className="bg-white/5 rounded-lg p-3">
-                            <div className="text-[10px] text-slate-500 uppercase mb-2 flex items-center gap-1.5">
-                                <Info size={10} />
-                                CIA Impact (FRR-MAS-05)
-                            </div>
-                            <div className="flex items-center justify-between mb-2">
+                        <div className="kpi">
+                            <div className="l" style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: 6 }}><Info size={10} /> CIA Impact · FRR-MAS-05</div>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '10px 0' }}>
                                 <CIABadge impact={system.cia_impact} />
                                 <ThirdPartyBadge isThirdParty={system.is_third_party} isAuthorized={system.is_fedramp_authorized} />
                             </div>
                             {system.cia_impact.rationale && (
-                                <div className="text-[10px] text-slate-400 leading-relaxed">{system.cia_impact.rationale}</div>
+                                <div className="sub" style={{ lineHeight: 1.5 }}>{system.cia_impact.rationale}</div>
                             )}
                         </div>
                     )}
 
-                    {/* AWS Services - Clickable */}
+                    {/* AWS Services - clickable rows */}
                     {isAWS && allServices.length > 0 && (
-                        <div>
-                            <div className="text-[10px] text-slate-500 uppercase mb-2 flex items-center justify-between">
-                                <div className="flex items-center gap-1.5">
-                                    <Cloud size={10} />
-                                    Active Services ({allServices.length})
-                                </div>
-                                <span className="text-[9px] text-slate-600 normal-case">Click service for details</span>
+                        <div className="panel">
+                            <div className="ph">
+                                <h4 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Cloud size={12} /> Active Services ({allServices.length})</h4>
+                                <span className="map">FRR-MAS-01</span>
                             </div>
-
-                            <div className="space-y-1">
-                                {visibleServices.map((svc, idx) => (
-                                    <div key={idx}>
-                                        <button
-                                            onClick={() => setExpandedService(expandedService === idx ? null : idx)}
-                                            className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between gap-2 transition-all ${expandedService === idx
-                                                    ? 'bg-blue-500/10 border border-blue-500/30'
-                                                    : 'bg-white/5 hover:bg-white/8 border border-transparent'
-                                                }`}
-                                        >
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${svc.isSecurityService ? 'bg-pink-400' : 'bg-blue-400'}`} />
-                                                <span className="text-[11px] text-slate-300 truncate">{svc.shortName}</span>
-                                                {svc.relatedDrift.length > 0 && (
-                                                    <span className="flex-shrink-0 w-4 h-4 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
-                                                        <AlertTriangle size={8} className="text-amber-400" />
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-2 flex-shrink-0">
-                                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-slate-500">{svc.category}</span>
-                                                {expandedService === idx
-                                                    ? <ChevronUp size={12} className="text-slate-500" />
-                                                    : <ChevronDown size={12} className="text-slate-500" />
-                                                }
-                                            </div>
-                                        </button>
-
-                                        {/* Expanded service detail */}
-                                        {expandedService === idx && (
-                                            <div className="mx-3 mt-1 mb-2 px-3 py-2.5 bg-[#0c0c10] rounded-lg border border-white/5 space-y-2">
-                                                <div className="grid grid-cols-2 gap-3 text-[10px]">
-                                                    <div>
-                                                        <div className="text-slate-600 uppercase">Full Name</div>
-                                                        <div className="text-slate-300 mt-0.5">{svc.name}</div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-slate-600 uppercase">Monthly Cost</div>
-                                                        <div className="text-slate-300 mt-0.5">${svc.cost.toFixed(2)}</div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-slate-600 uppercase">Category</div>
-                                                        <div className="text-slate-300 mt-0.5">{svc.category}</div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-slate-600 uppercase">Classification</div>
-                                                        <div className={`mt-0.5 ${svc.isSecurityService ? 'text-pink-400' : 'text-blue-400'}`}>
-                                                            {svc.isSecurityService ? 'Security Service' : 'Infrastructure'}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                {svc.relatedDrift.length > 0 && (
-                                                    <div className="pt-2 border-t border-white/5">
-                                                        <div className="text-[9px] text-amber-500 uppercase mb-1 flex items-center gap-1">
-                                                            <AlertTriangle size={8} />
-                                                            Drift Detected
-                                                        </div>
-                                                        {svc.relatedDrift.map((drift, dIdx) => (
-                                                            <div key={dIdx} className="text-[10px] text-slate-400 leading-relaxed">
-                                                                {drift.description}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                                {svc.cost === 0 && svc.relatedDrift.length === 0 && (
-                                                    <div className="text-[9px] text-slate-600 italic">
-                                                        No billing activity detected. Service may be in free tier or newly provisioned.
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
+                            {visibleServices.map((svc, idx) => (
+                                <div key={idx}>
+                                    <div
+                                        className="row"
+                                        style={{ cursor: 'pointer', justifyContent: 'space-between' }}
+                                        onClick={() => setExpandedService(expandedService === idx ? null : idx)}
+                                    >
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: svc.isSecurityService ? 'var(--red)' : 'var(--indigo)', flexShrink: 0 }} />
+                                            <span className="svc" style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{svc.shortName}</span>
+                                            {svc.relatedDrift.length > 0 && <AlertTriangle size={11} color="var(--amber)" />}
+                                        </span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                                            <span className="mono" style={{ fontSize: 10, color: 'var(--faint)' }}>{svc.category}</span>
+                                            {expandedService === idx ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                                        </span>
                                     </div>
-                                ))}
-                            </div>
-
-                            {allServices.length > 10 && !showAllServices && (
-                                <button
-                                    onClick={() => setShowAllServices(true)}
-                                    className="w-full mt-2 py-1.5 text-[10px] text-blue-400 hover:text-blue-300 bg-blue-500/5 hover:bg-blue-500/10 rounded-lg transition-colors border border-blue-500/10"
-                                >
-                                    Show all {allServices.length} services
-                                </button>
-                            )}
-                            {showAllServices && allServices.length > 10 && (
-                                <button
-                                    onClick={() => { setShowAllServices(false); setExpandedService(null); }}
-                                    className="w-full mt-2 py-1.5 text-[10px] text-slate-500 hover:text-slate-400 bg-white/5 rounded-lg transition-colors"
-                                >
-                                    Show fewer
-                                </button>
+                                    {expandedService === idx && (
+                                        <div className="cexp" style={{ paddingLeft: 20 }}>
+                                            <div className="kv">
+                                                <div><span style={{ color: 'var(--faint)' }}>Full · </span>{svc.name}</div>
+                                                <div><span style={{ color: 'var(--faint)' }}>Cost · </span><span className="mono" style={{ color: 'var(--signal)' }}>${svc.cost.toFixed(2)}/mo</span></div>
+                                                <div><span style={{ color: 'var(--faint)' }}>Category · </span>{svc.category}</div>
+                                                <div><span style={{ color: 'var(--faint)' }}>Class · </span><span style={{ color: svc.isSecurityService ? 'var(--red)' : 'var(--indigo)' }}>{svc.isSecurityService ? 'Security Service' : 'Infrastructure'}</span></div>
+                                            </div>
+                                            {svc.relatedDrift.length > 0 && (
+                                                <div style={{ marginTop: 10, color: 'var(--amber)' }}>
+                                                    {svc.relatedDrift.map((drift, dIdx) => (
+                                                        <div key={dIdx} style={{ color: 'var(--ash)' }}>{drift.description}</div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                            {allServices.length > 10 && (
+                                <div className="row" style={{ justifyContent: 'center' }}>
+                                    <button
+                                        onClick={() => { setShowAllServices(s => !s); if (showAllServices) setExpandedService(null); }}
+                                        className="badge i"
+                                        style={{ cursor: 'pointer', background: 'none' }}
+                                    >
+                                        {showAllServices ? 'Show fewer' : `Show all ${allServices.length} services`}
+                                    </button>
+                                </div>
                             )}
                         </div>
                     )}
 
-                    {/* Drift details for this system */}
-                    {(driftSummary || []).filter(d => d.source === system.id).length > 0 && (
-                        <div>
-                            <div className="text-[10px] text-amber-500/80 uppercase mb-2 flex items-center gap-1.5">
-                                <AlertTriangle size={10} />
-                                Configuration Drift ({(driftSummary || []).filter(d => d.source === system.id).length})
+                    {/* Drift detail for this system */}
+                    {systemDrift.length > 0 && (
+                        <div className="panel">
+                            <div className="ph">
+                                <h4 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><AlertTriangle size={12} color="var(--amber)" /> Configuration Drift ({systemDrift.length})</h4>
                             </div>
-                            <div className="space-y-1.5">
-                                {(driftSummary || []).filter(d => d.source === system.id).map((drift, idx) => (
-                                    <div key={idx} className="bg-amber-500/5 border border-amber-500/15 rounded-lg px-3 py-2">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <span className="text-[10px] text-amber-400 font-medium">{drift.type.replace(/_/g, ' ')}</span>
-                                            <span className={`text-[9px] px-1.5 py-0.5 rounded ${drift.severity === 'critical' ? 'bg-rose-500/15 text-rose-400' : 'bg-amber-500/15 text-amber-400/80'}`}>
-                                                {drift.severity}
-                                            </span>
-                                        </div>
-                                        <div className="text-[10px] text-slate-400 leading-relaxed">{drift.description}</div>
+                            {systemDrift.map((drift, idx) => (
+                                <div className="row" key={idx} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 5 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <span className="mono" style={{ fontSize: 11, color: 'var(--amber)' }}>{drift.type.replace(/_/g, ' ')}</span>
+                                        <span className={`tag ${drift.severity === 'critical' ? 'red' : 'warn'}`}>{drift.severity}</span>
                                     </div>
-                                ))}
-                            </div>
+                                    <span className="mono" style={{ fontSize: 11, color: 'var(--ash)' }}>{drift.description}</span>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div className="px-5 py-3 border-t border-white/5 flex-shrink-0">
-                    <div className="flex items-center justify-between text-[9px] text-slate-600">
-                        <span>System ID: {system.id}</span>
-                        <span>Type: {system.system_type || 'connected'}</span>
-                    </div>
+                <div className="ph" style={{ flexShrink: 0, borderTop: '1px solid var(--line)', borderBottom: 'none' }}>
+                    <span className="mono" style={{ fontSize: 10, color: 'var(--faint)' }}>ID: {system.id}</span>
+                    <span className="mono" style={{ fontSize: 10, color: 'var(--faint)' }}>Type: {system.system_type || 'connected'}</span>
                 </div>
             </div>
         </div>
@@ -1071,131 +341,28 @@ const SystemDetailPanel = ({ system, awsServices, driftSummary, onClose }) => {
 };
 
 // ============================================
-// AWS Services Panel - Shows ALL services (no pricing)
+// Resource row — console .row used for systems & integrations
 // ============================================
-const AWSServicesPanel = ({ services, isExpanded, onToggle }) => {
-    if (!services || Object.keys(services).length === 0) return null;
-
-    const sortedServices = Object.entries(services)
-        .sort((a, b) => b[1] - a[1])
-        .map(([name, cost]) => ({ name, cost }));
-
+const ResourceRow = ({ item, onClick }) => {
+    const config = CATEGORY_CONFIG[item.category] || CATEGORY_CONFIG.application;
+    const Icon = config.icon;
     return (
-        <div className="bg-[#121217] border border-white/10 rounded-xl overflow-hidden">
-            <button
-                onClick={onToggle}
-                className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition-colors"
-            >
-                <div className="flex items-center gap-4">
-                    <Cloud size={18} className="text-slate-400" />
-                    <span className="text-white font-medium">AWS Services</span>
-                    <span className="text-slate-500 text-sm">{sortedServices.length} in scope</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-slate-600">FRR-MAS-01</span>
-                    {isExpanded ? <ChevronUp size={16} className="text-slate-500" /> : <ChevronDown size={16} className="text-slate-500" />}
-                </div>
-            </button>
-
-            {isExpanded && (
-                <div className="border-t border-white/5">
-                    <div className="p-4">
-                        <div className="flex flex-wrap gap-1.5">
-                            {sortedServices.map((service, idx) => {
-                                const isSecurityService = service.name.includes('WAF') ||
-                                    service.name.includes('Firewall') ||
-                                    service.name.includes('GuardDuty') ||
-                                    service.name.includes('Security') ||
-                                    service.name.includes('Inspector') ||
-                                    service.name.includes('KMS');
-
-                                return (
-                                    <div
-                                        key={idx}
-                                        className={`px-2 py-1 rounded text-xs ${isSecurityService
-                                                ? 'bg-slate-700/50 text-slate-300 border border-slate-600/50'
-                                                : 'bg-slate-800/50 text-slate-400'
-                                            }`}
-                                        title={`$${service.cost.toFixed(2)}/mo`}
-                                    >
-                                        {service.name.replace('Amazon ', '').replace('AWS ', '')}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
-
-// ============================================
-// Systems Inventory Panel - Cleaned up with subtle badges
-// ============================================
-const SystemsInventoryPanel = ({ systems, isExpanded, onToggle }) => {
-    if (!systems || systems.length === 0) return null;
-
-    const connectedCount = systems.filter(s => s.connected).length;
-    const categories = [...new Set(systems.map(s => s.category))];
-
-    return (
-        <div className="bg-[#121217] border border-white/10 rounded-xl overflow-hidden">
-            <button
-                onClick={onToggle}
-                className="w-full px-5 py-4 flex items-center justify-between hover:bg-white/5 transition-colors"
-            >
-                <div className="flex items-center gap-4">
-                    <Layers size={18} className="text-slate-400" />
-                    <span className="text-white font-medium">Information Resources</span>
-                    <span className="text-slate-500 text-sm">{systems.length} systems</span>
-                    <div className="flex items-center gap-1.5 text-sm text-slate-400">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        <span>{connectedCount} connected</span>
-                    </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-slate-600">FRR-MAS-01</span>
-                    {isExpanded ? <ChevronUp size={16} className="text-slate-500" /> : <ChevronDown size={16} className="text-slate-500" />}
-                </div>
-            </button>
-
-            {isExpanded && (
-                <div className="border-t border-white/5 max-h-[400px] overflow-y-auto">
-                    {categories.map(category => {
-                        const config = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.application;
-                        const Icon = config.icon;
-                        const categorySystems = systems.filter(s => s.category === category);
-
-                        return (
-                            <div key={category} className="border-b border-white/5 last:border-b-0">
-                                <div className="px-5 py-2.5 bg-[#0c0c10] flex items-center gap-2">
-                                    <Icon size={14} className="text-slate-500" />
-                                    <span className="text-sm font-medium text-slate-300">{config.label}</span>
-                                    <span className="text-[10px] text-slate-600">({categorySystems.length})</span>
-                                </div>
-                                <div className="divide-y divide-white/5">
-                                    {categorySystems.map((system, idx) => (
-                                        <div key={idx} className="px-5 py-3 hover:bg-white/5 transition-colors">
-                                            <div className="flex items-center justify-between gap-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-1.5 h-1.5 rounded-full ${system.connected ? 'bg-emerald-500' : 'bg-slate-600'}`} />
-                                                    <span className="text-white text-sm">{system.name}</span>
-                                                    <ThirdPartyBadge isThirdParty={system.is_third_party} isAuthorized={system.is_fedramp_authorized} />
-                                                </div>
-                                                <div className="flex items-center gap-4 text-xs text-slate-500">
-                                                    {system.cia_impact && <CIABadge impact={system.cia_impact} />}
-                                                    <span>{system.resource_count || 0} resources</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+        <div className="row" style={{ cursor: onClick ? 'pointer' : 'default', justifyContent: 'space-between', gap: 14 }} onClick={onClick}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                <Icon size={15} color={item.connected ? 'var(--signal)' : 'var(--faint)'} style={{ flexShrink: 0 }} />
+                <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                    <span className="svc" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                    <span className="mono" style={{ fontSize: 10, color: 'var(--faint)' }}>{config.label}</span>
+                </span>
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+                {item.cia_impact && <CIABadge impact={item.cia_impact} />}
+                <ThirdPartyBadge isThirdParty={item.is_third_party} isAuthorized={item.is_fedramp_authorized} />
+                {item.drift_count > 0 && <span className="tag warn">{item.drift_count} DRIFT</span>}
+                <span className={`tag ${healthTag(item.health, item.connected)}`}>
+                    {item.connected ? 'LIVE' : 'DOCUMENTED'}
+                </span>
+            </span>
         </div>
     );
 };
@@ -1207,57 +374,11 @@ export const UnifiedMasDashboard = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [hoveredSystem, setHoveredSystem] = useState(null);
-    const [hoveredIntegration, setHoveredIntegration] = useState(null);
-    const hoverSystemTimerRef = React.useRef(null);
-    const hoverIntegrationTimerRef = React.useRef(null);
-
-    // Delayed leave handlers to allow mouse to travel from node to tooltip
-    const handleSystemHover = useCallback((id) => {
-        if (hoverSystemTimerRef.current) {
-            clearTimeout(hoverSystemTimerRef.current);
-            hoverSystemTimerRef.current = null;
-        }
-        setHoveredSystem(id);
-    }, []);
-
-    const handleSystemLeave = useCallback(() => {
-        hoverSystemTimerRef.current = setTimeout(() => {
-            setHoveredSystem(null);
-        }, 150);
-    }, []);
-
-    const handleIntegrationHover = useCallback((id) => {
-        if (hoverIntegrationTimerRef.current) {
-            clearTimeout(hoverIntegrationTimerRef.current);
-            hoverIntegrationTimerRef.current = null;
-        }
-        setHoveredIntegration(id);
-    }, []);
-
-    const handleIntegrationLeave = useCallback(() => {
-        hoverIntegrationTimerRef.current = setTimeout(() => {
-            setHoveredIntegration(null);
-        }, 150);
-    }, []);
-
-    // Cleanup timers on unmount
-    useEffect(() => {
-        return () => {
-            if (hoverSystemTimerRef.current) clearTimeout(hoverSystemTimerRef.current);
-            if (hoverIntegrationTimerRef.current) clearTimeout(hoverIntegrationTimerRef.current);
-        };
-    }, []);
     const [lastRefresh, setLastRefresh] = useState(null);
-    const [awsExpanded, setAwsExpanded] = useState(true);
-    const [inventoryExpanded, setInventoryExpanded] = useState(false);
-    const [integrationsExpanded, setIntegrationsExpanded] = useState(false);
     const [selectedSystem, setSelectedSystem] = useState(null);
 
     const handleSystemClick = useCallback((systemId) => {
         setSelectedSystem(prev => prev === systemId ? null : systemId);
-        // Clear hover when clicking
-        setHoveredSystem(null);
     }, []);
 
     const loadData = useCallback(async () => {
@@ -1284,48 +405,6 @@ export const UnifiedMasDashboard = () => {
         return () => clearInterval(interval);
     }, [loadData]);
 
-    // Calculate node positions - adaptive based on system count
-    const nodePositions = useMemo(() => {
-        if (!data?.systems) return [];
-        const systems = data.systems;
-        const centerX = 450;
-        const centerY = 320;
-        const baseRadius = 190;
-
-        // Adjust radius based on number of systems
-        const radius = systems.length > 6 ? baseRadius + (systems.length - 6) * 15 : baseRadius;
-
-        return systems.map((system, index) => {
-            const angle = (index * 2 * Math.PI / systems.length) - Math.PI / 2;
-            return {
-                ...system,
-                x: centerX + radius * Math.cos(angle),
-                y: centerY + radius * Math.sin(angle)
-            };
-        });
-    }, [data?.systems]);
-
-    // Calculate integration positions - outer ring
-    const integrationPositions = useMemo(() => {
-        if (!data?.integrations) return [];
-        const integrations = data.integrations;
-        const centerX = 450;
-        const centerY = 320;
-        const systemCount = data?.systems?.length || 6;
-        const baseRadius = systemCount > 6 ? 190 + (systemCount - 6) * 15 : 190;
-        const outerRadius = baseRadius + 130; // Outer ring for integrations
-
-        return integrations.map((integration, index) => {
-            // Offset angle to place integrations between system nodes
-            const angle = (index * 2 * Math.PI / integrations.length) - Math.PI / 2 + (Math.PI / integrations.length);
-            return {
-                ...integration,
-                x: centerX + outerRadius * Math.cos(angle),
-                y: centerY + outerRadius * Math.sin(angle)
-            };
-        });
-    }, [data?.integrations, data?.systems?.length]);
-
     const totalResources = useMemo(() =>
         (data?.systems || []).reduce((sum, s) => sum + (s.resource_count || 0), 0),
         [data?.systems]
@@ -1336,21 +415,26 @@ export const UnifiedMasDashboard = () => {
         [data?.systems]
     );
 
-    // Calculate SVG height dynamically - account for outer integration ring and tooltips
-    const svgHeight = useMemo(() => {
-        const hasIntegrations = (data?.integrations?.length || 0) > 0;
-        // Increased height to accommodate tooltips at bottom of graph
-        const baseHeight = hasIntegrations ? 780 : 640;
-        const systemCount = data?.systems?.length || 0;
-        return systemCount > 6 ? baseHeight + (systemCount - 6) * 30 : baseHeight;
-    }, [data?.systems?.length, data?.integrations?.length]);
+    // Federal data lifecycle — built from the OMB A-130 phases, anchored to
+    // real scope facts (system count, integrations, hosting) where available.
+    const lifecycle = useMemo(() => {
+        const sysCount = data?.health?.total_systems || (data?.systems?.length || 0);
+        const intCount = data?.health?.total_integrations || (data?.integrations?.length || 0);
+        return [
+            ['Collected', 'User Entry & Auth', 'KSI-IAM'],
+            ['Processed', 'Core Application', 'KSI-SVC'],
+            ['Maintained', 'Encrypted Store', 'KSI-CNA'],
+            ['Disseminated', `${intCount} Third-Party`, 'KSI-TPR'],
+            ['Maintained', `${sysCount} Resources`, 'KSI-MLA'],
+        ];
+    }, [data?.health, data?.systems, data?.integrations]);
 
     if (loading && !data) {
         return (
-            <div className="flex items-center justify-center h-96">
-                <div className="text-center">
-                    <RefreshCw size={32} className="animate-spin text-blue-400 mx-auto mb-4" />
-                    <div className="text-slate-400">Loading Minimum Assessment Scope...</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 384 }}>
+                <div style={{ textAlign: 'center' }}>
+                    <RefreshCw size={32} className="animate-spin" color="var(--signal)" style={{ margin: '0 auto 16px' }} />
+                    <div className="mono" style={{ color: 'var(--ash)' }}>Loading Minimum Assessment Scope…</div>
                 </div>
             </div>
         );
@@ -1358,374 +442,247 @@ export const UnifiedMasDashboard = () => {
 
     if (error && !data) {
         return (
-            <div className="bg-[#121217] border border-rose-500/30 rounded-xl p-8 text-center">
-                <AlertTriangle size={40} className="text-rose-400 mx-auto mb-4" />
-                <h3 className="text-white font-semibold text-lg mb-2">Failed to Load Assessment Scope</h3>
-                <p className="text-slate-400 text-sm mb-4">{error}</p>
-                <button
-                    onClick={loadData}
-                    className="px-6 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
-                >
-                    Retry
-                </button>
+            <div className="panel" style={{ padding: 32, textAlign: 'center', borderColor: '#F2607A55' }}>
+                <AlertTriangle size={40} color="var(--red)" style={{ margin: '0 auto 16px' }} />
+                <h4 style={{ fontSize: 18, marginBottom: 8 }}>Failed to Load Assessment Scope</h4>
+                <p className="mono" style={{ color: 'var(--ash)', marginBottom: 16 }}>{error}</p>
+                <button onClick={loadData} className="btn ghost" style={{ cursor: 'pointer' }}>Retry</button>
             </div>
         );
     }
 
-    const hoveredSystemData = hoveredSystem ? nodePositions.find(s => s.id === hoveredSystem) : null;
-    const hoveredIntegrationData = hoveredIntegration ? integrationPositions.find(i => i.id === hoveredIntegration) : null;
-
-    // Calculate total scope (systems + integrations)
-    const totalScope = (data?.systems?.length || 0) + (data?.integrations?.length || 0);
+    const overall = data?.health?.overall || 'unknown';
+    const overallColor = STATUS_COLORS[overall] || STATUS_COLORS.unknown;
+    const connectedSystems = data?.health?.connected_systems || 0;
+    const totalSystems = data?.health?.total_systems || 0;
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Header Stats Bar - Clean, subtle design */}
-            <div className="bg-[#121217] border border-white/10 rounded-xl p-5">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                    <div className="flex items-center gap-5 flex-wrap">
-                        {/* Title with health indicator */}
-                        <div className="flex items-center gap-3">
-                            <div className={`w-2.5 h-2.5 rounded-full ${data?.health?.overall === 'healthy' ? 'bg-emerald-500' :
-                                    data?.health?.overall === 'warning' ? 'bg-amber-500' :
-                                        'bg-rose-500'
-                                }`} />
-                            <span className="text-white font-semibold text-lg">Minimum Assessment Scope</span>
-                            <span className="text-[10px] text-slate-500 uppercase tracking-wide">
-                                {data?.health?.overall || 'Unknown'}
-                            </span>
+        <div className="stack" style={{ gap: 22 }}>
+            {/* ── Header ── */}
+            <div>
+                <div className="kick">⬡ — MINIMUM ASSESSMENT SCOPE · FRR-MAS</div>
+                <h1 className="big">Boundary &amp; <span className="g">data flow</span></h1>
+                <p className="lede">Federal data lifecycle per OMB A-130. Physical and lower-stack controls inherited from AWS's FedRAMP authorization.</p>
+
+                {/* live status pills */}
+                <div className="hbadges" style={{ marginBottom: 0 }}>
+                    <span className="badge" style={{ borderColor: `${overallColor}55`, color: overallColor }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: overallColor }} />
+                        {overall.toUpperCase()}
+                    </span>
+                    <span className="badge s">{connectedSystems}/{totalSystems} CONNECTED</span>
+                    <span className="badge">{totalResources} RESOURCES</span>
+                    {data?.integrations?.length > 0 && <span className="badge i">{data.integrations.length} INTEGRATIONS</span>}
+                    {totalDrift > 0 && <span className="badge" style={{ borderColor: '#F2B85C55', color: 'var(--amber)' }}>{totalDrift} DRIFT</span>}
+                    <button
+                        onClick={loadData}
+                        disabled={loading}
+                        className="badge i"
+                        style={{ cursor: 'pointer', background: 'none' }}
+                    >
+                        <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
+                        {lastRefresh ? `Updated ${lastRefresh.toLocaleTimeString()}` : 'Refresh'}
+                    </button>
+                </div>
+            </div>
+
+            {/* ── Data lifecycle flow ── */}
+            <div className="flow">
+                {lifecycle.map((n, i, a) => (
+                    <React.Fragment key={i}>
+                        <div className="node">
+                            <div className="ph2">{n[0]}</div>
+                            <div className="nm">{n[1]}</div>
+                            <div className="ks">{n[2]}</div>
                         </div>
+                        {i < a.length - 1 && <div className="arrow">→</div>}
+                    </React.Fragment>
+                ))}
+            </div>
 
-                        <div className="h-6 w-px bg-white/10" />
-
-                        {/* Stats - Clean inline layout */}
-                        <div className="flex items-center gap-5 text-sm text-slate-400">
-                            <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                <span>Connected</span>
-                                <span className="text-white font-medium">{data?.health?.connected_systems || 0}</span>
-                                <span className="text-slate-600">/</span>
-                                <span>{data?.health?.total_systems || 0}</span>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <span>Resources</span>
-                                <span className="text-white font-medium">{totalResources}</span>
-                            </div>
-
-                            {totalDrift > 0 && (
-                                <div className="flex items-center gap-2">
-                                    <span>Drift</span>
-                                    <span className="text-amber-400/80 font-medium">{totalDrift}</span>
-                                </div>
-                            )}
-
-                            {data?.integrations?.length > 0 && (
-                                <div className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full border border-slate-500 border-dashed" />
-                                    <span>Integrations</span>
-                                    <span className="text-white font-medium">{data.integrations.length}</span>
-                                </div>
-                            )}
-                        </div>
+            {/* ── Boundary facts ── */}
+            <div>
+                <h3 className="sec">Boundary</h3>
+                <div className="g3">
+                    <div className="kpi">
+                        <div className="v" style={{ fontSize: 18 }}>AWS US-East-1</div>
+                        <div className="l">Hosting</div>
+                        <div className="sub">inherited FedRAMP controls</div>
                     </div>
-
-                    <div className="flex items-center gap-4">
-                        <span className="text-[11px] text-slate-500">
-                            Updated: {lastRefresh?.toLocaleTimeString() || 'Never'}
-                        </span>
-                        <button
-                            onClick={loadData}
-                            disabled={loading}
-                            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors text-sm text-slate-300"
-                        >
-                            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                            Refresh
-                        </button>
+                    <div className="kpi">
+                        <div className="v" style={{ fontSize: 18 }}>Multi-Tenant</div>
+                        <div className="l">Tenancy</div>
+                        <div className="sub">logical isolation per agency</div>
+                    </div>
+                    <div className="kpi">
+                        <div className="v" style={{ fontSize: 18 }}>AES-256 · TLS 1.2+</div>
+                        <div className="l">Encryption</div>
+                        <div className="sub">KMS-managed keys</div>
                     </div>
                 </div>
             </div>
 
-            {/* Main Visualization - DYNAMIC HEIGHT FIX */}
-            <div className="bg-[#0c0c10] border border-white/10 rounded-xl p-6 relative overflow-visible">
-                {/* Background grid */}
-                <div className="absolute inset-0 opacity-5 rounded-xl overflow-hidden" style={{
-                    backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-                    backgroundSize: '40px 40px'
-                }} />
-
-                <svg
-                    width="100%"
-                    height={svgHeight}
-                    viewBox={`-20 -20 940 ${svgHeight + 40}`}
-                    className="relative z-10"
-                    style={{ minHeight: `${svgHeight}px`, overflow: 'visible' }}
-                >
-                    <defs>
-                        {/* Hub gradient */}
-                        <radialGradient id="hubGradient" cx="50%" cy="50%" r="50%">
-                            <stop offset="0%" stopColor="#1e293b" />
-                            <stop offset="100%" stopColor="#0f172a" />
-                        </radialGradient>
-
-                        {/* Glow filter */}
-                        <filter id="glow">
-                            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                            <feMerge>
-                                <feMergeNode in="coloredBlur" />
-                                <feMergeNode in="SourceGraphic" />
-                            </feMerge>
-                        </filter>
-                    </defs>
-
-                    {/* Flow lines from systems to center */}
-                    {nodePositions.map((system) => {
-                        const config = CATEGORY_CONFIG[system.category] || CATEGORY_CONFIG.application;
-                        return (
-                            <FlowLine
-                                key={`line-${system.id}`}
-                                startX={system.x}
-                                startY={system.y}
-                                endX={450}
-                                endY={300}
-                                color={system.connected ? config.color : '#374151'}
-                                thickness={system.connected ? Math.max(3, Math.min(10, system.resource_count / 6)) : 2}
-                                animated={system.connected}
-                                dimmed={hoveredSystem && hoveredSystem !== system.id}
-                            />
-                        );
-                    })}
-
-                    {/* Central Hub */}
-                    <g transform="translate(450, 320)">
-                        <CentralHub
-                            health={data?.health?.overall}
-                            totalSystems={data?.health?.total_systems || 0}
-                            connectedSystems={data?.health?.connected_systems || 0}
-                            totalResources={totalResources}
-                            totalDrift={totalDrift}
-                            totalIntegrations={data?.integrations?.length || 0}
-                        />
-                    </g>
-
-                    {/* System Nodes */}
-                    {nodePositions.map((system) => (
-                        <SystemNode
-                            key={system.id}
-                            x={system.x}
-                            y={system.y}
-                            system={system}
-                            isHovered={hoveredSystem === system.id}
-                            onHover={handleSystemHover}
-                            onLeave={handleSystemLeave}
-                            onClick={handleSystemClick}
-                            awsServices={data?.aws_services}
-                        />
-                    ))}
-
-                    {/* System Labels */}
-                    {nodePositions.map((system) => {
-                        const config = CATEGORY_CONFIG[system.category] || CATEGORY_CONFIG.application;
-                        const labelOffset = system.y > 320 ? 95 : -85;
-                        return (
-                            <text
-                                key={`label-${system.id}`}
-                                x={system.x}
-                                y={system.y + labelOffset}
-                                textAnchor="middle"
-                                fill={hoveredSystem === system.id ? config.color : '#94a3b8'}
-                                fontSize="13"
-                                fontWeight="600"
-                                className="transition-all duration-200"
-                            >
-                                {system.name}
-                            </text>
-                        );
-                    })}
-
-                    {/* Integration Nodes - Outer ring (FRR-MAS-02/03) */}
-                    {integrationPositions.map((integration) => (
-                        <IntegrationNode
-                            key={integration.id}
-                            x={integration.x}
-                            y={integration.y}
-                            integration={integration}
-                            isHovered={hoveredIntegration === integration.id}
-                            onHover={handleIntegrationHover}
-                            onLeave={handleIntegrationLeave}
-                        />
-                    ))}
-
-                    {/* Integration Labels */}
-                    {integrationPositions.map((integration) => {
-                        const config = CATEGORY_CONFIG[integration.category] || CATEGORY_CONFIG.application;
-                        const labelOffset = integration.y > 320 ? 62 : -58;
-                        return (
-                            <text
-                                key={`int-label-${integration.id}`}
-                                x={integration.x}
-                                y={integration.y + labelOffset}
-                                textAnchor="middle"
-                                fill={hoveredIntegration === integration.id ? config.color : '#64748b'}
-                                fontSize="10"
-                                fontWeight="500"
-                                className="transition-all duration-200"
-                            >
-                                {integration.name.length > 18 ? integration.name.slice(0, 16) + '...' : integration.name}
-                            </text>
-                        );
-                    })}
-
-                    {/* System Tooltip - hidden when detail panel is open */}
-                    {hoveredSystemData && !selectedSystem && (
-                        <SystemTooltip
-                            system={hoveredSystemData}
-                            x={hoveredSystemData.x}
-                            y={hoveredSystemData.y}
-                            awsServices={data?.aws_services}
-                            onMouseEnter={() => handleSystemHover(hoveredSystemData.id)}
-                            onMouseLeave={handleSystemLeave}
-                        />
-                    )}
-
-                    {/* Integration Tooltip */}
-                    {hoveredIntegrationData && (
-                        <IntegrationTooltip
-                            integration={hoveredIntegrationData}
-                            x={hoveredIntegrationData.x}
-                            y={hoveredIntegrationData.y}
-                            svgHeight={svgHeight}
-                            onMouseEnter={() => handleIntegrationHover(hoveredIntegrationData.id)}
-                            onMouseLeave={handleIntegrationLeave}
-                        />
-                    )}
-                </svg>
-
-                {/* Legend - Updated with integration style */}
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between flex-wrap gap-4 text-[11px] z-20">
-                    <div className="flex items-center gap-5 bg-black/60 px-4 py-2 rounded-lg backdrop-blur-sm">
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                            <span className="text-slate-400">Connected</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-slate-600" />
-                            <span className="text-slate-500">Offline</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full border border-dashed border-slate-500 bg-transparent" />
-                            <span className="text-slate-500">Integration</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center text-[8px] font-bold text-black">!</div>
-                            <span className="text-slate-500">Drift</span>
-                        </div>
+            {/* ── Scope metrics ── */}
+            <div>
+                <h3 className="sec">Scope Telemetry</h3>
+                <div className="g4">
+                    <div className="kpi">
+                        <div className="v s">{connectedSystems}<span style={{ color: 'var(--faint)', fontSize: 16 }}> / {totalSystems}</span></div>
+                        <div className="l">Connected Systems</div>
                     </div>
-                    <div className="flex items-center gap-3 bg-black/60 px-4 py-2 rounded-lg backdrop-blur-sm text-slate-500">
-                        <CheckCircle size={12} className="text-emerald-500/70" />
-                        <span>FedRAMP</span>
-                        <AlertTriangle size={12} className="text-amber-500/70 ml-2" />
-                        <span>Non-FedRAMP</span>
+                    <div className="kpi">
+                        <div className="v i">{data?.integrations?.length || 0}</div>
+                        <div className="l">Integrations</div>
+                        {data?.health?.non_fedramp_integrations > 0 && (
+                            <div className="sub">{data.health.non_fedramp_integrations} non-FedRAMP</div>
+                        )}
+                    </div>
+                    <div className="kpi">
+                        <div className="v">{totalResources}</div>
+                        <div className="l">Resources In Scope</div>
+                    </div>
+                    <div className="kpi">
+                        <div className={`v ${totalDrift > 0 ? 'a' : 's'}`}>{totalDrift}</div>
+                        <div className="l">Config Drift</div>
+                        {data?.health?.critical_drift > 0 && (
+                            <div className="sub" style={{ color: 'var(--red)' }}>{data.health.critical_drift} critical</div>
+                        )}
                     </div>
                 </div>
-
-                {/* System Detail Panel - Click overlay */}
-                {selectedSystem && (() => {
-                    const systemData = data?.systems?.find(s => s.id === selectedSystem);
-                    return systemData ? (
-                        <SystemDetailPanel
-                            system={systemData}
-                            awsServices={data?.aws_services}
-                            driftSummary={data?.drift_summary}
-                            onClose={() => setSelectedSystem(null)}
-                        />
-                    ) : null;
-                })()}
             </div>
 
-            {/* AWS Services Panel - Shows ALL services */}
-            {data?.aws_services && (
-                <AWSServicesPanel
-                    services={data.aws_services}
-                    isExpanded={awsExpanded}
-                    onToggle={() => setAwsExpanded(!awsExpanded)}
-                />
+            {/* ── Information Resources ── */}
+            {data?.systems?.length > 0 && (
+                <div>
+                    <h3 className="sec">Information Resources</h3>
+                    <div className="panel">
+                        <div className="ph">
+                            <h4>Connected Systems</h4>
+                            <span className="map">FRR-MAS-01 · click for detail</span>
+                        </div>
+                        {data.systems.map((system) => (
+                            <ResourceRow key={system.id} item={system} onClick={() => handleSystemClick(system.id)} />
+                        ))}
+                    </div>
+                </div>
             )}
 
-            {/* Systems Inventory Panel */}
-            {data?.systems && (
-                <SystemsInventoryPanel
-                    systems={data.systems}
-                    isExpanded={inventoryExpanded}
-                    onToggle={() => setInventoryExpanded(!inventoryExpanded)}
-                />
+            {/* ── Third-Party Integrations ── */}
+            {data?.integrations?.length > 0 && (
+                <div>
+                    <h3 className="sec">Third-Party Integrations</h3>
+                    <div className="panel">
+                        <div className="ph">
+                            <h4>Documented Integrations</h4>
+                            <span className="map">FRR-MAS-02 / 03</span>
+                        </div>
+                        {data.integrations.map((integration) => (
+                            <ResourceRow key={integration.id} item={integration} />
+                        ))}
+                    </div>
+                </div>
             )}
 
-            {/* Drift Summary Panel - Subtle design */}
+            {/* ── AWS Services ── */}
+            {data?.aws_services && Object.keys(data.aws_services).length > 0 && (
+                <div>
+                    <h3 className="sec">AWS Services In Scope</h3>
+                    <div className="panel">
+                        <div className="ph">
+                            <h4><Cloud size={13} style={{ verticalAlign: -2, marginRight: 6 }} />{Object.keys(data.aws_services).length} Services</h4>
+                            <span className="map">FRR-MAS-01</span>
+                        </div>
+                        <div style={{ padding: '16px 18px', display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                            {Object.entries(data.aws_services)
+                                .sort((a, b) => b[1] - a[1])
+                                .map(([name, cost], idx) => {
+                                    const isSecurityService = name.includes('WAF') || name.includes('Firewall') ||
+                                        name.includes('GuardDuty') || name.includes('Security') ||
+                                        name.includes('Inspector') || name.includes('KMS');
+                                    return (
+                                        <span
+                                            key={idx}
+                                            className={`tag ${isSecurityService ? 'vi' : ''}`}
+                                            style={isSecurityService ? undefined : { color: 'var(--ash)', background: 'var(--raise2)' }}
+                                            title={`$${cost.toFixed(2)}/mo`}
+                                        >
+                                            {name.replace('Amazon ', '').replace('AWS ', '')}
+                                        </span>
+                                    );
+                                })}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Configuration Drift ── */}
             {(data?.drift_summary?.length || 0) > 0 && (
-                <div className="bg-[#121217] border border-white/10 rounded-xl overflow-hidden">
-                    <div className="px-5 py-3 border-b border-white/5 flex items-center gap-3">
-                        <AlertTriangle size={16} className="text-amber-500/70" />
-                        <span className="text-white font-medium">Configuration Drift</span>
-                        <span className="text-slate-500 text-sm">{data.drift_summary.length} items</span>
-                    </div>
-
-                    <div className="max-h-64 overflow-y-auto">
-                        <table className="w-full">
-                            <thead className="bg-[#0c0c10] sticky top-0 z-10">
-                                <tr className="text-[10px] text-slate-600 uppercase">
-                                    <th className="px-5 py-2.5 text-left font-medium">Source</th>
-                                    <th className="px-5 py-2.5 text-left font-medium">Type</th>
-                                    <th className="px-5 py-2.5 text-left font-medium">Description</th>
-                                    <th className="px-5 py-2.5 text-left font-medium">Severity</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {data.drift_summary.map((item, idx) => (
-                                    <tr key={idx} className="hover:bg-white/5 transition-colors">
-                                        <td className="px-5 py-2.5">
-                                            <span className="text-slate-300 text-sm">{item.source}</span>
-                                        </td>
-                                        <td className="px-5 py-2.5">
-                                            <span className="text-slate-500 text-sm">{item.type}</span>
-                                        </td>
-                                        <td className="px-5 py-2.5">
-                                            <span className="text-slate-400 text-sm">{item.description}</span>
-                                        </td>
-                                        <td className="px-5 py-2.5">
-                                            <span className={`text-[10px] ${item.severity === 'critical' ? 'text-rose-400' :
-                                                    item.severity === 'warning' ? 'text-amber-400/80' :
-                                                        'text-slate-500'
-                                                }`}>
-                                                {item.severity}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                <div>
+                    <h3 className="sec">Configuration Drift</h3>
+                    <div className="panel">
+                        <div className="ph">
+                            <h4><AlertTriangle size={13} color="var(--amber)" style={{ verticalAlign: -2, marginRight: 6 }} />{data.drift_summary.length} Drift Items</h4>
+                            <span className="map">live diff vs. expected state</span>
+                        </div>
+                        {data.drift_summary.map((item, idx) => (
+                            <div className="row" key={idx} style={{ justifyContent: 'space-between', gap: 14 }}>
+                                <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                        <span className="mono" style={{ fontSize: 11, color: 'var(--indigo)' }}>{item.source}</span>
+                                        <span className="mono" style={{ fontSize: 11, color: 'var(--ash)' }}>{item.type}</span>
+                                    </span>
+                                    <span className="mono" style={{ fontSize: 11, color: 'var(--faint)', marginTop: 3 }}>{item.description}</span>
+                                </span>
+                                <span className={`tag ${item.severity === 'critical' ? 'red' : item.severity === 'warning' ? 'warn' : 'vi'}`}>
+                                    {item.severity}
+                                </span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
 
-            {/* FedRAMP MAS Compliance Footer */}
-            <div className="bg-[#121217] border border-white/10 rounded-xl p-5">
-                <div className="flex items-start gap-3">
-                    <FileText size={18} className="text-blue-400 mt-0.5 flex-shrink-0" />
-                    <div className="text-[11px] text-slate-500 space-y-1.5 leading-relaxed">
-                        <div><strong className="text-blue-400">FRR-MAS-01:</strong> <span className="text-slate-400">Cloud Service Offering includes all information resources (machine AND non-machine) likely to handle or impact CIA of federal customer data.</span></div>
-                        <div><strong className="text-purple-400">FRR-MAS-02:</strong> <span className="text-slate-400">Third-party information resources are included and monitored.</span></div>
-                        <div><strong className="text-amber-400">FRR-MAS-03:</strong> <span className="text-slate-400">Non-FedRAMP authorized third-party resources documented with justification and compensating controls.</span></div>
-                        <div><strong className="text-cyan-400">FRR-MAS-04:</strong> <span className="text-slate-400">Metadata about federal customer data included in assessment scope.</span></div>
-                        <div><strong className="text-emerald-400">FRR-MAS-05:</strong> <span className="text-slate-400">Information flows and CIA impact levels documented for ALL resources.</span></div>
-                    </div>
+            {/* ── FedRAMP MAS Compliance Footer ── */}
+            <div className="panel">
+                <div className="ph">
+                    <h4><FileText size={13} color="var(--indigo)" style={{ verticalAlign: -2, marginRight: 6 }} />FedRAMP MAS Rule Family</h4>
+                    <span className="map">{data?.meta?.compliance_ver || 'FedRAMP 20x'}</span>
                 </div>
-                <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-500">
-                    <span>Fingerprint: <span className="text-slate-400 font-mono">{data?.meta?.fingerprint || 'N/A'}</span></span>
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">Version 25.11C • Phase 2 Pilot Ready</span>
-                    <span>Generated: <span className="text-slate-400">{data?.meta?.generated_at ? new Date(data.meta.generated_at).toLocaleString() : 'N/A'}</span></span>
+                {[
+                    ['FRR-MAS-01', 'Cloud Service Offering includes all information resources (machine AND non-machine) likely to handle or impact CIA of federal customer data.'],
+                    ['FRR-MAS-02', 'Third-party information resources are included and monitored.'],
+                    ['FRR-MAS-03', 'Non-FedRAMP authorized third-party resources documented with justification and compensating controls.'],
+                    ['FRR-MAS-04', 'Metadata about federal customer data included in assessment scope.'],
+                    ['FRR-MAS-05', 'Information flows and CIA impact levels documented for ALL resources.'],
+                ].map(([id, desc]) => (
+                    <div className="row" key={id} style={{ gap: 14, alignItems: 'flex-start' }}>
+                        <span className="mono" style={{ color: 'var(--indigo)', fontSize: 11, flexShrink: 0, minWidth: 92 }}>{id}</span>
+                        <span style={{ fontSize: 13, color: 'var(--ash)', lineHeight: 1.5 }}>{desc}</span>
+                    </div>
+                ))}
+                <div className="ph" style={{ borderBottom: 'none', borderTop: '1px solid var(--line)' }}>
+                    <span className="mono" style={{ fontSize: 10, color: 'var(--ash)' }}>
+                        Fingerprint: <span style={{ color: 'var(--signal)' }}>{data?.meta?.fingerprint || 'N/A'}</span>
+                    </span>
+                    <span className="tag ok">Phase 2 Pilot Ready</span>
+                    <span className="mono" style={{ fontSize: 10, color: 'var(--ash)' }}>
+                        Generated: {data?.meta?.generated_at ? new Date(data.meta.generated_at).toLocaleString() : 'N/A'}
+                    </span>
                 </div>
             </div>
+
+            {/* ── Click-to-open system detail overlay ── */}
+            {selectedSystem && (() => {
+                const systemData = data?.systems?.find(s => s.id === selectedSystem);
+                return systemData ? (
+                    <SystemDetailPanel
+                        system={systemData}
+                        awsServices={data?.aws_services}
+                        driftSummary={data?.drift_summary}
+                        onClose={() => setSelectedSystem(null)}
+                    />
+                ) : null;
+            })()}
         </div>
     );
 };

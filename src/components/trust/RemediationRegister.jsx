@@ -21,18 +21,20 @@ import {
 const SEVERITY_ORDER = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
 const STATE_ORDER = { OPEN: 0, IN_PROGRESS: 1, RISK_ACCEPTED: 2, CLOSED: 3 };
 
+// Console palette: severity drives the dot color + .tag variant.
 const severityConfig = {
-  CRITICAL: { dot: 'bg-red-500', text: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30', icon: AlertOctagon },
-  HIGH:     { dot: 'bg-orange-500', text: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30', icon: AlertTriangle },
-  MEDIUM:   { dot: 'bg-yellow-500', text: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', icon: AlertCircle },
-  LOW:      { dot: 'bg-blue-500', text: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30', icon: Info },
+  CRITICAL: { dot: '#F2607A', tag: 'red',  icon: AlertOctagon },
+  HIGH:     { dot: '#F2B85C', tag: 'warn', icon: AlertTriangle },
+  MEDIUM:   { dot: '#F2B85C', tag: 'warn', icon: AlertCircle },
+  LOW:      { dot: '#818CF8', tag: 'vi',   icon: Info },
 };
 
+// State drives the .tag variant + label.
 const stateConfig = {
-  OPEN:          { text: 'text-slate-300', bg: 'bg-slate-500/10', border: 'border-slate-500/30', label: 'OPEN' },
-  IN_PROGRESS:   { text: 'text-blue-300', bg: 'bg-blue-500/10', border: 'border-blue-500/30', label: 'IN PROGRESS' },
-  RISK_ACCEPTED: { text: 'text-purple-300', bg: 'bg-purple-500/10', border: 'border-purple-500/30', label: 'RISK ACCEPTED' },
-  CLOSED:        { text: 'text-emerald-300', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', label: 'CLOSED' },
+  OPEN:          { tag: 'vi',   label: 'OPEN' },
+  IN_PROGRESS:   { tag: 'vi',   label: 'IN PROGRESS' },
+  RISK_ACCEPTED: { tag: 'warn', label: 'RISK ACCEPTED' },
+  CLOSED:        { tag: 'ok',   label: 'CLOSED' },
 };
 
 const STALE_DAYS = 30;
@@ -62,8 +64,8 @@ const formatDate = (iso) => {
 const SeverityChip = ({ severity }) => {
   const cfg = severityConfig[severity] || severityConfig.LOW;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+    <span className={`tag ${cfg.tag}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <span style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.dot }} />
       {severity}
     </span>
   );
@@ -71,11 +73,7 @@ const SeverityChip = ({ severity }) => {
 
 const StateChip = ({ state }) => {
   const cfg = stateConfig[state] || stateConfig.OPEN;
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
-      {cfg.label}
-    </span>
-  );
+  return <span className={`tag ${cfg.tag}`}>{cfg.label}</span>;
 };
 
 const StaleBadge = ({ firstSeen, state }) => {
@@ -83,90 +81,71 @@ const StaleBadge = ({ firstSeen, state }) => {
   const d = daysSince(firstSeen);
   if (d == null || d < STALE_DAYS) return null;
   return (
-    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border border-amber-500/30 bg-amber-500/10 text-amber-300">
-      <Clock size={9} /> Stale {d}d
+    <span className="tag warn" style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+      <Clock size={9} /> STALE {d}d
     </span>
   );
 };
-
-const FilterPill = ({ label, count, active, onClick, color }) => (
-  <button
-    onClick={onClick}
-    className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-2 border ${
-      active
-        ? 'bg-white/10 text-white border-white/20'
-        : 'bg-transparent text-slate-400 border-transparent hover:text-white hover:bg-white/5'
-    }`}
-  >
-    {color && <span className={`w-1.5 h-1.5 rounded-full ${color}`} />}
-    {label}
-    {count != null && (
-      <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${active ? 'bg-black/30 text-slate-200' : 'bg-white/5 text-slate-500'}`}>
-        {count}
-      </span>
-    )}
-  </button>
-);
 
 const Row = ({ item }) => {
   const [open, setOpen] = useState(false);
   const sev = severityConfig[item.severity] || severityConfig.LOW;
   const SevIcon = sev.icon;
+  const state = item.tracking?.state || 'OPEN';
 
   return (
     <>
-      <tr
+      <div
+        className="ctrl"
         onClick={() => setOpen(o => !o)}
-        className="border-b border-white/5 hover:bg-white/[0.02] cursor-pointer transition-colors"
+        style={{ cursor: 'pointer', alignItems: 'flex-start' }}
       >
-        <td className="px-3 py-2.5 align-middle">
-          <div className="flex items-center gap-2">
-            {open ? <ChevronDown size={12} className="text-slate-500" /> : <ChevronRight size={12} className="text-slate-500" />}
-            <SevIcon size={12} className={sev.text} />
-            <SeverityChip severity={item.severity} />
-          </div>
-        </td>
-        <td className="px-3 py-2.5 align-middle font-mono text-[11px] text-white">{item.ksi}</td>
-        <td className="px-3 py-2.5 align-middle font-mono text-[11px] text-slate-400">{item.resource}</td>
-        <td className="px-3 py-2.5 align-middle">
-          <div className="flex items-center gap-2">
-            <StateChip state={item.tracking?.state || 'OPEN'} />
-            <StaleBadge firstSeen={item.first_seen} state={item.tracking?.state} />
-          </div>
-        </td>
-        <td className="px-3 py-2.5 align-middle text-[11px] text-slate-300 font-mono tabular-nums">
-          {item.tracking?.target_date || '—'}
-        </td>
-        <td className="px-3 py-2.5 align-middle text-[11px] text-slate-400 font-mono tabular-nums">
-          {ageLabel(item.first_seen)}
-        </td>
-        <td className="px-3 py-2.5 align-middle font-mono text-[10px] text-slate-500">{item.id}</td>
-      </tr>
+        <div className="nm" style={{ flex: 1, minWidth: 0, gap: 12 }}>
+          <span style={{ color: '#424E5C', flexShrink: 0, display: 'inline-flex' }}>
+            {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+          </span>
+          <SevIcon size={13} style={{ color: sev.dot, flexShrink: 0 }} />
+          <span className="mono" style={{ color: '#818CF8', fontSize: 11, flexShrink: 0 }}>{item.id}</span>
+          <span className="mono" style={{ color: '#E8EEF4', fontSize: 12, flexShrink: 0 }}>{item.ksi}</span>
+          <span className="mono" style={{ color: '#788596', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {item.resource}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <SeverityChip severity={item.severity} />
+          <StateChip state={state} />
+          <StaleBadge firstSeen={item.first_seen} state={state} />
+          <span className="mono" style={{ color: '#788596', fontSize: 11 }}>
+            {item.tracking?.target_date || '—'}
+          </span>
+          <span className="mono" style={{ color: '#424E5C', fontSize: 11 }}>
+            {ageLabel(item.first_seen)}
+          </span>
+        </div>
+      </div>
       {open && (
-        <tr className="bg-black/30">
-          <td colSpan={7} className="px-6 py-4 border-b border-white/5">
-            <div className="space-y-3 text-[12px]">
-              <div>
-                <div className="text-[9px] uppercase tracking-wider font-bold text-slate-500 mb-1">Reason</div>
-                <p className="text-slate-300 leading-relaxed font-mono">{item.reason || '—'}</p>
-              </div>
-              <div className="flex flex-wrap gap-x-6 gap-y-2 text-[11px]">
-                <div>
-                  <span className="text-[9px] uppercase tracking-wider font-bold text-slate-500 mr-2">First seen</span>
-                  <span className="text-slate-300 font-mono">{formatDate(item.first_seen)}</span>
-                </div>
-                <div>
-                  <span className="text-[9px] uppercase tracking-wider font-bold text-slate-500 mr-2">Last seen</span>
-                  <span className="text-slate-300 font-mono">{formatDate(item.last_seen)}</span>
-                </div>
-                <div>
-                  <span className="text-[9px] uppercase tracking-wider font-bold text-slate-500 mr-2">Status</span>
-                  <span className="text-slate-300 font-mono">{item.status || '—'}</span>
-                </div>
-              </div>
+        <div className="cexp" style={{ paddingTop: 14 }}>
+          <div>
+            <div className="mono" style={{ color: '#424E5C', fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 6 }}>
+              Reason
             </div>
-          </td>
-        </tr>
+            <p className="mono" style={{ color: '#788596', fontSize: 12, lineHeight: 1.6 }}>{item.reason || '—'}</p>
+          </div>
+          <div className="kv" style={{ marginTop: 14 }}>
+            <div>
+              <span style={{ color: '#424E5C' }}>First seen · </span>
+              <span className="mono" style={{ color: '#788596' }}>{formatDate(item.first_seen)}</span>
+            </div>
+            <div>
+              <span style={{ color: '#424E5C' }}>Last seen · </span>
+              <span className="mono" style={{ color: '#788596' }}>{formatDate(item.last_seen)}</span>
+            </div>
+            <div>
+              <span style={{ color: '#424E5C' }}>Status · </span>
+              <span className="mono" style={{ color: '#788596' }}>{item.status || '—'}</span>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
@@ -247,199 +226,186 @@ export const RemediationRegister = ({ initialFilters = {} }) => {
   };
 
   if (loading) {
-    return <div className="p-12 text-center text-slate-500">Loading remediation register...</div>;
+    return <div className="mono" style={{ color: '#788596', padding: '48px 0', textAlign: 'center' }}>Loading remediation register…</div>;
   }
 
   if (!backlog) {
     return (
-      <div className="border border-white/5 rounded-xl bg-[#0c0c10] p-12 text-center">
-        <Shield size={32} className="text-slate-600 mx-auto mb-3" />
-        <h3 className="font-bold text-white text-lg mb-2">Remediation Register Not Yet Published</h3>
-        <p className="text-sm text-slate-400 max-w-md mx-auto">
-          The engine has not yet published <code className="text-xs text-slate-300 bg-white/5 px-1.5 py-0.5 rounded">remediation_backlog.json</code> to the trust-center data path.
+      <div className="panel" style={{ padding: 48, textAlign: 'center' }}>
+        <Shield size={32} style={{ color: '#424E5C', margin: '0 auto 12px' }} />
+        <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 8 }}>Remediation Register Not Yet Published</h3>
+        <p className="lede" style={{ margin: '0 auto', maxWidth: 460, fontSize: 14 }}>
+          The engine has not yet published <span className="mono" style={{ color: '#818CF8' }}>remediation_backlog.json</span> to the trust-center data path.
           This file is generated by the FedRAMP 20x continuous remediation register pipeline.
         </p>
       </div>
     );
   }
 
+  const hasActiveFilters = severityFilter !== 'all' || stateFilter !== 'all' || ksiFilter !== 'all' || !!search;
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="stack">
 
       {/* Header */}
-      <div className="border border-white/5 rounded-xl bg-[#0c0c10] p-5">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                <Layers size={18} className="text-blue-400" />
-              </div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Remediation Register</h2>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 border border-white/5 px-2 py-0.5 rounded bg-white/5">
-                FedRAMP 20x · Public
-              </span>
-            </div>
-            <p className="text-xs text-slate-500">
-              {backlog.total_items} actionable items
-              {backlog.filtered_info_count > 0 && <> · {backlog.filtered_info_count} INFO-tier filtered</>}
-              {backlog.generated_at && <> · Generated {formatDate(backlog.generated_at)}</>}
-            </p>
-          </div>
-        </div>
+      <div>
+        <div className="kick"><Layers size={12} /> REMEDIATION REGISTER</div>
+        <h1 className="big">Open <span className="g">remediation</span></h1>
+        <p className="lede" style={{ marginBottom: 0 }}>
+          {backlog.total_items} actionable items
+          {backlog.filtered_info_count > 0 && <> · {backlog.filtered_info_count} INFO-tier filtered</>}
+          {backlog.generated_at && <> · Generated {formatDate(backlog.generated_at)}</>}
+          <span className="badge i" style={{ marginLeft: 12 }}>FedRAMP 20x · Public</span>
+        </p>
         {backlog.note && (
-          <p className="text-[11px] text-slate-500 mt-3 pt-3 border-t border-white/5 leading-relaxed">{backlog.note}</p>
+          <p className="mono" style={{ color: '#424E5C', fontSize: 11, marginTop: 14, lineHeight: 1.6 }}>{backlog.note}</p>
         )}
       </div>
 
-      {/* Filter bar */}
-      <div className="border border-white/5 rounded-xl bg-[#0c0c10] p-4 space-y-3">
-        {/* Search */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search by ID, KSI, resource hash, or reason..."
-              className="w-full pl-9 pr-9 py-2 bg-white/5 border border-white/5 rounded-lg text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500/40"
-            />
-            {search && (
-              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
-                <X size={14} />
+      {/* Search + toggles */}
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="search" style={{ flex: 1, minWidth: 240 }}>
+          <Search size={15} />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="search by id, KSI, resource hash, or reason…"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#788596', cursor: 'pointer', display: 'inline-flex' }}
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        <div className="seg">
+          <button className={groupByResource ? '' : 'on'} onClick={() => setGroupByResource(false)}>FLAT</button>
+          <button className={groupByResource ? 'on' : ''} onClick={() => setGroupByResource(true)}>
+            <Hash size={10} style={{ verticalAlign: 'middle', marginRight: 5 }} />BY RESOURCE
+          </button>
+        </div>
+        <button
+          onClick={handleResetFilters}
+          className="chip"
+          style={{ cursor: 'pointer' }}
+        >
+          Reset
+        </button>
+      </div>
+
+      {/* Severity chips */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <span className="mono" style={{ color: '#424E5C', fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <Filter size={10} /> Severity
+        </span>
+        <div className="chips">
+          <button className={`chip ${severityFilter === 'all' ? 'on' : ''}`}
+            style={severityFilter === 'all' ? { background: '#818CF8', borderColor: '#818CF8', color: '#07090C' } : {}}
+            onClick={() => setSeverityFilter('all')}>
+            All <span style={{ opacity: .7 }}>{items.length}</span>
+          </button>
+          {['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map(sev => {
+            const on = severityFilter === sev;
+            const c = severityConfig[sev].dot;
+            return (
+              <button key={sev} className={`chip ${on ? 'on' : ''}`}
+                style={on ? { background: c, borderColor: c, color: '#07090C' } : {}}
+                onClick={() => setSeverityFilter(on ? 'all' : sev)}>
+                <span className="dot" style={{ background: on ? '#07090C' : c }} />{sev}
+                <span style={{ opacity: .7 }}>{counts.severity[sev]}</span>
               </button>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setGroupByResource(g => !g)}
-              className={`px-3 py-2 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-2 border ${
-                groupByResource
-                  ? 'bg-blue-500/10 border-blue-500/30 text-blue-300'
-                  : 'bg-white/5 border-white/5 text-slate-400 hover:text-white'
-              }`}
-            >
-              <Hash size={11} /> Group by resource
-            </button>
-            <button
-              onClick={handleResetFilters}
-              className="px-3 py-2 rounded-lg text-[11px] font-bold text-slate-400 hover:text-white bg-white/5 border border-white/5 transition-colors"
-            >
-              Reset
-            </button>
-          </div>
+            );
+          })}
         </div>
-
-        {/* Severity filters */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500 mr-2 flex items-center gap-1.5">
-            <Filter size={10} /> Severity
-          </span>
-          <FilterPill label="All" count={items.length} active={severityFilter === 'all'} onClick={() => setSeverityFilter('all')} />
-          {['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map(sev => (
-            <FilterPill
-              key={sev}
-              label={sev}
-              count={counts.severity[sev]}
-              active={severityFilter === sev}
-              color={severityConfig[sev].dot}
-              onClick={() => setSeverityFilter(severityFilter === sev ? 'all' : sev)}
-            />
-          ))}
-        </div>
-
-        {/* State filters */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500 mr-2 flex items-center gap-1.5">
-            <Filter size={10} /> State
-          </span>
-          <FilterPill label="All" active={stateFilter === 'all'} onClick={() => setStateFilter('all')} />
-          {['OPEN', 'IN_PROGRESS', 'RISK_ACCEPTED', 'CLOSED'].map(s => (
-            <FilterPill
-              key={s}
-              label={stateConfig[s].label}
-              count={counts.state[s]}
-              active={stateFilter === s}
-              onClick={() => setStateFilter(stateFilter === s ? 'all' : s)}
-            />
-          ))}
-        </div>
-
-        {/* KSI dropdown — only show when there are many */}
-        {ksiOptions.length > 4 && (
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500 mr-1 flex items-center gap-1.5">
-              <Filter size={10} /> KSI
-            </span>
-            <select
-              value={ksiFilter}
-              onChange={e => setKsiFilter(e.target.value)}
-              className="px-3 py-1.5 bg-white/5 border border-white/5 rounded-lg text-[11px] font-bold text-slate-300 focus:outline-none focus:border-blue-500/40"
-            >
-              {ksiOptions.map(k => (
-                <option key={k} value={k}>{k === 'all' ? 'All KSIs' : k}</option>
-              ))}
-            </select>
-          </div>
-        )}
       </div>
+
+      {/* State chips */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <span className="mono" style={{ color: '#424E5C', fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <Filter size={10} /> State
+        </span>
+        <div className="chips">
+          <button className={`chip ${stateFilter === 'all' ? 'on' : ''}`}
+            style={stateFilter === 'all' ? { background: '#818CF8', borderColor: '#818CF8', color: '#07090C' } : {}}
+            onClick={() => setStateFilter('all')}>
+            All
+          </button>
+          {['OPEN', 'IN_PROGRESS', 'RISK_ACCEPTED', 'CLOSED'].map(s => {
+            const on = stateFilter === s;
+            return (
+              <button key={s} className={`chip ${on ? 'on' : ''}`}
+                style={on ? { background: '#818CF8', borderColor: '#818CF8', color: '#07090C' } : {}}
+                onClick={() => setStateFilter(on ? 'all' : s)}>
+                {stateConfig[s].label}
+                <span style={{ opacity: .7 }}>{counts.state[s]}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* KSI dropdown — only show when there are many */}
+      {ksiOptions.length > 4 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span className="mono" style={{ color: '#424E5C', fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Filter size={10} /> KSI
+          </span>
+          <select
+            value={ksiFilter}
+            onChange={e => setKsiFilter(e.target.value)}
+            className="mono"
+            style={{ background: '#0A0E13', border: '1px solid #1A222D', borderRadius: 9, padding: '8px 12px', color: '#E8EEF4', fontSize: 12, outline: 'none' }}
+          >
+            {ksiOptions.map(k => (
+              <option key={k} value={k}>{k === 'all' ? 'All KSIs' : k}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Result count */}
-      <div className="flex items-center justify-between text-[11px] text-slate-500">
-        <span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span className="mono" style={{ color: '#424E5C', fontSize: 11 }}>
           Showing {filtered.length} of {items.length} items
         </span>
-        {(severityFilter !== 'all' || stateFilter !== 'all' || ksiFilter !== 'all' || search) && (
-          <button onClick={handleResetFilters} className="text-blue-400 hover:text-blue-300 font-bold">
+        {hasActiveFilters && (
+          <button onClick={handleResetFilters} className="mono" style={{ background: 'none', border: 'none', color: '#818CF8', fontSize: 11, cursor: 'pointer' }}>
             Clear filters
           </button>
         )}
       </div>
 
-      {/* Table */}
+      {/* Register */}
       {filtered.length === 0 ? (
-        <div className="border-2 border-dashed border-white/5 rounded-xl py-16 text-center text-slate-500">
-          No items match the current filters.
+        <div className="panel" style={{ padding: '64px 0', textAlign: 'center' }}>
+          <span className="mono" style={{ color: '#424E5C', fontSize: 13 }}>No items match the current filters.</span>
         </div>
       ) : groupByResource && resourceGroups ? (
-        <div className="space-y-3">
+        <div className="stack">
           {resourceGroups.map(g => (
-            <div key={g.resource} className="border border-white/5 rounded-xl overflow-hidden bg-[#0c0c10]">
-              <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Hash size={12} className="text-slate-500" />
-                  <span className="font-mono text-[12px] text-white font-bold">{g.resource}</span>
-                  <span className="text-[10px] text-slate-500">
-                    {g.items.length} finding{g.items.length === 1 ? '' : 's'} · {g.ksis.size} KSI{g.ksis.size === 1 ? '' : 's'}
-                  </span>
-                </div>
+            <div key={g.resource} className="panel">
+              <div className="ph">
+                <h4 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Hash size={12} style={{ color: '#424E5C' }} />
+                  <span className="mono" style={{ color: '#818CF8' }}>{g.resource}</span>
+                </h4>
+                <span className="map">
+                  {g.items.length} finding{g.items.length === 1 ? '' : 's'} · {g.ksis.size} KSI{g.ksis.size === 1 ? '' : 's'}
+                </span>
               </div>
-              <table className="w-full">
-                <tbody>
-                  {g.items.map(item => <Row key={item.id} item={item} />)}
-                </tbody>
-              </table>
+              {g.items.map(item => <Row key={item.id} item={item} />)}
             </div>
           ))}
         </div>
       ) : (
-        <div className="border border-white/5 rounded-xl overflow-hidden bg-[#0c0c10]">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/5 bg-white/[0.02] text-[9px] uppercase tracking-wider font-bold text-slate-500 text-left">
-                <th className="px-3 py-2.5">Severity</th>
-                <th className="px-3 py-2.5">KSI</th>
-                <th className="px-3 py-2.5">Resource</th>
-                <th className="px-3 py-2.5">State</th>
-                <th className="px-3 py-2.5">Target</th>
-                <th className="px-3 py-2.5">Age</th>
-                <th className="px-3 py-2.5">ID</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(item => <Row key={item.id} item={item} />)}
-            </tbody>
-          </table>
+        <div className="panel">
+          <div className="ph">
+            <h4>POA&amp;M items</h4>
+            <span className="map">{filtered.length} active</span>
+          </div>
+          {filtered.map(item => <Row key={item.id} item={item} />)}
         </div>
       )}
     </div>
