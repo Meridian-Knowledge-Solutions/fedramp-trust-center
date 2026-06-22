@@ -104,7 +104,6 @@ const isVerdictDisagreement = (issue) => {
 };
 
 const IssueCard = ({ issue, type }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
     const parts = issue.split(': ');
     const ksiId = parts[0];
     const description = parts.slice(1).join(': ');
@@ -125,32 +124,14 @@ const IssueCard = ({ issue, type }) => {
     const label = typeLabels[type] || typeLabels.technical;
 
     return (
-        <div style={{ borderBottom: '1px solid var(--line)' }}>
-            <div
-                className="ctrl"
-                style={{ cursor: 'pointer', borderBottom: 'none' }}
-                onClick={() => setIsExpanded(!isExpanded)}
-            >
-                <div className="nm" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span className="mono" style={{ color: 'var(--ink)', fontWeight: 600 }}>{ksiId}</span>
-                        <span className={`tag ${tag}`}>{label}</span>
-                    </div>
-                    <p style={{ fontSize: 13, color: 'var(--ash)', margin: 0 }}>{description}</p>
+        <div className="ctrl" style={{ borderBottom: '1px solid var(--line)' }}>
+            <div className="nm" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 4, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span className="mono" style={{ color: 'var(--ink)', fontWeight: 600 }}>{ksiId}</span>
+                    <span className={`tag ${tag}`}>{label}</span>
                 </div>
-                <ChevronDown
-                    size={16}
-                    style={{
-                        color: 'var(--faint)', flexShrink: 0,
-                        transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform .15s'
-                    }}
-                />
+                <p style={{ fontSize: 13, color: 'var(--ash)', margin: 0, lineHeight: 1.5 }}>{description}</p>
             </div>
-            {isExpanded && (
-                <div className="code" style={{ borderTop: '1px solid var(--line)', whiteSpace: 'pre-wrap' }}>
-                    {description}
-                </div>
-            )}
         </div>
     );
 };
