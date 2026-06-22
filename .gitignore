@@ -40,11 +40,12 @@ public/data/*.jsonl
 !public/data/metrics_history.jsonl
 !public/data/validation_integrity_report.json
 !public/data/execution_quality_report.json
+# Append-only pipeline-consistency record (~10 MB and growing — that's its
+# purpose). Tracked in git (not LFS: the 15-min deploy checkout would burn LFS
+# bandwidth quota). Shallow CI checkout + gh-pages orphan keep it manageable.
+!public/data/temporal_consistency_log.json
 
 # --- Local-only / not-published compliance data (stays ignored) ---
-# NOTE: temporal_consistency_log.json (~10 MB, re-stamped every run) is held out
-# deliberately to avoid repo bloat — revisit via Git LFS if it must go live.
-public/data/temporal_consistency_log.json
 public/data/scn_history.jsonl
 public/data/3pao_audit_report.json
 public/data/ksi_logic.json
