@@ -144,7 +144,7 @@ export const RegistrationModal = () => {
               Federal Agency Personnel Only
             </p>
             <p className="text-[#788596] leading-relaxed">
-              Access to detailed technical validation findings and authorization package materials
+              Access to detailed technical validation findings and certification package materials
               is restricted to authorized federal personnel with valid .gov or .mil email addresses.
             </p>
           </div>

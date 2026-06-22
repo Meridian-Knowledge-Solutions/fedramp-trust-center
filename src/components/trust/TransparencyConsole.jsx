@@ -628,7 +628,7 @@ const TransparencyConsole = () => {
                     </div>
                     <h1 className="big" style={{ fontSize: 26, marginBottom: 12 }}>Authentication Required</h1>
                     <p style={{ fontSize: 13, color: 'var(--ash)', marginBottom: 24, lineHeight: 1.55 }}>
-                        The System Transparency Console contains detailed technical validation findings and authorization materials restricted to authorized federal personnel.
+                        The System Transparency Console contains detailed technical validation findings and certification materials restricted to authorized federal personnel.
                     </p>
                     <div className="panel" style={{ background: 'var(--raise2)', padding: 16, marginBottom: 24, textAlign: 'left' }}>
                         <p className="mono" style={{ color: 'var(--ash)', marginBottom: 12, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '.05em', fontSize: 10 }}>With Federal Access</p>

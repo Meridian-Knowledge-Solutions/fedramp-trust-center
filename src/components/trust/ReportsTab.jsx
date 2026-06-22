@@ -284,10 +284,10 @@ export const ReportsTab = memo(() => {
   return (
     <div className="animate-in fade-in duration-500">
       {/* Header */}
-      <div className="kick">▣ — AUTHORIZATION ARTIFACTS</div>
+      <div className="kick">▣ — CERTIFICATION ARTIFACTS</div>
       <h1 className="big">Reports &amp; <span className="g">evidence</span></h1>
       <p className="lede">
-        Machine-readable authorization data and audited artifacts. Public items stream openly;
+        Machine-readable certification data and audited artifacts. Public items stream openly;
         access-controlled items unlock for authorized reviewers.
       </p>
 

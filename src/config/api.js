@@ -12,7 +12,7 @@ export const API_CONFIG = {
         CONFIG_PUBLIC: '/config',
         CONFIG_TENANT: '/config/tenant', // Requires Auth
 
-        // Authorization Package
+        // Certification Package
         // Returns JSON { url: "https://s3..." } signed URL
         PACKAGE_DOWNLOAD: '/package',
 

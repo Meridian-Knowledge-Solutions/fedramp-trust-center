@@ -175,7 +175,7 @@ const bars=(seed,n=48,warnHi=false)=>Array.from({length:n},(_,i)=>{const r=Math.
 const trend=[82,83.6,85.2,85.2,85.2,85.2,93.4,93.4,93.4,93.4,93.4,93.4,93.4,93.4];
 const trendBars=trend.map((v,i)=>`<i style="height:${((v-78)/(94-78))*82+18}%;background:var(--signal);animation-delay:${i*30}ms"></i>`).join('');
 
-const FW=[['FedRAMP 20x','AUTHORIZED'],['NIST 800-53 R5','MODERATE'],['FedRAMP KSI','MAPPED'],['CMMC 2.0 L2','CROSS-REF'],['CUI · DoDI 5200.48','ATTESTED'],['OMB A-130','ALIGNED']];
+const FW=[['FedRAMP 20x','CERTIFIED'],['NIST 800-53 R5','MODERATE'],['FedRAMP KSI','MAPPED'],['CMMC 2.0 L2','CROSS-REF'],['CUI · DoDI 5200.48','ATTESTED'],['OMB A-130','ALIGNED']];
 
 // ── views ──
 const V={};
@@ -183,7 +183,7 @@ const V={};
 V.dashboard=()=>`
   <div class="kick">LIVE · CONTINUOUSLY MONITORED · MODERATE IMPACT</div>
   <h1 class="big">Continuous validation, <span class="g">observed live.</span></h1>
-  <p class="lede">System-wide posture for the FedRAMP 20x Moderate authorization — Key Security Indicators validated continuously, with evidence sealed daily.</p>
+  <p class="lede">System-wide posture for the FedRAMP 20x Class C Moderate Certification — Key Security Indicators validated continuously, with evidence sealed daily.</p>
 
   <div class="panel" style="margin-bottom:14px">
     <div class="ph"><h4 style="display:flex;align-items:center;gap:10px"><span style="color:var(--signal)">◢ Operational</span> <span class="tag ok">MODERATE</span></h4><span class="map" style="cursor:pointer">↻ SYNC NOW</span></div>
@@ -212,7 +212,7 @@ V.dashboard=()=>`
     <div class="row"><span class="svc" style="width:130px">Compliance %</span><div class="spark" style="max-width:none;height:50px">${trendBars}</div><span class="mono" style="margin-left:14px;color:var(--signal)">82% → 93.4%</span></div></div>`;
 
 V.trust=()=>`
-  <div class="kick">02 — AUTHORIZATION RECORD</div>
+  <div class="kick">02 — CERTIFICATION RECORD</div>
   <h1 class="big">FedRAMP <span class="g">Trust Center</span></h1>
   <p class="lede">The public authorization record for Meridian LMS — posture, controls, and artifacts for agency reviewers.</p>
   <div class="console" style="margin-bottom:18px">
@@ -226,7 +226,7 @@ V.trust=()=>`
     <div class="log" id="log"></div>
   </div>
   <div class="marquee" style="margin-bottom:18px"><div class="mtrack">${[...FW,...FW].map(f=>`<span><b>${f[0]}</b> <span class="v">◆ ${f[1]}</span></span>`).join('')}</div></div>
-  <div class="bset">${FW.map(f=>`<span class="badge ${f[1]==='AUTHORIZED'?'s':''}">${f[1]==='AUTHORIZED'?'● ':''}${f[0]}</span>`).join('')}</div>
+  <div class="bset">${FW.map(f=>`<span class="badge ${f[1]==='CERTIFIED'?'s':''}">${f[1]==='CERTIFIED'?'● ':''}${f[0]}</span>`).join('')}</div>
   <div class="grid g4">
     <div class="kpi"><div class="v s">93.4%</div><div class="l">KSI compliance</div><div class="sub">57 / 61 passing</div></div>
     <div class="kpi"><div class="v">4</div><div class="l">Active gaps</div><div class="sub">in remediation</div></div>
@@ -323,8 +323,8 @@ V.schema=()=>`
 V.reports=()=>`
   <div class="kick">▣ — AUTHORIZATION ARTIFACTS</div>
   <h1 class="big">Reports &amp; <span class="g">evidence</span></h1>
-  <p class="lede">Machine-readable authorization data and audited artifacts. Public items stream openly; access-controlled items unlock for authorized reviewers.</p>
-  <div class="panel">${[['Ongoing Authorization Report (OAR)','Period ending 2026-05-15 · FRR-CCM','pub'],['Vulnerability Disclosure Report (VDR)','Release 25.09A · aggregate','pub'],['Significant Change Notifications','41 on record · FRR-SCN','pub'],['CSO Public Metadata','ADS-CSO-PUB · JSON','pub'],['3PAO Assessment Evidence','Independent assessor','nda'],['Authorization Package (OSCAL)','Full artifact bundle','nda']].map(d=>`<div class="lrow"><div><div class="t">${d[0]}</div><div class="d">${d[1]}</div></div><div class="meta">${d[2]==='nda'?'<span class="nda">ACCESS REQUIRED</span>':'<span class="pub">OPEN ACCESS</span>'}<span class="ar">→</span></div></div>`).join('')}</div>`;
+  <p class="lede">Machine-readable certification data and audited artifacts. Public items stream openly; access-controlled items unlock for authorized reviewers.</p>
+  <div class="panel">${[['Ongoing Authorization Report (OAR)','Period ending 2026-05-15 · FRR-CCM','pub'],['Vulnerability Disclosure Report (VDR)','Release 25.09A · aggregate','pub'],['Significant Change Notifications','41 on record · FRR-SCN','pub'],['CSO Public Metadata','ADS-CSO-PUB · JSON','pub'],['3PAO Assessment Evidence','Independent assessor','nda'],['Certification Package (OSCAL)','Full artifact bundle','nda']].map(d=>`<div class="lrow"><div><div class="t">${d[0]}</div><div class="d">${d[1]}</div></div><div class="meta">${d[2]==='nda'?'<span class="nda">ACCESS REQUIRED</span>':'<span class="pub">OPEN ACCESS</span>'}<span class="ar">→</span></div></div>`).join('')}</div>`;
 
 // render + nav
 const stage=document.getElementById('stage');

@@ -20,7 +20,7 @@ const NAV = [
 const NAV_IDS = new Set(NAV.map(n => n[0]));
 
 const FRAMEWORKS = [
-    ['FedRAMP 20x', 'AUTHORIZED'], ['NIST 800-53 R5', 'MODERATE'], ['FedRAMP KSI', 'MAPPED'],
+    ['FedRAMP 20x', 'CERTIFIED'], ['NIST 800-53 R5', 'MODERATE'], ['FedRAMP KSI', 'MAPPED'],
     ['CMMC 2.0 L2', 'CROSS-REF'], ['CUI · DoDI 5200.48', 'ATTESTED'], ['OMB A-130', 'ALIGNED'],
 ];
 
@@ -132,7 +132,7 @@ export const TrustCenterView = () => {
     const blobDl = (blob, filename) => { const u = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = u; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); };
     const viewConfig = async () => { if (!guard('View Secure Configuration')) return; try { const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`); openModal('markdown', { title: 'Secure Configuration', markdown: await r.text() }); } catch { alert('Load failed.'); } };
     const downloadConfig = async () => { if (!guard('Download Secure Configuration')) return; try { const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`); if (!r.ok) throw new Error(`HTTP ${r.status}`); blobDl(new Blob([await r.text()], { type: 'text/markdown' }), 'secure-configuration.md'); } catch (e) { alert(`Download failed: ${e.message}`); } };
-    const downloadPackage = async () => { if (!guard('Download Authorization Package')) return; try { const tok = localStorage.getItem(API_CONFIG.TOKEN_KEY); if (!tok) { alert('Session expired.'); return; } const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PACKAGE_DOWNLOAD}`, { headers: { Authorization: `Bearer ${tok}` } }); if (!r.ok) throw new Error('Access Denied'); const j = await r.json(); if (j.url) window.location.href = j.url; } catch (e) { alert(`Download failed: ${e.message}`); } };
+    const downloadPackage = async () => { if (!guard('Download Certification Package')) return; try { const tok = localStorage.getItem(API_CONFIG.TOKEN_KEY); if (!tok) { alert('Session expired.'); return; } const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PACKAGE_DOWNLOAD}`, { headers: { Authorization: `Bearer ${tok}` } }); if (!r.ok) throw new Error('Access Denied'); const j = await r.json(); if (j.url) window.location.href = j.url; } catch (e) { alert(`Download failed: ${e.message}`); } };
     const apiDocs = () => window.open('https://meridian-knowledge-solutions.github.io/fedramp-20x-public/documentation/api/', '_blank');
     const security = cso?.contacts?.security || 'security@meridianks.com';
 
@@ -170,11 +170,11 @@ export const TrustCenterView = () => {
                 {/* 01 OVERVIEW */}
                 <section id="overview" className="hero">
                     <div className="rv in">
-                        <Kick>LIVE · CONTINUOUSLY MONITORED · {cso?.package_id || 'AUTHORIZED'}</Kick>
-                        <h1>Authorization, observed in <span className="g">real time.</span></h1>
-                        <p className="sub">A living view of how {cso?.cso_name || 'Meridian LMS'} maintains its {cso?.authorization_type || 'FedRAMP 20x'} {cso?.impact_level || 'Moderate'} authorization — KSI posture, vulnerability data, and the controls beneath them, streaming as evidence is collected.</p>
+                        <Kick>LIVE · CONTINUOUSLY MONITORED · {cso?.package_id || 'CERTIFIED'}</Kick>
+                        <h1>Certification, observed in <span className="g">real time.</span></h1>
+                        <p className="sub">A living view of how {cso?.cso_name || 'Meridian LMS'} maintains its {cso?.authorization_type || 'FedRAMP 20x'} Class C {cso?.impact_level || 'Moderate'} Certification — KSI posture, vulnerability data, and the controls beneath them, streaming as evidence is collected.</p>
                         <div className="hbadges">
-                            <span className="badge s">● AUTHORIZED</span>
+                            <span className="badge s">● CERTIFIED</span>
                             <span className="badge i">{cso?.authorization_type || 'FedRAMP 20x'}</span>
                             <span className="badge">{cso?.impact_level || 'Moderate'} IMPACT</span>
                             <span className="badge">{cso?.service_model || 'SaaS'} · {cso?.cloud_provider || 'AWS'}</span>
@@ -275,15 +275,15 @@ export const TrustCenterView = () => {
 
                 {/* 05 ARTIFACTS (Documents, 20x language) */}
                 <section id="artifacts">
-                    <div className="rv"><Kick>05 — AUTHORIZATION ARTIFACTS</Kick><h2>Reports &amp; evidence</h2>
-                        <p className="lede">Machine-readable authorization data and audited artifacts. Public items stream openly; access-controlled items unlock for authorized agency reviewers.</p></div>
+                    <div className="rv"><Kick>05 — CERTIFICATION ARTIFACTS</Kick><h2>Reports &amp; evidence</h2>
+                        <p className="lede">Machine-readable certification data and audited artifacts. Public items stream openly; access-controlled items unlock for authorized agency reviewers.</p></div>
                     <div className="panel rv">
                         {[['Ongoing Authorization Report (OAR)', `Period ending ${oar?.reporting_period?.end_date || '2026-05-15'} · FRR-CCM`, 'pub', () => window.open(`${BASE_PATH}reports/samples/oar-report.json`, '_blank')],
                         ['Vulnerability Disclosure Report (VDR)', `${vdr?.metadata?.vdr_standard || 'Release 25.09A'} · aggregate`, 'pub', () => window.open(`${BASE_PATH}vdr_public_metrics.json`, '_blank')],
                         ['Significant Change Notifications (SCN)', `${oar?.data_sources?.scn_history_entries ?? 41} on record · FRR-SCN`, 'pub', () => jump('monitoring')],
                         ['CSO Public Metadata', 'ADS-CSO-PUB · machine-readable', 'pub', () => window.open(`${BASE_PATH}cso_public_info.json`, '_blank')],
                         ['3PAO Assessment Evidence', 'Independent assessor · access-controlled', 'nda', () => guard('3PAO Assessment')],
-                        ['Authorization Package (OSCAL)', 'Full artifact bundle · access-controlled', 'nda', downloadPackage]].map((d, i) => (
+                        ['Certification Package (OSCAL)', 'Full artifact bundle · access-controlled', 'nda', downloadPackage]].map((d, i) => (
                             <div className="lrow" key={i} onClick={d[3]}>
                                 <div><div className="t">{d[0]}</div><div className="d">{d[1]}</div></div>
                                 <div className="meta">{d[2] === 'nda' ? <span className="nda">ACCESS REQUIRED</span> : <span className="pub">OPEN ACCESS</span>}<span className="ar">→</span></div>
@@ -301,7 +301,7 @@ export const TrustCenterView = () => {
                 {/* 06 GOVERNANCE (Policies, 20x language) */}
                 <section id="governance">
                     <div className="rv"><Kick>06 — FedRAMP 20x RULE FAMILIES</Kick><h2>Governance</h2>
-                        <p className="lede">The standards and processes governing this authorization, published openly.</p></div>
+                        <p className="lede">The standards and processes governing this certification, published openly.</p></div>
                     <div className="panel rv">
                         {[['Continuous Monitoring', 'FRR-CCM-01 … 07'], ['Significant Change Notification', 'FRR-SCN'], ['Key Security Indicators', 'FRR-KSI'],
                         ['Minimum Assessment Scope', 'FRR-MAS'], ['Vulnerability Management', 'FRR-CVM'], ['Information Security Policy', 'NIST 800-53 PL'],
@@ -324,7 +324,7 @@ export const TrustCenterView = () => {
                     <div className="rv"><Kick>07 — MACHINE-READABLE</Kick><h2>Downloads</h2>
                         <p className="lede">Ready-to-share materials for your security and procurement teams.</p></div>
                     <div className="dlg rv">
-                        {[['Authorization Package', 'OSCAL · access-controlled', downloadPackage, isAuthenticated ? null : 'lock'],
+                        {[['Certification Package', 'OSCAL · access-controlled', downloadPackage, isAuthenticated ? null : 'lock'],
                         ['Secure Configuration Guide', 'Markdown · hardening', downloadConfig, null],
                         ['CRM Matrix (NIST/KSI/CMMC/CUI)', 'XLSX · 185 controls', () => window.open(`${BASE_PATH}Meridian_LMS_CRM_NIST_800-53_Rev5_CMMC_CUI.xlsx`, '_blank'), null],
                         ['CSO Public Metadata', 'JSON · ADS-CSO-PUB', () => window.open(`${BASE_PATH}cso_public_info.json`, '_blank'), null],
@@ -362,7 +362,7 @@ const Feedback = ({ security, entries }) => {
     return (
         <div className="grid2" style={{ padding: 20, gridTemplateColumns: '1fr 1fr', gap: 24 }}>
             <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <textarea value={q} onChange={e => setQ(e.target.value)} rows={3} required placeholder="Ask about KSI validation, posture, or authorization data…"
+                <textarea value={q} onChange={e => setQ(e.target.value)} rows={3} required placeholder="Ask about KSI validation, posture, or certification data…"
                     style={{ background: '#0A0E13', border: '1px solid #1A222D', borderRadius: 9, padding: 12, color: '#E8EEF4', fontFamily: 'Geist Mono, monospace', fontSize: 12.5, resize: 'none', outline: 'none' }} />
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@agency.gov (optional)"
                     style={{ background: '#0A0E13', border: '1px solid #1A222D', borderRadius: 9, padding: 12, color: '#E8EEF4', fontFamily: 'Geist Mono, monospace', fontSize: 12.5, outline: 'none' }} />

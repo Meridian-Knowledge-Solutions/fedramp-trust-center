@@ -137,7 +137,7 @@ export const ThreePaoView = () => {
     if (!data?.report) return (
         <div className="min-h-screen bg-[#09090b] flex flex-col items-center justify-center text-slate-500 p-6">
             <div className="bg-rose-900/20 p-4 rounded-full mb-4 text-rose-500"><AlertTriangle size={48} /></div>
-            <h3 className="text-xl font-bold text-white mb-2">Authorization Package Unavailable</h3>
+            <h3 className="text-xl font-bold text-white mb-2">Certification Package Unavailable</h3>
             <p className="max-w-md text-center mb-6">The system could not retrieve the assessment artifacts.</p>
             <button onClick={() => window.location.reload()} className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors">Retry Connection</button>
         </div>
