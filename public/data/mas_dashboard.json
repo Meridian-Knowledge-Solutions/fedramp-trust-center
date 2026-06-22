@@ -1,0 +1,937 @@
+{
+  "meta": {
+    "generated_at": "2026-06-19T18:45:12.201886+00:00",
+    "compliance_ver": "FedRAMP 20x",
+    "scope": "PUBLIC_SAFE",
+    "fingerprint": "cf6cc7fc57a7"
+  },
+  "health": {
+    "overall": "critical",
+    "connected_systems": 2,
+    "total_systems": 6,
+    "total_integrations": 8,
+    "non_fedramp_integrations": 3,
+    "drift_count": 20,
+    "critical_drift": 2,
+    "incident_count": 0,
+    "critical_incidents": 0
+  },
+  "categories": [
+    {
+      "id": "infrastructure",
+      "label": "Infrastructure",
+      "icon": "cloud",
+      "connected": 1,
+      "total": 1,
+      "drift_count": 20,
+      "health": "warning"
+    },
+    {
+      "id": "collaboration",
+      "label": "Collaboration",
+      "icon": "message-square",
+      "connected": 1,
+      "total": 2,
+      "drift_count": 0,
+      "health": "healthy"
+    },
+    {
+      "id": "identity",
+      "label": "Identity",
+      "icon": "shield",
+      "connected": 0,
+      "total": 1,
+      "drift_count": 0,
+      "health": "healthy"
+    },
+    {
+      "id": "hr",
+      "label": "Hr",
+      "icon": "users",
+      "connected": 0,
+      "total": 1,
+      "drift_count": 0,
+      "health": "healthy"
+    },
+    {
+      "id": "application",
+      "label": "Application",
+      "icon": "box",
+      "connected": 0,
+      "total": 1,
+      "drift_count": 0,
+      "health": "healthy"
+    },
+    {
+      "id": "content_library",
+      "label": "Content Library",
+      "icon": "book-open",
+      "connected": 0,
+      "total": 0,
+      "drift_count": 0,
+      "health": "healthy",
+      "integrations": 3
+    },
+    {
+      "id": "authoring_tool",
+      "label": "Authoring Tool",
+      "icon": "edit",
+      "connected": 0,
+      "total": 0,
+      "drift_count": 0,
+      "health": "healthy",
+      "integrations": 1
+    },
+    {
+      "id": "virtual_meeting",
+      "label": "Virtual Meeting",
+      "icon": "video",
+      "connected": 0,
+      "total": 0,
+      "drift_count": 0,
+      "health": "healthy",
+      "integrations": 2
+    },
+    {
+      "id": "devops",
+      "label": "Devops",
+      "icon": "git-branch",
+      "connected": 0,
+      "total": 0,
+      "drift_count": 0,
+      "health": "healthy",
+      "integrations": 1
+    },
+    {
+      "id": "compliance",
+      "label": "Compliance",
+      "icon": "shield",
+      "connected": 0,
+      "total": 0,
+      "drift_count": 0,
+      "health": "healthy",
+      "integrations": 1
+    }
+  ],
+  "systems": [
+    {
+      "id": "aws",
+      "name": "Amazon Web Services",
+      "category": "infrastructure",
+      "status": "connected",
+      "health": "warning",
+      "resource_count": 79,
+      "drift_count": 20,
+      "incident_count": 0,
+      "connected": true,
+      "is_third_party": true,
+      "is_fedramp_authorized": true,
+      "cia_impact": {
+        "C": "High",
+        "I": "High",
+        "A": "High",
+        "rationale": "Core infrastructure hosting all federal customer data and applications."
+      },
+      "data_source": "Cost Explorer API",
+      "system_type": "connected"
+    },
+    {
+      "id": "jira",
+      "name": "Jira Cloud",
+      "category": "collaboration",
+      "status": "connected",
+      "health": "healthy",
+      "resource_count": 1,
+      "drift_count": 0,
+      "incident_count": 0,
+      "connected": true,
+      "is_third_party": true,
+      "is_fedramp_authorized": true,
+      "cia_impact": {
+        "C": "Moderate",
+        "I": "High",
+        "A": "Moderate",
+        "rationale": "Manages incident response tracking and audit trails. Compromised tickets could mask security incidents."
+      },
+      "data_source": "REST API v3",
+      "system_type": "connected"
+    },
+    {
+      "id": "okta",
+      "name": "Okta",
+      "category": "identity",
+      "status": "error",
+      "health": "unknown",
+      "resource_count": 0,
+      "drift_count": 0,
+      "incident_count": 0,
+      "connected": false,
+      "is_third_party": true,
+      "is_fedramp_authorized": true,
+      "cia_impact": {
+        "C": "High",
+        "I": "High",
+        "A": "High",
+        "rationale": "Central identity provider controlling all authentication and authorization."
+      },
+      "data_source": "Management API",
+      "system_type": "connected"
+    },
+    {
+      "id": "paylocity",
+      "name": "Paylocity HR",
+      "category": "hr",
+      "status": "error",
+      "health": "unknown",
+      "resource_count": 0,
+      "drift_count": 0,
+      "incident_count": 0,
+      "connected": false,
+      "is_third_party": true,
+      "is_fedramp_authorized": false,
+      "cia_impact": {
+        "C": "High",
+        "I": "High",
+        "A": "Moderate",
+        "rationale": "Personnel onboarding controls access provisioning. Imposter employee risk could grant unauthorized production access."
+      },
+      "data_source": "REST API",
+      "system_type": "connected"
+    },
+    {
+      "id": "m365",
+      "name": "Microsoft 365",
+      "category": "collaboration",
+      "status": "error",
+      "health": "unknown",
+      "resource_count": 0,
+      "drift_count": 0,
+      "incident_count": 0,
+      "connected": false,
+      "is_third_party": true,
+      "is_fedramp_authorized": true,
+      "cia_impact": {
+        "C": "High",
+        "I": "Moderate",
+        "A": "Moderate",
+        "rationale": "Email and document storage may contain sensitive federal communications."
+      },
+      "data_source": "Graph API",
+      "system_type": "connected"
+    },
+    {
+      "id": "lms",
+      "name": "Meridian LMS",
+      "category": "application",
+      "status": "error",
+      "health": "unknown",
+      "resource_count": 0,
+      "drift_count": 0,
+      "incident_count": 0,
+      "connected": false,
+      "is_third_party": false,
+      "is_fedramp_authorized": true,
+      "cia_impact": {
+        "C": "High",
+        "I": "High",
+        "A": "High",
+        "rationale": "Core application handling federal customer training data and PII."
+      },
+      "data_source": "Internal API",
+      "system_type": "connected"
+    }
+  ],
+  "integrations": [
+    {
+      "id": "skillsoft",
+      "name": "Skillsoft Percipio",
+      "category": "content_library",
+      "status": "FedRAMP Authorized",
+      "health": "n/a",
+      "resource_count": 1,
+      "drift_count": 0,
+      "connected": false,
+      "documented": true,
+      "is_third_party": true,
+      "is_fedramp_authorized": true,
+      "cia_impact": {
+        "C": "Moderate",
+        "I": "Low",
+        "A": "Low",
+        "rationale": "Content delivery platform. PII shared for SSO authentication and progress tracking."
+      },
+      "data_source": "xAPI (Outbound)",
+      "connection_type": "xAPI",
+      "auth_method": "SAML 2.0 (SSO)",
+      "risk": "low",
+      "pii_shared": [
+        "Email",
+        "First Name",
+        "Last Name"
+      ],
+      "compensating_controls": null,
+      "justification": null,
+      "data_flow": {
+        "classification": "federal-disseminated",
+        "direction": "Outbound",
+        "data_types": [
+          "Training progress",
+          "Completion records",
+          "User identity"
+        ],
+        "omb_a130": "Federal employee PII disseminated to authorized third party"
+      },
+      "system_type": "integration"
+    },
+    {
+      "id": "linkedin_learning",
+      "name": "LinkedIn Learning",
+      "category": "content_library",
+      "status": "Commercial",
+      "health": "n/a",
+      "resource_count": 1,
+      "drift_count": 0,
+      "connected": false,
+      "documented": true,
+      "is_third_party": true,
+      "is_fedramp_authorized": false,
+      "cia_impact": {
+        "C": "Moderate",
+        "I": "Low",
+        "A": "Low",
+        "rationale": "Commercial content library. Non-FedRAMP - compensating controls via data minimization and SSO. Data sensitivity: Moderate per NIST 800-60 D.8."
+      },
+      "data_source": "xAPI (Outbound)",
+      "connection_type": "xAPI",
+      "auth_method": "SAML 2.0 (SSO)",
+      "risk": "elevated",
+      "pii_shared": [
+        "Email",
+        "First Name",
+        "Last Name"
+      ],
+      "compensating_controls": "Data minimization, SSO-only auth, no sensitive data transmitted",
+      "justification": "Business requirement for professional development content not available in FedRAMP marketplace",
+      "data_flow": {
+        "classification": "federal-disseminated",
+        "direction": "Outbound",
+        "data_types": [
+          "Training progress",
+          "User identity",
+          "Learning activity"
+        ],
+        "omb_a130": "Federal employee PII disseminated to commercial provider"
+      },
+      "system_type": "integration"
+    },
+    {
+      "id": "opensesame",
+      "name": "OpenSesame",
+      "category": "content_library",
+      "status": "Commercial",
+      "health": "n/a",
+      "resource_count": 1,
+      "drift_count": 0,
+      "connected": false,
+      "documented": true,
+      "is_third_party": true,
+      "is_fedramp_authorized": false,
+      "cia_impact": {
+        "C": "Moderate",
+        "I": "Low",
+        "A": "Low",
+        "rationale": "Commercial content aggregator. Non-FedRAMP - GUID pseudonymization limits PII exposure."
+      },
+      "data_source": "SCORM (Outbound)",
+      "connection_type": "SCORM 1.2",
+      "auth_method": "Direct Launch",
+      "risk": "elevated",
+      "pii_shared": [
+        "First Name",
+        "Last Name",
+        "User GUID"
+      ],
+      "compensating_controls": "GUID pseudonymization, no email shared, session-based launch",
+      "justification": "Required for compliance training catalog breadth",
+      "data_flow": {
+        "classification": "federal-disseminated",
+        "direction": "Outbound",
+        "data_types": [
+          "SCORM progress data",
+          "Pseudonymized user ID",
+          "Completion status"
+        ],
+        "omb_a130": "Pseudonymized federal data disseminated via SCORM"
+      },
+      "system_type": "integration"
+    },
+    {
+      "id": "dominknow",
+      "name": "DominKnow",
+      "category": "authoring_tool",
+      "status": "Commercial",
+      "health": "n/a",
+      "resource_count": 1,
+      "drift_count": 0,
+      "connected": false,
+      "documented": true,
+      "is_third_party": true,
+      "is_fedramp_authorized": false,
+      "cia_impact": {
+        "C": "Low",
+        "I": "Low",
+        "A": "Low",
+        "rationale": "Content authoring tool. Content ingress only - no federal customer data egress."
+      },
+      "data_source": "SCORM (Ingress)",
+      "connection_type": "SCORM (Ingress)",
+      "auth_method": "Direct Launch",
+      "risk": "elevated",
+      "pii_shared": [
+        "First Name",
+        "Last Name",
+        "User GUID"
+      ],
+      "compensating_controls": "Ingress-only integration, content review before publish",
+      "justification": "Agency content authoring requirement",
+      "data_flow": {
+        "classification": "non-federal",
+        "direction": "Ingress",
+        "data_types": [
+          "Training content packages",
+          "SCORM modules"
+        ],
+        "omb_a130": "Commercial content ingress - no federal data egress"
+      },
+      "system_type": "integration"
+    },
+    {
+      "id": "ms_teams",
+      "name": "Microsoft Teams",
+      "category": "virtual_meeting",
+      "status": "FedRAMP Authorized",
+      "health": "n/a",
+      "resource_count": 1,
+      "drift_count": 0,
+      "connected": false,
+      "documented": true,
+      "is_third_party": true,
+      "is_fedramp_authorized": true,
+      "cia_impact": {
+        "C": "Moderate",
+        "I": "Low",
+        "A": "Low",
+        "rationale": "Virtual classroom integration. FedRAMP authorized via Microsoft GCC."
+      },
+      "data_source": "Graph API (Outbound)",
+      "connection_type": "Graph API",
+      "auth_method": "OAuth 2.0",
+      "risk": "medium",
+      "pii_shared": [
+        "Email",
+        "Display Name"
+      ],
+      "compensating_controls": null,
+      "justification": null,
+      "data_flow": {
+        "classification": "federal-disseminated",
+        "direction": "Bidirectional",
+        "data_types": [
+          "Meeting invitations",
+          "Attendance records",
+          "User identity"
+        ],
+        "omb_a130": "Federal meeting data processed in GCC environment"
+      },
+      "system_type": "integration"
+    },
+    {
+      "id": "zoom",
+      "name": "Zoom",
+      "category": "virtual_meeting",
+      "status": "FedRAMP Authorized",
+      "health": "n/a",
+      "resource_count": 1,
+      "drift_count": 0,
+      "connected": false,
+      "documented": true,
+      "is_third_party": true,
+      "is_fedramp_authorized": true,
+      "cia_impact": {
+        "C": "Moderate",
+        "I": "Low",
+        "A": "Low",
+        "rationale": "Virtual classroom integration. FedRAMP authorized (Zoom for Government)."
+      },
+      "data_source": "REST API (Outbound)",
+      "connection_type": "REST API",
+      "auth_method": "JWT / OAuth",
+      "risk": "medium",
+      "pii_shared": [
+        "Email",
+        "Display Name"
+      ],
+      "compensating_controls": null,
+      "justification": null,
+      "data_flow": {
+        "classification": "federal-disseminated",
+        "direction": "Bidirectional",
+        "data_types": [
+          "Meeting data",
+          "Attendance records",
+          "Session recordings"
+        ],
+        "omb_a130": "Federal meeting data in Zoom for Government"
+      },
+      "system_type": "integration"
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "category": "devops",
+      "status": "FedRAMP Authorized",
+      "health": "n/a",
+      "resource_count": 1,
+      "drift_count": 0,
+      "connected": false,
+      "documented": true,
+      "is_third_party": true,
+      "is_fedramp_authorized": true,
+      "cia_impact": {
+        "C": "High",
+        "I": "High",
+        "A": "Moderate",
+        "rationale": "Source code repository and CI/CD. Malicious code injection could compromise CSO."
+      },
+      "data_source": "GraphQL API",
+      "connection_type": "GraphQL/REST API",
+      "auth_method": "PAT / GitHub Apps",
+      "risk": "low",
+      "pii_shared": [
+        "Developer Email",
+        "Commit Author"
+      ],
+      "compensating_controls": null,
+      "justification": null,
+      "data_flow": {
+        "classification": "federal-processed",
+        "direction": "Bidirectional",
+        "data_types": [
+          "Source code",
+          "CI/CD artifacts",
+          "Developer activity"
+        ],
+        "omb_a130": "Federal system code processed in FedRAMP environment"
+      },
+      "system_type": "integration"
+    },
+    {
+      "id": "trust_center",
+      "name": "FedRAMP Trust Center",
+      "category": "compliance",
+      "status": "FRR-ADS-TC-01",
+      "health": "n/a",
+      "resource_count": 1,
+      "drift_count": 0,
+      "connected": false,
+      "documented": true,
+      "is_third_party": false,
+      "is_fedramp_authorized": true,
+      "cia_impact": {
+        "C": "Moderate",
+        "I": "High",
+        "A": "Moderate",
+        "rationale": "Compliance data portal. Integrity critical for accurate authorization status."
+      },
+      "data_source": "REST API (Internal)",
+      "connection_type": "REST API",
+      "auth_method": "JWT Token",
+      "risk": "low",
+      "pii_shared": [
+        "Agency Contact Name",
+        "Agency Email"
+      ],
+      "compensating_controls": null,
+      "justification": null,
+      "data_flow": {
+        "classification": "federal-maintained",
+        "direction": "Outbound",
+        "data_types": [
+          "Compliance status",
+          "KSI metrics",
+          "Authorization data"
+        ],
+        "omb_a130": "Federal compliance records maintained and published"
+      },
+      "system_type": "integration"
+    }
+  ],
+  "human_process_resources": {
+    "schema": "FRR-MAS Human and Process Resources",
+    "version": "1.0.0",
+    "last_updated": "2026-03-07",
+    "description": "Supplements the MAS machine resource inventory (KSI-AFR-01) with human and process resources within the FedRAMP authorization boundary. Per FRR-MAS requirements, the Minimum Assessment Scope must account for people, processes, and technology \u2014 not just infrastructure.",
+    "human_resources": {
+      "security_roles": [
+        {
+          "role": "Information System Security Officer (ISSO)",
+          "responsibility": "Maintains the security posture of the Meridian LMS authorization boundary. Responsible for continuous monitoring, POA&M management, and FedRAMP deliverables.",
+          "clearance_required": false,
+          "us_based": true,
+          "assessment_scope": "Annual assessment interviews, control implementation verification, ConMon deliverable review"
+        },
+        {
+          "role": "System Administrator",
+          "responsibility": "Manages AWS infrastructure within the authorization boundary including EC2, RDS, S3, VPC, and IAM configurations.",
+          "clearance_required": false,
+          "us_based": true,
+          "assessment_scope": "Privileged access review, change management verification, configuration baseline compliance"
+        },
+        {
+          "role": "Security Operations / Incident Response",
+          "responsibility": "Monitors security events, responds to incidents per FRR-ICP procedures, and conducts IR/DR training and tabletop exercises.",
+          "clearance_required": false,
+          "us_based": true,
+          "assessment_scope": "Incident response capability testing (KSI-RPL-04), training effectiveness (KSI-CED-04), alert response times"
+        },
+        {
+          "role": "Development Team Lead",
+          "responsibility": "Manages SDLC security practices, code review, and deployment pipeline security for the Meridian LMS application.",
+          "clearance_required": false,
+          "us_based": true,
+          "assessment_scope": "SDLC policy compliance, secure coding practices, change management process adherence"
+        },
+        {
+          "role": "Authorizing Official Designee",
+          "responsibility": "Meridian executive responsible for accepting residual risk and authorizing operation of the system.",
+          "clearance_required": false,
+          "us_based": true,
+          "assessment_scope": "Risk acceptance decisions, POA&M oversight, authorization boundary changes"
+        }
+      ],
+      "staffing_model": {
+        "total_boundary_personnel": 8,
+        "all_us_based": true,
+        "all_us_persons": true,
+        "note": "Meridian Knowledge Solutions is a U.S.-based company with all development and support handled by U.S.-based personnel."
+      }
+    },
+    "process_resources": [
+      {
+        "process": "Continuous Monitoring (ConMon)",
+        "description": "Automated daily KSI validation via CLI pipeline, OAR generation, and QAR reporting. Human review of findings and remediation tracking.",
+        "ksi_coverage": [
+          "KSI-AFR-02",
+          "KSI-MLA-02",
+          "KSI-MLA-07"
+        ],
+        "frequency": "Daily (automated), Monthly (OAR), Quarterly (QAR)",
+        "assessment_scope": "ConMon deliverable accuracy, timeliness, and coverage"
+      },
+      {
+        "process": "Vulnerability Management",
+        "description": "Multi-source vulnerability scanning (Inspector, Security Hub, Aikido, OSV, Bandit, External Scanner) with Jira SEC tracking and VDR reporting.",
+        "ksi_coverage": [
+          "KSI-TPR-04",
+          "KSI-AFR-04"
+        ],
+        "frequency": "Continuous (scanning), 3-day (VDR reports)",
+        "assessment_scope": "Scan coverage, remediation timeliness, VDR accuracy"
+      },
+      {
+        "process": "Incident Response",
+        "description": "Automated incident communication workflow (FRR-ICP) with Jira SEC integration, Lambda notification dispatch, and SLA tracking.",
+        "ksi_coverage": [
+          "KSI-AFR-10",
+          "KSI-RPL-04",
+          "KSI-CED-04"
+        ],
+        "frequency": "Event-driven, tabletop exercises quarterly",
+        "assessment_scope": "SLA compliance, notification accuracy, post-incident review"
+      },
+      {
+        "process": "Change Management",
+        "description": "GitOps-based change management with SCN classification (routine/adaptive/transformative), approval workflows, and security impact assessment.",
+        "ksi_coverage": [
+          "KSI-CMT-01",
+          "KSI-CMT-02"
+        ],
+        "frequency": "Per change event, SCN reporting as needed",
+        "assessment_scope": "Change classification accuracy, notification timeliness, security impact assessment quality"
+      },
+      {
+        "process": "Access Control and Identity Management",
+        "description": "Okta-based federal identity with PIV/CAC support, SAML 2.0 SSO, role-based access control within Meridian LMS and AWS IAM.",
+        "ksi_coverage": [
+          "KSI-IAM-01",
+          "KSI-IAM-02",
+          "KSI-CNA-01"
+        ],
+        "frequency": "Continuous (authentication), Quarterly (access review)",
+        "assessment_scope": "Privileged access inventory, authentication strength, access review completeness"
+      },
+      {
+        "process": "Security Governance",
+        "description": "Policy and procedure management via CodeCommit security-governance repository. Version-controlled policies with attestation tracking.",
+        "ksi_coverage": [
+          "KSI-CED-01",
+          "KSI-CED-02",
+          "KSI-CED-03"
+        ],
+        "frequency": "Annual review, event-driven updates",
+        "assessment_scope": "Policy currency, attestation completeness, governance repository integrity"
+      }
+    ],
+    "data_classification": {
+      "nist_800_60_alignment": {
+        "information_types": [
+          {
+            "type": "Training and Education Management",
+            "nist_id": "D.8",
+            "confidentiality_impact": "Moderate",
+            "integrity_impact": "Moderate",
+            "availability_impact": "Low"
+          },
+          {
+            "type": "Federal Employee PII (Learning Records)",
+            "nist_id": "C.2.8.12",
+            "confidentiality_impact": "Moderate",
+            "integrity_impact": "Moderate",
+            "availability_impact": "Low"
+          }
+        ],
+        "overall_impact_level": "Moderate",
+        "justification": "Federal employee PII (names, emails, learning progress) processed for training management purposes. No classified or law enforcement data."
+      }
+    }
+  },
+  "aws_services": {
+    "AWS CloudTrail": 0.57,
+    "AWS Config": 3.27,
+    "AWS Cost Explorer": 0.7,
+    "AWS Directory Service": 34.89,
+    "AWS Key Management Service": 2.61,
+    "AWS Lambda": 0.0,
+    "AWS Network Firewall": 227.52,
+    "AWS Secrets Manager": 0.63,
+    "AWS Security Hub": 4.24,
+    "AWS Systems Manager": 1.37,
+    "AWS Transfer Family": 86.4,
+    "AWS WAF": 7.75,
+    "Amazon API Gateway": 0.0,
+    "EC2 - Other": 82.52,
+    "Amazon Elastic Compute Cloud - Compute": 176.56,
+    "Amazon Elastic Load Balancing": 12.96,
+    "Amazon FSx": 224.88,
+    "Amazon GuardDuty": 1.18,
+    "Amazon Inspector": 4.87,
+    "Amazon RDS Optimize CPU License Included Third Party Fees": 329.47,
+    "Amazon Relational Database Service": 226.09,
+    "Amazon Simple Storage Service": 1.39,
+    "Amazon Virtual Private Cloud": 54.73,
+    "AmazonCloudWatch": 13.27
+  },
+  "drift_summary": [
+    {
+      "source": "aws",
+      "type": "zombie_cost",
+      "resource_type": "directory_service",
+      "severity": "warning",
+      "description": "'AWS Directory Service' billing ($34.89/mo) but 0 resources in us-east-1.",
+      "expected": ">0",
+      "actual": 0,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "zombie_cost",
+      "resource_type": "transfer",
+      "severity": "warning",
+      "description": "'AWS Transfer Family' billing ($86.4/mo) but 0 resources in us-east-1.",
+      "expected": ">0",
+      "actual": 0,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "rds",
+      "severity": "critical",
+      "description": "rds: 1 resource(s) declared in Terraform but missing from AWS",
+      "expected": 1,
+      "actual": 1,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "security_groups",
+      "severity": "critical",
+      "description": "security_groups: 13 resource(s) in AWS not declared in Terraform",
+      "expected": 26,
+      "actual": 14,
+      "delta": 13
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "alb",
+      "severity": "warning",
+      "description": "alb: 1 resource(s) declared in Terraform but missing from AWS",
+      "expected": 1,
+      "actual": 1,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "alb",
+      "severity": "warning",
+      "description": "alb: 1 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 1,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "api_endpoints",
+      "severity": "warning",
+      "description": "api_endpoints: 1 resource(s) in AWS not declared in Terraform",
+      "expected": 0,
+      "actual": 2,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "ec2",
+      "severity": "warning",
+      "description": "ec2: 2 resource(s) declared in Terraform but missing from AWS",
+      "expected": 2,
+      "actual": 3,
+      "delta": 2
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "ec2",
+      "severity": "warning",
+      "description": "ec2: 1 resource(s) in AWS not declared in Terraform",
+      "expected": 2,
+      "actual": 3,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "fsx",
+      "severity": "warning",
+      "description": "fsx: 1 resource(s) declared in Terraform but missing from AWS",
+      "expected": 1,
+      "actual": 1,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "fsx",
+      "severity": "warning",
+      "description": "fsx: 1 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 1,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "lambda",
+      "severity": "warning",
+      "description": "lambda: 26 resource(s) in AWS not declared in Terraform",
+      "expected": 0,
+      "actual": 15,
+      "delta": 26
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "rds",
+      "severity": "warning",
+      "description": "rds: 1 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 1,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "s3",
+      "severity": "warning",
+      "description": "s3: 1 resource(s) declared in Terraform but missing from AWS",
+      "expected": 1,
+      "actual": 2,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "s3",
+      "severity": "warning",
+      "description": "s3: 2 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 2,
+      "delta": 2
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "backup",
+      "severity": "info",
+      "description": "backup: 1 resource(s) declared in Terraform but missing from AWS",
+      "expected": 1,
+      "actual": 3,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "backup",
+      "severity": "info",
+      "description": "backup: 3 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 3,
+      "delta": 3
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "route53",
+      "severity": "info",
+      "description": "route53: 1 resource(s) declared in Terraform but missing from AWS",
+      "expected": 1,
+      "actual": 1,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "unmanaged",
+      "resource_type": "route53",
+      "severity": "info",
+      "description": "route53: 1 resource(s) in AWS not declared in Terraform",
+      "expected": 1,
+      "actual": 1,
+      "delta": 1
+    },
+    {
+      "source": "aws",
+      "type": "missing_from_aws",
+      "resource_type": "security_groups",
+      "severity": "info",
+      "description": "security_groups: 25 resource(s) declared in Terraform but missing from AWS",
+      "expected": 26,
+      "actual": 14,
+      "delta": 25
+    }
+  ],
+  "health_summary": []
+}
