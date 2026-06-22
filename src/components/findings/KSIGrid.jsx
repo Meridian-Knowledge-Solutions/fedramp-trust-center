@@ -4,7 +4,8 @@ import { useModal } from '../../contexts/ModalContext';
 import { Sanitizer } from '../../utils/sanitizer';
 import {
   Search, X, ChevronDown, ChevronRight, ArrowRight,
-  CheckCircle2, XCircle, AlertTriangle, Info, Layers
+  CheckCircle2, XCircle, AlertTriangle, Info, Layers,
+  ChevronsDownUp, ChevronsUpDown
 } from 'lucide-react';
 
 export const KSIGrid = () => {
@@ -13,6 +14,9 @@ export const KSIGrid = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  // Categories are collapsed by default (cleaner landing); this Set holds the
+  // ones the user has expanded. Global toggle + per-section toggle both write here.
+  const [expandedCats, setExpandedCats] = useState(() => new Set());
 
   // Filter
   const filteredKsis = useMemo(() => {
@@ -68,6 +72,19 @@ export const KSIGrid = () => {
     };
   }, [ksis]);
 
+  // While searching/filtering, force sections open so matches are always visible;
+  // otherwise honour the per-category expanded state (collapsed by default).
+  const categoryKeys = useMemo(() => Object.keys(groupedKsis), [groupedKsis]);
+  const isFiltering = searchTerm.trim() !== '' || statusFilter !== 'all';
+  const allExpanded = categoryKeys.length > 0 && categoryKeys.every(c => expandedCats.has(c));
+
+  const toggleCat = (cat) => setExpandedCats(prev => {
+    const next = new Set(prev);
+    next.has(cat) ? next.delete(cat) : next.add(cat);
+    return next;
+  });
+  const toggleAll = () => setExpandedCats(allExpanded ? new Set() : new Set(categoryKeys));
+
   const handleReset = () => {
     setSearchTerm('');
     setStatusFilter('all');
@@ -115,13 +132,31 @@ export const KSIGrid = () => {
           <span className="mono" style={{ color: 'var(--faint)', fontSize: 11, alignSelf: 'center', marginLeft: 4 }}>
             {filteredKsis.length} / {ksis.length}
           </span>
+          <button
+            type="button"
+            className="chip"
+            onClick={toggleAll}
+            style={{ marginLeft: 4 }}
+            title={allExpanded ? 'Collapse all categories' : 'Expand all categories'}
+          >
+            {allExpanded ? <ChevronsDownUp size={13} /> : <ChevronsUpDown size={13} />}
+            {allExpanded ? 'Collapse all' : 'Expand all'}
+          </button>
         </div>
       </div>
 
       {/* Category Sections */}
       <div className="stack">
         {Object.entries(groupedKsis).map(([category, items]) => (
-          <CategorySection key={category} category={category} items={items} openModal={openModal} backlogByKsi={backlogByKsi} />
+          <CategorySection
+            key={category}
+            category={category}
+            items={items}
+            openModal={openModal}
+            backlogByKsi={backlogByKsi}
+            isExpanded={isFiltering || expandedCats.has(category)}
+            onToggle={() => toggleCat(category)}
+          />
         ))}
 
         {filteredKsis.length === 0 && (
@@ -141,15 +176,13 @@ export const KSIGrid = () => {
   );
 };
 
-// Collapsible Category Section
-const CategorySection = ({ category, items, openModal, backlogByKsi }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-
+// Collapsible Category Section — expansion is controlled by the parent grid.
+const CategorySection = ({ category, items, openModal, backlogByKsi, isExpanded, onToggle }) => {
   const failed = items.filter(i => i.assertion === false || i.assertion === "false").length;
 
   return (
     <div className="panel">
-      <div className="ph" style={{ cursor: 'pointer' }} onClick={() => setIsExpanded(!isExpanded)}>
+      <div className="ph" style={{ cursor: 'pointer' }} onClick={onToggle}>
         <h4 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           <Layers size={15} style={{ color: failed > 0 ? 'var(--red)' : 'var(--signal)' }} />
