@@ -28,11 +28,23 @@ public/data/*.jsonl
 # Static reference data — committed in repo, not CI-generated
 !public/data/nist_crm.json
 !public/data/Meridian_LMS_CRM_NIST_800-53_Rev5.xlsx
-# Data files are auto-updated by CI - always use remote version
-public/data/unified_ksi_validations.json
-public/data/cli_command_register.json
-public/data/ksi_history.jsonl
-# --- Local Compliance Data (Do Not Commit) ---
+# --- Live data files — published fresh by the governance pipeline every run ---
+# Un-ignored so the pipeline's `git add public/data/` commits them and the
+# gh-pages deploy serves current data (keeps the site in sync with validations).
+!public/data/unified_ksi_validations.json
+!public/data/cli_command_register.json
+!public/data/ksi_history.jsonl
+!public/data/ksi_failure_tracker.json
+!public/data/mas_dashboard.json
+!public/data/mas_boundary.json
+!public/data/metrics_history.jsonl
+!public/data/validation_integrity_report.json
+!public/data/execution_quality_report.json
+
+# --- Local-only / not-published compliance data (stays ignored) ---
+# NOTE: temporal_consistency_log.json (~10 MB, re-stamped every run) is held out
+# deliberately to avoid repo bloat — revisit via Git LFS if it must go live.
+public/data/temporal_consistency_log.json
 public/data/scn_history.jsonl
 public/data/3pao_audit_report.json
 public/data/ksi_logic.json
@@ -41,4 +53,3 @@ public/data/validation_consistency_log.json
 public/data/ksi-command-validation-reference.md
 public/data/cli_assertion_rules.py
 public/data/fingerprint_cache.json
-public/data/cli_command_register.json
