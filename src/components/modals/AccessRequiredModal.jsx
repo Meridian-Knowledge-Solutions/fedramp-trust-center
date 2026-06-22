@@ -128,7 +128,7 @@ export const AccessRequiredModal = () => {
           {data?.featureName || 'This feature'} requires authentication
         </h2>
         <p style={s.subheading}>
-          Access to technical validation findings and authorization materials is restricted to
+          Access to technical validation findings and certification materials is restricted to
           authorized federal personnel.
         </p>
 

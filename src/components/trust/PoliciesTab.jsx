@@ -199,7 +199,7 @@ export const PoliciesTab = memo(() => {
         <div className="kick">§ — GOVERNANCE</div>
         <h1 className="big">Governing <span className="g">standards</span></h1>
         <p className="lede">
-          The FedRAMP 20x rule families and policies governing this authorization, published openly.
+          The FedRAMP 20x rule families and policies governing this certification, published openly.
         </p>
       </div>
 
