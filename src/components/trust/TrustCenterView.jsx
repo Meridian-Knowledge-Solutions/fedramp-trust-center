@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../contexts/ModalContext';
 import { useSystemStatus } from '../../hooks/useSystemStatus';
+import { useData } from '../../hooks/useData';
 import { API_CONFIG, QUARTERLY_REGISTRATION_URL } from '../../config/api';
 import { BASE_PATH } from '../../config/theme';
 import { getRouteSegments, setRoute, onRouteChange } from '../../utils/hashRoute';
@@ -61,6 +62,8 @@ export const TrustCenterView = () => {
     const { isAuthenticated } = useAuth();
     const { openModal } = useModal();
     const { status } = useSystemStatus();
+    // Live KSI numbers — same source the Overview uses, so the two never drift.
+    const { metrics, ksis } = useData();
 
     const [cso, setCso] = useState(null);
     const [schedule, setSchedule] = useState(null);
@@ -77,7 +80,7 @@ export const TrustCenterView = () => {
         const ts = Date.now();
         const grab = async (p) => { try { const r = await fetch(`${BASE_PATH}${p}?t=${ts}`); return r.ok ? r.json() : null; } catch { return null; } };
         (async () => {
-            const [a, b, c, d, e] = await Promise.all([grab('cso_public_info.json'), grab('next_report_date.json'), grab('quarterly_meetings.json'), grab('reports/samples/oar-report.json'), grab('vdr_public_metrics.json')]);
+            const [a, b, c, d, e] = await Promise.all([grab('cso_public_info.json'), grab('next_report_date.json'), grab('quarterly_meetings.json'), grab('../trust-center/reports/json/oar-report.json'), grab('vdr_public_metrics.json')]);
             if (a) setCso(a); if (b) setSchedule(b); if (c) setMeeting(c);
             if (d) { setOar(d); if (d.feedback_summary?.entries) setFeedback(d.feedback_summary.entries); }
             if (e) setVdr(e); setLoading(false);
@@ -101,7 +104,7 @@ export const TrustCenterView = () => {
         const changes = oar?.transformative_changes?.changes || [];
         const events = [
             ['ok', 'probe', 'status endpoint → 200 OK · operational'],
-            ['vi', 'ksi', `KSI validation run · ${oar?.executive_summary?.passed_ksis ?? 57}/${oar?.executive_summary?.total_ksis ?? 61} passing`],
+            ['vi', 'ksi', `KSI validation run · ${metrics?.passed ?? 0}/${ksis?.length ?? 0} passing`],
             ['ok', 'evidence', `daily evidence snapshot sealed · ${oar?.executive_summary?.evidence_snapshots?.daily ?? 230} today`],
             ['ok', 'vdr', `VDR pipeline · ${vdr?.risk?.critical ?? 0} critical · ${vdr?.vdr_acceptance?.active ?? 11} active`],
             ...changes.slice(0, 3).map(c => ['vi', 'scn', `${c.scn_id} · ${(c.type || '').replace('_', ' ')}`]),
@@ -190,9 +193,9 @@ export const TrustCenterView = () => {
                         </div>
                         <div className="console-grid">
                             <div className="cstat"><div className="fig s"><CountUp to={uptime} dec suffix="%" /></div><div className="lab">Uptime / 90d</div></div>
-                            <div className="cstat"><div className="fig i"><CountUp to={ex?.compliance_rate ?? 93.4} dec suffix="%" /></div><div className="lab">KSI compliance</div></div>
+                            <div className="cstat"><div className="fig i"><CountUp to={metrics?.score ?? 0} dec suffix="%" /></div><div className="lab">KSI compliance</div></div>
                             <div className="cstat"><div className="fig s"><CountUp to={vdr?.risk?.critical ?? 0} /></div><div className="lab">Open criticals</div></div>
-                            <div className="cstat"><div className="fig"><CountUp to={ex?.passed_ksis ?? 57} />/<CountUp to={ex?.total_ksis ?? 61} /></div><div className="lab">KSIs passing</div></div>
+                            <div className="cstat"><div className="fig"><CountUp to={metrics?.passed ?? 0} />/<CountUp to={ksis?.length ?? 0} /></div><div className="lab">KSIs passing</div></div>
                         </div>
                         <div className="log">
                             {logLines.map(l => (
@@ -218,7 +221,7 @@ export const TrustCenterView = () => {
                         <div className="row">
                             <span className="svc" style={{ width: 180 }}>KSI Compliance</span>
                             <Sparkbars data={trend} />
-                            <span className="mono" style={{ width: 70, textAlign: 'right', marginLeft: 'auto' }}>{ex?.compliance_rate ?? 93.4}%</span>
+                            <span className="mono" style={{ width: 70, textAlign: 'right', marginLeft: 'auto' }}>{metrics?.score ?? 0}%</span>
                             <span style={{ marginLeft: 16 }}><span className="tag ok">{oar?.compliance_trend?.trend_direction === 'improving' ? 'IMPROVING' : 'STABLE'}</span></span>
                         </div>
                         <div className="row">
@@ -278,7 +281,7 @@ export const TrustCenterView = () => {
                     <div className="rv"><Kick>05 — CERTIFICATION ARTIFACTS</Kick><h2>Reports &amp; evidence</h2>
                         <p className="lede">Machine-readable certification data and audited artifacts. Public items stream openly; access-controlled items unlock for authorized agency reviewers.</p></div>
                     <div className="panel rv">
-                        {[['Ongoing Authorization Report (OAR)', `Period ending ${oar?.reporting_period?.end_date || '2026-05-15'} · FRR-CCM`, 'pub', () => window.open(`${BASE_PATH}reports/samples/oar-report.json`, '_blank')],
+                        {[['Ongoing Authorization Report (OAR)', `Period ending ${oar?.reporting_period?.end_date || '2026-05-15'} · FRR-CCM`, 'pub', () => window.open(`${BASE_PATH}../trust-center/reports/html/oar-report.html`, '_blank')],
                         ['Vulnerability Disclosure Report (VDR)', `${vdr?.metadata?.vdr_standard || 'Release 25.09A'} · aggregate`, 'pub', () => window.open(`${BASE_PATH}vdr_public_metrics.json`, '_blank')],
                         ['Significant Change Notifications (SCN)', `${oar?.data_sources?.scn_history_entries ?? 41} on record · FRR-SCN`, 'pub', () => jump('monitoring')],
                         ['CSO Public Metadata', 'ADS-CSO-PUB · machine-readable', 'pub', () => window.open(`${BASE_PATH}cso_public_info.json`, '_blank')],
