@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Secure Configuration — redesigned pop-out</title>
+<style>
+  :root{
+    --base:#07090C; --raise:#0D1117; --raise2:#0A0E13; --line:#1A222D;
+    --ink:#E8EEF4; --ash:#788596; --faint:#424E5C; --signal:#34E0C4; --indigo:#818CF8;
+    --body:#C2CCD6; --mono:'Geist Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+    --disp:'Geist','Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#05070a;font-family:var(--disp);min-height:100vh;
+    display:flex;align-items:center;justify-content:center;padding:32px;
+    background-image:radial-gradient(ellipse at 50% -10%, #34E0C415, transparent 60%);}
+  /* modal shell */
+  .overlay{width:100%;max-width:900px}
+  .modal{background:var(--raise);border:1px solid var(--line);border-radius:16px;
+    overflow:hidden;box-shadow:0 40px 120px -30px #000;max-height:88vh;display:flex;flex-direction:column}
+  .head{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;
+    background:#0b1016;border-bottom:1px solid var(--line)}
+  .head .ttl{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:600;color:var(--ink)}
+  .head .ttl svg{color:var(--signal)}
+  .x{width:34px;height:34px;border-radius:9px;border:none;background:none;color:var(--ash);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+  .x:hover{background:var(--line);color:var(--ink)}
+  .body{padding:24px 26px;overflow-y:auto;color:var(--body);font-size:14px;line-height:1.7}
+  /* markdown elements */
+  .body h1{font-size:22px;font-weight:600;color:var(--ink);letter-spacing:-.02em;
+    margin:0 0 18px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .body h2{font-size:17px;font-weight:600;color:var(--ink);margin:26px 0 12px;
+    padding-left:12px;border-left:2px solid var(--signal)}
+  .body h3{font-size:15px;font-weight:600;color:var(--ink);margin:20px 0 8px}
+  .body h4{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;
+    color:var(--ash);font-family:var(--mono);margin:16px 0 8px}
+  .body p{margin:0 0 16px;line-height:1.7}
+  .body ul{list-style:disc;padding-left:20px;margin:0 0 16px}
+  .body ul li::marker{color:var(--signal)}
+  .body ol{list-style:decimal;padding-left:20px;margin:0 0 16px}
+  .body ol li::marker{color:var(--indigo);font-family:var(--mono)}
+  .body li{margin-bottom:6px;line-height:1.6}
+  .body a{color:var(--indigo);text-decoration:underline;text-decoration-color:#818CF84d;text-underline-offset:2px}
+  .body code.inline{background:var(--raise2);color:var(--signal);padding:2px 6px;border-radius:5px;
+    border:1px solid var(--line);font-size:12.5px;font-family:var(--mono)}
+  .body pre{background:var(--base);border:1px solid var(--line);border-radius:12px;
+    padding:16px;overflow-x:auto;margin:0 0 16px}
+  .body pre code{color:#9FE9DC;font-size:12.5px;font-family:var(--mono);line-height:1.7;white-space:pre}
+  .body pre .k{color:var(--indigo)} .body pre .s{color:var(--signal)} .body pre .c{color:var(--faint)}
+  .tablewrap{overflow-x:auto;margin:0 0 20px;border:1px solid var(--line);border-radius:12px}
+  table{width:100%;border-collapse:collapse}
+  thead{background:#0b1016}
+  th{padding:10px 16px;text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--ash);font-family:var(--mono);font-weight:600}
+  td{padding:10px 16px;font-size:13px;color:var(--body);vertical-align:top}
+  tbody tr{border-bottom:1px solid var(--line);transition:.15s}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:#34E0C408}
+  .tag{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:6px;white-space:nowrap}
+  .tag.ok{color:var(--signal);background:#34E0C414} .tag.warn{color:#F2B85C;background:#F2B85C14}
+  blockquote{border-left:2px solid var(--indigo);background:#818CF810;padding:10px 14px;margin:0 0 16px;
+    border-radius:0 8px 8px 0;color:#B6C0CC;font-style:italic}
+  hr{border:none;border-top:1px solid var(--line);margin:24px 0}
+  .body strong{color:var(--ink);font-weight:600}
+  /* footer */
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:16px 26px;border-top:1px solid var(--line)}
+  .foot .sub{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .dl{display:inline-flex;align-items:center;gap:8px;background:var(--indigo);color:var(--base);
+    border:none;border-radius:9px;padding:10px 18px;font-family:var(--mono);font-size:12px;font-weight:600;
+    letter-spacing:.03em;cursor:pointer;transition:.15s}
+  .dl:hover{box-shadow:0 0 24px -4px var(--indigo)}
+  .note{max-width:900px;margin:0 auto 14px;font-family:var(--mono);font-size:11px;color:var(--ash);
+    letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+  .note b{color:var(--signal)}
+</style>
+</head>
+<body>
+<div>
+  <div class="note"><b>PREVIEW</b> · redesigned “View Secure Configuration” pop-out (representative content)</div>
+  <div class="overlay">
+    <div class="modal">
+      <div class="head">
+        <div class="ttl">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Secure Configuration
+        </div>
+        <button class="x" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="body">
+        <h1>Meridian LMS — Secure Configuration Baseline</h1>
+        <p>This baseline documents the hardened configuration enforced across the Meridian LMS
+        production boundary, validated continuously by the FedRAMP&nbsp;20x KSI pipeline. Settings
+        below are drawn from infrastructure-as-code and verified against live cloud state.</p>
+
+        <blockquote>All values are enforced via Terraform and re-validated every pipeline run;
+        drift triggers an automatic Significant Change evaluation.</blockquote>
+
+        <h2>Identity &amp; Access</h2>
+        <ul>
+          <li>Phishing-resistant <strong>MFA</strong> required org-wide (PIV/CAC + WebAuthn).</li>
+          <li>SSO via SAML 2.0; session timeout <code class="inline">15m</code> idle, <code class="inline">12h</code> absolute.</li>
+          <li>Least-privilege IAM permission sets, reviewed quarterly.</li>
+        </ul>
+
+        <h2>Encryption</h2>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Control</th><th>Setting</th><th>Scope</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Data at rest</td><td>AES-256 (KMS CMK)</td><td>S3, RDS, EBS</td><td><span class="tag ok">ENFORCED</span></td></tr>
+              <tr><td>Data in transit</td><td>TLS 1.2+</td><td>All endpoints</td><td><span class="tag ok">ENFORCED</span></td></tr>
+              <tr><td>Key rotation</td><td>Annual (auto)</td><td>KMS</td><td><span class="tag ok">ENFORCED</span></td></tr>
+              <tr><td>Backup versioning</td><td>Enabled</td><td>State backend</td><td><span class="tag warn">REVIEW</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Logging &amp; Monitoring</h2>
+        <h4>CloudTrail policy excerpt</h4>
+        <pre><code><span class="c"># audit logging — all regions, log-file validation on</span>
+<span class="k">resource</span> <span class="s">"aws_cloudtrail" "audit"</span> {
+  is_multi_region_trail        = <span class="s">true</span>
+  enable_log_file_validation   = <span class="s">true</span>
+  kms_key_id                   = aws_kms_key.audit.arn
+}</code></pre>
+        <p>Logs stream to a centralized, immutable account with <strong>1-year</strong> retention
+        and anomaly detection via GuardDuty + Security Hub. See the
+        <a href="#">Transparency Console</a> for the live evidence stream.</p>
+
+        <hr/>
+        <h3>References</h3>
+        <ol>
+          <li>NIST SP 800-53 Rev 5 — SC-7, SC-13, SC-28, AU-2, IA-2(1)</li>
+          <li>FedRAMP 20x KSI — KSI-IAM, KSI-MLA, KSI-CNA</li>
+        </ol>
+      </div>
+
+      <div class="foot">
+        <div class="sub">FedRAMP 20x · machine-readable evidence</div>
+        <button class="dl">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Markdown
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
