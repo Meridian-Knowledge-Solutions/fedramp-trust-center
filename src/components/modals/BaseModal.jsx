@@ -32,12 +32,12 @@ export const BaseModal = ({ isOpen, onClose, title, children, size = 'default', 
       body: 'bg-white'
     },
     dark: {
-      container: 'bg-[#0f1014]',
-      header: 'border-gray-800/50 bg-gradient-to-r from-gray-900/90 to-gray-800/90',
-      title: 'text-white',
-      closeButton: 'hover:bg-gray-700/50',
-      closeIcon: 'text-gray-300',
-      body: 'bg-[#151618]'
+      container: 'bg-[#0D1117]',
+      header: 'border-[#1A222D] bg-[#0b1016]',
+      title: 'text-[#E8EEF4]',
+      closeButton: 'hover:bg-[#1A222D]',
+      closeIcon: 'text-[#788596]',
+      body: 'bg-[#0D1117]'
     }
   };
 
