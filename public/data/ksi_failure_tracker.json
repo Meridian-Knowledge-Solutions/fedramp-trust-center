@@ -1,9 +1,9 @@
 {
   "metadata": {
     "created_at": "2026-01-17T07:22:37.324152+00:00",
-    "last_updated": "2026-06-24T13:19:22.428122+00:00",
+    "last_updated": "2026-06-24T17:18:21.906553+00:00",
     "schema_version": "1.0.0",
-    "total_runs_processed": 2282,
+    "total_runs_processed": 2283,
     "backfill_complete": true,
     "backfill_since": "all time",
     "backfill_commits": 1256
@@ -38,16 +38,6 @@
       "requirement": "Use immutable infrastructure with strictly defined functionality and privileges by default.",
       "score_at_failure": 0
     },
-    "KSI-CMT-02": {
-      "ksi_id": "KSI-CMT-02",
-      "failed_at": "2026-05-12T03:06:48.256462+00:00",
-      "failed_commit": "5fe128e1ff844263ab7f67b57fac4c969bf08226",
-      "reason": "Insufficient (55%): Execute changes to machine-based information resources through redeployment of version controlled immutable resources... | 5/11 resources compliant, 2 unverified. | Verified: IMDSv2 Enforced: Instance '[resource]' requires HttpTokens.; IMDSv2 Enforced: Instance '[resource]' requires HttpTokens.; IMDSv2 Enforced: Instance '[resource]' requires HttpTokens. |   ...and 2 more verification(s) | Failures: Risk: Instance '[resource]' allows IMDSv1 (Legacy Metadata). Enforce v2.; Risk: Instance '[resource]' allows IMDSv1 (Legacy Metadata). Enforce v2.; Risk: Instance '[resource]' allows IMDSv1 (Legacy Metadata). Enforce v2. | Warnings: Pipeline success rate 0% below 95% target (0/50).",
-      "score": 55,
-      "resources_failed": 4,
-      "requirement": "Execute changes to machine-based information resources through redeployment of version controlled immutable resources rather than direct modification wherever possible.",
-      "score_at_failure": 55
-    },
     "KSI-CNA-05": {
       "ksi_id": "KSI-CNA-05",
       "failed_at": "2026-06-15T21:32:05.248293+00:00",
@@ -56,16 +46,6 @@
       "score": 0,
       "resources_failed": 0,
       "requirement": "Persistently review the effectiveness of protection against denial of service attacks and other unwanted activity.",
-      "score_at_failure": 0
-    },
-    "KSI-CNA-06": {
-      "ksi_id": "KSI-CNA-06",
-      "failed_at": "2026-06-15T21:32:05.248293+00:00",
-      "failed_commit": "1a62a92286f219ca7d5e3f8c104d08f3ec39e820",
-      "reason": "Not Evaluated: Appropriately optimize machine-based information resources for high availability and rapid recovery. | Not evaluated: circuit breaker engaged before this KSI ran | Verdict: No findings produced for this KSI.",
-      "score": 0,
-      "resources_failed": 0,
-      "requirement": "Appropriately optimize machine-based information resources for high availability and rapid recovery.",
       "score_at_failure": 0
     },
     "KSI-IAM-01": {
@@ -127,6 +107,16 @@
       "resources_failed": 1,
       "requirement": "Enforce appropriately secure authentication methods for non-user accounts and services.",
       "score_at_failure": 98
+    },
+    "KSI-MLA-01": {
+      "ksi_id": "KSI-MLA-01",
+      "failed_at": "2026-06-24T17:18:21.384229+00:00",
+      "failed_commit": "6ecf916de886e9acd09c916017bd3ca1da27bb72",
+      "reason": "Insufficient (75%): Log all activity on all information resources supporting the cloud service offering to a protected audit log. | 3/5 resources compliant, 1 unverified. | Verified: Trail is Secure (Multi-Region, Validated, KMS-Encrypted, Global Events) [organization trail; CloudWatch Logs integrated \u2192 arn:aws:[redacted]; delivery role arn:aws:[redacted]; Trail logging rate 100% (1/1 trails actively logging).; S3 access-logging rate 100% (11 buckets covered). | Failures: ALB access-log rate 50% < target 100% (1/2 ALBs without S3 access logs). | Verdict: Operational metric(s) below target: alb_access_log_metrics",
+      "score": 75,
+      "resources_failed": 1,
+      "requirement": "Log all activity on all information resources supporting the cloud service offering to a protected audit log.",
+      "score_at_failure": 75
     }
   },
   "failure_history": [
@@ -6192,6 +6182,32 @@
       "remediated_at": "2026-06-21T09:48:30.482003+00:00",
       "remediation_commit": "541de9ec450fdc84764b5f1bd3aad5aa79fe7b40",
       "duration_hours": 3.64
+    },
+    {
+      "ksi_id": "KSI-CMT-02",
+      "failed_at": "2026-05-12T03:06:48.256462+00:00",
+      "failed_commit": "5fe128e1ff844263ab7f67b57fac4c969bf08226",
+      "reason": "Insufficient (55%): Execute changes to machine-based information resources through redeployment of version controlled immutable resources... | 5/11 resources compliant, 2 unverified. | Verified: IMDSv2 Enforced: Instance '[resource]' requires HttpTokens.; IMDSv2 Enforced: Instance '[resource]' requires HttpTokens.; IMDSv2 Enforced: Instance '[resource]' requires HttpTokens. |   ...and 2 more verification(s) | Failures: Risk: Instance '[resource]' allows IMDSv1 (Legacy Metadata). Enforce v2.; Risk: Instance '[resource]' allows IMDSv1 (Legacy Metadata). Enforce v2.; Risk: Instance '[resource]' allows IMDSv1 (Legacy Metadata). Enforce v2. | Warnings: Pipeline success rate 0% below 95% target (0/50).",
+      "score": 55,
+      "resources_failed": 4,
+      "requirement": "Execute changes to machine-based information resources through redeployment of version controlled immutable resources rather than direct modification wherever possible.",
+      "score_at_failure": 55,
+      "remediated_at": "2026-06-24T17:18:21.384229+00:00",
+      "remediation_commit": "6ecf916de886e9acd09c916017bd3ca1da27bb72",
+      "duration_hours": 1046.19
+    },
+    {
+      "ksi_id": "KSI-CNA-06",
+      "failed_at": "2026-06-15T21:32:05.248293+00:00",
+      "failed_commit": "1a62a92286f219ca7d5e3f8c104d08f3ec39e820",
+      "reason": "Not Evaluated: Appropriately optimize machine-based information resources for high availability and rapid recovery. | Not evaluated: circuit breaker engaged before this KSI ran | Verdict: No findings produced for this KSI.",
+      "score": 0,
+      "resources_failed": 0,
+      "requirement": "Appropriately optimize machine-based information resources for high availability and rapid recovery.",
+      "score_at_failure": 0,
+      "remediated_at": "2026-06-24T17:18:21.384229+00:00",
+      "remediation_commit": "6ecf916de886e9acd09c916017bd3ca1da27bb72",
+      "duration_hours": 211.77
     }
   ],
   "ksi_stats": {
@@ -6205,9 +6221,11 @@
     },
     "KSI-CMT-02": {
       "total_failures": 8,
-      "total_remediations": 7,
-      "mttr_hours": 19.5,
-      "last_failure": "2026-05-12T03:06:48.256462+00:00"
+      "total_remediations": 8,
+      "mttr_hours": 147.84,
+      "last_failure": "2026-05-12T03:06:48.256462+00:00",
+      "longest_outage_hours": 1046.19,
+      "shortest_outage_hours": 0.17
     },
     "KSI-CNA-05": {
       "total_failures": 9,
@@ -6459,9 +6477,11 @@
     },
     "KSI-CNA-06": {
       "total_failures": 8,
-      "total_remediations": 7,
-      "mttr_hours": 29.37,
-      "last_failure": "2026-06-15T21:32:05.248293+00:00"
+      "total_remediations": 8,
+      "mttr_hours": 52.17,
+      "last_failure": "2026-06-15T21:32:05.248293+00:00",
+      "longest_outage_hours": 211.77,
+      "shortest_outage_hours": 0.29
     },
     "KSI-PIY-04": {
       "total_failures": 6,
@@ -6568,10 +6588,10 @@
       "shortest_outage_hours": 0.29
     },
     "KSI-MLA-01": {
-      "total_failures": 11,
+      "total_failures": 12,
       "total_remediations": 11,
       "mttr_hours": 27.74,
-      "last_failure": "2026-06-15T21:32:05.248293+00:00",
+      "last_failure": "2026-06-24T17:18:21.384229+00:00",
       "longest_outage_hours": 186.68,
       "shortest_outage_hours": 0.29
     },
