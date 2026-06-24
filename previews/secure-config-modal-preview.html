@@ -74,6 +74,18 @@
   .note{max-width:900px;margin:0 auto 14px;font-family:var(--mono);font-size:11px;color:var(--ash);
     letter-spacing:.04em;display:flex;align-items:center;gap:8px}
   .note b{color:var(--signal)}
+  /* responsive table-as-cards */
+  .hint{font-size:12px;color:var(--ash);margin:0 0 12px}
+  .cards{display:flex;flex-direction:column;gap:10px;margin:0 0 20px}
+  .card{border:1px solid var(--line);border-radius:12px;background:var(--raise2);overflow:hidden}
+  .card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:10px 16px;background:#0b1016;border-bottom:1px solid var(--line)}
+  .card-t{font-size:14px;font-weight:600;color:var(--ink)}
+  .card-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;padding:14px 16px}
+  .card-grid .lab{font-family:var(--mono);font-size:10px;text-transform:uppercase;
+    letter-spacing:.08em;color:var(--ash);margin-bottom:4px}
+  .card-grid .val{font-size:13px;color:var(--body);line-height:1.6}
+  @media(max-width:560px){.card-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -108,16 +120,35 @@
         </ul>
 
         <h2>Encryption</h2>
-        <div class="tablewrap">
-          <table>
-            <thead><tr><th>Control</th><th>Setting</th><th>Scope</th><th>Status</th></tr></thead>
-            <tbody>
-              <tr><td>Data at rest</td><td>AES-256 (KMS CMK)</td><td>S3, RDS, EBS</td><td><span class="tag ok">ENFORCED</span></td></tr>
-              <tr><td>Data in transit</td><td>TLS 1.2+</td><td>All endpoints</td><td><span class="tag ok">ENFORCED</span></td></tr>
-              <tr><td>Key rotation</td><td>Annual (auto)</td><td>KMS</td><td><span class="tag ok">ENFORCED</span></td></tr>
-              <tr><td>Backup versioning</td><td>Enabled</td><td>State backend</td><td><span class="tag warn">REVIEW</span></td></tr>
-            </tbody>
-          </table>
+        <p class="hint">↓ Wide tables (4+ columns) now render as cards — every field is visible, nothing hides behind a horizontal scrollbar.</p>
+        <div class="cards">
+          <div class="card">
+            <div class="card-h"><div class="card-t">Data at rest</div><span class="tag ok">ENFORCED</span></div>
+            <div class="card-grid">
+              <div><div class="lab">Setting</div><div class="val"><code class="inline">AES-256</code> (KMS CMK)</div></div>
+              <div><div class="lab">Scope</div><div class="val">S3, RDS, EBS</div></div>
+              <div><div class="lab">Control</div><div class="val">SC-28</div></div>
+              <div><div class="lab">Validated</div><div class="val">2h ago</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-t">Data in transit</div><span class="tag ok">ENFORCED</span></div>
+            <div class="card-grid">
+              <div><div class="lab">Setting</div><div class="val"><code class="inline">TLS 1.2+</code></div></div>
+              <div><div class="lab">Scope</div><div class="val">All public endpoints</div></div>
+              <div><div class="lab">Control</div><div class="val">SC-8, SC-13</div></div>
+              <div><div class="lab">Validated</div><div class="val">2h ago</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-t">Backup state versioning</div><span class="tag warn">REVIEW</span></div>
+            <div class="card-grid">
+              <div><div class="lab">Setting</div><div class="val"><code class="inline">Enabled</code></div></div>
+              <div><div class="lab">Scope</div><div class="val">Terraform state backend (S3)</div></div>
+              <div><div class="lab">Control</div><div class="val">CP-9</div></div>
+              <div><div class="lab">Validated</div><div class="val">2h ago</div></div>
+            </div>
+          </div>
         </div>
 
         <h2>Logging &amp; Monitoring</h2>
