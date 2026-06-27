@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-06-27T02:06:29Z",
+    "generated_at": "2026-06-27T04:06:17Z",
     "total_ksis": 61,
     "passed": 50,
     "failed": 11,
@@ -20,7 +20,7 @@
         "total_passed": 50,
         "consecutive_failures": 1,
         "failure_rate": 0.1803,
-        "last_failure_time": "2026-06-27T01:14:46.651821+00:00",
+        "last_failure_time": "2026-06-27T03:18:05.149540+00:00",
         "circuit_broken_at": null
       }
     },
@@ -159,13 +159,13 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws ec2 describe-vpcs --filters Name=isDefault,Values=false --output json; aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json; aws rds describe-db-instances --query \"DBInstances[*].{ID:DBInstanceIdentifier, Engine:Engine, VPC:DBSubnetGroup.VpcId}\" --output json; aws s3api [s3-bucket] --output json; aws elbv2 describe-load-balancers --query \"LoadBalancers[*].{ARN:LoadBalancerArn, DNS:DNSName, VPC:VpcId}\" --output json; aws iam list-users --query \"Users[*].{UserName:UserName, CreateDate:CreateDate, PasswordLastUsed:PasswordLastUsed}\" --output json; aws iam list-roles --query \"Roles[?contains(RoleName, '[resource]') || contains(RoleName, '[resource]') || contains(RoleName, '[resource]')]\" --output json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/manifest.json",
-      "timestamp": "2026-06-27T01:14:46.660491Z",
+      "timestamp": "2026-06-27T03:18:05.160237Z",
       "score": 74,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-01/ec2_011136_82f014d5.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-01/ec2_031438_82f014d5.json",
       "total_category_controls": 1,
       "resources_scanned": 43,
       "resources_passed": 32,
@@ -439,7 +439,7 @@
           "command": "aws ec2 describe-vpcs --filters Name=isDefault,Values=false --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.92s",
+          "execution_time": "1.03s",
           "error_message": null,
           "stdout_sha256": "bd8996737150d31c6b3a6cb00a598822e3d9192a9adfed113122dd0d56ee7c3c"
         },
@@ -449,7 +449,7 @@
           "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "1.22s",
           "error_message": null,
           "stdout_sha256": "a4aa126131f7b23689c39f2224454a87dceae113adf35c6c9d4e77945a42b5b2"
         },
@@ -459,7 +459,7 @@
           "command": "aws rds describe-db-instances --query \"DBInstances[*].{ID:DBInstanceIdentifier, Engine:Engine, VPC:DBSubnetGroup.VpcId}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.77s",
+          "execution_time": "0.87s",
           "error_message": null,
           "stdout_sha256": "3748bce9c96517acc2d5f12189607d06dbeabaff4617dcca686017cb2ea86046"
         },
@@ -469,7 +469,7 @@
           "command": "aws s3api [s3-bucket] --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.73s",
+          "execution_time": "0.75s",
           "error_message": null,
           "stdout_sha256": "998aaa7e196cff7866debbe89d08379391c116eaf43cc8fa4f45a122d6ea8465"
         },
@@ -479,7 +479,7 @@
           "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[*].{ARN:LoadBalancerArn, DNS:DNSName, VPC:VpcId}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.66s",
+          "execution_time": "0.79s",
           "error_message": null,
           "stdout_sha256": "a0527daf992903f949fb24c2a6f3ef2d5514f5ac011b95aee5b17162d35394a3"
         },
@@ -489,7 +489,7 @@
           "command": "aws iam list-users --query \"Users[*].{UserName:UserName, CreateDate:CreateDate, PasswordLastUsed:PasswordLastUsed}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.75s",
+          "execution_time": "0.85s",
           "error_message": null,
           "stdout_sha256": "bfd4c148cf63e50ec7e5ff9a7bfe7db7b5977201bcf66f0063db89d15cdd2684"
         },
@@ -499,7 +499,7 @@
           "command": "aws iam list-roles --query \"Roles[?contains(RoleName, '[resource]') || contains(RoleName, '[resource]') || contains(RoleName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.03s",
+          "execution_time": "0.89s",
           "error_message": null,
           "stdout_sha256": "e56ff333b20b6f97a6e79e01c4138bbc6e39afb0e280daa8304713dfde0a7f3f"
         },
@@ -509,9 +509,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/manifest.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.12s",
+          "execution_time": "0.15s",
           "error_message": null,
-          "stdout_sha256": "45448718439f5aa2627041b8c3a5e51190e6542fc77212f5150b144f050e9db6"
+          "stdout_sha256": "f3b93364939c9338235865d3a0340fc56dd288181b83a2a68fb8a22c8ffd75d4"
         }
       ],
       "commands_executed": 8,
@@ -534,13 +534,13 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/unified_ksi_validations.json --output json; aws securityhub describe-hub --output json",
-      "timestamp": "2026-06-27T01:14:46.669831Z",
+      "timestamp": "2026-06-27T03:18:05.170908Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-02/s3api_011136_bb02a3ee.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-02/s3api_031438_bb02a3ee.json",
       "total_category_controls": 2,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -568,9 +568,9 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/unified_ksi_validations.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.70s",
+          "execution_time": "0.80s",
           "error_message": null,
-          "stdout_sha256": "bac848711267c4b7779dc0284491939e6108af023e447bd84b12630b09c83885"
+          "stdout_sha256": "b9fab50a5d19fa43ec4dab1215edfcac39ec8839d48e73b924ed623e74a2119c"
         },
         {
           "index": 1,
@@ -578,7 +578,7 @@
           "command": "aws securityhub describe-hub --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.76s",
+          "execution_time": "0.89s",
           "error_message": null,
           "stdout_sha256": "2fcb32fe1145d433a94f4767376e9834bcbae762a8eb12534c44f366c5f1a425"
         }
@@ -603,13 +603,13 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/meridian-authorization-package-LATEST.zip --output json; curl -s -o /dev/null -w \"%{http_code}\" https://7d7pdwb9t3.[fqdn]/prod/status || echo \"000\"",
-      "timestamp": "2026-06-27T01:14:46.670985Z",
+      "timestamp": "2026-06-27T03:18:05.172192Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-03/s3api_011136_5cd5fb53.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-03/s3api_031438_5cd5fb53.json",
       "total_category_controls": 3,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -637,9 +637,9 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/meridian-authorization-package-LATEST.zip --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.73s",
+          "execution_time": "0.80s",
           "error_message": null,
-          "stdout_sha256": "5a8680dae14390689715c76810aa6f032a21b881af51ff9358dc364eb7898366"
+          "stdout_sha256": "209ee405c505a440d0c351694bba5e537acc146a3cf7e5bcc12af38f833a07d9"
         },
         {
           "index": 1,
@@ -647,7 +647,7 @@
           "command": "curl -s -o /dev/null -w \"%{http_code}\" https://7d7pdwb9t3.[fqdn]/prod/status || echo \"000\"",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.53s",
+          "execution_time": "0.41s",
           "error_message": null,
           "stdout_sha256": "27badc983df1780b60c2b3fa9d3a19a00e46aac798451f0febdca52920faaddf"
         }
@@ -672,13 +672,13 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/dashboard-data/assessed_vulnerabilities_integrated.json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/dashboard-data/vdr_vulnerability_status.json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/vulnerability-management-policy.md",
-      "timestamp": "2026-06-27T01:14:46.672579Z",
+      "timestamp": "2026-06-27T03:18:05.173944Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-04/documentation_011136_6aee584e.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-04/documentation_031438_6aee584e.json",
       "total_category_controls": 4,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -712,9 +712,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/dashboard-data/assessed_vulnerabilities_integrated.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.13s",
+          "execution_time": "0.29s",
           "error_message": null,
-          "stdout_sha256": "5e50e7798da87cbd0209a36fd01d66696ce37a259f724ad2f259e7b852b92152"
+          "stdout_sha256": "38e7d764428911ce492ed0af9cef5a6af88021ee66dae5770d540fc05f4c0557"
         },
         {
           "index": 1,
@@ -722,9 +722,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/dashboard-data/vdr_vulnerability_status.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.13s",
+          "execution_time": "0.15s",
           "error_message": null,
-          "stdout_sha256": "9e4dc07d148d526b0e50597aefd92a5a80a52ca0cd71c8cd1a16166b193ab2b2"
+          "stdout_sha256": "51d1dbddad7082e15d5d7313d9128705ae90cafeb6be225b3ce8a6580ae4e3d7"
         },
         {
           "index": 2,
@@ -732,9 +732,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/vulnerability-management-policy.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.12s",
+          "execution_time": "0.13s",
           "error_message": null,
-          "stdout_sha256": "9f249d128e5befffed20e87bde5471f2a1624d20515c2edba76d086d0018ffd9"
+          "stdout_sha256": "089e3d6689994a38c36d1511603d945e60a80cc510550def30dcabd1207e950e"
         }
       ],
       "commands_executed": 3,
@@ -744,7 +744,7 @@
       "ksi_id": "KSI-AFR-05",
       "validation_id": "KSI-AFR-05",
       "assertion": true,
-      "assertion_reason": "\u2705 Excellent (100%): Verify SCN procedures are documented and active change tracking is maintained. | 2/2 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (7796 bytes, 8 sections).; Verified: Governance document '[resource]' contains 115 structured entries (55474 bytes).",
+      "assertion_reason": "\u2705 Excellent (100%): Verify SCN procedures are documented and active change tracking is maintained. | 2/2 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (7796 bytes, 8 sections).; Verified: Governance document '[resource]' contains 116 structured entries (55956 bytes).",
       "display_status": "pass",
       "mode": "capability",
       "capability_status": "operational",
@@ -757,13 +757,13 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/scn_procedures.md; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/scn_automation/public_scn_history.jsonl",
-      "timestamp": "2026-06-27T01:14:46.675059Z",
+      "timestamp": "2026-06-27T03:18:05.176606Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-05/documentation_011136_4b2ff89d.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-05/documentation_031438_4b2ff89d.json",
       "total_category_controls": 5,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -781,7 +781,7 @@
           "resource": "scn_automation/public_scn_history.jsonl",
           "status": "PASS",
           "check": "documentation",
-          "reason": "Verified: Governance document '[resource]' contains 115 structured entries (55474 bytes)."
+          "reason": "Verified: Governance document '[resource]' contains 116 structured entries (55956 bytes)."
         }
       ],
       "command_executions": [
@@ -791,9 +791,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/scn_procedures.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.14s",
+          "execution_time": "0.13s",
           "error_message": null,
-          "stdout_sha256": "035d19c819dc6382fcb059758c1677f45b57759943e5d0faa34b12ddeeaf6e09"
+          "stdout_sha256": "4a073bb5d1c43c3c0c7b4585624852d439c55bd50e2f506190845a0e8ccedaa1"
         },
         {
           "index": 1,
@@ -801,9 +801,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/scn_automation/public_scn_history.jsonl",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.12s",
+          "execution_time": "0.18s",
           "error_message": null,
-          "stdout_sha256": "1c305d42120ea7a7cc429d47015ce8f83dac890e4777f6152e61e2f5289e9ca9"
+          "stdout_sha256": "c95002c0e109dad85ca54265c8bd983a32165415095aaa63b8ddfdf3c14e38b1"
         }
       ],
       "commands_executed": 2,
@@ -826,13 +826,13 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/3pao_audit_report.json --output json; curl -s -o /dev/null -w \"%{http_code}\" https://[fqdn]/fedramp-trust-center/ || echo \"000\"",
-      "timestamp": "2026-06-27T01:14:46.676745Z",
+      "timestamp": "2026-06-27T03:18:05.178495Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-06/s3api_011136_1d624f99.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-06/s3api_031438_1d624f99.json",
       "total_category_controls": 6,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -860,7 +860,7 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/3pao_audit_report.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.72s",
+          "execution_time": "0.79s",
           "error_message": null,
           "stdout_sha256": "a6de2ffe966fe36256a83b7c2f092777eebe48ebb71d9a224521a45ad337c473"
         },
@@ -870,7 +870,7 @@
           "command": "curl -s -o /dev/null -w \"%{http_code}\" https://[fqdn]/fedramp-trust-center/ || echo \"000\"",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.05s",
+          "execution_time": "0.03s",
           "error_message": null,
           "stdout_sha256": "27badc983df1780b60c2b3fa9d3a19a00e46aac798451f0febdca52920faaddf"
         }
@@ -895,13 +895,13 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "curl -s https://7d7pdwb9t3.[fqdn]/prod/config",
-      "timestamp": "2026-06-27T01:14:46.677669Z",
+      "timestamp": "2026-06-27T03:18:05.179475Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-07/apidocumentation_011136_94db2fcc.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-07/apidocumentation_031438_94db2fcc.json",
       "total_category_controls": 7,
       "resources_scanned": 1,
       "resources_passed": 1,
@@ -923,7 +923,7 @@
           "command": "curl -s https://7d7pdwb9t3.[fqdn]/prod/config",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.15s",
+          "execution_time": "1.18s",
           "error_message": null,
           "stdout_sha256": "a9a77520f2dcb18ff93b1cdc015205c96f862292074b54a99b4972ddbc188b9c"
         }
@@ -948,13 +948,13 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/security-inbox-procedures.md; aws sns list-topics --query \"Topics[?contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]')]\" --output json",
-      "timestamp": "2026-06-27T01:14:46.678824Z",
+      "timestamp": "2026-06-27T03:18:05.180684Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-08/documentation_011136_94f0ec0c.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-08/documentation_031438_94f0ec0c.json",
       "total_category_controls": 8,
       "resources_scanned": 4,
       "resources_passed": 4,
@@ -994,9 +994,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/security-inbox-procedures.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.11s",
+          "execution_time": "0.13s",
           "error_message": null,
-          "stdout_sha256": "a47f89ea08cd1ddd6a112278edcac778887e4c560087f6f5ad968d37e53072bc"
+          "stdout_sha256": "2b45f7dd4831227d221b9d65c51e96bb93cd2090c9efd2b5dcdf1c82a3851211"
         },
         {
           "index": 1,
@@ -1004,7 +1004,7 @@
           "command": "aws sns list-topics --query \"Topics[?contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.67s",
+          "execution_time": "0.78s",
           "error_message": null,
           "stdout_sha256": "9909c68705068006b6ec8ecaac387318d90a8ac5ddb6afdecbe9b48ed06be8f1"
         }
@@ -1029,13 +1029,13 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/authorization_by_fedramp/fedramp-phase2-validation-architecture.mmd; aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/unified_ksi_validations.json --output json",
-      "timestamp": "2026-06-27T01:14:46.680555Z",
+      "timestamp": "2026-06-27T03:18:05.182597Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-09/documentation_011136_07e3c5b1.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-09/documentation_031438_07e3c5b1.json",
       "total_category_controls": 9,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -1063,9 +1063,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/authorization_by_fedramp/fedramp-phase2-validation-architecture.mmd",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.13s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "ec7f232477b260648319c52978f68ea498ca4f897af01882110d444a1824a0ae"
+          "stdout_sha256": "dc88829bc044084c25fb27faadf9e3dee81660ce2c095a445877dbf440f8beb0"
         },
         {
           "index": 1,
@@ -1073,9 +1073,9 @@
           "command": "aws s3api head-object --bucket fedramp-compliance-[account-id] --key data/unified_ksi_validations.json --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.70s",
+          "execution_time": "0.79s",
           "error_message": null,
-          "stdout_sha256": "bac848711267c4b7779dc0284491939e6108af023e447bd84b12630b09c83885"
+          "stdout_sha256": "b9fab50a5d19fa43ec4dab1215edfcac39ec8839d48e73b924ed623e74a2119c"
         }
       ],
       "commands_executed": 2,
@@ -1098,13 +1098,13 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/icp_playbook.md; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/incident-response-plan.md; aws sns list-topics --query \"Topics[?contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]')]\" --output json; aws sns list-subscriptions --query \"Subscriptions[?contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]')]\" --output json",
-      "timestamp": "2026-06-27T01:14:46.682631Z",
+      "timestamp": "2026-06-27T03:18:05.184828Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-10/documentation_011136_ca6eb552.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-10/documentation_031438_ca6eb552.json",
       "total_category_controls": 10,
       "resources_scanned": 7,
       "resources_passed": 6,
@@ -1162,9 +1162,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/icp_playbook.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.13s",
+          "execution_time": "0.16s",
           "error_message": null,
-          "stdout_sha256": "e5e979bef3c5d33895f1a1a5fbf3961a8816293d1eb5f26d11162663dbcffb30"
+          "stdout_sha256": "d6be16d94028faf8120ffe5324810889ade940409e6670b904454432827d6721"
         },
         {
           "index": 1,
@@ -1172,9 +1172,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/incident-response-plan.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.12s",
+          "execution_time": "0.15s",
           "error_message": null,
-          "stdout_sha256": "e4e85b265862940fdf9188d8ef60a63803dd8f7f024ea4563411f71a65c8acab"
+          "stdout_sha256": "a6d91e071849979f2935344dc8f221f8d25f5d2604e5e464d110af6b75af6394"
         },
         {
           "index": 2,
@@ -1182,7 +1182,7 @@
           "command": "aws sns list-topics --query \"Topics[?contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.71s",
+          "execution_time": "0.81s",
           "error_message": null,
           "stdout_sha256": "88efa65e4baee99dabba27c193fa3bb815fb7b160d080d56dee576a5f1118757"
         },
@@ -1192,7 +1192,7 @@
           "command": "aws sns list-subscriptions --query \"Subscriptions[?contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]') || contains(TopicArn, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.70s",
+          "execution_time": "0.76s",
           "error_message": null,
           "stdout_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
         }
@@ -1217,7 +1217,7 @@
       "long_name": "Authorization by FedRAMP",
       "category_prefix": "KSI-AFR",
       "cli_command": "aws kms list-keys --limit 5 --output json; aws s3api [s3-bucket] --bucket fedramp-compliance-[account-id] --output json; aws rds describe-db-instances --output json; aws elbv2 describe-listeners --load-balancer-arn $(aws elbv2 describe-load-balancers --query \"LoadBalancers[0].LoadBalancerArn\" --output text) --output json || echo \"[]\"; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/cryptographic-modules-policy.md; aws ec2 get-ebs-encryption-by-default --output json; aws kms list-keys --output json; aws kms describe-key --key-id $(aws kms list-keys --query 'Keys[0].KeyId' --output text) --output json; ( for b in $(aws s3api [s3-bucket] --query 'Buckets[].Name' --output text 2>/dev/null); do (aws s3api [s3-bucket] --bucket \"$b\" --output json 2>/dev/null || echo '{}') | jq --arg b \"$b\" '. + {Bucket: $b}'; done ) | jq -s '{BucketEncryption: .}'",
-      "timestamp": "2026-06-27T01:14:46.685910Z",
+      "timestamp": "2026-06-27T03:18:05.188909Z",
       "score": 100,
       "threshold": 100,
       "metric_status": "pass",
@@ -1225,7 +1225,7 @@
         "s3-aes256-non-boundary-buckets"
       ],
       "accepted_risks_flipped_assertion": true,
-      "evidence_path": "evidence_v2_engine/KSI-AFR-11/kms_011136_3471c05c.json",
+      "evidence_path": "evidence_v2_engine/KSI-AFR-11/kms_031438_3471c05c.json",
       "total_category_controls": 11,
       "resources_scanned": 30,
       "resources_passed": 27,
@@ -1424,7 +1424,7 @@
           "command": "aws kms list-keys --limit 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.64s",
+          "execution_time": "0.72s",
           "error_message": null,
           "stdout_sha256": "d0a3212f7420ae102665ca1ce9d37aea7f804aca80713a86d89c058e8578d73f"
         },
@@ -1434,7 +1434,7 @@
           "command": "aws s3api [s3-bucket] --bucket fedramp-compliance-[account-id] --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.68s",
+          "execution_time": "0.77s",
           "error_message": null,
           "stdout_sha256": "9dcbf5a9219555f282511d108aea0d88f078e8824b9fdd397160394bd3c2a213"
         },
@@ -1444,9 +1444,9 @@
           "command": "aws rds describe-db-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.76s",
+          "execution_time": "0.91s",
           "error_message": null,
-          "stdout_sha256": "5dd37315538e45bc34536bb1d24f3c76964f95e85b23c29b02aadf7dc2d20911"
+          "stdout_sha256": "38ff797c6f84f3b9dd19c97a5b364ed7e5dbdf5a767625772d00e3bdba4287df"
         },
         {
           "index": 3,
@@ -1454,7 +1454,7 @@
           "command": "aws elbv2 describe-listeners --load-balancer-arn $(aws elbv2 describe-load-balancers --query \"LoadBalancers[0].LoadBalancerArn\" --output text) --output json || echo \"[]\"",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.35s",
+          "execution_time": "1.50s",
           "error_message": null,
           "stdout_sha256": "aed352333a02326928e63dfbb44534deafaec75f68ef625303e9a7d81cf96553"
         },
@@ -1464,9 +1464,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/cryptographic-modules-policy.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.12s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "37a7f8292d51f7e203acf134963daae7f3c1560ea463fc3f76c327762868be54"
+          "stdout_sha256": "84398b7fb4291e9369b237e0f8b99b01a020c2acd0df27a4233f4d6114f62978"
         },
         {
           "index": 5,
@@ -1474,7 +1474,7 @@
           "command": "aws ec2 get-ebs-encryption-by-default --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.84s",
+          "execution_time": "0.94s",
           "error_message": null,
           "stdout_sha256": "5ddd232a55b6b0a94d8a933bcfba9e4c900908f0aca66430f8b7b5603ce0d47f"
         },
@@ -1484,7 +1484,7 @@
           "command": "aws kms list-keys --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.67s",
+          "execution_time": "0.71s",
           "error_message": null,
           "stdout_sha256": "8138a1e552bc3a1f4b69025a9fd447b68b14e017a858867c21434adff056eaca"
         },
@@ -1494,7 +1494,7 @@
           "command": "aws kms describe-key --key-id $(aws kms list-keys --query 'Keys[0].KeyId' --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.28s",
+          "execution_time": "1.44s",
           "error_message": null,
           "stdout_sha256": "22b193061783936a91be04903b763ba60f0040288a50040e313e13a4a39c9622"
         },
@@ -1504,7 +1504,7 @@
           "command": "( for b in $(aws s3api [s3-bucket] --query 'Buckets[].Name' --output text 2>/dev/null); do (aws s3api [s3-bucket] --bucket \"$b\" --output json 2>/dev/null || echo '{}') | jq --arg b \"$b\" '. + {Bucket: $b}'; done ) | jq -s '{BucketEncryption: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "10.74s",
+          "execution_time": "11.76s",
           "error_message": null,
           "stdout_sha256": "133c3bf4a7bef146b1a946fffc45f99ce4709c35c4c2d632aef2b8540ed6e23f"
         }
@@ -1529,13 +1529,13 @@
       "long_name": "Cybersecurity Education",
       "category_prefix": "KSI-CED",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/training/register.json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/training/security-refresh.md",
-      "timestamp": "2026-06-27T01:14:46.692140Z",
+      "timestamp": "2026-06-27T03:18:05.193297Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CED-01/documentation_011136_e7232e94.json",
+      "evidence_path": "evidence_v2_engine/KSI-CED-01/documentation_031438_e7232e94.json",
       "total_category_controls": 1,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -1565,7 +1565,7 @@
           "exit_code": 0,
           "execution_time": "0.17s",
           "error_message": null,
-          "stdout_sha256": "ea6d08ba7e3c253910e803f0089a700a0540d35f7dbdc147611c77287b084e2e"
+          "stdout_sha256": "8e75ce51b59b76bc3c17920819fb88ff68932565aef8ca6bf6b0bd07956fd139"
         },
         {
           "index": 1,
@@ -1573,9 +1573,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/training/security-refresh.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.11s",
+          "execution_time": "0.22s",
           "error_message": null,
-          "stdout_sha256": "ed1a75ffdb1203a580282c9a0fad2ca36897e7c33980b76eac879b6c1bb9c5d8"
+          "stdout_sha256": "11b87c6877f725bc61bbf9bd75ae2e105118345c48fca74b6e6da6b82a9d0519"
         }
       ],
       "commands_executed": 2,
@@ -1598,13 +1598,13 @@
       "long_name": "Cybersecurity Education",
       "category_prefix": "KSI-CED",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/training/privileged_register.json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/training/privileged-access-guide.md",
-      "timestamp": "2026-06-27T01:14:46.694082Z",
+      "timestamp": "2026-06-27T03:18:05.194607Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CED-02/documentation_011136_06bd0736.json",
+      "evidence_path": "evidence_v2_engine/KSI-CED-02/documentation_031438_06bd0736.json",
       "total_category_controls": 2,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -1632,9 +1632,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/training/privileged_register.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.12s",
+          "execution_time": "0.16s",
           "error_message": null,
-          "stdout_sha256": "89a0524c67afc99067e4304f923cd046c14613901e4d8085eb2e9a1db7da3532"
+          "stdout_sha256": "40220a70e936a6ff69d615bcf40ddb4aacc7d35d993e941257329546e963eadd"
         },
         {
           "index": 1,
@@ -1642,9 +1642,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/training/privileged-access-guide.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.13s",
+          "execution_time": "0.20s",
           "error_message": null,
-          "stdout_sha256": "94facfb1eea3c41eed2e2271c0a0599b4562c3fd3ccafe178bc8a5461835af21"
+          "stdout_sha256": "21a9071343991ee34633836ddbe32e6f9312762a6c1959e09775b63ddd6f905b"
         }
       ],
       "commands_executed": 2,
@@ -1667,13 +1667,13 @@
       "long_name": "Cybersecurity Education",
       "category_prefix": "KSI-CED",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/training/developer_register.json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/secure-software-development.md",
-      "timestamp": "2026-06-27T01:14:46.695417Z",
+      "timestamp": "2026-06-27T03:18:05.195958Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CED-03/documentation_011136_55dd7116.json",
+      "evidence_path": "evidence_v2_engine/KSI-CED-03/documentation_031438_55dd7116.json",
       "total_category_controls": 3,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -1701,9 +1701,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/training/developer_register.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.14s",
+          "execution_time": "0.16s",
           "error_message": null,
-          "stdout_sha256": "290040b8b5fbbd3717d115b3834883f27d0b7e3f80fa0d453cffd3ed5d9f6fa1"
+          "stdout_sha256": "5564104529e77e463312c61fb838290cffbb4e71d7e28841c6d63431fdd8eff5"
         },
         {
           "index": 1,
@@ -1711,9 +1711,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/secure-software-development.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.15s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "4c6860a6529ed173012c5161cd347188fcfe9e85e9b2af65885e6f82279de532"
+          "stdout_sha256": "a2a6d1fb01966f923dd0356b79d8a0caa1cc6b3e335cf2cd77b709a851e9534a"
         }
       ],
       "commands_executed": 2,
@@ -1736,13 +1736,13 @@
       "long_name": "Cybersecurity Education",
       "category_prefix": "KSI-CED",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/training/ir_dr_register.json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/incident-response-plan.md",
-      "timestamp": "2026-06-27T01:14:46.696704Z",
+      "timestamp": "2026-06-27T03:18:05.197304Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CED-04/documentation_011136_bf097148.json",
+      "evidence_path": "evidence_v2_engine/KSI-CED-04/documentation_031438_bf097148.json",
       "total_category_controls": 4,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -1770,9 +1770,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/training/ir_dr_register.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.12s",
+          "execution_time": "0.15s",
           "error_message": null,
-          "stdout_sha256": "82fd7ed23575888a2b68b153f0eac38064ce37d38200771929c97697ace06422"
+          "stdout_sha256": "49852f13c5dbb00f565cbf8163a88c3c6c64b4dda50608272ddf3ccc73be65c8"
         },
         {
           "index": 1,
@@ -1780,9 +1780,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/incident-response-plan.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.13s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "b968d31ab5e3d39ef437f2cf86fbc304e51e3698c1d3fccca0291a280af20b7d"
+          "stdout_sha256": "8285ae42d29a369a60a66605fe3db51176c438d77580ac62a094b7ac27f5844c"
         }
       ],
       "commands_executed": 2,
@@ -1805,13 +1805,13 @@
       "long_name": "Change Management",
       "category_prefix": "KSI-CMT",
       "cli_command": "aws cloudtrail describe-trails --output json; aws cloudtrail get-event-selectors --trail-name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json; aws configservice describe-configuration-recorder-status --output json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/change-management-policy.md; ( for arn in $(aws cloudtrail describe-trails --query 'trailList[].TrailARN' --output text 2>/dev/null); do aws cloudtrail get-event-selectors --trail-name \"$arn\" --output json 2>/dev/null; done ) | jq -s '{TrailEventSelectors: .}'",
-      "timestamp": "2026-06-27T01:14:46.698258Z",
+      "timestamp": "2026-06-27T03:18:05.198911Z",
       "score": 100,
       "threshold": 100,
       "metric_status": "pass",
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CMT-01/cloudtrail_011136_21cac14d.json",
+      "evidence_path": "evidence_v2_engine/KSI-CMT-01/cloudtrail_031438_21cac14d.json",
       "total_category_controls": 1,
       "resources_scanned": 5,
       "resources_passed": 5,
@@ -1857,7 +1857,7 @@
           "command": "aws cloudtrail describe-trails --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.74s",
+          "execution_time": "0.79s",
           "error_message": null,
           "stdout_sha256": "2cd01c0468b769010d057a2096eb2d775f67a23bfe65913bc03f6a94c1079bb6"
         },
@@ -1867,7 +1867,7 @@
           "command": "aws cloudtrail get-event-selectors --trail-name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.38s",
+          "execution_time": "1.54s",
           "error_message": null,
           "stdout_sha256": "536f74530dc478dd7c918dc6677fa87febcf357d1491ad74b91d345b2eea1fdc"
         },
@@ -1877,7 +1877,7 @@
           "command": "aws configservice describe-configuration-recorder-status --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.72s",
+          "execution_time": "0.77s",
           "error_message": null,
           "stdout_sha256": "7c1cbe03ee969ef311f10ff873d6b56c2faee406f08e43de35e593ba34e09eac"
         },
@@ -1887,9 +1887,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/change-management-policy.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.14s",
+          "execution_time": "0.17s",
           "error_message": null,
-          "stdout_sha256": "5119a39ac9648bb1039beed411e45015d877849a72949be0d3f4c2def28e16ec"
+          "stdout_sha256": "2d9b0a8667ea7b410387e76c227cbb2aeaa2c9631e3af36937b7ada57faea554"
         },
         {
           "index": 4,
@@ -1897,7 +1897,7 @@
           "command": "( for arn in $(aws cloudtrail describe-trails --query 'trailList[].TrailARN' --output text 2>/dev/null); do aws cloudtrail get-event-selectors --trail-name \"$arn\" --output json 2>/dev/null; done ) | jq -s '{TrailEventSelectors: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.41s",
+          "execution_time": "1.56s",
           "error_message": null,
           "stdout_sha256": "c43093c9390f1a39346669592fd8ed34f6e2e76234afa22059a414dd1b6e6027"
         }
@@ -1909,7 +1909,7 @@
       "ksi_id": "KSI-CMT-02",
       "validation_id": "KSI-CMT-02",
       "assertion": true,
-      "assertion_reason": "\u2705 Excellent (100%): Execute changes to machine-based information resources through redeployment of version controlled immutable resources... | 12/12 resources compliant. | Verified: Verified: Governance artifact '[resource]' contains 115 structured entries (55474 bytes).; IMDSv2 Enforced: Instance '[resource]' requires HttpTokens. No public IP (private).; IMDSv2 Enforced: Instance '[resource]' requires HttpTokens. No public IP (private). |   ...and 9 more verification(s)",
+      "assertion_reason": "\u2705 Excellent (100%): Execute changes to machine-based information resources through redeployment of version controlled immutable resources... | 12/12 resources compliant. | Verified: Verified: Governance artifact '[resource]' contains 116 structured entries (55956 bytes).; IMDSv2 Enforced: Instance '[resource]' requires HttpTokens. No public IP (private).; IMDSv2 Enforced: Instance '[resource]' requires HttpTokens. No public IP (private). |   ...and 9 more verification(s)",
       "display_status": "pass",
       "mode": "capability",
       "capability_status": "operational",
@@ -1922,13 +1922,13 @@
       "long_name": "Change Management",
       "category_prefix": "KSI-CMT",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/scn_automation/public_scn_history.jsonl; aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/configuration-management-policy.md",
-      "timestamp": "2026-06-27T01:14:46.700232Z",
+      "timestamp": "2026-06-27T03:18:05.200961Z",
       "score": 100,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CMT-02/documentation_011136_d6cac857.json",
+      "evidence_path": "evidence_v2_engine/KSI-CMT-02/documentation_031438_d6cac857.json",
       "total_category_controls": 2,
       "resources_scanned": 12,
       "resources_passed": 12,
@@ -1940,7 +1940,7 @@
           "resource": "scn_automation/public_scn_history.jsonl",
           "status": "PASS",
           "check": "documentation",
-          "reason": "Verified: Governance artifact '[resource]' contains 115 structured entries (55474 bytes)."
+          "reason": "Verified: Governance artifact '[resource]' contains 116 structured entries (55956 bytes)."
         },
         {
           "resource": "[resource]",
@@ -2016,9 +2016,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/scn_automation/public_scn_history.jsonl",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.14s",
+          "execution_time": "0.18s",
           "error_message": null,
-          "stdout_sha256": "c894378097cd19d865e83345b70b17972801f4bc041aba02df4f25ec6a841eb0"
+          "stdout_sha256": "3c39bb082f714361ec8c15f6ee0d54fb664bbfa9ce3f78c1bd4d1f845d6ac68a"
         },
         {
           "index": 1,
@@ -2026,7 +2026,7 @@
           "command": "aws ec2 describe-instances --filters Name=instance-state-name,Values=running --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.96s",
+          "execution_time": "1.04s",
           "error_message": null,
           "stdout_sha256": "a4aa126131f7b23689c39f2224454a87dceae113adf35c6c9d4e77945a42b5b2"
         },
@@ -2036,9 +2036,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/configuration-management-policy.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.11s",
+          "execution_time": "0.16s",
           "error_message": null,
-          "stdout_sha256": "cf1695c0728f09a4c26f69b591657781dd112b808b75e743bc7777fdb5760419"
+          "stdout_sha256": "a47011b73bddf06027411cb4bb16af277bf202260f9f9de395508a0fb47b869c"
         }
       ],
       "commands_executed": 3,
@@ -2061,7 +2061,7 @@
       "long_name": "Change Management",
       "category_prefix": "KSI-CMT",
       "cli_command": "aws configservice describe-configuration-recorder-status --output json; aws configservice describe-config-rules --query \"ConfigRules[?ConfigRuleState=='[resource]']\" --max-items 5 --output json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/sdlc-policy.md; aws configservice describe-compliance-by-config-rule --output json",
-      "timestamp": "2026-06-27T01:14:46.702496Z",
+      "timestamp": "2026-06-27T03:18:05.203356Z",
       "score": 100,
       "threshold": 100,
       "metric_status": "pass",
@@ -2069,7 +2069,7 @@
         "aws-config-baseline-deferred-q3-2026"
       ],
       "accepted_risks_flipped_assertion": true,
-      "evidence_path": "evidence_v2_engine/KSI-CMT-03/configservice_011136_af9b602f.json",
+      "evidence_path": "evidence_v2_engine/KSI-CMT-03/configservice_031438_af9b602f.json",
       "total_category_controls": 3,
       "resources_scanned": 8,
       "resources_passed": 7,
@@ -2136,7 +2136,7 @@
           "command": "aws configservice describe-configuration-recorder-status --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.72s",
+          "execution_time": "0.77s",
           "error_message": null,
           "stdout_sha256": "7c1cbe03ee969ef311f10ff873d6b56c2faee406f08e43de35e593ba34e09eac"
         },
@@ -2146,7 +2146,7 @@
           "command": "aws configservice describe-config-rules --query \"ConfigRules[?ConfigRuleState=='[resource]']\" --max-items 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.70s",
+          "execution_time": "0.76s",
           "error_message": null,
           "stdout_sha256": "978d9bc9cc29269ca959a1384e11925dc3faa5c2732759acbba602a26f486536"
         },
@@ -2156,9 +2156,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/sdlc-policy.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.15s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "f99b31464d08ca42ece966878184142913343f4417c29e2c648efe8c2c637bd4"
+          "stdout_sha256": "1a5f9988fd11db1d2d6ba27f29f86ab5600f45c769eeee37257c12f49e2dbe58"
         },
         {
           "index": 3,
@@ -2166,9 +2166,9 @@
           "command": "aws configservice describe-compliance-by-config-rule --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "3.36s",
+          "execution_time": "3.69s",
           "error_message": null,
-          "stdout_sha256": "b0ee21b764372ed3edd59dd6aaffa2fc31d7759ea5b401e80ff585c18979e3bd"
+          "stdout_sha256": "5722f3a8253ab53f35ab3c8343beef1fbfd651b46f56f3079ce6681f8e33e656"
         }
       ],
       "commands_executed": 4,
@@ -2191,13 +2191,13 @@
       "long_name": "Change Management",
       "category_prefix": "KSI-CMT",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/change-management-procedure.md; aws s3api [s3-bucket] --bucket [[s3-bucket]] --output json",
-      "timestamp": "2026-06-27T01:14:46.703998Z",
+      "timestamp": "2026-06-27T03:18:05.204984Z",
       "score": 100,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CMT-04/documentation_011136_62219604.json",
+      "evidence_path": "evidence_v2_engine/KSI-CMT-04/documentation_031438_62219604.json",
       "total_category_controls": 4,
       "resources_scanned": 2,
       "resources_passed": 1,
@@ -2225,9 +2225,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/change-management-procedure.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.11s",
+          "execution_time": "0.16s",
           "error_message": null,
-          "stdout_sha256": "c5158ce3c5009c6ecdce709c2ffe6ce610b5f13b522dc1e8bfc4443d01e275d8"
+          "stdout_sha256": "38c4a1b7fc3f3d8b09409dfcbfd8d0c67a76f9216bae515286476f94ad4977c2"
         },
         {
           "index": 1,
@@ -2235,7 +2235,7 @@
           "command": "aws s3api [s3-bucket] --bucket [[s3-bucket]] --output json",
           "status": "failed",
           "exit_code": 254,
-          "execution_time": "0.76s",
+          "execution_time": "0.78s",
           "error_message": "\naws: [ERROR]: An error occurred (AccessDenied) when calling the [s3-bucket] operation: User: arn:aws:[redacted] is not authorize",
           "stdout_sha256": null
         }
@@ -2260,13 +2260,13 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws ec2 describe-security-groups --filters Name=group-name,Values=default --output json; aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=tcp --max-items 5 --output json; aws ec2 describe-network-acls --max-items 5 --output json",
-      "timestamp": "2026-06-27T01:14:46.705362Z",
+      "timestamp": "2026-06-27T03:18:05.206377Z",
       "score": 100,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-01/ec2_011136_6ec405b1.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-01/ec2_031438_6ec405b1.json",
       "total_category_controls": 1,
       "resources_scanned": 7,
       "resources_passed": 7,
@@ -2324,7 +2324,7 @@
           "command": "aws ec2 describe-security-groups --filters Name=group-name,Values=default --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.97s",
+          "execution_time": "1.06s",
           "error_message": null,
           "stdout_sha256": "db73841df3eb5310d58e3f54a28016d69699016207e4dae99c4a3658467a608f"
         },
@@ -2334,7 +2334,7 @@
           "command": "aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=tcp --max-items 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.90s",
+          "execution_time": "0.99s",
           "error_message": null,
           "stdout_sha256": "c90641c8e718aa9344c94147bc4b0bd1da8fb3a25744e6d88a611b9b64bf6eb3"
         },
@@ -2344,7 +2344,7 @@
           "command": "aws ec2 describe-network-acls --max-items 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.89s",
+          "execution_time": "0.96s",
           "error_message": null,
           "stdout_sha256": "0dc1b2c79d6f1d8a7a15c50d033aa5866f5e0b62fb2ed4582b4bcef9375dde48"
         }
@@ -2369,7 +2369,7 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws ec2 describe-subnets --filters \"Name=map-public-ip-on-launch,Values=false\" --max-items 5 --output json; aws ec2 describe-security-groups --max-items 20 --output json; aws rds describe-db-instances --output json",
-      "timestamp": "2026-06-27T01:14:46.707163Z",
+      "timestamp": "2026-06-27T03:18:05.208217Z",
       "score": 95,
       "threshold": 100,
       "metric_status": null,
@@ -2377,7 +2377,7 @@
         "sg-directory-service-controllers-d-9066328a4b"
       ],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-02/ec2_011136_abe26689.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-02/ec2_031438_abe26689.json",
       "total_category_controls": 2,
       "resources_scanned": 22,
       "resources_passed": 20,
@@ -2528,7 +2528,7 @@
           "command": "aws ec2 describe-subnets --filters \"Name=map-public-ip-on-launch,Values=false\" --max-items 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.94s",
+          "execution_time": "1.07s",
           "error_message": null,
           "stdout_sha256": "a4810c84f0fd07e0a3cfa4907b0c2a0cdb6a34c6beef0de39c8c2c2eaddb0ea0"
         },
@@ -2538,7 +2538,7 @@
           "command": "aws ec2 describe-security-groups --max-items 20 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.89s",
+          "execution_time": "1.02s",
           "error_message": null,
           "stdout_sha256": "2320c6299676baee619c15e9937bf66396da59600541fc621f849e2b09c2756b"
         },
@@ -2548,9 +2548,9 @@
           "command": "aws rds describe-db-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.76s",
+          "execution_time": "0.94s",
           "error_message": null,
-          "stdout_sha256": "5dd37315538e45bc34536bb1d24f3c76964f95e85b23c29b02aadf7dc2d20911"
+          "stdout_sha256": "1d8ad4818129c01382f5f75c9d73f0976b62e97b544cc5cb8316e147b25201d5"
         }
       ],
       "commands_executed": 3,
@@ -2573,13 +2573,13 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws ec2 [vpc]-endpoints --output json; aws ec2 describe-nat-gateways --filter Name=state,Values=available --output json; aws elbv2 describe-load-balancers --output json",
-      "timestamp": "2026-06-27T01:14:46.710016Z",
+      "timestamp": "2026-06-27T03:18:05.211145Z",
       "score": 100,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-03/ec2_011136_e1ef11db.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-03/ec2_031438_e1ef11db.json",
       "total_category_controls": 3,
       "resources_scanned": 11,
       "resources_passed": 9,
@@ -2661,7 +2661,7 @@
           "command": "aws ec2 [vpc]-endpoints --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.93s",
+          "execution_time": "0.98s",
           "error_message": null,
           "stdout_sha256": "9b4fb9c38bf8bb5eff0a6abbdaaf9bb832626248d1770ec2d97406f3022dbb90"
         },
@@ -2671,7 +2671,7 @@
           "command": "aws ec2 describe-nat-gateways --filter Name=state,Values=available --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.92s",
+          "execution_time": "0.96s",
           "error_message": null,
           "stdout_sha256": "8625468edad39dd427a7411ec968afae3e2aa7ed2474877f5627fa682224473e"
         },
@@ -2681,7 +2681,7 @@
           "command": "aws elbv2 describe-load-balancers --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.77s",
+          "execution_time": "0.76s",
           "error_message": null,
           "stdout_sha256": "725ee75710dc06035352164bb485d90ae7e9a6709d7870cdf2c24ea13e3b4509"
         }
@@ -2706,7 +2706,7 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/configuration-management-policy.md; aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=-1 --output json; aws iam list-roles --query \"Roles[?!(contains(RoleName, '[resource]') || contains(Path, '[resource]'))]\" --output json",
-      "timestamp": "2026-06-27T01:14:46.712388Z",
+      "timestamp": "2026-06-27T03:18:05.213571Z",
       "score": 98,
       "threshold": 100,
       "metric_status": null,
@@ -2714,7 +2714,7 @@
         "sg-directory-service-controllers-d-9066328a4b"
       ],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-04/documentation_011136_764d0179.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-04/documentation_031438_764d0179.json",
       "total_category_controls": 4,
       "resources_scanned": 84,
       "resources_passed": 82,
@@ -3239,7 +3239,7 @@
           "exit_code": 0,
           "execution_time": "0.13s",
           "error_message": null,
-          "stdout_sha256": "d48a908051ccd35c7ad338c3595fef76bd716092b58d6efba69e4e831ca0415d"
+          "stdout_sha256": "3c144454354a44f56dc9f4f82fb32cf4314b1b1ef5fe218e957d7ab9fb1c1249"
         },
         {
           "index": 1,
@@ -3247,7 +3247,7 @@
           "command": "aws ec2 describe-security-groups --filters Name=ip-permission.protocol,Values=-1 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.88s",
+          "execution_time": "0.97s",
           "error_message": null,
           "stdout_sha256": "f0a7bf089caadb0a7fba9a23b93fcfc408e12e31e8a6fc747a9df59c430820a9"
         },
@@ -3257,7 +3257,7 @@
           "command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, '[resource]') || contains(Path, '[resource]'))]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.76s",
+          "execution_time": "0.87s",
           "error_message": null,
           "stdout_sha256": "0d73826095a5c9fbdfe7b702108742f6f35a0aa007dc41d96962b8079d6a3fe2"
         }
@@ -3282,13 +3282,13 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws wafv2 list-web-acls --scope REGIONAL --output json; aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Type:Type, Scheme:Scheme}\" --output json; aws route53 list-hosted-zones --max-items 5 --output json; aws ses list-identities --max-items 5 --output json; ( for id in $(aws apigateway get-rest-apis --query 'items[].id' --output text 2>/dev/null); do aws apigateway get-stages --rest-api-id \"$id\" --output json 2>/dev/null | jq --arg id \"$id\" '(.item // []) | map(. + {restApiId: $id})'; done ) | jq -s '{Stages: [.[][]?]}'",
-      "timestamp": "2026-06-27T01:14:46.722033Z",
+      "timestamp": "2026-06-27T03:18:05.223452Z",
       "score": 80,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-05/wafv2_011136_710b255e.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-05/wafv2_031438_710b255e.json",
       "total_category_controls": 5,
       "resources_scanned": 6,
       "resources_passed": 4,
@@ -3340,7 +3340,7 @@
           "command": "aws wafv2 list-web-acls --scope REGIONAL --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.73s",
+          "execution_time": "0.79s",
           "error_message": null,
           "stdout_sha256": "d20b5f2c485e5f750f0737ae6abb6f4470bcd354b309f2d9569086c2481a3e2e"
         },
@@ -3350,7 +3350,7 @@
           "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Type:Type, Scheme:Scheme}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.67s",
+          "execution_time": "0.76s",
           "error_message": null,
           "stdout_sha256": "b8aee83c7381e0d48ff6faaca50dae8946e21bb6ac1324188e25524662a83b30"
         },
@@ -3360,7 +3360,7 @@
           "command": "aws route53 list-hosted-zones --max-items 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.88s",
+          "execution_time": "0.84s",
           "error_message": null,
           "stdout_sha256": "fc73eda332c88eaa5cc764d2fa629112f6d0cf86e1123ec5f950b404a75f5058"
         },
@@ -3370,7 +3370,7 @@
           "command": "aws ses list-identities --max-items 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.67s",
+          "execution_time": "0.84s",
           "error_message": null,
           "stdout_sha256": "c35aa98808bbe30ff951f7a77398e9e2722cbaa233ddce050bc2a0b335eb49f2"
         },
@@ -3380,7 +3380,7 @@
           "command": "( for id in $(aws apigateway get-rest-apis --query 'items[].id' --output text 2>/dev/null); do aws apigateway get-stages --rest-api-id \"$id\" --output json 2>/dev/null | jq --arg id \"$id\" '(.item // []) | map(. + {restApiId: $id})'; done ) | jq -s '{Stages: [.[][]?]}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.97s",
+          "execution_time": "3.16s",
           "error_message": null,
           "stdout_sha256": "9faaadc49c9d1a061511288e3b5ac6e4bed3c084344e5816f03950064f2031c8"
         }
@@ -3405,13 +3405,13 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws elbv2 describe-load-balancers --output json; aws rds describe-db-instances --output json; aws backup list-backup-plans --output json",
-      "timestamp": "2026-06-27T01:14:46.723813Z",
+      "timestamp": "2026-06-27T03:18:05.225676Z",
       "score": 100,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-06/elbv2_011136_8eb7095a.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-06/elbv2_031438_8eb7095a.json",
       "total_category_controls": 6,
       "resources_scanned": 5,
       "resources_passed": 5,
@@ -3457,7 +3457,7 @@
           "command": "aws elbv2 describe-load-balancers --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.69s",
+          "execution_time": "0.73s",
           "error_message": null,
           "stdout_sha256": "725ee75710dc06035352164bb485d90ae7e9a6709d7870cdf2c24ea13e3b4509"
         },
@@ -3467,9 +3467,9 @@
           "command": "aws rds describe-db-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.75s",
+          "execution_time": "0.81s",
           "error_message": null,
-          "stdout_sha256": "5dd37315538e45bc34536bb1d24f3c76964f95e85b23c29b02aadf7dc2d20911"
+          "stdout_sha256": "1d8ad4818129c01382f5f75c9d73f0976b62e97b544cc5cb8316e147b25201d5"
         },
         {
           "index": 2,
@@ -3477,7 +3477,7 @@
           "command": "aws backup list-backup-plans --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.77s",
+          "execution_time": "0.76s",
           "error_message": null,
           "stdout_sha256": "ff2ed3e76b71b4d9436eef27fe1b27ddd26ec821040e3af85336cc83711f0053"
         }
@@ -3502,13 +3502,13 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws ec2 describe-instances --output json; aws lambda list-functions --output json; aws rds describe-db-instances --output json; aws apigateway get-rest-apis --output json; aws elbv2 describe-load-balancers --output json; aws autoscaling describe-auto-scaling-groups --output json",
-      "timestamp": "2026-06-27T01:14:46.725282Z",
+      "timestamp": "2026-06-27T03:18:05.227257Z",
       "score": 73,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-07/ec2_011136_0216bef6.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-07/ec2_031438_0216bef6.json",
       "total_category_controls": 7,
       "resources_scanned": 42,
       "resources_passed": 31,
@@ -3776,7 +3776,7 @@
           "command": "aws ec2 describe-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.93s",
+          "execution_time": "1.24s",
           "error_message": null,
           "stdout_sha256": "a4aa126131f7b23689c39f2224454a87dceae113adf35c6c9d4e77945a42b5b2"
         },
@@ -3786,7 +3786,7 @@
           "command": "aws lambda list-functions --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.88s",
+          "execution_time": "1.00s",
           "error_message": null,
           "stdout_sha256": "c519ab21f2498e9baa3a6d2fbb473b8c07373b665d1a9260298d74565e8f5359"
         },
@@ -3796,9 +3796,9 @@
           "command": "aws rds describe-db-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.76s",
+          "execution_time": "0.84s",
           "error_message": null,
-          "stdout_sha256": "5dd37315538e45bc34536bb1d24f3c76964f95e85b23c29b02aadf7dc2d20911"
+          "stdout_sha256": "1d8ad4818129c01382f5f75c9d73f0976b62e97b544cc5cb8316e147b25201d5"
         },
         {
           "index": 3,
@@ -3806,7 +3806,7 @@
           "command": "aws apigateway get-rest-apis --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.71s",
+          "execution_time": "0.79s",
           "error_message": null,
           "stdout_sha256": "32c29c0773296605aaba7b1c7a8c9269d7835982a4737113a78f3a18ab78cb7e"
         },
@@ -3816,7 +3816,7 @@
           "command": "aws elbv2 describe-load-balancers --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.69s",
+          "execution_time": "0.73s",
           "error_message": null,
           "stdout_sha256": "725ee75710dc06035352164bb485d90ae7e9a6709d7870cdf2c24ea13e3b4509"
         },
@@ -3826,7 +3826,7 @@
           "command": "aws autoscaling describe-auto-scaling-groups --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.72s",
+          "execution_time": "0.75s",
           "error_message": null,
           "stdout_sha256": "13b4369aafccf6b3e5c7707f66c3e4f7e02fe66125cc342d72c118a7b91bf33f"
         }
@@ -3851,13 +3851,13 @@
       "long_name": "Cloud Native Architecture",
       "category_prefix": "KSI-CNA",
       "cli_command": "aws securityhub get-enabled-standards --output json; aws guardduty list-detectors --output json; aws configservice describe-configuration-recorders --output json; aws inspector2 list-coverage --output json",
-      "timestamp": "2026-06-27T01:14:46.729803Z",
+      "timestamp": "2026-06-27T03:18:05.231900Z",
       "score": 100,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-CNA-08/securityhub_011136_dc424601.json",
+      "evidence_path": "evidence_v2_engine/KSI-CNA-08/securityhub_031438_dc424601.json",
       "total_category_controls": 8,
       "resources_scanned": 4,
       "resources_passed": 4,
@@ -3897,7 +3897,7 @@
           "command": "aws securityhub get-enabled-standards --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.12s",
+          "execution_time": "1.05s",
           "error_message": null,
           "stdout_sha256": "6077bfbf5da75c0539dec01ed61ce639006ac81fafefa427ca7144f4a2128a61"
         },
@@ -3907,7 +3907,7 @@
           "command": "aws guardduty list-detectors --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.71s",
+          "execution_time": "0.75s",
           "error_message": null,
           "stdout_sha256": "da0a800072de478ede625cfda8dcb1e0b639594a3e85ae547fb67b4073eb782d"
         },
@@ -3917,7 +3917,7 @@
           "command": "aws configservice describe-configuration-recorders --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.66s",
+          "execution_time": "0.71s",
           "error_message": null,
           "stdout_sha256": "5ef57dd1b43e664d3895d49599204dd4c736bcd956e9a6c76b6d6a1ef0996bd2"
         },
@@ -3927,9 +3927,9 @@
           "command": "aws inspector2 list-coverage --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.98s",
+          "execution_time": "1.33s",
           "error_message": null,
-          "stdout_sha256": "ef668b795b06a042c64d5513cb9f3fef2f8d33e7a456de821fea1e6171228011"
+          "stdout_sha256": "8b9618fa16d00441a90941aabe4d956c0e0c43eca95517c891abe5d342ae1894"
         }
       ],
       "commands_executed": 4,
@@ -3952,7 +3952,7 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json; aws sso-admin list-instances --output json; aws iam list-virtual-mfa-devices --output json; echo '{}' | jq --argjson users \"$(aws iam list-users --output json | jq '.Users // []')\" --argjson mfa \"$(aws iam list-virtual-mfa-devices --output json | jq '.VirtualMFADevices // []')\" --argjson scim \"$(aws identitystore list-users --identity-store-id $(aws sso-admin list-instances --query 'Instances[0].IdentityStoreId' --output text) --output json | jq '.Users // []')\" '{HumanUsers: ($users | map(select(.PasswordLastUsed != null))), VirtualMFADevices: $mfa, ScimUsers: $scim}'; aws sso-admin list-permission-sets --instance-arn $(aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text) --output json; aws identitystore list-users --identity-store-id $(aws sso-admin list-instances --query 'Instances[0].IdentityStoreId' --output text) --output json; ( IN=$(aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text 2>/dev/null); for ps in $(aws sso-admin list-permission-sets --instance-arn \"$IN\" --query 'PermissionSets[]' --output text 2>/dev/null); do aws sso-admin describe-permission-set --instance-arn \"$IN\" --permission-set-arn \"$ps\" --output json 2>/dev/null | jq '.PermissionSet'; done ) | jq -s '{PermissionSets: .}'",
-      "timestamp": "2026-06-27T01:14:46.731606Z",
+      "timestamp": "2026-06-27T03:18:05.233759Z",
       "score": 12,
       "threshold": 100,
       "metric_status": "missing",
@@ -4103,7 +4103,7 @@
           "command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.71s",
+          "execution_time": "0.81s",
           "error_message": null,
           "stdout_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
         },
@@ -4113,7 +4113,7 @@
           "command": "aws sso-admin list-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.77s",
+          "execution_time": "0.84s",
           "error_message": null,
           "stdout_sha256": "4d34959d74a50378a1cb85bba7992d6b4507a1455720740c928ede94b834ad78"
         },
@@ -4123,7 +4123,7 @@
           "command": "aws iam list-virtual-mfa-devices --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.68s",
+          "execution_time": "0.74s",
           "error_message": null,
           "stdout_sha256": "04f893bd07ee1ac22f89f1c5c7bffc0ed3d23cc0f10606a475a0480dc02d3320"
         },
@@ -4133,7 +4133,7 @@
           "command": "echo '{}' | jq --argjson users \"$(aws iam list-users --output json | jq '.Users // []')\" --argjson mfa \"$(aws iam list-virtual-mfa-devices --output json | jq '.VirtualMFADevices // []')\" --argjson scim \"$(aws identitystore list-users --identity-store-id $(aws sso-admin list-instances --query 'Instances[0].IdentityStoreId' --output text) --output json | jq '.Users // []')\" '{HumanUsers: ($users | map(select(.PasswordLastUsed != null))), VirtualMFADevices: $mfa, ScimUsers: $scim}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.91s",
+          "execution_time": "3.07s",
           "error_message": null,
           "stdout_sha256": "32e76137a1007b60c45648f74fe08f53ae5ad55608fb959961b4db07f9f91825"
         },
@@ -4143,7 +4143,7 @@
           "command": "aws sso-admin list-permission-sets --instance-arn $(aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text) --output json",
           "status": "failed",
           "exit_code": 254,
-          "execution_time": "1.39s",
+          "execution_time": "1.60s",
           "error_message": "\naws: [ERROR]: An error occurred (AccessDeniedException) when calling the ListPermissionSets operation: User: arn:aws:[redacted] is not a",
           "stdout_sha256": null
         },
@@ -4153,7 +4153,7 @@
           "command": "aws identitystore list-users --identity-store-id $(aws sso-admin list-instances --query 'Instances[0].IdentityStoreId' --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.41s",
+          "execution_time": "1.56s",
           "error_message": null,
           "stdout_sha256": "51b9b4e897952590ade1f7c00ddf9ac4e0c1854eeadc63bca34d31c595a336db"
         },
@@ -4163,7 +4163,7 @@
           "command": "( IN=$(aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text 2>/dev/null); for ps in $(aws sso-admin list-permission-sets --instance-arn \"$IN\" --query 'PermissionSets[]' --output text 2>/dev/null); do aws sso-admin describe-permission-set --instance-arn \"$IN\" --permission-set-arn \"$ps\" --output json 2>/dev/null | jq '.PermissionSet'; done ) | jq -s '{PermissionSets: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.41s",
+          "execution_time": "1.54s",
           "error_message": null,
           "stdout_sha256": "67be1d800347a1660ffc6d313fbb9939f4f3f9023e60db234de78e4e3cfc8f6c"
         }
@@ -4188,13 +4188,13 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws sso-admin list-instances --output json; aws iam list-saml-providers --output json; aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
-      "timestamp": "2026-06-27T01:14:46.735090Z",
+      "timestamp": "2026-06-27T03:18:05.237303Z",
       "score": 100,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-IAM-02/ssoadmin_011136_2ee16596.json",
+      "evidence_path": "evidence_v2_engine/KSI-IAM-02/ssoadmin_031438_2ee16596.json",
       "total_category_controls": 2,
       "resources_scanned": 3,
       "resources_passed": 2,
@@ -4228,7 +4228,7 @@
           "command": "aws sso-admin list-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.68s",
+          "execution_time": "0.83s",
           "error_message": null,
           "stdout_sha256": "4d34959d74a50378a1cb85bba7992d6b4507a1455720740c928ede94b834ad78"
         },
@@ -4238,7 +4238,7 @@
           "command": "aws iam list-saml-providers --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.67s",
+          "execution_time": "0.73s",
           "error_message": null,
           "stdout_sha256": "3b6f6303cec4701c606d9fd155fa8a08432ea735c1a6c442bf89b3e4932e8af6"
         },
@@ -4248,7 +4248,7 @@
           "command": "aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.76s",
+          "execution_time": "0.74s",
           "error_message": null,
           "stdout_sha256": "987f78453685793ed000ec3e5be6e9d7950bf85dea08df5bbbcd48539a289600"
         }
@@ -4273,13 +4273,13 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, '[resource]') || contains(Path, '[resource]'))]\" --output json; aws iam list-users --query \"Users[?PasswordLastUsed==null]\" --output json; aws iam get-credential-report --output text > /dev/null && aws iam get-credential-report --output json || echo '{\"Content\": \"Permission Denied\"}'",
-      "timestamp": "2026-06-27T01:14:46.736246Z",
+      "timestamp": "2026-06-27T03:18:05.238556Z",
       "score": 97,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-IAM-03/iam_011136_9b153fd6.json",
+      "evidence_path": "evidence_v2_engine/KSI-IAM-03/iam_031438_9b153fd6.json",
       "total_category_controls": 3,
       "resources_scanned": 83,
       "resources_passed": 80,
@@ -4793,9 +4793,9 @@
           "command": "aws iam list-roles --query \"Roles[?!(contains(RoleName, '[resource]') || contains(Path, '[resource]'))]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.75s",
+          "execution_time": "0.90s",
           "error_message": null,
-          "stdout_sha256": "0574fbf37ad385092ef18e73c09325611de00ce6fe409bce6988c70427a1bde5"
+          "stdout_sha256": "a4f29a47a77a9d4b04d485bfacf614bf0ae62b54f4334109fcc0f0bd683b90f3"
         },
         {
           "index": 1,
@@ -4803,7 +4803,7 @@
           "command": "aws iam list-users --query \"Users[?PasswordLastUsed==null]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.71s",
+          "execution_time": "0.74s",
           "error_message": null,
           "stdout_sha256": "80151ac307f57df5dabb218941c30750c37379a19ad16e11b66df40a9622a521"
         },
@@ -4813,7 +4813,7 @@
           "command": "aws iam get-credential-report --output text > /dev/null && aws iam get-credential-report --output json || echo '{\"Content\": \"Permission Denied\"}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.63s",
+          "execution_time": "1.56s",
           "error_message": null,
           "stdout_sha256": "24fc0bab67c87b106c758b448d960da99bdcb9e114cd166b78444044abd08ff4"
         }
@@ -4838,13 +4838,13 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws sso-admin list-instances --output json; aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json; aws iam list-roles --output json | jq '{Roles: .Roles | map({RoleName, AssumeRolePolicyDocument})}'",
-      "timestamp": "2026-06-27T01:14:46.744701Z",
+      "timestamp": "2026-06-27T03:18:05.247352Z",
       "score": 100,
       "threshold": 100,
       "metric_status": "pass",
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-IAM-04/ssoadmin_011136_2ee16596.json",
+      "evidence_path": "evidence_v2_engine/KSI-IAM-04/ssoadmin_031438_2ee16596.json",
       "total_category_controls": 4,
       "resources_scanned": 3,
       "resources_passed": 2,
@@ -4878,7 +4878,7 @@
           "command": "aws sso-admin list-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.68s",
+          "execution_time": "0.76s",
           "error_message": null,
           "stdout_sha256": "4d34959d74a50378a1cb85bba7992d6b4507a1455720740c928ede94b834ad78"
         },
@@ -4888,7 +4888,7 @@
           "command": "aws iam list-users --query \"Users[?PasswordLastUsed!=null]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.67s",
+          "execution_time": "0.74s",
           "error_message": null,
           "stdout_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
         },
@@ -4898,9 +4898,9 @@
           "command": "aws iam list-roles --output json | jq '{Roles: .Roles | map({RoleName, AssumeRolePolicyDocument})}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.76s",
+          "execution_time": "0.88s",
           "error_message": null,
-          "stdout_sha256": "5a5d86740d7e2513cd05b464630df39a04b5bc1ba4ac698c5753f6d1d2a60bbb"
+          "stdout_sha256": "758adfa7df625558e49d3db41896b5cfe3177e5e2dc37235597c3d696b0ed893"
         }
       ],
       "commands_executed": 3,
@@ -4923,13 +4923,13 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws sso-admin list-instances --output json; aws iam list-virtual-mfa-devices --output json; aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
-      "timestamp": "2026-06-27T01:14:46.745646Z",
+      "timestamp": "2026-06-27T03:18:05.248351Z",
       "score": 100,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-IAM-05/ssoadmin_011136_2ee16596.json",
+      "evidence_path": "evidence_v2_engine/KSI-IAM-05/ssoadmin_031438_2ee16596.json",
       "total_category_controls": 5,
       "resources_scanned": 2,
       "resources_passed": 1,
@@ -4957,7 +4957,7 @@
           "command": "aws sso-admin list-instances --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.68s",
+          "execution_time": "0.74s",
           "error_message": null,
           "stdout_sha256": "4d34959d74a50378a1cb85bba7992d6b4507a1455720740c928ede94b834ad78"
         },
@@ -4967,7 +4967,7 @@
           "command": "aws iam list-virtual-mfa-devices --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.69s",
+          "execution_time": "0.74s",
           "error_message": null,
           "stdout_sha256": "04f893bd07ee1ac22f89f1c5c7bffc0ed3d23cc0f10606a475a0480dc02d3320"
         },
@@ -4977,7 +4977,7 @@
           "command": "aws iam get-account-password-policy --output json || echo '{\"PasswordPolicy\": null}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.70s",
+          "execution_time": "0.73s",
           "error_message": null,
           "stdout_sha256": "987f78453685793ed000ec3e5be6e9d7950bf85dea08df5bbbcd48539a289600"
         }
@@ -5002,13 +5002,13 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws guardduty list-detectors --output json; aws events list-rules --output json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/access-control-policy.md",
-      "timestamp": "2026-06-27T01:14:46.746505Z",
+      "timestamp": "2026-06-27T03:18:05.249265Z",
       "score": 100,
       "threshold": 100,
       "metric_status": "pass",
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-IAM-06/guardduty_011136_2d97e55e.json",
+      "evidence_path": "evidence_v2_engine/KSI-IAM-06/guardduty_031438_2d97e55e.json",
       "total_category_controls": 6,
       "resources_scanned": 3,
       "resources_passed": 2,
@@ -5042,7 +5042,7 @@
           "command": "aws guardduty list-detectors --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.71s",
+          "execution_time": "0.75s",
           "error_message": null,
           "stdout_sha256": "da0a800072de478ede625cfda8dcb1e0b639594a3e85ae547fb67b4073eb782d"
         },
@@ -5052,7 +5052,7 @@
           "command": "aws events list-rules --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.73s",
+          "execution_time": "0.75s",
           "error_message": null,
           "stdout_sha256": "e4236769218d53b19c5362192e4ae25333384603492f40c70781ed2519aa8942"
         },
@@ -5062,9 +5062,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/access-control-policy.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.12s",
+          "execution_time": "0.15s",
           "error_message": null,
-          "stdout_sha256": "041d53163432c27062d98452b6d3d1c89b3f8e907079281aaf99b27899572cfc"
+          "stdout_sha256": "06ca3c4f50ef994ce62008404ae72f59bcc5469e6774b03e8954642b4f548043"
         }
       ],
       "commands_executed": 3,
@@ -5087,13 +5087,13 @@
       "long_name": "Identity and Access Management",
       "category_prefix": "KSI-IAM",
       "cli_command": "aws iam generate-credential-report > /dev/null && aws iam get-credential-report --output text | base64 --decode || echo 'Permission Denied'; aws iam list-roles --query \"Roles[?CreateDate<='[resource]']\" --output json",
-      "timestamp": "2026-06-27T01:14:46.747576Z",
+      "timestamp": "2026-06-27T03:18:05.250404Z",
       "score": 0,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-IAM-07/iam_011136_6900159d.json",
+      "evidence_path": "evidence_v2_engine/KSI-IAM-07/iam_031438_6900159d.json",
       "total_category_controls": 7,
       "resources_scanned": 2,
       "resources_passed": 0,
@@ -5121,7 +5121,7 @@
           "command": "aws iam generate-credential-report > /dev/null && aws iam get-credential-report --output text | base64 --decode || echo 'Permission Denied'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.46s",
+          "execution_time": "1.53s",
           "error_message": null,
           "stdout_sha256": "a6827a8999db383539ae25aba88b180426683d03c707072855ede3a77707eb31"
         },
@@ -5131,7 +5131,7 @@
           "command": "aws iam list-roles --query \"Roles[?CreateDate<='[resource]']\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.75s",
+          "execution_time": "0.86s",
           "error_message": null,
           "stdout_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
         }
@@ -5156,13 +5156,13 @@
       "long_name": "Incident Response",
       "category_prefix": "KSI-INR",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/incident-response-plan.md; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/reports/quarterly/sample_review.md",
-      "timestamp": "2026-06-27T01:14:46.748447Z",
+      "timestamp": "2026-06-27T03:18:05.251329Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-INR-01/documentation_011136_e0cfa778.json",
+      "evidence_path": "evidence_v2_engine/KSI-INR-01/documentation_031438_e0cfa778.json",
       "total_category_controls": 1,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -5190,9 +5190,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/procedures/incident-response-plan.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.15s",
+          "execution_time": "0.13s",
           "error_message": null,
-          "stdout_sha256": "73e1e72448f79610028db24893644b3bcc1161bcdabdf404e63978ce54a7b5d7"
+          "stdout_sha256": "c53022561d159c41b729eee5dd8e99fce13adff524daa80743c13193a7777e28"
         },
         {
           "index": 1,
@@ -5200,9 +5200,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/reports/quarterly/sample_review.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.14s",
+          "execution_time": "0.15s",
           "error_message": null,
-          "stdout_sha256": "cf978d30bddbb4ee3c0cecd5387bbafba01f738ccf65a32a8ee1a9bbc028d005"
+          "stdout_sha256": "02686b6cf8622a2599d6fce560cfcd9dad6635e94bb667dd4ae2fd98ca1ec8d9"
         }
       ],
       "commands_executed": 2,
@@ -5225,13 +5225,13 @@
       "long_name": "Incident Response",
       "category_prefix": "KSI-INR",
       "cli_command": "aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]')]\" --output json; aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json",
-      "timestamp": "2026-06-27T01:14:46.749630Z",
+      "timestamp": "2026-06-27T03:18:05.252569Z",
       "score": 90,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-INR-02/logs_011136_143cc321.json",
+      "evidence_path": "evidence_v2_engine/KSI-INR-02/logs_031438_143cc321.json",
       "total_category_controls": 2,
       "resources_scanned": 14,
       "resources_passed": 10,
@@ -5331,7 +5331,7 @@
           "command": "aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.76s",
+          "execution_time": "0.80s",
           "error_message": null,
           "stdout_sha256": "2d2a4629d48986945e328771bb2c271f4735e4b0efedea5f4bb1886cdec11e30"
         },
@@ -5341,7 +5341,7 @@
           "command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.73s",
+          "execution_time": "0.77s",
           "error_message": null,
           "stdout_sha256": "cc56df38e5a3aba784aca3cefdb7b622de0fdd34c23eab523b2297732ec9beb1"
         }
@@ -5366,13 +5366,13 @@
       "long_name": "Incident Response",
       "category_prefix": "KSI-INR",
       "cli_command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]')]\" --output json",
-      "timestamp": "2026-06-27T01:14:46.751678Z",
+      "timestamp": "2026-06-27T03:18:05.254745Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-INR-03/codecommit_011136_14f52d8e.json",
+      "evidence_path": "evidence_v2_engine/KSI-INR-03/codecommit_031438_14f52d8e.json",
       "total_category_controls": 3,
       "resources_scanned": 1,
       "resources_passed": 1,
@@ -5394,7 +5394,7 @@
           "command": "aws codecommit list-repositories --query \"repositories[?contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]') || contains(repositoryName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.82s",
+          "execution_time": "0.79s",
           "error_message": null,
           "stdout_sha256": "4d9ea61f28a22fccb5e8fe850b7ef1766884c06aa5c07f62b24be1a280864dbe"
         }
@@ -5419,13 +5419,13 @@
       "long_name": "Monitoring, Logging, and Auditing",
       "category_prefix": "KSI-MLA",
       "cli_command": "aws cloudtrail describe-trails --output json; aws cloudtrail get-trail-status --name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json; aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json; ( for b in $(aws s3api [s3-bucket] --query 'Buckets[].Name' --output text 2>/dev/null); do (aws s3api [s3-bucket] --bucket \"$b\" --output json 2>/dev/null || echo '{}') | jq --arg b \"$b\" '. + {Bucket: $b}'; done ) | jq -s '{BucketLoggingStatus: .}'; ( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-load-balancer-attributes --load-balancer-arn \"$arn\" --output json 2>/dev/null | jq --arg arn \"$arn\" '. + {LoadBalancerArn: $arn}'; done ) | jq -s '{LoadBalancerAttributes: .}'",
-      "timestamp": "2026-06-27T01:14:46.753117Z",
+      "timestamp": "2026-06-27T03:18:05.256223Z",
       "score": 75,
       "threshold": 100,
       "metric_status": "fail",
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-MLA-01/cloudtrail_011136_21cac14d.json",
+      "evidence_path": "evidence_v2_engine/KSI-MLA-01/cloudtrail_031438_21cac14d.json",
       "total_category_controls": 1,
       "resources_scanned": 5,
       "resources_passed": 3,
@@ -5471,7 +5471,7 @@
           "command": "aws cloudtrail describe-trails --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.73s",
+          "execution_time": "0.84s",
           "error_message": null,
           "stdout_sha256": "2cd01c0468b769010d057a2096eb2d775f67a23bfe65913bc03f6a94c1079bb6"
         },
@@ -5481,9 +5481,9 @@
           "command": "aws cloudtrail get-trail-status --name $(aws cloudtrail describe-trails --query 'trailList[0].TrailARN' --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.51s",
+          "execution_time": "1.58s",
           "error_message": null,
-          "stdout_sha256": "e7f98a00654468e3966711f40a4dbcfce96fa345b5d1f1f51974e02a842dc2a7"
+          "stdout_sha256": "100972b5d1b9004cc63b9d08641dadc3ef1ea6378b7dbed6832478c825ad6e52"
         },
         {
           "index": 2,
@@ -5491,7 +5491,7 @@
           "command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.70s",
+          "execution_time": "0.82s",
           "error_message": null,
           "stdout_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
         },
@@ -5501,7 +5501,7 @@
           "command": "( for b in $(aws s3api [s3-bucket] --query 'Buckets[].Name' --output text 2>/dev/null); do (aws s3api [s3-bucket] --bucket \"$b\" --output json 2>/dev/null || echo '{}') | jq --arg b \"$b\" '. + {Bucket: $b}'; done ) | jq -s '{BucketLoggingStatus: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "10.37s",
+          "execution_time": "11.66s",
           "error_message": null,
           "stdout_sha256": "e9fb67a6f401c930680a9a00614beef84fa3e8babe17bfad677f78caf139130c"
         },
@@ -5511,7 +5511,7 @@
           "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-load-balancer-attributes --load-balancer-arn \"$arn\" --output json 2>/dev/null | jq --arg arn \"$arn\" '. + {LoadBalancerArn: $arn}'; done ) | jq -s '{LoadBalancerAttributes: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.31s",
+          "execution_time": "2.25s",
           "error_message": null,
           "stdout_sha256": "c8e3bde60aa1d21f05baaf2f92859cb2a827f6665e105700848b6740e3b9ed20"
         }
@@ -5536,13 +5536,13 @@
       "long_name": "Monitoring, Logging, and Auditing",
       "category_prefix": "KSI-MLA",
       "cli_command": "aws logs describe-metric-filters --output json; aws securityhub get-insights --output json; aws cloudwatch describe-alarms --query \"MetricAlarms[?contains(AlarmName, '[resource]') || contains(AlarmName, '[resource]') || contains(AlarmName, '[resource]')]\" --output json",
-      "timestamp": "2026-06-27T01:14:46.755276Z",
+      "timestamp": "2026-06-27T03:18:05.258407Z",
       "score": 16,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-MLA-02/securityhub_011136_077bf986.json",
+      "evidence_path": "evidence_v2_engine/KSI-MLA-02/securityhub_031438_077bf986.json",
       "total_category_controls": 2,
       "resources_scanned": 6,
       "resources_passed": 1,
@@ -5614,7 +5614,7 @@
           "command": "aws cloudwatch describe-alarms --query \"MetricAlarms[?contains(AlarmName, '[resource]') || contains(AlarmName, '[resource]') || contains(AlarmName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.66s",
+          "execution_time": "0.76s",
           "error_message": null,
           "stdout_sha256": "0326925caaebdf8f9ccb9b708663f92d3cb784af5749592bfde473b7df36fc46"
         }
@@ -5639,13 +5639,13 @@
       "long_name": "Monitoring, Logging, and Auditing",
       "category_prefix": "KSI-MLA",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/evidence_v2/iac-scan/checkov_scan_summary.json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/sdlc-policy.md",
-      "timestamp": "2026-06-27T01:14:46.756659Z",
+      "timestamp": "2026-06-27T03:18:05.259814Z",
       "score": 100,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-MLA-05/documentation_011136_0970aabc.json",
+      "evidence_path": "evidence_v2_engine/KSI-MLA-05/documentation_031438_0970aabc.json",
       "total_category_controls": 3,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -5673,9 +5673,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/evidence_v2/iac-scan/checkov_scan_summary.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.13s",
+          "execution_time": "0.15s",
           "error_message": null,
-          "stdout_sha256": "8b526ad878190e7d89c39a201442ad78c3e40267a0d4fa53a808816a6253eac0"
+          "stdout_sha256": "45cba01999a76511b20e64ccfdd41049a47d279433d960dd6fc1f3a615aaa2e3"
         },
         {
           "index": 1,
@@ -5683,9 +5683,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/sdlc-policy.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.11s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "0043439663ba890817f48806c8a07a6dcf68a0fcca6b87c7b49680bc1af66695"
+          "stdout_sha256": "e78c2c23633cafaa9b9cbeb8daf0fd77da6803fc3edd394bcabff1cabaeedfcb"
         }
       ],
       "commands_executed": 2,
@@ -5708,13 +5708,13 @@
       "long_name": "Monitoring, Logging, and Auditing",
       "category_prefix": "KSI-MLA",
       "cli_command": "aws configservice describe-configuration-recorders --output json; aws cloudtrail describe-trails --output json; aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]')]\" --output json; aws rds describe-db-instances --output json | jq '{DBInstances: (.DBInstances // []) | map({DBInstanceIdentifier, Engine, EnabledCloudwatchLogsExports, DeletionProtection})}'",
-      "timestamp": "2026-06-27T01:14:46.758295Z",
+      "timestamp": "2026-06-27T03:18:05.261503Z",
       "score": 100,
       "threshold": 100,
       "metric_status": "pass",
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-MLA-07/configservice_011136_76741181.json",
+      "evidence_path": "evidence_v2_engine/KSI-MLA-07/configservice_031438_76741181.json",
       "total_category_controls": 4,
       "resources_scanned": 12,
       "resources_passed": 12,
@@ -5802,7 +5802,7 @@
           "command": "aws configservice describe-configuration-recorders --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.67s",
+          "execution_time": "0.75s",
           "error_message": null,
           "stdout_sha256": "5ef57dd1b43e664d3895d49599204dd4c736bcd956e9a6c76b6d6a1ef0996bd2"
         },
@@ -5812,7 +5812,7 @@
           "command": "aws cloudtrail describe-trails --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.74s",
+          "execution_time": "0.80s",
           "error_message": null,
           "stdout_sha256": "2cd01c0468b769010d057a2096eb2d775f67a23bfe65913bc03f6a94c1079bb6"
         },
@@ -5822,7 +5822,7 @@
           "command": "aws logs describe-log-groups --query \"logGroups[?contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]') || contains(logGroupName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.76s",
+          "execution_time": "0.80s",
           "error_message": null,
           "stdout_sha256": "a3bf733e0ee12cd31ca6a0bbbbca96ea8c69cb1e8e9a9d7a57700fdd2e2c072a"
         },
@@ -5832,7 +5832,7 @@
           "command": "aws rds describe-db-instances --output json | jq '{DBInstances: (.DBInstances // []) | map({DBInstanceIdentifier, Engine, EnabledCloudwatchLogsExports, DeletionProtection})}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.77s",
+          "execution_time": "0.87s",
           "error_message": null,
           "stdout_sha256": "262d0a14784c78f5af7cd0fb9fd0ce2a10260ceee2106d68861a05db3b5a869d"
         }
@@ -5857,13 +5857,13 @@
       "long_name": "Monitoring, Logging, and Auditing",
       "category_prefix": "KSI-MLA",
       "cli_command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json; aws kms list-aliases --query \"Aliases[?contains(AliasName, '[resource]') || contains(AliasName, '[resource]') || contains(AliasName, '[resource]')]\" --output json; aws iam list-policies --scope Local --query \"Policies[?contains(PolicyName, '[resource]') || contains(PolicyName, '[resource]') || contains(PolicyName, '[resource]') || contains(PolicyName, '[resource]')]\" --output json; aws iam get-policy-version --policy-arn $(aws iam list-policies --scope Local --query \"Policies[?contains(PolicyName,'[resource]')||contains(PolicyName,'[resource]')]|[0].Arn\" --output text) --version-id $(aws iam list-policies --scope Local --query \"Policies[?contains(PolicyName,'[resource]')||contains(PolicyName,'[resource]')]|[0].DefaultVersionId\" --output text) --output json",
-      "timestamp": "2026-06-27T01:14:46.760931Z",
+      "timestamp": "2026-06-27T03:18:05.264203Z",
       "score": 100,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-MLA-08/infrastructurevalidation_011136_23f8e64f.json",
+      "evidence_path": "evidence_v2_engine/KSI-MLA-08/infrastructurevalidation_031438_23f8e64f.json",
       "total_category_controls": 5,
       "resources_scanned": 11,
       "resources_passed": 11,
@@ -5945,7 +5945,7 @@
           "command": "aws s3api [s3-bucket] --query \"Buckets[?contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]') || contains(Name, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.74s",
+          "execution_time": "0.79s",
           "error_message": null,
           "stdout_sha256": "8e839bc9ba899527a5cd25e1940a91c46dba52f6a53bba906ef307ca29f52346"
         },
@@ -5955,7 +5955,7 @@
           "command": "aws kms list-aliases --query \"Aliases[?contains(AliasName, '[resource]') || contains(AliasName, '[resource]') || contains(AliasName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.67s",
+          "execution_time": "0.75s",
           "error_message": null,
           "stdout_sha256": "1842e63aad758888e1df583f16ebd897fb54616071042d31a4076c3b83024bcb"
         },
@@ -5965,7 +5965,7 @@
           "command": "aws iam list-policies --scope Local --query \"Policies[?contains(PolicyName, '[resource]') || contains(PolicyName, '[resource]') || contains(PolicyName, '[resource]') || contains(PolicyName, '[resource]')]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.68s",
+          "execution_time": "0.76s",
           "error_message": null,
           "stdout_sha256": "5e7d4fdcc89c7b93b508ce66d77c82505afba03b8836b4e43534f5828f700edf"
         },
@@ -5975,7 +5975,7 @@
           "command": "aws iam get-policy-version --policy-arn $(aws iam list-policies --scope Local --query \"Policies[?contains(PolicyName,'[resource]')||contains(PolicyName,'[resource]')]|[0].Arn\" --output text) --version-id $(aws iam list-policies --scope Local --query \"Policies[?contains(PolicyName,'[resource]')||contains(PolicyName,'[resource]')]|[0].DefaultVersionId\" --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.06s",
+          "execution_time": "2.23s",
           "error_message": null,
           "stdout_sha256": "75e4ac232abf58ee9076181579917a16b9732b40a207237689647dfa8bdf07a7"
         }
@@ -6000,13 +6000,13 @@
       "long_name": "Policy and Inventory",
       "category_prefix": "KSI-PIY",
       "cli_command": "aws configservice describe-configuration-recorders --output json; aws configservice describe-delivery-channels --output json; ( for id in $(aws ssm describe-instance-information --query 'InstanceInformationList[].InstanceId' --output text 2>/dev/null); do aws ssm list-inventory-entries --instance-id \"$id\" --type-name AWS:Application --output json; done ) | jq -s '{Entries: [.[].Entries // [] | .[]?]}'; aws configservice get-discovered-resource-counts --output json",
-      "timestamp": "2026-06-27T01:14:46.763287Z",
+      "timestamp": "2026-06-27T03:18:05.266654Z",
       "score": 100,
       "threshold": 80,
       "metric_status": "pass",
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-PIY-01/configservice_011136_76741181.json",
+      "evidence_path": "evidence_v2_engine/KSI-PIY-01/configservice_031438_76741181.json",
       "total_category_controls": 1,
       "resources_scanned": 192,
       "resources_passed": 192,
@@ -7174,7 +7174,7 @@
           "command": "aws configservice describe-configuration-recorders --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.75s",
+          "execution_time": "0.76s",
           "error_message": null,
           "stdout_sha256": "5ef57dd1b43e664d3895d49599204dd4c736bcd956e9a6c76b6d6a1ef0996bd2"
         },
@@ -7184,7 +7184,7 @@
           "command": "aws configservice describe-delivery-channels --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.68s",
+          "execution_time": "0.74s",
           "error_message": null,
           "stdout_sha256": "ae69167a6bb11deddac07e622050a319724a714d3dc7a931e6cb9aec73009a67"
         },
@@ -7194,7 +7194,7 @@
           "command": "( for id in $(aws ssm describe-instance-information --query 'InstanceInformationList[].InstanceId' --output text 2>/dev/null); do aws ssm list-inventory-entries --instance-id \"$id\" --type-name AWS:Application --output json; done ) | jq -s '{Entries: [.[].Entries // [] | .[]?]}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "8.13s",
+          "execution_time": "8.80s",
           "error_message": null,
           "stdout_sha256": "45ebc4a880170700345d5c3cb7b159b2ca65fcaeb43ef1bee38fbb958837e4e0"
         },
@@ -7204,7 +7204,7 @@
           "command": "aws configservice get-discovered-resource-counts --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.79s",
+          "execution_time": "0.74s",
           "error_message": null,
           "stdout_sha256": "00d8f157d9d3a060b09553b21f23c3be48a092a099033123e93e61ea813f1bed"
         }
@@ -7229,13 +7229,13 @@
       "long_name": "Policy and Inventory",
       "category_prefix": "KSI-PIY",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/manifest.json",
-      "timestamp": "2026-06-27T01:14:46.774889Z",
+      "timestamp": "2026-06-27T03:18:05.279111Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-PIY-03/documentation_011136_97695766.json",
+      "evidence_path": "evidence_v2_engine/KSI-PIY-03/documentation_031438_97695766.json",
       "total_category_controls": 2,
       "resources_scanned": 1,
       "resources_passed": 1,
@@ -7257,9 +7257,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/manifest.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.12s",
+          "execution_time": "0.17s",
           "error_message": null,
-          "stdout_sha256": "c192b117eac48238fd1aee1b8bc490cbe055839ff4b2495a67383f40d4f655da"
+          "stdout_sha256": "8d44620af07ffec86afee86874b87bdaf21b94340d4a0c29665a3427e5a310ef"
         }
       ],
       "commands_executed": 1,
@@ -7282,13 +7282,13 @@
       "long_name": "Policy and Inventory",
       "category_prefix": "KSI-PIY",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/secure-software-development.md; curl -s -H \"Accept: application/vnd.github+json\" \"https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/actions/workflows/enterprise_scanner.yml/runs?status=completed&per_page=30\"",
-      "timestamp": "2026-06-27T01:14:46.775675Z",
+      "timestamp": "2026-06-27T03:18:05.279944Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-PIY-04/documentation_011136_0e981cf9.json",
+      "evidence_path": "evidence_v2_engine/KSI-PIY-04/documentation_031438_0e981cf9.json",
       "total_category_controls": 3,
       "resources_scanned": 2,
       "resources_passed": 1,
@@ -7316,9 +7316,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/secure-software-development.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.13s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "47bda4e3d0797274a318d91b1bf6c7ed97aed9363b5e094cd4797ece96e05763"
+          "stdout_sha256": "cc4e56aa48b897684f6080318e038b2db5ed455ca945e35ea8d2d46c7dfacaf8"
         },
         {
           "index": 1,
@@ -7326,7 +7326,7 @@
           "command": "curl -s -H \"Accept: application/vnd.github+json\" \"https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/actions/workflows/enterprise_scanner.yml/runs?status=completed&per_page=30\"",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.10s",
+          "execution_time": "0.13s",
           "error_message": null,
           "stdout_sha256": "5c5b5795d33a2af5c615baf9170901a6ec19e1a2e77dfa0e012ea43fb4ee9d16"
         }
@@ -7351,13 +7351,13 @@
       "long_name": "Policy and Inventory",
       "category_prefix": "KSI-PIY",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/security-objectives/security-monitoring-and-alerting-plan.md; aws securityhub get-enabled-standards --output json",
-      "timestamp": "2026-06-27T01:14:46.776808Z",
+      "timestamp": "2026-06-27T03:18:05.281134Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-PIY-06/documentation_011136_6c10c65b.json",
+      "evidence_path": "evidence_v2_engine/KSI-PIY-06/documentation_031438_6c10c65b.json",
       "total_category_controls": 4,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -7385,9 +7385,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/security-objectives/security-monitoring-and-alerting-plan.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.11s",
+          "execution_time": "0.13s",
           "error_message": null,
-          "stdout_sha256": "f9680cdde32abe02a56be514c22023de567177787d8e2421d6161d0ca396e7a8"
+          "stdout_sha256": "6aa425920c4f2f1a34ad21097cc0afefa004819005c50ee00acb030ebfbf174a"
         },
         {
           "index": 1,
@@ -7395,7 +7395,7 @@
           "command": "aws securityhub get-enabled-standards --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.01s",
+          "execution_time": "1.13s",
           "error_message": null,
           "stdout_sha256": "6077bfbf5da75c0539dec01ed61ce639006ac81fafefa427ca7144f4a2128a61"
         }
@@ -7420,13 +7420,13 @@
       "long_name": "Policy and Inventory",
       "category_prefix": "KSI-PIY",
       "cli_command": "aws guardduty list-detectors --output json; aws securityhub get-enabled-standards --output json; aws budgets describe-budgets --account-id $(aws sts get-caller-identity --query Account --output text) --output json",
-      "timestamp": "2026-06-27T01:14:46.777839Z",
+      "timestamp": "2026-06-27T03:18:05.282290Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-PIY-08/guardduty_011136_2d97e55e.json",
+      "evidence_path": "evidence_v2_engine/KSI-PIY-08/guardduty_031438_2d97e55e.json",
       "total_category_controls": 5,
       "resources_scanned": 3,
       "resources_passed": 2,
@@ -7460,7 +7460,7 @@
           "command": "aws guardduty list-detectors --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.72s",
+          "execution_time": "0.79s",
           "error_message": null,
           "stdout_sha256": "da0a800072de478ede625cfda8dcb1e0b639594a3e85ae547fb67b4073eb782d"
         },
@@ -7470,7 +7470,7 @@
           "command": "aws securityhub get-enabled-standards --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.96s",
+          "execution_time": "1.02s",
           "error_message": null,
           "stdout_sha256": "6077bfbf5da75c0539dec01ed61ce639006ac81fafefa427ca7144f4a2128a61"
         },
@@ -7480,7 +7480,7 @@
           "command": "aws budgets describe-budgets --account-id $(aws sts get-caller-identity --query Account --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.52s",
+          "execution_time": "1.48s",
           "error_message": null,
           "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         }
@@ -7505,13 +7505,13 @@
       "long_name": "Recovery Planning",
       "category_prefix": "KSI-RPL",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/manifest.json; aws backup list-backup-plans --output json; ( for id in $(aws backup list-backup-plans --query 'BackupPlansList[].BackupPlanId' --output text 2>/dev/null); do aws backup get-backup-plan --backup-plan-id \"$id\" --output json; done ) | jq -s '{BackupPlans: .}'",
-      "timestamp": "2026-06-27T01:14:46.779165Z",
+      "timestamp": "2026-06-27T03:18:05.283837Z",
       "score": 100,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-RPL-01/documentation_011136_97695766.json",
+      "evidence_path": "evidence_v2_engine/KSI-RPL-01/documentation_031438_97695766.json",
       "total_category_controls": 1,
       "resources_scanned": 5,
       "resources_passed": 5,
@@ -7557,9 +7557,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/manifest.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.10s",
+          "execution_time": "0.15s",
           "error_message": null,
-          "stdout_sha256": "aebb071cca05467c61700a55a1f1bf8c18262b08b8b723b09529cb3f9fedab1b"
+          "stdout_sha256": "708b41ed2068e144be52e5e9015d6d4ecac06e3e2f10afcf00b9d9848fcc3d36"
         },
         {
           "index": 1,
@@ -7567,7 +7567,7 @@
           "command": "aws backup list-backup-plans --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.85s",
+          "execution_time": "0.83s",
           "error_message": null,
           "stdout_sha256": "ff2ed3e76b71b4d9436eef27fe1b27ddd26ec821040e3af85336cc83711f0053"
         },
@@ -7577,7 +7577,7 @@
           "command": "( for id in $(aws backup list-backup-plans --query 'BackupPlansList[].BackupPlanId' --output text 2>/dev/null); do aws backup get-backup-plan --backup-plan-id \"$id\" --output json; done ) | jq -s '{BackupPlans: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.13s",
+          "execution_time": "2.20s",
           "error_message": null,
           "stdout_sha256": "1120d6c05770fc649caebbf88ebaa1273429dbc0e2116adf38e46215b263b607"
         }
@@ -7602,13 +7602,13 @@
       "long_name": "Recovery Planning",
       "category_prefix": "KSI-RPL",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/disaster-recovery-plan.md; aws backup list-backup-jobs --by-state COMPLETED --max-results 5 --output json",
-      "timestamp": "2026-06-27T01:14:46.780750Z",
+      "timestamp": "2026-06-27T03:18:05.285505Z",
       "score": 100,
       "threshold": 100,
       "metric_status": "pass",
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-RPL-02/documentation_011136_4797fc53.json",
+      "evidence_path": "evidence_v2_engine/KSI-RPL-02/documentation_031438_4797fc53.json",
       "total_category_controls": 2,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -7636,9 +7636,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/disaster-recovery-plan.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.10s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "1d5893bf2038a932f11ad81a3b85e3d1b321280cd26b9ef18195a5249a581a09"
+          "stdout_sha256": "5ee90fa498a3c58882b422667bd3dd9dc807812f7c8319c8ed1ad94745abc3b7"
         },
         {
           "index": 1,
@@ -7646,9 +7646,9 @@
           "command": "aws backup list-backup-jobs --by-state COMPLETED --max-results 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.84s",
+          "execution_time": "0.77s",
           "error_message": null,
-          "stdout_sha256": "a619f6ffce8860c37bbd58849790102efeb9714e978da3a21835a239d88cddae"
+          "stdout_sha256": "b134f6319bb2fecc7860d4c221d7862769152785f22c1b18eb6f775e62350b79"
         }
       ],
       "commands_executed": 2,
@@ -7671,13 +7671,13 @@
       "long_name": "Recovery Planning",
       "category_prefix": "KSI-RPL",
       "cli_command": "aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/manifest.json; aws backup list-restore-jobs --by-status COMPLETED --output json",
-      "timestamp": "2026-06-27T01:14:46.781710Z",
+      "timestamp": "2026-06-27T03:18:05.286535Z",
       "score": 100,
       "threshold": 100,
       "metric_status": "pass",
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-RPL-03/backup_011136_d5b08740.json",
+      "evidence_path": "evidence_v2_engine/KSI-RPL-03/backup_031438_d5b08740.json",
       "total_category_controls": 3,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -7711,7 +7711,7 @@
           "command": "aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.68s",
+          "execution_time": "0.71s",
           "error_message": null,
           "stdout_sha256": "3e6f7339e4a1c0027aff45d88936d787a20f3c37d4cf5602205aa97c95e1dcae"
         },
@@ -7721,9 +7721,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/manifest.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.11s",
+          "execution_time": "0.20s",
           "error_message": null,
-          "stdout_sha256": "21686b4d2eb6810dad21f4b57f85658a31411dbf6e6d8beefefbce5169108725"
+          "stdout_sha256": "028cce66d5b065fde6aa777a6fba3df9100c25c614e6fa7de0700331bc003d77"
         },
         {
           "index": 2,
@@ -7731,7 +7731,7 @@
           "command": "aws backup list-restore-jobs --by-status COMPLETED --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.85s",
+          "execution_time": "0.74s",
           "error_message": null,
           "stdout_sha256": "3e6f7339e4a1c0027aff45d88936d787a20f3c37d4cf5602205aa97c95e1dcae"
         }
@@ -7756,13 +7756,13 @@
       "long_name": "Recovery Planning",
       "category_prefix": "KSI-RPL",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/manifest.json; aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json; aws backup list-restore-jobs --by-status COMPLETED --output json",
-      "timestamp": "2026-06-27T01:14:46.782826Z",
+      "timestamp": "2026-06-27T03:18:05.287687Z",
       "score": 100,
       "threshold": 100,
       "metric_status": "pass",
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-RPL-04/documentation_011136_97695766.json",
+      "evidence_path": "evidence_v2_engine/KSI-RPL-04/documentation_031438_97695766.json",
       "total_category_controls": 4,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -7796,9 +7796,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/manifest.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.10s",
+          "execution_time": "0.18s",
           "error_message": null,
-          "stdout_sha256": "6ca5f67bf185c7f6e2e0674cab6548ca186ac8e0afbc69d25175f38e6e48049d"
+          "stdout_sha256": "841948fc299a3326c353e7d0bcbb35a56691d7a6533e1938a746bbfca7aa31c3"
         },
         {
           "index": 1,
@@ -7806,7 +7806,7 @@
           "command": "aws backup list-restore-jobs --by-status COMPLETED --max-results 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.94s",
+          "execution_time": "0.72s",
           "error_message": null,
           "stdout_sha256": "3e6f7339e4a1c0027aff45d88936d787a20f3c37d4cf5602205aa97c95e1dcae"
         },
@@ -7816,7 +7816,7 @@
           "command": "aws backup list-restore-jobs --by-status COMPLETED --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.78s",
+          "execution_time": "0.72s",
           "error_message": null,
           "stdout_sha256": "3e6f7339e4a1c0027aff45d88936d787a20f3c37d4cf5602205aa97c95e1dcae"
         }
@@ -7841,13 +7841,13 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws inspector2 list-coverage --output json; aws ssm describe-patch-baselines --filters \"Key=OWNER,Values=[Self]\" --output json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/vulnerability-management-policy.md",
-      "timestamp": "2026-06-27T01:14:46.783953Z",
+      "timestamp": "2026-06-27T03:18:05.288841Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-01/inspector2_011136_4c6de8c9.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-01/inspector2_031438_4c6de8c9.json",
       "total_category_controls": 1,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -7881,9 +7881,9 @@
           "command": "aws inspector2 list-coverage --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.00s",
+          "execution_time": "1.24s",
           "error_message": null,
-          "stdout_sha256": "8f1103130524dcc09b5e07044fbffea54277624cb0fc695466afc51acfb81e63"
+          "stdout_sha256": "8b9618fa16d00441a90941aabe4d956c0e0c43eca95517c891abe5d342ae1894"
         },
         {
           "index": 1,
@@ -7891,7 +7891,7 @@
           "command": "aws ssm describe-patch-baselines --filters \"Key=OWNER,Values=[Self]\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.71s",
+          "execution_time": "0.77s",
           "error_message": null,
           "stdout_sha256": "40c5859b71d1b40cd88602ca66154bfb719759b5c61013ce4fb4f0e28644fead"
         },
@@ -7901,9 +7901,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/vulnerability-management-policy.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.12s",
+          "execution_time": "0.15s",
           "error_message": null,
-          "stdout_sha256": "80b1cbf50ecf109cf6926f157c3ce2f728eafce3cfc33dd28c310e545c95d360"
+          "stdout_sha256": "46a1bf66c8075fc0ad43bab08aed558066367e62958b803abd23c16045b0ae91"
         }
       ],
       "commands_executed": 3,
@@ -7926,13 +7926,13 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws acm list-certificates --certificate-statuses ISSUED --output json; aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Scheme:Scheme}\" --output json; aws cloudfront list-distributions --query \"DistributionList.Items[].{Id:Id, Domain:DomainName, Certificate:ViewerCertificate.Certificate}\" --output json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/encryption-policy.md; ( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
-      "timestamp": "2026-06-27T01:14:46.785329Z",
+      "timestamp": "2026-06-27T03:18:05.290206Z",
       "score": 100,
       "threshold": 100,
       "metric_status": "pass",
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-02/acm_011136_d94e2b67.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-02/acm_031438_d94e2b67.json",
       "total_category_controls": 2,
       "resources_scanned": 6,
       "resources_passed": 3,
@@ -7984,7 +7984,7 @@
           "command": "aws acm list-certificates --certificate-statuses ISSUED --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.75s",
+          "execution_time": "0.78s",
           "error_message": null,
           "stdout_sha256": "4701426d32f5137b6ecd50fdee3aa3b59840e602186d532ae1305184f66cc1b8"
         },
@@ -7994,7 +7994,7 @@
           "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Scheme:Scheme}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.66s",
+          "execution_time": "0.74s",
           "error_message": null,
           "stdout_sha256": "a08e3da7f4aae6fe64542c1e23fd0815e38356bf0eb79a96807d3b98a8093768"
         },
@@ -8004,7 +8004,7 @@
           "command": "aws cloudfront list-distributions --query \"DistributionList.Items[].{Id:Id, Domain:DomainName, Certificate:ViewerCertificate.Certificate}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.70s",
+          "execution_time": "0.84s",
           "error_message": null,
           "stdout_sha256": "38e0b9de817f645c4bec37c0d4a3e58baecccb040f5718dc069a72c7385a0bed"
         },
@@ -8014,9 +8014,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/encryption-policy.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.11s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "95e0b0e17b8c3810825f0bf2d9b18984ad0665c3ea3893743fbf5b10ca5765fb"
+          "stdout_sha256": "7af1dca0da6103ae07ed4c2d2c0b939ebcde43b3af732b1d171fb36c4373d21c"
         },
         {
           "index": 4,
@@ -8024,7 +8024,7 @@
           "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.04s",
+          "execution_time": "2.18s",
           "error_message": null,
           "stdout_sha256": "8cb17d929c3f778a602c0307510edd47d3b985b4fd74c60fc7e29495ddf7adf8"
         }
@@ -8049,13 +8049,13 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/evidence_v2/iac-scan/checkov_scan_summary.json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/configuration-management-policy.md",
-      "timestamp": "2026-06-27T01:14:46.787190Z",
+      "timestamp": "2026-06-27T03:18:05.292067Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-04/documentation_011136_0970aabc.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-04/documentation_031438_0970aabc.json",
       "total_category_controls": 3,
       "resources_scanned": 2,
       "resources_passed": 2,
@@ -8083,9 +8083,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/evidence_v2/iac-scan/checkov_scan_summary.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.11s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "31681ac127a466b724c64c01f1cf773d301ea65d6f15df4617eaae7d346656d0"
+          "stdout_sha256": "d7078b82dde142dd42d8b69550baf727fedc2cab724e433b8ce0081f0743f464"
         },
         {
           "index": 1,
@@ -8093,9 +8093,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/configuration-management-policy.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.11s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "b5925a294234a979f4ab9e41e154491037c3a4c7adddfc607ae831d3f4975c13"
+          "stdout_sha256": "6d4991668ea42b1a37ef04989e5afec45fa10992828009750d7310fca220f151"
         }
       ],
       "commands_executed": 2,
@@ -8118,13 +8118,13 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws cloudtrail describe-trails --query 'trailList[].TrailARN' --output text | tr '\\t' '\\n' | xargs -I{} aws cloudtrail get-trail --name {} --output json | jq -s '[.[] | .Trail | select(.LogFileValidationEnabled == true)]'; aws s3api [s3-bucket] --bucket $(aws cloudtrail describe-trails --query 'trailList[0].[s3-bucket]' --output text) --output json; aws ssm describe-instance-information --query \"InstanceInformationList[].{ID:InstanceId, PingStatus:PingStatus, AgentVersion:AgentVersion}\" --output json",
-      "timestamp": "2026-06-27T01:14:46.788717Z",
+      "timestamp": "2026-06-27T03:18:05.293594Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-05/cloudtrail_011136_09e4622f.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-05/cloudtrail_031438_09e4622f.json",
       "total_category_controls": 4,
       "resources_scanned": 12,
       "resources_passed": 12,
@@ -8212,7 +8212,7 @@
           "command": "aws cloudtrail describe-trails --query 'trailList[].TrailARN' --output text | tr '\\t' '\\n' | xargs -I{} aws cloudtrail get-trail --name {} --output json | jq -s '[.[] | .Trail | select(.LogFileValidationEnabled == true)]'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.42s",
+          "execution_time": "1.50s",
           "error_message": null,
           "stdout_sha256": "78d1025da394561ba1d71c3bf02d4456e7077ebbfb63107ab33c7fc75b000bf3"
         },
@@ -8222,7 +8222,7 @@
           "command": "aws s3api [s3-bucket] --bucket $(aws cloudtrail describe-trails --query 'trailList[0].[s3-bucket]' --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.36s",
+          "execution_time": "1.54s",
           "error_message": null,
           "stdout_sha256": "e0d7fcfe6b2ca7b3376e1af42cfbf309d2ee91d4cd664565f9b73c4816079f22"
         },
@@ -8232,7 +8232,7 @@
           "command": "aws ssm describe-instance-information --query \"InstanceInformationList[].{ID:InstanceId, PingStatus:PingStatus, AgentVersion:AgentVersion}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.74s",
+          "execution_time": "0.78s",
           "error_message": null,
           "stdout_sha256": "f925093143496202d887c32e8e9e372dac66cf8a9b045da4e41d1ba855871b46"
         }
@@ -8257,7 +8257,7 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws kms list-keys --limit 10 --output json; aws secretsmanager list-secrets --max-results 5 --output json; aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json; ( for arn in $(aws secretsmanager list-secrets --query 'SecretList[].ARN' --output text 2>/dev/null); do aws secretsmanager describe-secret --secret-id \"$arn\" --output json; done ) | jq -s '{SecretList: .}'; ( for k in $(aws kms list-keys --query 'Keys[].KeyId' --output text 2>/dev/null); do aws kms get-key-rotation-status --key-id \"$k\" --output json; done ) | jq -s '{KeyRotationStatuses: .}'; ( for arn in $(aws acm list-certificates --certificate-statuses ISSUED --query 'CertificateSummaryList[].CertificateArn' --output text 2>/dev/null); do aws acm describe-certificate --certificate-arn \"$arn\" --output json 2>/dev/null | jq '.Certificate | {CertificateArn, NotAfter, DomainName, Status}'; done ) | jq -s '{Certificates: .}'; ( for arn in $(aws secretsmanager list-secrets --query 'SecretList[].ARN' --output text 2>/dev/null); do aws secretsmanager describe-secret --secret-id \"$arn\" --output json 2>/dev/null | jq '{ARN, Name, RotationEnabled, RotationRules}'; done ) | jq -s '{Secrets: .}'",
-      "timestamp": "2026-06-27T01:14:46.791557Z",
+      "timestamp": "2026-06-27T03:18:05.296497Z",
       "score": 100,
       "threshold": 100,
       "metric_status": "pass",
@@ -8267,7 +8267,7 @@
         "secret-paylocity-webhook-auth"
       ],
       "accepted_risks_flipped_assertion": true,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-06/kms_011136_5e8ee543.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-06/kms_031438_5e8ee543.json",
       "total_category_controls": 5,
       "resources_scanned": 22,
       "resources_passed": 6,
@@ -8433,7 +8433,7 @@
           "command": "aws kms list-keys --limit 10 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.66s",
+          "execution_time": "0.74s",
           "error_message": null,
           "stdout_sha256": "81523c7d5cc2798512b64ada840e4325e1774b81eb45c64bbe2c058362802fcc"
         },
@@ -8443,7 +8443,7 @@
           "command": "aws secretsmanager list-secrets --max-results 5 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.71s",
+          "execution_time": "0.74s",
           "error_message": null,
           "stdout_sha256": "8ffbaa807f90d7ade93baa8c3fea339879ea0c1c19e6253c8a99e7fd620a9771"
         },
@@ -8453,7 +8453,7 @@
           "command": "aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.66s",
+          "execution_time": "0.75s",
           "error_message": null,
           "stdout_sha256": "4701426d32f5137b6ecd50fdee3aa3b59840e602186d532ae1305184f66cc1b8"
         },
@@ -8463,7 +8463,7 @@
           "command": "( for arn in $(aws secretsmanager list-secrets --query 'SecretList[].ARN' --output text 2>/dev/null); do aws secretsmanager describe-secret --secret-id \"$arn\" --output json; done ) | jq -s '{SecretList: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "3.26s",
+          "execution_time": "3.59s",
           "error_message": null,
           "stdout_sha256": "34e641a1adaf24d83ecca6bdb5a0c0f0e3c379fc031c83dbf7e3cad2dcb25e5c"
         },
@@ -8473,7 +8473,7 @@
           "command": "( for k in $(aws kms list-keys --query 'Keys[].KeyId' --output text 2>/dev/null); do aws kms get-key-rotation-status --key-id \"$k\" --output json; done ) | jq -s '{KeyRotationStatuses: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "12.37s",
+          "execution_time": "13.74s",
           "error_message": null,
           "stdout_sha256": "67e834d137e48e4a0423986bac67b30dc9f23ce35f1613f8edbc97dca22e5d1f"
         },
@@ -8483,7 +8483,7 @@
           "command": "( for arn in $(aws acm list-certificates --certificate-statuses ISSUED --query 'CertificateSummaryList[].CertificateArn' --output text 2>/dev/null); do aws acm describe-certificate --certificate-arn \"$arn\" --output json 2>/dev/null | jq '.Certificate | {CertificateArn, NotAfter, DomainName, Status}'; done ) | jq -s '{Certificates: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.50s",
+          "execution_time": "1.49s",
           "error_message": null,
           "stdout_sha256": "348ec15c1b86d11fd6af00610775c55cb199331f776488d8d1df046d16b62ad5"
         },
@@ -8493,7 +8493,7 @@
           "command": "( for arn in $(aws secretsmanager list-secrets --query 'SecretList[].ARN' --output text 2>/dev/null); do aws secretsmanager describe-secret --secret-id \"$arn\" --output json 2>/dev/null | jq '{ARN, Name, RotationEnabled, RotationRules}'; done ) | jq -s '{Secrets: .}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "3.14s",
+          "execution_time": "3.52s",
           "error_message": null,
           "stdout_sha256": "986ee3a3f7c1f4714bdf7a8dbe308aae1925975060d8aa80b9c907f7e43d32c0"
         }
@@ -8518,13 +8518,13 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws s3api [s3-bucket] --bucket $(aws s3api [s3-bucket] --query \"Buckets[?contains(Name,'[resource]')]|[0].Name\" --output text) --output json; aws rds describe-db-snapshots --snapshot-type manual --query '{DBSnapshots: DBSnapshots[].{DBSnapshotIdentifier: DBSnapshotIdentifier, Status: Status, SnapshotCreateTime: SnapshotCreateTime}}' --output json; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/data-sanitization-policy.md",
-      "timestamp": "2026-06-27T01:14:46.795193Z",
+      "timestamp": "2026-06-27T03:18:05.300183Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-08/s3api_011136_59a5db86.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-08/s3api_031438_59a5db86.json",
       "total_category_controls": 6,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -8558,7 +8558,7 @@
           "command": "aws s3api [s3-bucket] --bucket $(aws s3api [s3-bucket] --query \"Buckets[?contains(Name,'[resource]')]|[0].Name\" --output text) --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "1.45s",
+          "execution_time": "1.59s",
           "error_message": null,
           "stdout_sha256": "c1228861c53f27d2d3fa089ea4229052308106c3d6b51e1d5763ee2a348657a4"
         },
@@ -8568,7 +8568,7 @@
           "command": "aws rds describe-db-snapshots --snapshot-type manual --query '{DBSnapshots: DBSnapshots[].{DBSnapshotIdentifier: DBSnapshotIdentifier, Status: Status, SnapshotCreateTime: SnapshotCreateTime}}' --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.74s",
+          "execution_time": "0.84s",
           "error_message": null,
           "stdout_sha256": "7174c24c314c80068df8faee2f4c514013ddd14f790124d938c45fb8189843c5"
         },
@@ -8578,9 +8578,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/data-sanitization-policy.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.12s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "5c41aae7113c72021fb599f742dde30dc0ef9ba3325cae5b61ff5b216cbae5b1"
+          "stdout_sha256": "9418eca2b22b4eeaf2e1a0be5d0a0ce4edcbde95b4bae7d6eada14f1cc803a26"
         }
       ],
       "commands_executed": 3,
@@ -8603,13 +8603,13 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, Scheme:Scheme}\" --output json; ( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'; aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json; ( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
-      "timestamp": "2026-06-27T01:14:46.796826Z",
+      "timestamp": "2026-06-27T03:18:05.301816Z",
       "score": 100,
       "threshold": 100,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-09/elbv2_011136_a92a0b2a.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-09/elbv2_031438_a92a0b2a.json",
       "total_category_controls": 7,
       "resources_scanned": 7,
       "resources_passed": 5,
@@ -8667,7 +8667,7 @@
           "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, Scheme:Scheme}\" --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.67s",
+          "execution_time": "0.76s",
           "error_message": null,
           "stdout_sha256": "b03e6283b60b80aeeba419e3ae016a5e8cee3809c21436b064b422c598395d80"
         },
@@ -8677,7 +8677,7 @@
           "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.09s",
+          "execution_time": "2.27s",
           "error_message": null,
           "stdout_sha256": "8cb17d929c3f778a602c0307510edd47d3b985b4fd74c60fc7e29495ddf7adf8"
         },
@@ -8687,7 +8687,7 @@
           "command": "aws acm list-certificates --certificate-statuses ISSUED --max-items 10 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.68s",
+          "execution_time": "0.73s",
           "error_message": null,
           "stdout_sha256": "4701426d32f5137b6ecd50fdee3aa3b59840e602186d532ae1305184f66cc1b8"
         },
@@ -8697,7 +8697,7 @@
           "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "2.15s",
+          "execution_time": "2.30s",
           "error_message": null,
           "stdout_sha256": "8cb17d929c3f778a602c0307510edd47d3b985b4fd74c60fc7e29495ddf7adf8"
         }
@@ -8722,13 +8722,13 @@
       "long_name": "Service Configuration Management",
       "category_prefix": "KSI-SVC",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/data-sanitization-policy.md; aws backup list-backup-plans --output json; aws kms list-keys --limit 10 --output json",
-      "timestamp": "2026-06-27T01:14:46.798939Z",
+      "timestamp": "2026-06-27T03:18:05.303960Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-SVC-10/documentation_011136_7f4937df.json",
+      "evidence_path": "evidence_v2_engine/KSI-SVC-10/documentation_031438_7f4937df.json",
       "total_category_controls": 8,
       "resources_scanned": 4,
       "resources_passed": 4,
@@ -8768,9 +8768,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/data-sanitization-policy.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.11s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "fadd2f130bcea0009101ecf6f7e0238cfee3d260f187ed208b7b80f2b807a71e"
+          "stdout_sha256": "b59ad84bdf91ed044f7f30e15fef82be27ffbf38238a1ba85d066974421c4d37"
         },
         {
           "index": 1,
@@ -8778,7 +8778,7 @@
           "command": "aws backup list-backup-plans --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.74s",
+          "execution_time": "0.80s",
           "error_message": null,
           "stdout_sha256": "ff2ed3e76b71b4d9436eef27fe1b27ddd26ec821040e3af85336cc83711f0053"
         },
@@ -8788,7 +8788,7 @@
           "command": "aws kms list-keys --limit 10 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.71s",
+          "execution_time": "0.70s",
           "error_message": null,
           "stdout_sha256": "81523c7d5cc2798512b64ada840e4325e1774b81eb45c64bbe2c058362802fcc"
         }
@@ -8813,13 +8813,13 @@
       "long_name": "Third-Party Information Resources",
       "category_prefix": "KSI-TPR",
       "cli_command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/supply-chain-risk-management.md; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/.github/dependabot.yml; curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/metrics/github/summary.json",
-      "timestamp": "2026-06-27T01:14:46.800509Z",
+      "timestamp": "2026-06-27T03:18:05.305562Z",
       "score": 100,
       "threshold": 80,
       "metric_status": null,
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-TPR-03/documentation_011136_71d45cc0.json",
+      "evidence_path": "evidence_v2_engine/KSI-TPR-03/documentation_031438_71d45cc0.json",
       "total_category_controls": 1,
       "resources_scanned": 3,
       "resources_passed": 3,
@@ -8853,9 +8853,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/governance/policies/supply-chain-risk-management.md",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.12s",
+          "execution_time": "0.14s",
           "error_message": null,
-          "stdout_sha256": "91a602e85eb08ab4395da6355fc2096796727524c805690b23d64e1fd3ff8dfb"
+          "stdout_sha256": "b67107ce2ccc859df1bfb0bf2fde2f0c69ab361b2dc0f13fbe1e67c42f60a7f1"
         },
         {
           "index": 1,
@@ -8863,9 +8863,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/.github/dependabot.yml",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.10s",
+          "execution_time": "0.15s",
           "error_message": null,
-          "stdout_sha256": "b4c5ae38d52d0e2ca2c59f80f2894316864fa5640f1696e7cbe5f8aa1ad6bb17"
+          "stdout_sha256": "94a3c0a68b4f19312bf23bb9d56af37bdc02c4e13a84683893f36b6bd91cc969"
         },
         {
           "index": 2,
@@ -8873,9 +8873,9 @@
           "command": "curl -s -H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\" https://[fqdn]/repos/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/contents/metrics/github/summary.json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.11s",
+          "execution_time": "0.16s",
           "error_message": null,
-          "stdout_sha256": "a0ec61bb4ade70ef2a0a318bc33ce8d5d1df1edc32a1060f22961061562799a5"
+          "stdout_sha256": "20a592d62aa319bfecc4454d512f1e1679735dfd7113a178231508fdaa0ee027"
         }
       ],
       "commands_executed": 3,
@@ -8898,13 +8898,13 @@
       "long_name": "Third-Party Information Resources",
       "category_prefix": "KSI-TPR",
       "cli_command": "aws inspector2 get-configuration --output json; aws inspector2 list-findings --filter-criteria '{\"componentType\":[{\"comparison\":\"EQUALS\",\"value\":\"OPERATING_SYSTEM\"}]}' --max-results 50 --output json; aws inspector2 list-findings --filter-criteria '{\"componentType\":[{\"comparison\":\"EQUALS\",\"value\":\"APPLICATION\"}]}' --max-results 50 --output json; aws inspector2 list-findings --filter-criteria '{\"findingStatus\":[{\"comparison\":\"EQUALS\",\"value\":\"ACTIVE\"}]}' --max-results 100 --output json; aws inspector2 list-coverage --filter-criteria '{\"resourceType\":[{\"comparison\":\"EQUALS\",\"value\":\"AWS_EC2_INSTANCE\"}]}' --max-results 100 --output json; aws ssm describe-instance-information --output json",
-      "timestamp": "2026-06-27T01:14:46.802318Z",
+      "timestamp": "2026-06-27T03:18:05.307416Z",
       "score": 91,
       "threshold": 80,
       "metric_status": "fail",
       "accepted_risks_applied": [],
       "accepted_risks_flipped_assertion": false,
-      "evidence_path": "evidence_v2_engine/KSI-TPR-04/inspector2_011136_26f5156f.json",
+      "evidence_path": "evidence_v2_engine/KSI-TPR-04/inspector2_031438_26f5156f.json",
       "total_category_controls": 2,
       "resources_scanned": 15,
       "resources_passed": 11,
@@ -9010,7 +9010,7 @@
           "command": "aws inspector2 get-configuration --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.87s",
+          "execution_time": "1.01s",
           "error_message": null,
           "stdout_sha256": "b726df0ad6ca18fbbe48a2c578749b41accc4a5b3a4732fb94c7b41753a078a3"
         },
@@ -9020,7 +9020,7 @@
           "command": "aws inspector2 list-findings --filter-criteria '{\"componentType\":[{\"comparison\":\"EQUALS\",\"value\":\"OPERATING_SYSTEM\"}]}' --max-results 50 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.96s",
+          "execution_time": "0.90s",
           "error_message": null,
           "stdout_sha256": "28d69ef1a484aa8dbf32ae993578fac866a41c5248f6451b331aa8f03285d7ec"
         },
@@ -9030,7 +9030,7 @@
           "command": "aws inspector2 list-findings --filter-criteria '{\"componentType\":[{\"comparison\":\"EQUALS\",\"value\":\"APPLICATION\"}]}' --max-results 50 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.92s",
+          "execution_time": "0.97s",
           "error_message": null,
           "stdout_sha256": "28d69ef1a484aa8dbf32ae993578fac866a41c5248f6451b331aa8f03285d7ec"
         },
@@ -9042,7 +9042,7 @@
           "exit_code": 0,
           "execution_time": "1.02s",
           "error_message": null,
-          "stdout_sha256": "c143ac0b6f2baf37df2f1044c57d346dcc169401bae2986aeb185ee520d8c5cc"
+          "stdout_sha256": "9bf5a944cfe60eddd10a30a137c72f5084668957560f7969bf23c5307589b654"
         },
         {
           "index": 4,
@@ -9050,9 +9050,9 @@
           "command": "aws inspector2 list-coverage --filter-criteria '{\"resourceType\":[{\"comparison\":\"EQUALS\",\"value\":\"AWS_EC2_INSTANCE\"}]}' --max-results 100 --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.90s",
+          "execution_time": "0.81s",
           "error_message": null,
-          "stdout_sha256": "c335d8cc3c1483fda0b29d2949b302af8d23c3f36a2a867157fe333b08fe030a"
+          "stdout_sha256": "c6b0077bf7f55e03db68e56ba196868eb2e305de4be9693af8a29ce2ce51be04"
         },
         {
           "index": 5,
@@ -9060,9 +9060,9 @@
           "command": "aws ssm describe-instance-information --output json",
           "status": "success",
           "exit_code": 0,
-          "execution_time": "0.74s",
+          "execution_time": "0.84s",
           "error_message": null,
-          "stdout_sha256": "8b3aff348134cbbce99bd87efc579a11bebbccdd91a7e82f517c988ba232b79b"
+          "stdout_sha256": "d8724d9af805c87f47d847a43313d84e40d086176bd63f5b16d523620a7e520a"
         }
       ],
       "commands_executed": 6,
