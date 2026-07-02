@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Significant Change Notification (SCN) - 2026-07-02</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-50:  rgb(var(--a50));
+            --accent-100: rgb(var(--a100));
+            --accent-500: rgb(var(--a500));
+            --accent-600: rgb(var(--a600));
+            --accent-700: rgb(var(--a700));
+        }
+        html, body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+        .font-mono, code { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+        .accent-band { background: linear-gradient(135deg, var(--accent-600), var(--accent-700)); }
+        .accent-text { color: var(--accent-600); }
+        .accent-bg-soft { background: var(--accent-50); }
+        .accent-border { border-color: var(--accent-500); }
+        .card { background: #fff; border: 1px solid rgb(226 232 240); border-radius: 16px; box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px -2px rgba(15,23,42,.05); }
+        .card-flush { background: #fff; border: 1px solid rgb(226 232 240); border-radius: 16px; overflow: hidden; }
+        .section-eyebrow { letter-spacing: .18em; font-weight: 700; font-size: 10px; text-transform: uppercase; color: var(--accent-600); }
+        .section-h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; color: rgb(15 23 42); }
+        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .data-table thead th { background: rgb(248 250 252); color: rgb(71 85 105); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; text-align: left; padding: 12px 16px; position: sticky; top: 0; }
+        .data-table thead th:first-child { border-top-left-radius: 16px; }
+        .data-table thead th:last-child { border-top-right-radius: 16px; }
+        .data-table tbody td { padding: 12px 16px; font-size: 13px; color: rgb(30 41 59); border-top: 1px solid rgb(241 245 249); }
+        .data-table tbody tr:hover td { background: rgb(248 250 252); }
+        .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1; }
+        .pill-good { background: rgb(220 252 231); color: rgb(22 101 52); }
+        .pill-warn { background: rgb(254 243 199); color: rgb(146 64 14); }
+        .pill-bad  { background: rgb(254 226 226); color: rgb(153 27 27); }
+        .pill-info { background: rgb(241 245 249); color: rgb(51 65 85); }
+        .accent-rose { --a50: 238 242 255; --a100: 224 231 255; --a500: 99 102 241; --a600: 79 70 229; --a700: 67 56 202; }
+        .accent-indigo { --a50: 238 242 255; --a100: 224 231 255; --a500: 99 102 241; --a600: 79 70 229; --a700: 67 56 202; }
+        .accent-blue   { --a50: 239 246 255; --a100: 219 234 254; --a500: 59 130 246; --a600: 37 99 235; --a700: 29 78 216; }
+        .accent-amber  { --a50: 255 251 235; --a100: 254 243 199; --a500: 245 158 11; --a600: 217 119 6;  --a700: 180 83 9; }
+        .accent-rose   { --a50: 255 241 242; --a100: 255 228 230; --a500: 244 63 94;  --a600: 225 29 72;  --a700: 190 18 60; }
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 11pt; background: #fff; }
+            .no-print { display: none; }
+            .page-break { page-break-before: always; }
+            .card, .card-flush { box-shadow: none; break-inside: avoid; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 accent-rose">
+    <div class="accent-band h-1.5 w-full"></div>
+    <header class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                <div class="flex items-start gap-4">
+                    <div class="accent-band text-white rounded-2xl w-12 h-12 flex items-center justify-center shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-6 h-6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M19.5 14.151A8.25 8.25 0 1 1 18.16 6.348L21 9.348"/></svg>
+                    </div>
+                    <div>
+                        <p class="section-eyebrow mb-1">FRR-SCN-01, SCN-TR, SCN-TF, SCN-AU</p>
+                        <h1 class="text-3xl font-bold text-slate-900 tracking-tight leading-tight">Significant Change Notification (SCN)</h1>
+                        <p class="text-sm text-slate-500 mt-1">Meridian Knowledge Solutions &middot; Meridian LMS &middot; Moderate</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 lg:justify-end">
+                    <span class="pill pill-info"><span class="opacity-60">Generated</span><span class="font-mono">2026-07-02 09:10 UTC</span></span>
+                    <span class="pill pill-info"><span class="opacity-60">Data</span><span class="font-mono">LIVE</span></span>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-6 lg:px-8 py-8 space-y-8">
+
+        <section class="space-y-4">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 1</p>
+                    <h2 class="section-h2">Change Overview</h2>
+                </div>
+            </div>
+            
+            
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                
+        <div class="card p-5">
+            <div class="flex items-start justify-between mb-3">
+                <p class="section-eyebrow">Change Tier</p>
+                <div class="accent-text"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M19.5 14.151A8.25 8.25 0 1 1 18.16 6.348L21 9.348"/></svg></div>
+            </div>
+            <p class="text-3xl font-bold tracking-tight text-slate-900">Adaptive</p>
+            
+        </div>
+                
+        <div class="card p-5">
+            <div class="flex items-start justify-between mb-3">
+                <p class="section-eyebrow">Category</p>
+                <div class="accent-text"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg></div>
+            </div>
+            <p class="text-3xl font-bold tracking-tight text-slate-900">Configuration / Security Adaptation</p>
+            
+        </div>
+                
+        <div class="card p-5">
+            <div class="flex items-start justify-between mb-3">
+                <p class="section-eyebrow">Emergency</p>
+                <div class="accent-text"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9.303 3.376c.866 1.5-.217 3.374-1.948 3.374H4.645c-1.732 0-2.813-1.874-1.948-3.374L9.4 3.003c.866-1.5 3.032-1.5 3.898 0l8.704 13.123ZM12 17.25h.007v.008H12v-.008Z"/></svg></div>
+            </div>
+            <p class="text-3xl font-bold tracking-tight text-emerald-600">No</p>
+            
+        </div>
+                
+        <div class="card p-5">
+            <div class="flex items-start justify-between mb-3">
+                <p class="section-eyebrow">Risk Level</p>
+                <div class="accent-text"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 5.523-3.879 10.268-9 11.486-5.121-1.218-9-5.963-9-11.486V5.25l9-3 9 3V12Z"/></svg></div>
+            </div>
+            <p class="text-3xl font-bold tracking-tight text-emerald-600">Low</p>
+            
+        </div>
+            </div>
+            <div class="card p-5">
+                <p class="section-eyebrow mb-2">Change Summary</p>
+                <h3 class="text-lg font-semibold text-slate-900 tracking-tight mb-2">Adaptive configuration update to core aws infrastructure</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">Pipeline-classified adaptive change covering 1 repositories, 16 commits, and 6 files (5 in production paths). Affected services: Core AWS infrastructure.</p>
+            </div>
+        </section>
+        <section class="space-y-4">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 2</p>
+                    <h2 class="section-h2">Affected Components</h2>
+                </div>
+            </div>
+            
+            
+        <div class="card-flush">
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead><tr><th>Component ID</th><th>Type</th><th>Change</th><th>Description</th></tr></thead>
+                    <tbody><tr><td><span class="font-mono text-xs">meridian-aws-resources</span></td><td><span class="pill pill-info">infrastructure</span></td><td><span class="pill pill-warn">modified</span></td><td>Core AWS infrastructure: 6 file(s) changed, 5 touching production paths. Service impact: adaptive.</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+        </section>
+        <section class="space-y-4">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 3</p>
+                    <h2 class="section-h2">Timeline</h2>
+                </div>
+            </div>
+            
+            
+        <div class="card-flush">
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead><tr><th>Event</th><th>Timestamp</th></tr></thead>
+                    <tbody><tr><td>Change Initiated</td><td><span class="font-mono text-xs">2026-06-24T13:14:41.027673+00:00</span></td></tr><tr><td>Change Completed</td><td><span class="font-mono text-xs">2026-06-24T17:14:41.027673+00:00</span></td></tr><tr><td>Verification Completed</td><td><span class="font-mono text-xs">2026-06-24T17:14:41.027673+00:00</span></td></tr><tr><td>Notification Sent</td><td><span class="font-mono text-xs">2026-06-24T19:14:41.027673+00:00</span></td></tr><tr><td>Documentation Updated</td><td><span class="font-mono text-xs">2026-06-24T19:14:41.027673+00:00</span></td></tr><tr><td>Notification Deadline</td><td><span class="font-mono text-xs">2026-06-29T17:14:41.027673+00:00</span></td></tr><tr><td>Documentation Deadline</td><td><span class="font-mono text-xs">N/A</span></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+        </section>
+        <section class="space-y-4">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 4</p>
+                    <h2 class="section-h2">Security Controls Impact</h2>
+                </div>
+            </div>
+            
+            
+        <div class="card-flush">
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead><tr><th>Control ID</th><th>Control</th><th>Impact</th><th>Notes</th></tr></thead>
+                    <tbody><tr><td><span class="font-mono text-xs">CA-7</span></td><td>Continuous Monitoring</td><td><span class="pill pill-good">positive</span></td><td>Re-evaluated via continuous monitoring after a adaptive change.</td></tr><tr><td><span class="font-mono text-xs">CM-2</span></td><td>Baseline Configuration</td><td><span class="pill pill-info">neutral</span></td><td>Re-evaluated via continuous monitoring after a adaptive change.</td></tr><tr><td><span class="font-mono text-xs">CM-3</span></td><td>Configuration Change Control</td><td><span class="pill pill-good">positive</span></td><td>Re-evaluated via continuous monitoring after a adaptive change.</td></tr><tr><td><span class="font-mono text-xs">CM-4</span></td><td>Impact Analyses</td><td><span class="pill pill-good">positive</span></td><td>Re-evaluated via continuous monitoring after a adaptive change.</td></tr><tr><td><span class="font-mono text-xs">CM-6</span></td><td>Configuration Settings</td><td><span class="pill pill-info">neutral</span></td><td>Re-evaluated via continuous monitoring after a adaptive change.</td></tr><tr><td><span class="font-mono text-xs">SI-4</span></td><td>System Monitoring</td><td><span class="pill pill-info">neutral</span></td><td>Re-evaluated via continuous monitoring after a adaptive change.</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+        </section>
+        <section class="space-y-4 page-break">
+            <div class="flex items-end justify-between gap-3 pb-3 border-b border-slate-200">
+                <div>
+                    <p class="section-eyebrow mb-1">Section 5</p>
+                    <h2 class="section-h2">Controls Verification</h2>
+                </div>
+            </div>
+            
+            
+            <div class="flex items-center gap-3 text-sm text-slate-600">
+                <span>Overall verification:</span> <span class="pill pill-good">PASS</span>
+            </div>
+            
+        <div class="card-flush">
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead><tr><th>Control ID</th><th>Test</th><th>Result</th><th>Evidence</th></tr></thead>
+                    <tbody><tr><td><span class="font-mono text-xs">CA-7</span></td><td>Post-change KSI pipeline re-execution confirmed control remains operational.</td><td><span class="pill pill-good">operational</span></td><td></td></tr><tr><td><span class="font-mono text-xs">CM-2</span></td><td>Post-change KSI pipeline re-execution confirmed control remains operational.</td><td><span class="pill pill-good">operational</span></td><td></td></tr><tr><td><span class="font-mono text-xs">CM-3</span></td><td>Post-change KSI pipeline re-execution confirmed control remains operational.</td><td><span class="pill pill-good">operational</span></td><td></td></tr><tr><td><span class="font-mono text-xs">CM-4</span></td><td>Post-change KSI pipeline re-execution confirmed control remains operational.</td><td><span class="pill pill-good">operational</span></td><td></td></tr><tr><td><span class="font-mono text-xs">CM-6</span></td><td>Post-change KSI pipeline re-execution confirmed control remains operational.</td><td><span class="pill pill-good">operational</span></td><td></td></tr><tr><td><span class="font-mono text-xs">SI-4</span></td><td>Post-change KSI pipeline re-execution confirmed control remains operational.</td><td><span class="pill pill-good">operational</span></td><td></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+        </section>
+    </main>
+    <footer class="border-t border-slate-200 bg-white mt-8">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs text-slate-500">
+            <p>Automatically generated per FedRAMP 20x continuous monitoring requirements (RFC-0016).</p>
+            <p class="font-mono">SHA-256: <span class="text-slate-700">N/A</span></p>
+        </div>
+    </footer>
+</body>
+</html>

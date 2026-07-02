@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meridianks.com/fedramp/schemas/oar-v1.0.json",
+  "title": "FedRAMP 20x Ongoing Authorization Report (OAR)",
+  "description": "Machine-readable schema for Ongoing Authorization Reports per FRR-CCM-01 through CCM-07 requirements.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "report_id",
+    "provider",
+    "reporting_period",
+    "executive_summary",
+    "compliance_trend",
+    "transformative_changes",
+    "accepted_vulnerabilities",
+    "compliance_attestations"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Version of this OAR schema"
+    },
+    "report_id": {
+      "type": "string",
+      "pattern": "^OAR-\\d{4}-Q[1-4]-v\\d+\\.\\d+$",
+      "description": "Unique report identifier (format: OAR-YYYY-QN-vX.Y)"
+    },
+    "provider": {
+      "type": "object",
+      "required": ["name", "fedramp_id", "service_name"],
+      "properties": {
+        "name": { "type": "string" },
+        "fedramp_id": { "type": "string" },
+        "service_name": { "type": "string" },
+        "impact_level": {
+          "type": "string",
+          "enum": ["Low", "Moderate", "High"]
+        }
+      }
+    },
+    "reporting_period": {
+      "type": "object",
+      "required": ["start_date", "end_date", "generated_at", "next_report_date"],
+      "properties": {
+        "start_date": { "type": "string", "format": "date" },
+        "end_date": { "type": "string", "format": "date" },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "next_report_date": {
+          "type": "string",
+          "format": "date",
+          "description": "FRR-CCM-03: Publicly disclosed next report date"
+        },
+        "quarter": {
+          "type": "string",
+          "pattern": "^\\d{4}-Q[1-4]$"
+        }
+      }
+    },
+    "executive_summary": {
+      "type": "object",
+      "required": ["compliance_rate", "active_gaps", "total_ksis"],
+      "description": "FRR-CCM-01: High-level authorization health summary",
+      "properties": {
+        "compliance_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Overall KSI compliance percentage"
+        },
+        "active_gaps": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of KSIs not currently passing"
+        },
+        "total_ksis": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of KSIs evaluated"
+        },
+        "passed_ksis": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidence_snapshots": {
+          "type": "object",
+          "properties": {
+            "daily": { "type": "integer" },
+            "weekly": { "type": "integer" },
+            "monthly": { "type": "integer" }
+          }
+        },
+        "narrative": {
+          "type": "string",
+          "description": "Executive narrative summary"
+        }
+      }
+    },
+    "compliance_trend": {
+      "type": "object",
+      "required": ["data_points"],
+      "description": "Temporal validation data demonstrating persistent compliance",
+      "properties": {
+        "window_days": {
+          "type": "integer",
+          "default": 14,
+          "description": "Number of days in the trend window"
+        },
+        "data_points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["date", "compliance_rate"],
+            "properties": {
+              "date": { "type": "string", "format": "date" },
+              "compliance_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+              "total_ksis": { "type": "integer" },
+              "passed_ksis": { "type": "integer" },
+              "failed_ksis": { "type": "integer" }
+            }
+          },
+          "description": "Daily compliance data points"
+        },
+        "trend_direction": {
+          "type": "string",
+          "enum": ["improving", "stable", "declining"],
+          "description": "Overall trend direction"
+        }
+      }
+    },
+    "transformative_changes": {
+      "type": "object",
+      "required": ["changes"],
+      "description": "FRR-CCM-01: Summary of significant changes during the period",
+      "properties": {
+        "total_count": { "type": "integer" },
+        "changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scn_id": { "type": "string" },
+              "date": { "type": "string", "format": "date" },
+              "type": { "type": "string" },
+              "description": { "type": "string" },
+              "impact": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "planned_changes": {
+      "type": "object",
+      "description": "FRR-CCM-01: Forward-looking transparency on planned modifications",
+      "properties": {
+        "window_days": {
+          "type": "integer",
+          "default": 90
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "target_date": { "type": "string", "format": "date" },
+              "expected_tier": {
+                "type": "string",
+                "enum": ["routine_recurring", "adaptive", "transformative"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "accepted_vulnerabilities": {
+      "type": "object",
+      "required": ["vulnerabilities"],
+      "description": "FRR-CCM-01: Risk-accepted findings with business justifications",
+      "properties": {
+        "total_count": { "type": "integer" },
+        "vulnerabilities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "severity", "justification"],
+            "properties": {
+              "id": { "type": "string" },
+              "severity": { "type": "string" },
+              "title": { "type": "string" },
+              "justification": { "type": "string" },
+              "accepted_date": { "type": "string", "format": "date" },
+              "review_date": { "type": "string", "format": "date" }
+            }
+          }
+        }
+      }
+    },
+    "updated_recommendations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "date": { "type": "string", "format": "date" }
+        }
+      },
+      "description": "FRR-CCM-01: Updated security recommendations"
+    },
+    "feedback_summary": {
+      "type": "object",
+      "description": "FRR-CCM-04/05: Anonymized feedback mechanism and summary",
+      "properties": {
+        "mechanism": {
+          "type": "string",
+          "description": "Description of asynchronous feedback mechanism"
+        },
+        "contact": {
+          "type": "string",
+          "format": "email",
+          "description": "Feedback submission contact"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": { "type": "string", "format": "date" },
+              "question": { "type": "string" },
+              "answer": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "compliance_attestations": {
+      "type": "object",
+      "required": ["ccm_01", "ccm_02", "ccm_03", "ccm_04", "ccm_05", "ccm_06", "ccm_07"],
+      "description": "FRR-CCM requirement attestation status",
+      "properties": {
+        "ccm_01": {
+          "type": "object",
+          "properties": {
+            "description": { "type": "string", "default": "Ongoing Authorization Report with all required sections" },
+            "compliant": { "type": "boolean" }
+          }
+        },
+        "ccm_02": {
+          "type": "object",
+          "properties": {
+            "description": { "type": "string", "default": "Regular 3-month reporting cycle" },
+            "compliant": { "type": "boolean" }
+          }
+        },
+        "ccm_03": {
+          "type": "object",
+          "properties": {
+            "description": { "type": "string", "default": "Public next report date disclosed" },
+            "compliant": { "type": "boolean" },
+            "next_date": { "type": "string", "format": "date" }
+          }
+        },
+        "ccm_04": {
+          "type": "object",
+          "properties": {
+            "description": { "type": "string", "default": "Asynchronous feedback mechanism" },
+            "compliant": { "type": "boolean" }
+          }
+        },
+        "ccm_05": {
+          "type": "object",
+          "properties": {
+            "description": { "type": "string", "default": "Anonymized feedback summary" },
+            "compliant": { "type": "boolean" }
+          }
+        },
+        "ccm_06": {
+          "type": "object",
+          "properties": {
+            "description": { "type": "string", "default": "No irresponsible disclosure" },
+            "compliant": { "type": "boolean" }
+          }
+        },
+        "ccm_07": {
+          "type": "object",
+          "properties": {
+            "description": { "type": "string", "default": "Responsible public sharing" },
+            "compliant": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "properties": {
+        "generated_at": { "type": "string", "format": "date-time" },
+        "generator_version": { "type": "string" },
+        "content_hash": { "type": "string" },
+        "report_version": { "type": "string" }
+      }
+    }
+  }
+}

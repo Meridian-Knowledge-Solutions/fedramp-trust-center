@@ -1,0 +1,327 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meridianks.com/fedramp/schemas/vdr-v2.0.json",
+  "title": "FedRAMP 20x Vulnerability Detection and Response (VDR) Public Report",
+  "description": "Machine-readable schema for aggregate VDR public reports per FedRAMP VDR Release 25.09A. Contains ONLY aggregate counts - no CVE identifiers, vulnerability descriptions, resource IDs, or other data that could identify specific vulnerabilities.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "report_id",
+    "data_classification",
+    "provider",
+    "reporting_period",
+    "scan_summary",
+    "vulnerability_summary",
+    "methodology",
+    "compliance_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "2.0.0",
+      "description": "Version of this VDR schema (2.0.0 = aggregate public format)"
+    },
+    "report_id": {
+      "type": "string",
+      "pattern": "^VDR-\\d{8}-[a-f0-9]{8}$",
+      "description": "Unique report identifier"
+    },
+    "data_classification": {
+      "type": "string",
+      "const": "PUBLIC",
+      "description": "Data classification - this report contains only aggregate public-safe data"
+    },
+    "privacy_notice": {
+      "type": "string",
+      "description": "Notice that no CVEs, resource IDs, or identifiable vulnerability data is included"
+    },
+    "provider": {
+      "type": "object",
+      "required": ["name", "fedramp_id", "service_name"],
+      "properties": {
+        "name": { "type": "string" },
+        "fedramp_id": { "type": "string" },
+        "service_name": { "type": "string" },
+        "impact_level": {
+          "type": "string",
+          "enum": ["Low", "Moderate", "High"]
+        }
+      }
+    },
+    "reporting_period": {
+      "type": "object",
+      "required": ["start_date", "end_date", "generated_at"],
+      "properties": {
+        "start_date": { "type": "string", "format": "date" },
+        "end_date": { "type": "string", "format": "date" },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "cadence": {
+          "type": "string",
+          "enum": ["daily", "3-day", "weekly", "monthly", "quarterly"],
+          "description": "Reporting cadence (daily for continuous monitoring)"
+        }
+      }
+    },
+    "scan_summary": {
+      "type": "object",
+      "required": ["total_scans", "scan_sources", "coverage"],
+      "properties": {
+        "total_scans": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total vulnerability scans performed in this period"
+        },
+        "scan_sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source_name", "scan_type"],
+            "properties": {
+              "source_name": { "type": "string" },
+              "scan_type": {
+                "type": "string",
+                "enum": ["authenticated", "unauthenticated", "agent_based", "container", "sast", "dast", "sca", "cspm", "pentest", "audit", "incident", "threat_intel"]
+              },
+              "last_scan": { "type": "string", "format": "date-time" },
+              "scan_count": { "type": "integer" }
+            }
+          },
+          "description": "Sources of vulnerability detection data"
+        },
+        "coverage": {
+          "type": "object",
+          "properties": {
+            "total_assets": { "type": "integer" },
+            "scanned_assets": { "type": "integer" },
+            "coverage_percentage": { "type": "number", "minimum": 0, "maximum": 100 }
+          },
+          "description": "Asset scan coverage metrics"
+        }
+      }
+    },
+    "vulnerability_summary": {
+      "type": "object",
+      "description": "Aggregate vulnerability counts - NO individual CVEs or identifiable details",
+      "required": ["total_findings", "severity_breakdown", "status_breakdown", "risk_classification"],
+      "properties": {
+        "total_findings": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of vulnerability findings"
+        },
+        "unique_cve_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of unique CVEs (no identifiers disclosed)"
+        },
+        "severity_breakdown": {
+          "type": "object",
+          "description": "Count of vulnerabilities by severity level",
+          "properties": {
+            "critical": { "type": "integer" },
+            "high": { "type": "integer" },
+            "medium": { "type": "integer" },
+            "low": { "type": "integer" },
+            "informational": { "type": "integer" }
+          }
+        },
+        "status_breakdown": {
+          "type": "object",
+          "description": "Count of vulnerabilities by current status",
+          "properties": {
+            "open": { "type": "integer" },
+            "in_progress": { "type": "integer" },
+            "remediated": { "type": "integer" },
+            "accepted": { "type": "integer" },
+            "mitigated": { "type": "integer" }
+          }
+        },
+        "risk_classification": {
+          "type": "object",
+          "description": "VDR Release 25.09A risk classification counts",
+          "properties": {
+            "n_rating_distribution": {
+              "type": "object",
+              "description": "Count by N-rating (N1=negligible through N5=catastrophic)",
+              "properties": {
+                "n5_catastrophic": { "type": "integer" },
+                "n4_serious": { "type": "integer" },
+                "n3_moderate": { "type": "integer" },
+                "n2_minor": { "type": "integer" },
+                "n1_negligible": { "type": "integer" },
+                "unrated": { "type": "integer" }
+              }
+            },
+            "lev_count": {
+              "type": "integer",
+              "description": "Count of Likely Exploitable Vulnerabilities"
+            },
+            "irv_count": {
+              "type": "integer",
+              "description": "Count of Internet-Reachable Vulnerabilities"
+            },
+            "kev_count": {
+              "type": "integer",
+              "description": "Count matching CISA Known Exploited Vulnerabilities catalog"
+            },
+            "lev_irv_combined": {
+              "type": "integer",
+              "description": "Count of vulnerabilities that are both LEV and IRV"
+            }
+          }
+        },
+        "detection_source_breakdown": {
+          "type": "object",
+          "description": "Count of vulnerabilities by detection source (all-encompassing vulnerability management)",
+          "properties": {
+            "inspector": { "type": "integer", "description": "AWS Inspector authenticated scanning" },
+            "security_hub": { "type": "integer", "description": "AWS Security Hub findings" },
+            "pentest": { "type": "integer", "description": "Penetration test findings (3PAO, ad-hoc, red team)" },
+            "audit": { "type": "integer", "description": "3PAO annual assessment and internal audit findings" },
+            "incident": { "type": "integer", "description": "Incident-response-discovered vulnerabilities" },
+            "sca": { "type": "integer", "description": "Software Composition Analysis (OSV.dev, CISA KEV, EPSS)" },
+            "sast": { "type": "integer", "description": "Static Application Security Testing" },
+            "dast": { "type": "integer", "description": "Dynamic Application Security Testing" },
+            "external": { "type": "integer", "description": "External unauthenticated scanning" }
+          }
+        },
+        "vdr_acceptance": {
+          "type": "object",
+          "description": "VDR acceptance tracking per FRR-VDR-TF-03",
+          "properties": {
+            "acceptance_threshold_days": { "type": "integer" },
+            "total_accepted": { "type": "integer" },
+            "total_active": { "type": "integer" },
+            "compliance_rate": { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        }
+      }
+    },
+    "trends": {
+      "type": "object",
+      "description": "Historical trend data from pipeline runs at daily, weekly, and monthly granularity",
+      "properties": {
+        "daily": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/trend_point" },
+          "description": "Daily aggregate vulnerability counts (up to 90 days)"
+        },
+        "weekly": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/trend_point" },
+          "description": "Weekly aggregate vulnerability counts"
+        },
+        "monthly": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/trend_point" },
+          "description": "Monthly aggregate vulnerability counts"
+        }
+      }
+    },
+    "methodology": {
+      "type": "object",
+      "required": ["detection_approach", "prioritization_framework"],
+      "description": "VDR methodology documentation",
+      "properties": {
+        "detection_approach": {
+          "type": "string",
+          "description": "Description of the vulnerability detection methodology"
+        },
+        "prioritization_framework": {
+          "type": "string",
+          "description": "Framework used for vulnerability prioritization"
+        },
+        "sla_definitions": {
+          "type": "object",
+          "properties": {
+            "critical": { "type": "string" },
+            "high": { "type": "string" },
+            "medium": { "type": "string" },
+            "low": { "type": "string" }
+          }
+        },
+        "scanning_frequency": {
+          "type": "object",
+          "properties": {
+            "authenticated": { "type": "string" },
+            "unauthenticated": { "type": "string" },
+            "container": { "type": "string" },
+            "code_analysis": { "type": "string" }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "description": "VDR performance metrics (aggregate only)",
+      "properties": {
+        "total_detected": { "type": "integer" },
+        "total_remediated": { "type": "integer" },
+        "total_accepted": { "type": "integer" },
+        "total_open": { "type": "integer" },
+        "sla_compliance_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+        "severity_breakdown": {
+          "type": "object",
+          "properties": {
+            "critical": { "type": "integer" },
+            "high": { "type": "integer" },
+            "medium": { "type": "integer" },
+            "low": { "type": "integer" },
+            "informational": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "compliance_status": {
+      "type": "object",
+      "required": ["overall_compliant"],
+      "properties": {
+        "overall_compliant": { "type": "boolean" },
+        "requirements_met": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "requirement_id": { "type": "string" },
+              "description": { "type": "string" },
+              "status": {
+                "type": "string",
+                "enum": ["met", "partially_met", "not_met", "not_applicable"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "properties": {
+        "generated_at": { "type": "string", "format": "date-time" },
+        "generator_version": { "type": "string" },
+        "content_hash": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "trend_point": {
+      "type": "object",
+      "description": "A single trend data point with aggregate counts",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "total": { "type": "integer", "description": "Total vulnerabilities" },
+        "critical": { "type": "integer", "description": "N4 + N5 count" },
+        "n5": { "type": "integer" },
+        "n4": { "type": "integer" },
+        "n3": { "type": "integer" },
+        "n2": { "type": "integer" },
+        "n1": { "type": "integer" },
+        "lev": { "type": "integer", "description": "Likely Exploitable Vulnerabilities" },
+        "irv": { "type": "integer", "description": "Internet-Reachable Vulnerabilities" },
+        "accepted": { "type": "integer" },
+        "active": { "type": "integer" },
+        "compliance_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+        "pentest": { "type": "integer", "description": "Penetration test findings count" }
+      }
+    }
+  }
+}
