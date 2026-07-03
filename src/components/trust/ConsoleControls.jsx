@@ -195,7 +195,7 @@ export default function ConsoleControls() {
                 </Panel>
             )}
             {data.ksi_reference?.length > 0 && (
-                <Panel title={`FedRAMP 20x KSI reference · ${data.ksi_reference.length} indicators`} map="FRR-KSI">
+                <Panel title={`CR26 KSI reference · ${data.ksi_reference.length} indicators`} map="CR26 KSI">
                     {data.ksi_reference.slice(0, 80).map(k => (
                         <div className="ctrl" key={k.ksi_id}><div className="nm"><span className="mono" style={{ color: '#34E0C4', width: 92, flexShrink: 0 }}>{k.ksi_id}</span>
                             <span style={{ color: '#788596', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k.description}</span></div></div>

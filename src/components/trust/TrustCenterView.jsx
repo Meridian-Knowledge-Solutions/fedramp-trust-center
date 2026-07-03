@@ -245,7 +245,7 @@ export const TrustCenterView = () => {
 
                 {/* 03 VULNERABILITIES (VDR) */}
                 <section id="vulnerabilities">
-                    <div className="rv"><Kick>03 — FRR-CVM · COORDINATED DISCLOSURE</Kick><h2>Vulnerability data</h2>
+                    <div className="rv"><Kick>03 — FRR-VDR / FRR-VER · COORDINATED DISCLOSURE</Kick><h2>Vulnerability data</h2>
                         <p className="lede">Aggregate finding counts from the Vulnerability Disclosure Report, streamed openly (no sensitive data). Researchers report through our coordinated program.</p></div>
                     <div className="vc rv">
                         {[['Critical', sev.CRITICAL ?? 0], ['High', sev.HIGH ?? 0], ['Medium', sev.MEDIUM ?? 0], ['Low', sev.LOW ?? 0]].map(([l, n], i) => (
@@ -256,7 +256,7 @@ export const TrustCenterView = () => {
                         {[['Security posture', `${vdr?.posture?.rating || 'EXCELLENT'} · ${vdr?.posture?.score ?? 8.6}`, 'ok'],
                         ['Active / accepted', `${vdr?.vdr_acceptance?.active ?? 11} active · ${vdr?.vdr_acceptance?.accepted ?? 0} accepted`, 'ok'],
                         ['KEV matches', `${vdr?.risk?.kev_matches ?? 0}`, 'ok'],
-                        ['FRR-CVM-04', vdr?.compliance?.frr_cvm_04 || 'COMPLIANT', 'ok'],
+                        ['VER-EVA (contextual evaluation)', vdr?.compliance?.frr_cvm_04 || 'COMPLIANT', 'ok'],
                         ['CSPM findings', `${vdr?.cspm?.total ?? 139} tracked · ${vdr?.cspm?.by_severity?.CRITICAL ?? 1} critical`, 'warn']].map((r, i) => (
                             <div className="row" key={i}>
                                 <span className="svc" style={{ fontSize: 14 }}>{r[0]}</span>
@@ -281,10 +281,10 @@ export const TrustCenterView = () => {
                     <div className="rv"><Kick>05 — CERTIFICATION ARTIFACTS</Kick><h2>Reports &amp; evidence</h2>
                         <p className="lede">Machine-readable certification data and audited artifacts. Public items stream openly; access-controlled items unlock for authorized agency reviewers.</p></div>
                     <div className="panel rv">
-                        {[['Ongoing Authorization Report (OAR)', `Period ending ${oar?.reporting_period?.end_date || '2026-05-15'} · FRR-CCM`, 'pub', () => window.open(`${BASE_PATH}../trust-center/reports/html/oar-report.html`, '_blank')],
-                        ['Vulnerability Disclosure Report (VDR)', `${vdr?.metadata?.vdr_standard || 'Release 25.09A'} · aggregate`, 'pub', () => window.open(`${BASE_PATH}vdr_public_metrics.json`, '_blank')],
+                        {[['Ongoing Certification Report (OCR) (OAR)', `Period ending ${oar?.reporting_period?.end_date || '2026-05-15'} · FRR-CCM`, 'pub', () => window.open(`${BASE_PATH}../trust-center/reports/html/oar-report.html`, '_blank')],
+                        ['Vulnerability Disclosure Report (VDR)', `${vdr?.metadata?.vdr_standard || 'CR26 (FRR-VDR/FRR-VER)'} · aggregate`, 'pub', () => window.open(`${BASE_PATH}vdr_public_metrics.json`, '_blank')],
                         ['Significant Change Notifications (SCN)', `${oar?.data_sources?.scn_history_entries ?? 41} on record · FRR-SCN`, 'pub', () => jump('monitoring')],
-                        ['CSO Public Metadata', 'ADS-CSO-PUB · machine-readable', 'pub', () => window.open(`${BASE_PATH}cso_public_info.json`, '_blank')],
+                        ['CSO Public Metadata', 'FRR-CDS · machine-readable', 'pub', () => window.open(`${BASE_PATH}cso_public_info.json`, '_blank')],
                         ['3PAO Assessment Evidence', 'Independent assessor · access-controlled', 'nda', () => guard('3PAO Assessment')],
                         ['Certification Package (OSCAL)', 'Full artifact bundle · access-controlled', 'nda', downloadPackage]].map((d, i) => (
                             <div className="lrow" key={i} onClick={d[3]}>
@@ -306,8 +306,8 @@ export const TrustCenterView = () => {
                     <div className="rv"><Kick>06 — FedRAMP 20x RULE FAMILIES</Kick><h2>Governance</h2>
                         <p className="lede">The standards and processes governing this certification, published openly.</p></div>
                     <div className="panel rv">
-                        {[['Continuous Monitoring', 'FRR-CCM-01 … 07'], ['Significant Change Notification', 'FRR-SCN'], ['Key Security Indicators', 'FRR-KSI'],
-                        ['Minimum Assessment Scope', 'FRR-MAS'], ['Vulnerability Management', 'FRR-CVM'], ['Information Security Policy', 'NIST 800-53 PL'],
+                        {[['Continuous Monitoring', 'FRR-CCM'], ['Significant Change Notification', 'FRR-SCN'], ['Key Security Indicators', 'CR26 KSI'],
+                        ['Minimum Assessment Scope', 'FRR-MAS'], ['Vulnerability Management', 'FRR-VDR / FRR-VER'], ['Information Security Policy', 'NIST 800-53 PL'],
                         ['Incident Response Plan', 'NIST 800-53 IR'], ['Data Retention & Privacy', 'OMB A-130 · DoDI 5200.48'], ['Access Control Standard', 'NIST 800-53 AC / IA']].map((p, i) => (
                             <div className="lrow" key={i}>
                                 <div><div className="t">{p[0]}</div></div>
@@ -317,7 +317,7 @@ export const TrustCenterView = () => {
                     </div>
                     {/* feedback */}
                     <div className="panel rv" style={{ marginTop: 14 }}>
-                        <div className="grp-h"><h4>Feedback &amp; questions</h4><span className="map">FRR-CCM-04 / 05</span></div>
+                        <div className="grp-h"><h4>Feedback &amp; questions</h4><span className="map">FRR-CCM (OCR + Quarterly Review)</span></div>
                         <Feedback security={cso?.contacts?.fedramp || 'fedramp_20x@meridianks.com'} entries={feedback} />
                     </div>
                 </section>
@@ -330,7 +330,7 @@ export const TrustCenterView = () => {
                         {[['Certification Package', 'OSCAL · access-controlled', downloadPackage, isAuthenticated ? null : 'lock'],
                         ['Secure Configuration Guide', 'Markdown · hardening', downloadConfig, null],
                         ['CRM Matrix (NIST/KSI/CMMC/CUI)', 'XLSX · 185 controls', () => window.open(`${BASE_PATH}Meridian_LMS_CRM_NIST_800-53_Rev5_CMMC_CUI.xlsx`, '_blank'), null],
-                        ['CSO Public Metadata', 'JSON · ADS-CSO-PUB', () => window.open(`${BASE_PATH}cso_public_info.json`, '_blank'), null],
+                        ['CSO Public Metadata', 'JSON · FRR-CDS', () => window.open(`${BASE_PATH}cso_public_info.json`, '_blank'), null],
                         ['VDR Public Metrics', 'JSON · aggregate', () => window.open(`${BASE_PATH}vdr_public_metrics.json`, '_blank'), null],
                         ['API Documentation', 'REST · OAuth 2.0', apiDocs, null]].map((d, i) => (
                             <div className="dl" key={i} onClick={d[2]}>

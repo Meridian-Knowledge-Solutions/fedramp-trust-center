@@ -369,13 +369,16 @@ export const DataProvider = ({ children }) => {
       setMetadata({
         validation_date: realDate,
         impact_level: rawMeta.impact_level || 'MODERATE',
+        certification_profile: rawMeta.certification_profile || { type: '20x', path: 'Program', class: 'C' },
+        rules_version: rawMeta.rules_version || null,
         global_status: rawMeta.global_status || 'OPERATIONAL',
         pass_rate: rawMeta.pass_rate || `${Math.round(score)}%`,
         passed: passedCount,
         total_validated: totalCount,
         failed: failedCount,
         impact_thresholds: rawMeta.impact_thresholds || { min: '80%' },
-        category_summary: rawMeta.category_summary || {}
+        category_summary: rawMeta.category_summary || {},
+        frr_summary: validationData?.frr_summary || {}
       });
 
       setMetrics({

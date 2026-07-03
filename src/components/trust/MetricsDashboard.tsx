@@ -184,7 +184,7 @@ export default function MetricsDashboard() {
         <div className="tcx" style={{ padding: '40px 0' }}>
             <div className="wrap">
                 {/* --- HEADER ---  */}
-                <div className="kick">▤ — PIPELINE TELEMETRY · KSI-PIY-06</div>
+                <div className="kick">▤ — PIPELINE TELEMETRY · KSI-PIY-RIS</div>
                 <h1 className="big">Compliance pipeline <span className="g">effectiveness</span></h1>
                 <p className="lede">
                     KSI validation throughput, evidence cadence, and pipeline-stability trend from {history.length} weeks of continuous-monitoring development activity.

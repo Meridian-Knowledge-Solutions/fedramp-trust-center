@@ -4,7 +4,7 @@ FedRAMP 20x Public Report Generator
 ====================================
 Generates machine-readable (JSON) AND human-readable (HTML) reports for
 SCN, VDR, OAR, and QAR with JSON schema validation for the FedRAMP 20x
-Phase II completeness requirements.
+CR26 completeness requirements.
 
 - VDR and OAR reports are generated from LIVE production pipeline data.
 - QAR is generated from LIVE production pipeline data.
@@ -208,7 +208,7 @@ class PublicReportGenerator:
                         "notes": "Updated rate limiting rules strengthen DoS protection",
                     },
                 ],
-                "ksi_impact": ["KSI-CNA-04"],
+                "ksi_impact": ["KSI-CNA-DFP"],
                 "data_impact": "none",
             },
             "controls_verification": {
@@ -540,7 +540,7 @@ class PublicReportGenerator:
             "data_sources": {
                 "pipeline_version": pipeline_meta.get("pipeline_version", "unknown"),
                 "pipeline_run": pipeline_meta.get("github_run_number"),
-                "vdr_standard": pipeline_meta.get("vdr_compliance", {}).get("version", "Release 25.09A"),
+                "vdr_standard": pipeline_meta.get("vdr_compliance", {}).get("version", "CR26 (FRR-VDR/FRR-VER)"),
                 "scan_timestamp": scan_ts,
                 "raw_findings_count": display.get("raw_findings_count", len(parsed_vulns)),
                 "unique_cves": display.get("unique_cves", len(agg_vulns)),
@@ -565,7 +565,7 @@ class PublicReportGenerator:
                     + pipeline_meta.get("pipeline_version", "unknown")
                 ),
                 "prioritization_framework": (
-                    "VDR Release 25.09A contextual risk rating: CVSS base score adjusted "
+                    "VDR CR26 (FRR-VDR/FRR-VER) contextual risk rating: CVSS base score adjusted "
                     "with N-rating (N1-N5), LEV/NLEV exploitability status, and IRV/NIRV "
                     "internet reachability verification."
                 ),
@@ -602,14 +602,14 @@ class PublicReportGenerator:
             "compliance_status": {
                 "overall_compliant": True,
                 "requirements_met": [
-                    {"requirement_id": "FRR-VDR-01", "description": "Vulnerability detection methodology documented", "status": "met"},
-                    {"requirement_id": "FRR-VDR-02", "description": "Multi-source vulnerability scanning", "status": "met"},
-                    {"requirement_id": "FRR-VDR-03", "description": "3-day reporting cadence for critical items", "status": "met"},
-                    {"requirement_id": "FRR-VDR-04", "description": "Internet reachability assessed (IRV/NIRV)", "status": "met"},
-                    {"requirement_id": "FRR-VDR-05", "description": "Exploitability tracked (LEV/NLEV, EPSS)", "status": "met"},
-                    {"requirement_id": "FRR-VDR-06", "description": "Adverse impact to federal data rated (N1-N5)", "status": "met"},
-                    {"requirement_id": "FRR-VDR-07", "description": "Accepted vulnerabilities with justification", "status": "met"},
-                    {"requirement_id": "FRR-VDR-08", "description": "Machine-readable and human-readable formats", "status": "met"},
+                    {"requirement_id": "VDR-CSO-DET", "description": "Vulnerability detection methodology documented", "status": "met"},
+                    {"requirement_id": "VDR-CSO-RES", "description": "Multi-source vulnerability scanning", "status": "met"},
+                    {"requirement_id": "VER-EVA-ELX", "description": "3-day reporting cadence for critical items", "status": "met"},
+                    {"requirement_id": "VER-EVA-EIR", "description": "Internet reachability assessed (IRV/NIRV)", "status": "met"},
+                    {"requirement_id": "VER-EVA-EPA", "description": "Exploitability tracked (LEV/NLEV, EPSS)", "status": "met"},
+                    {"requirement_id": "VER-RPT-VDT", "description": "Adverse impact to federal data rated (N1-N5)", "status": "met"},
+                    {"requirement_id": "VER-TFR-MHR", "description": "Accepted vulnerabilities with justification", "status": "met"},
+                    {"requirement_id": "VER-TFR-MAV", "description": "Machine-readable and human-readable formats", "status": "met"},
                 ],
             },
             "integrity": {
@@ -642,7 +642,7 @@ class PublicReportGenerator:
         now = self.generation_time
         year = now.year
 
-        # Non-calendar quarter schedule per FRR-CCM-02
+        # Non-calendar quarter schedule per FRR-CCM
         report_dates = [(2, 15), (5, 15), (8, 15), (11, 15)]
 
         # Find next report date after today
@@ -711,7 +711,7 @@ class PublicReportGenerator:
     # OAR Live Report (LIVE production data from KSI/VDR/SCN pipelines)
     # -------------------------------------------------------------------------
     def generate_oar_report(self):
-        """Generate a live Ongoing Authorization Report.
+        """Generate a live Ongoing Certification Report (OCR).
 
         Sources production data from:
           - unified_ksi_validations.json (61 KSIs, 100% pass rate)
@@ -868,7 +868,7 @@ class PublicReportGenerator:
                 "passed_ksis": meta.get("passed", 0),
                 "evidence_snapshots": snapshot_counts,
                 "narrative": (
-                    f"This Ongoing Authorization Report covers the period ending "
+                    f"This Ongoing Certification Report (OCR) covers the period ending "
                     f"{now.strftime('%Y-%m-%d')}. The Meridian LMS maintains a "
                     f"{compliance_rate}% compliance rate across {total_ksis} "
                     f"Key Security Indicators with {meta.get('failed', 0)} active gaps. "
@@ -906,7 +906,7 @@ class PublicReportGenerator:
                 "entries": feedback_entries,
             },
             "compliance_attestations": {
-                "ccm_01": {"description": "Ongoing Authorization Report with all required sections", "compliant": True},
+                "ccm_01": {"description": "Ongoing Certification Report (OCR) with all required sections", "compliant": True},
                 "ccm_02": {"description": "Regular 3-month reporting cycle (Feb 15, May 15, Aug 15, Nov 15)", "compliant": True},
                 "ccm_03": {"description": "Public next report date disclosed", "compliant": True, "next_date": next_report.strftime("%Y-%m-%d")},
                 "ccm_04": {"description": "Asynchronous feedback mechanism", "compliant": True},
@@ -970,7 +970,7 @@ class PublicReportGenerator:
 
         Sources the same production data as the QAR HTML dashboard but outputs
         machine-readable JSON alongside the human-readable HTML. Fulfills
-        FRR-CCM-QR-02 through QR-11.
+        FRR-CCM Quarterly Review rules.
         """
         now = self.generation_time
         quarter = (now.month - 1) // 3 + 1
@@ -1094,7 +1094,7 @@ class PublicReportGenerator:
 
         now = self.generation_time
         title_map = {
-            "oar": "Ongoing Authorization Report (OAR)",
+            "oar": "Ongoing Certification Report (OCR) (OAR)",
             "qar": "Quarterly Authorization Review (QAR)",
             "vdr": "Vulnerability Detection & Response (VDR)",
             "scn": "Significant Change Notification (SCN)",
@@ -1102,10 +1102,10 @@ class PublicReportGenerator:
         title = title_map.get(report_type, report_type.upper())
 
         subtitle_map = {
-            "oar": "FRR-CCM-01 through CCM-07",
-            "qar": "FRR-CCM-QR-02 through QR-11",
-            "vdr": "FRR-VDR-01 through VDR-08",
-            "scn": "FRR-SCN-01, SCN-TR, SCN-TF, SCN-AU",
+            "oar": "FRR-CCM",
+            "qar": "FRR-CCM Quarterly Review rules",
+            "vdr": "VDR-CSO-DET through VDR-08",
+            "scn": "SCN-CSO-EVA, SCN-RTR-NNR, SCN-ADP-NTF, SCN-TRF-NIP/NFP/NAF/NAV",
         }
         subtitle = subtitle_map.get(report_type, "")
 
@@ -1476,7 +1476,7 @@ class PublicReportGenerator:
             "generator": "FedRAMP 20x Public Report Generator v2.0.0",
             "provider": dict(self.PROVIDER),
             "purpose": (
-                "Machine-readable reports for FedRAMP 20x Phase II completeness "
+                "Machine-readable reports for FedRAMP CR26 completeness "
                 "requirements. VDR and OAR are generated from live production data. "
                 "SCN is a sample report (no transformative change has occurred yet)."
             ),
@@ -1487,7 +1487,7 @@ class PublicReportGenerator:
         generators = {
             "scn": ("Significant Change Notification", self.generate_scn_report, "sample", "scn-sample-report.json"),
             "vdr": ("Vulnerability Detection and Response", self.generate_vdr_report, "live", "vdr-report.json"),
-            "oar": ("Ongoing Authorization Report", self.generate_oar_report, "live", "oar-report.json"),
+            "oar": ("Ongoing Certification Report (OCR)", self.generate_oar_report, "live", "oar-report.json"),
             "qar": ("Quarterly Authorization Review", self.generate_qar_report, "live", "qar-report.json"),
         }
 
@@ -1585,29 +1585,29 @@ class PublicReportGenerator:
         """Map report types to FRR requirement IDs."""
         mapping = {
             "scn": [
-                "FRR-SCN-01 (Notification delivery)",
+                "SCN-ADP-NTF / SCN-TRF (Notification delivery)",
                 "FRR-SCN-TR (Tiered change framework)",
                 "FRR-SCN-TF (Timeline compliance)",
                 "FRR-SCN-AU (Audit record keeping)",
             ],
             "vdr": [
-                "FRR-VDR-01 (Detection methodology)",
-                "FRR-VDR-02 (Multi-source scanning)",
-                "FRR-VDR-03 (Reporting cadence)",
-                "FRR-VDR-04 (Internet reachability)",
-                "FRR-VDR-05 (Exploitability tracking)",
-                "FRR-VDR-06 (Adverse impact rating)",
-                "FRR-VDR-07 (Accepted vulnerabilities)",
-                "FRR-VDR-08 (Machine-readable format)",
+                "VDR-CSO-DET (Detection methodology)",
+                "VDR-CSO-RES (Multi-source scanning)",
+                "VER-EVA-ELX (Reporting cadence)",
+                "VER-EVA-EIR (Internet reachability)",
+                "VER-EVA-EPA (Exploitability tracking)",
+                "VER-RPT-VDT (Adverse impact rating)",
+                "VER-TFR-MHR (Accepted vulnerabilities)",
+                "VER-TFR-MAV (Machine-readable format)",
             ],
             "oar": [
-                "FRR-CCM-01 (OAR with all required sections)",
-                "FRR-CCM-02 (Quarterly schedule)",
-                "FRR-CCM-03 (Public next report date)",
-                "FRR-CCM-04 (Feedback mechanism)",
-                "FRR-CCM-05 (Anonymized summary)",
-                "FRR-CCM-06 (No irresponsible disclosure)",
-                "FRR-CCM-07 (Responsible public sharing)",
+                "FRR-CCM (OCR with all required sections)",
+                "FRR-CCM (Quarterly schedule)",
+                "FRR-CCM (Public next report date)",
+                "FRR-CCM (Feedback mechanism)",
+                "FRR-CCM (Anonymized summary)",
+                "FRR-CCM (No irresponsible disclosure)",
+                "FRR-CCM (Machine-readable publication)",
             ],
             "qar": [
                 "FRR-CCM-QR-02 (Quarterly review baseline)",

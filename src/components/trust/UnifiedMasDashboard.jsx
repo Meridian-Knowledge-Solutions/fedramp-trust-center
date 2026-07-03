@@ -67,7 +67,7 @@ const CATEGORY_CONFIG = {
         gradient: 'from-pink-500 to-pink-600',
         description: 'Security tools and compliance'
     },
-    // Third-party integration categories (FRR-MAS-02/03)
+    // Third-party integration categories (MAS-CSO-TPR / MAS-CSO-FLO)
     content_library: {
         icon: FileText,
         label: 'Content Library',
@@ -243,7 +243,7 @@ const SystemDetailPanel = ({ system, awsServices, driftSummary, onClose }) => {
                     {/* CIA Impact */}
                     {system.cia_impact && (
                         <div className="kpi">
-                            <div className="l" style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: 6 }}><Info size={10} /> CIA Impact · FRR-MAS-05</div>
+                            <div className="l" style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: 6 }}><Info size={10} /> CIA Impact · MAS-CSO-FLO</div>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '10px 0' }}>
                                 <CIABadge impact={system.cia_impact} />
                                 <ThirdPartyBadge isThirdParty={system.is_third_party} isAuthorized={system.is_fedramp_authorized} />
@@ -259,7 +259,7 @@ const SystemDetailPanel = ({ system, awsServices, driftSummary, onClose }) => {
                         <div className="panel">
                             <div className="ph">
                                 <h4 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Cloud size={12} /> Active Services ({allServices.length})</h4>
-                                <span className="map">FRR-MAS-01</span>
+                                <span className="map">MAS-CSO-IIR</span>
                             </div>
                             {visibleServices.map((svc, idx) => (
                                 <div key={idx}>
@@ -424,7 +424,7 @@ export const UnifiedMasDashboard = () => {
             ['Collected', 'User Entry & Auth', 'KSI-IAM'],
             ['Processed', 'Core Application', 'KSI-SVC'],
             ['Maintained', 'Encrypted Store', 'KSI-CNA'],
-            ['Disseminated', `${intCount} Third-Party`, 'KSI-TPR'],
+            ['Disseminated', `${intCount} Third-Party`, 'KSI-SCR'],
             ['Maintained', `${sysCount} Resources`, 'KSI-MLA'],
         ];
     }, [data?.health, data?.systems, data?.integrations]);
@@ -558,7 +558,7 @@ export const UnifiedMasDashboard = () => {
                     <div className="panel">
                         <div className="ph">
                             <h4>Connected Systems</h4>
-                            <span className="map">FRR-MAS-01 · click for detail</span>
+                            <span className="map">MAS-CSO-IIR · click for detail</span>
                         </div>
                         {data.systems.map((system) => (
                             <ResourceRow key={system.id} item={system} onClick={() => handleSystemClick(system.id)} />
@@ -574,7 +574,7 @@ export const UnifiedMasDashboard = () => {
                     <div className="panel">
                         <div className="ph">
                             <h4>Documented Integrations</h4>
-                            <span className="map">FRR-MAS-02 / 03</span>
+                            <span className="map">MAS-CSO-TPR / MAS-CSO-FLO</span>
                         </div>
                         {data.integrations.map((integration) => (
                             <ResourceRow key={integration.id} item={integration} />
@@ -590,7 +590,7 @@ export const UnifiedMasDashboard = () => {
                     <div className="panel">
                         <div className="ph">
                             <h4><Cloud size={13} style={{ verticalAlign: -2, marginRight: 6 }} />{Object.keys(data.aws_services).length} Services</h4>
-                            <span className="map">FRR-MAS-01</span>
+                            <span className="map">MAS-CSO-IIR</span>
                         </div>
                         <div style={{ padding: '16px 18px', display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                             {Object.entries(data.aws_services)
@@ -646,14 +646,14 @@ export const UnifiedMasDashboard = () => {
             <div className="panel">
                 <div className="ph">
                     <h4><FileText size={13} color="var(--indigo)" style={{ verticalAlign: -2, marginRight: 6 }} />FedRAMP MAS Rule Family</h4>
-                    <span className="map">{data?.meta?.compliance_ver || 'FedRAMP 20x'}</span>
+                    <span className="map">{data?.meta?.compliance_ver || 'CR26 · FRR-MAS'}</span>
                 </div>
                 {[
-                    ['FRR-MAS-01', 'Cloud Service Offering includes all information resources (machine AND non-machine) likely to handle or impact CIA of federal customer data.'],
-                    ['FRR-MAS-02', 'Third-party information resources are included and monitored.'],
-                    ['FRR-MAS-03', 'Non-FedRAMP authorized third-party resources documented with justification and compensating controls.'],
-                    ['FRR-MAS-04', 'Metadata about federal customer data included in assessment scope.'],
-                    ['FRR-MAS-05', 'Information flows and CIA impact levels documented for ALL resources.'],
+                    ['MAS-CSO-IIR', 'Providers MUST identify a set of information resources to assess for FedRAMP Certification that includes all information resources that are likely to handle federal customer data or likely to impact the confidentiality, integrity, or availability of federal…'],
+                    ['MAS-CSO-FLO', 'Providers MUST clearly identify, document, and explain information flows and security categories for ALL information resources or sets of information resources in the cloud service offering.'],
+                    ['MAS-CSO-TPR', 'Providers MUST address the potential impact to federal customer data from third-party information resources used by the cloud service offering, ONLY IF MAS-CSO-IIR (Identify Information Resources) APPLIES, by documenting the following information about each…'],
+                    ['MAS-CSO-MDI', 'Providers MUST include metadata (including metadata about federal customer data) in the Minimum Assessment Scope ONLY IF MAS-CSO-IIR (Identify Information Resources) APPLIES.'],
+                    ['MAS-CSO-SUP', 'Providers MAY include additional materials about other information resources that are not part of the cloud service offering in a FedRAMP Certification Package supplement; these resources will not be FedRAMP Certified and MUST be clearly marked and separate…'],
                 ].map(([id, desc]) => (
                     <div className="row" key={id} style={{ gap: 14, alignItems: 'flex-start' }}>
                         <span className="mono" style={{ color: 'var(--indigo)', fontSize: 11, flexShrink: 0, minWidth: 92 }}>{id}</span>
@@ -664,7 +664,7 @@ export const UnifiedMasDashboard = () => {
                     <span className="mono" style={{ fontSize: 10, color: 'var(--ash)' }}>
                         Fingerprint: <span style={{ color: 'var(--signal)' }}>{data?.meta?.fingerprint || 'N/A'}</span>
                     </span>
-                    <span className="tag ok">Phase 2 Pilot Ready</span>
+                    <span className="tag ok">CR26 Aligned</span>
                     <span className="mono" style={{ fontSize: 10, color: 'var(--ash)' }}>
                         Generated: {data?.meta?.generated_at ? new Date(data.meta.generated_at).toLocaleString() : 'N/A'}
                     </span>

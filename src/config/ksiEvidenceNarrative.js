@@ -1,211 +1,48 @@
 /**
- * KSI Evidence Narrative Configuration
- * 
- * Maps each KSI to human-readable explanations of:
+ * KSI Evidence Narrative Configuration — FedRAMP Consolidated Rules for 2026 (CR26)
+ *
+ * Maps each CR26 KSI (46 mnemonic indicators, 10 families) to human-readable
+ * explanations of:
  * - What evidence is collected
  * - What validations are performed
  * - How pass/fail is determined
- * 
+ *
+ * Legacy (20x Phase Two) numeric KSI IDs were migrated to CR26 mnemonics per
+ * config/cr26_ksi_mapping.json. The former KSI-AFR indicators are no longer
+ * KSIs — they were promoted to FRR rule families and now live in the separate
+ * FRR_COMPLIANCE_NARRATIVES export below (keyed by FRR family).
+ *
  * This provides transparency into the validation process
  * WITHOUT exposing actual evidence file contents.
  */
 
 const KSI_EVIDENCE_NARRATIVES = {
   // ============================================
-  // Authorization by FedRAMP (KSI-AFR)
-  // ============================================
-  'KSI-AFR-01': {
-    name: 'Minimum Assessment Scope',
-    summary: 'Validates that the cloud service offering scope is properly documented and all components are identified for FedRAMP assessment per the Minimum Assessment Standard (MAS).',
-    evidenceTypes: [
-      { name: 'System Boundary', description: 'Inventory of all system components within authorization boundary' },
-      { name: 'Data Flow Mapping', description: 'Documentation of data flows between components' },
-      { name: 'Service Catalog', description: 'List of services and their security classifications' },
-    ],
-    validationLogic: 'Pass requires: All system components documented, data flows mapped, and service boundaries clearly defined.',
-    passIndicators: ['Complete system inventory', 'Documented data flows', 'Defined authorization boundary'],
-    failIndicators: ['Missing component documentation', 'Undefined data flows', 'Unclear system boundaries'],
-  },
-
-  'KSI-AFR-02': {
-    name: 'Key Security Indicators',
-    summary: 'Validates that security goals are set based on FedRAMP 20x Phase Two KSIs with automated validation of status and progress.',
-    evidenceTypes: [
-      { name: 'KSI Coverage', description: 'Percentage of KSIs with automated validation' },
-      { name: 'Validation Pipeline', description: 'CI/CD integration for continuous KSI assessment' },
-      { name: 'Progress Tracking', description: 'Historical trend data for KSI compliance' },
-    ],
-    validationLogic: 'Pass requires: Automated validation for all applicable KSIs, continuous monitoring pipeline active.',
-    passIndicators: ['Full KSI coverage', 'Automated validation active', 'Progress tracked'],
-    failIndicators: ['Missing KSI validators', 'Manual-only assessment', 'No trend tracking'],
-  },
-
-  'KSI-AFR-03': {
-    name: 'Authorization Data Sharing',
-    summary: 'Validates alignment with the FedRAMP Authorization Data Sharing (ADS) standard for sharing authorization data with necessary parties.',
-    evidenceTypes: [
-      { name: 'Data Sharing Policy', description: 'Documented policy for authorization data sharing' },
-      { name: 'Access Controls', description: 'Controls governing who can access authorization data' },
-      { name: 'Audit Trail', description: 'Logging of authorization data access and sharing' },
-    ],
-    validationLogic: 'Pass requires: Documented data sharing policy, appropriate access controls, audit logging enabled.',
-    passIndicators: ['Policy documented', 'Access controlled', 'Sharing audited'],
-    failIndicators: ['No sharing policy', 'Unrestricted access', 'No audit trail'],
-  },
-
-  'KSI-AFR-04': {
-    name: 'Vulnerability Detection and Response',
-    summary: 'Validates vulnerability scanning coverage and remediation processes per the FedRAMP VDR standard.',
-    evidenceTypes: [
-      { name: 'Scan Coverage', description: 'Percentage of assets with active vulnerability scanning' },
-      { name: 'Remediation SLAs', description: 'Time-to-remediate metrics by severity level' },
-      { name: 'Scanner Configuration', description: 'Validation of scanner settings and schedules' },
-    ],
-    validationLogic: 'Pass requires: 100% scan coverage, critical vulnerabilities remediated within 15 days, high within 30 days.',
-    passIndicators: ['Full scan coverage', 'SLAs met', 'No overdue critical findings'],
-    failIndicators: ['Scan gaps detected', 'Overdue remediations', 'Missing scanner configuration'],
-  },
-
-  'KSI-AFR-05': {
-    name: 'Significant Change Notifications',
-    summary: 'Validates that significant changes to the cloud service are properly documented and communicated per SCN requirements.',
-    evidenceTypes: [
-      { name: 'Change Records', description: 'Documentation of significant changes made to the system' },
-      { name: 'Notification Process', description: 'Process for notifying stakeholders of changes' },
-      { name: 'Impact Assessment', description: 'Security impact analysis for changes' },
-    ],
-    validationLogic: 'Pass requires: All significant changes documented, notifications sent, impact assessed.',
-    passIndicators: ['Changes documented', 'Stakeholders notified', 'Impact assessed'],
-    failIndicators: ['Undocumented changes', 'Missing notifications', 'No impact analysis'],
-  },
-
-  'KSI-AFR-06': {
-    name: 'Incident Communications Procedures',
-    summary: 'Validates documented procedures for communicating security incidents to affected parties and FedRAMP.',
-    evidenceTypes: [
-      { name: 'Communication Plan', description: 'Documented incident communication procedures' },
-      { name: 'Contact Lists', description: 'Current contact information for incident notifications' },
-      { name: 'Timeline Requirements', description: 'Defined timeframes for incident reporting' },
-    ],
-    validationLogic: 'Pass requires: Documented communication plan, current contacts, defined reporting timelines.',
-    passIndicators: ['Plan documented', 'Contacts current', 'Timelines defined'],
-    failIndicators: ['No communication plan', 'Stale contacts', 'Undefined timelines'],
-  },
-
-  'KSI-AFR-07': {
-    name: 'FedRAMP Security Inbox',
-    summary: 'Validates maintenance of a dedicated security inbox for FedRAMP communications that is actively monitored.',
-    evidenceTypes: [
-      { name: 'Inbox Configuration', description: 'Dedicated email address for FedRAMP security communications' },
-      { name: 'Monitoring Process', description: 'Process for monitoring and responding to inbox messages' },
-      { name: 'Response SLAs', description: 'Defined timeframes for responding to communications' },
-    ],
-    validationLogic: 'Pass requires: Dedicated inbox configured, actively monitored, response SLAs defined.',
-    passIndicators: ['Inbox active', 'Monitoring in place', 'SLAs met'],
-    failIndicators: ['No dedicated inbox', 'Unmonitored', 'Slow responses'],
-  },
-
-  'KSI-AFR-08': {
-    name: 'Persistent Validation and Assessment',
-    summary: 'Validates continuous security assessment and validation processes are in place and operating.',
-    evidenceTypes: [
-      { name: 'Continuous Monitoring', description: 'Automated continuous security monitoring tools' },
-      { name: 'Assessment Schedule', description: 'Regular security assessment schedule' },
-      { name: 'Validation Results', description: 'Historical validation and assessment results' },
-    ],
-    validationLogic: 'Pass requires: Continuous monitoring active, regular assessments performed, results documented.',
-    passIndicators: ['Monitoring active', 'Assessments current', 'Results documented'],
-    failIndicators: ['No continuous monitoring', 'Missed assessments', 'Undocumented results'],
-  },
-
-  'KSI-AFR-09': {
-    name: 'Collaborative Continuous Monitoring',
-    summary: 'Validates collaborative approach to continuous monitoring with agencies and FedRAMP.',
-    evidenceTypes: [
-      { name: 'Collaboration Framework', description: 'Framework for collaborative monitoring with stakeholders' },
-      { name: 'Shared Dashboards', description: 'Shared visibility into security posture' },
-      { name: 'Communication Channels', description: 'Established channels for security collaboration' },
-    ],
-    validationLogic: 'Pass requires: Collaboration framework defined, shared visibility provided, channels established.',
-    passIndicators: ['Framework defined', 'Dashboards shared', 'Channels active'],
-    failIndicators: ['No collaboration', 'No shared visibility', 'Communication gaps'],
-  },
-
-  'KSI-AFR-10': {
-    name: 'Recommended Secure Configuration',
-    summary: 'Validates that recommended secure configurations are documented and implemented.',
-    evidenceTypes: [
-      { name: 'Configuration Baselines', description: 'Documented secure configuration baselines' },
-      { name: 'Compliance Scanning', description: 'Automated configuration compliance scanning' },
-      { name: 'Deviation Tracking', description: 'Tracking and approval of configuration deviations' },
-    ],
-    validationLogic: 'Pass requires: Baselines documented, compliance scanning active, deviations tracked.',
-    passIndicators: ['Baselines defined', 'Scanning active', 'Deviations managed'],
-    failIndicators: ['No baselines', 'No compliance scanning', 'Untracked deviations'],
-  },
-
-  'KSI-AFR-11': {
-    name: 'Using Cryptographic Modules',
-    summary: 'Validates that all cryptographic modules protecting federal data comply with FIPS 140-2/140-3 requirements.',
-    evidenceTypes: [
-      { name: 'S3 Encryption', description: 'Server-side encryption configuration for all S3 buckets (AES-256 or KMS)' },
-      { name: 'RDS Encryption', description: 'Storage encryption status for all RDS database instances' },
-      { name: 'KMS Key Policy', description: 'Key management configuration and rotation policies' },
-      { name: 'TLS Configuration', description: 'Load balancer listener TLS versions and cipher suites' },
-      { name: 'Crypto Policy', description: 'Organization-wide cryptographic standards documentation' },
-    ],
-    validationLogic: 'Pass requires: All data-at-rest encrypted with FIPS-validated modules, TLS 1.2+ for data-in-transit, KMS keys with appropriate policies.',
-    passIndicators: ['All storage encrypted', 'TLS 1.2+ enforced', 'KMS keys properly configured', 'FIPS-validated algorithms'],
-    failIndicators: ['Unencrypted storage', 'Weak TLS versions', 'Missing key rotation', 'Non-FIPS algorithms'],
-  },
-
-  // ============================================
   // Cybersecurity Education (KSI-CED)
   // ============================================
-  'KSI-CED-01': {
-    name: 'General Training',
-    summary: 'Validates security awareness training completion and effectiveness for all employees.',
+  // Consolidates legacy KSI-CED-01 (general), KSI-CED-02 (role-specific),
+  // KSI-CED-03 (developer), and KSI-CED-04 into a single CR26 indicator.
+  'KSI-CED-RAT': {
+    name: 'Reviewing All Training',
+    summary: 'Validates that the effectiveness of all cybersecurity education is persistently reviewed: security awareness training for all employees, specialized training for high-risk and privileged roles, secure software delivery training for development staff, and incident response / disaster recovery training.',
     evidenceTypes: [
-      { name: 'Training Records', description: 'Completion status for required security training modules' },
+      { name: 'Training Records', description: 'Completion status for required security training modules across all employees' },
       { name: 'Assessment Scores', description: 'Employee performance on security knowledge assessments' },
       { name: 'Training Currency', description: 'Recency of completed training relative to requirements' },
+      { name: 'Role Classification', description: 'Identification of privileged / high-risk roles requiring specialized training' },
+      { name: 'Specialized Curriculum', description: 'Role-specific training modules, including OWASP-aligned secure coding content for developers' },
+      { name: 'Effectiveness Review', description: 'Evidence that training effectiveness is measured and curricula updated' },
     ],
-    validationLogic: 'Pass requires: 100% completion of required training, passing scores on assessments, training current within 12 months.',
-    passIndicators: ['All employees trained', 'Passing assessment scores', 'Training up to date'],
-    failIndicators: ['Incomplete training', 'Failed assessments', 'Expired certifications'],
-  },
-
-  'KSI-CED-02': {
-    name: 'Role-Specific Training',
-    summary: 'Validates specialized training for employees in high-risk or privileged access roles.',
-    evidenceTypes: [
-      { name: 'Role Classification', description: 'Identification of privileged access roles requiring specialized training' },
-      { name: 'Specialized Curriculum', description: 'Role-specific training modules and requirements' },
-      { name: 'Completion Tracking', description: 'Training status for each identified role' },
-    ],
-    validationLogic: 'Pass requires: All privileged users completed role-specific training, specialized modules defined per role.',
-    passIndicators: ['Privileged users trained', 'Role-specific content delivered', 'Current certifications'],
-    failIndicators: ['Untrained privileged users', 'Missing role-specific modules', 'Expired training'],
-  },
-
-  'KSI-CED-03': {
-    name: 'Developer Security Training',
-    summary: 'Validates role-specific security training for development staff on secure coding practices.',
-    evidenceTypes: [
-      { name: 'Developer Training', description: 'Secure coding training completion for development staff' },
-      { name: 'OWASP Coverage', description: 'Training coverage of OWASP Top 10 and secure development' },
-      { name: 'Certification Status', description: 'Developer security certifications and currency' },
-    ],
-    validationLogic: 'Pass requires: All developers completed secure coding training, OWASP awareness verified.',
-    passIndicators: ['Developers trained', 'OWASP covered', 'Certifications current'],
-    failIndicators: ['Untrained developers', 'Missing OWASP training', 'Expired certifications'],
+    validationLogic: 'Pass requires: 100% completion of required training with passing scores, all privileged users and developers completed role-specific modules, training current within 12 months, and effectiveness reviews documented.',
+    passIndicators: ['All employees trained', 'Privileged users and developers covered', 'Training up to date', 'Effectiveness reviewed'],
+    failIndicators: ['Incomplete training', 'Untrained privileged users or developers', 'Expired certifications', 'No effectiveness review'],
   },
 
   // ============================================
   // Change Management (KSI-CMT)
   // ============================================
-  'KSI-CMT-01': {
-    name: 'Log and Monitor Changes',
+  'KSI-CMT-LMC': {
+    name: 'Logging Changes',
     summary: 'Validates that all changes to the cloud service are logged and monitored.',
     evidenceTypes: [
       { name: 'CloudTrail Logging', description: 'API activity logging across all AWS regions' },
@@ -217,8 +54,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Missing trail regions', 'Config disabled', 'No change monitoring'],
   },
 
-  'KSI-CMT-02': {
-    name: 'Redeployment',
+  'KSI-CMT-RMV': {
+    name: 'Redeploying vs Modifying',
     summary: 'Validates use of immutable infrastructure patterns with version-controlled deployments.',
     evidenceTypes: [
       { name: 'Infrastructure as Code', description: 'IaC templates in version control (Terraform, CloudFormation)' },
@@ -230,9 +67,9 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Manual deployments detected', 'Missing IaC definitions', 'Configuration drift'],
   },
 
-  'KSI-CMT-03': {
-    name: 'Version Control',
-    summary: 'Validates that all code and configuration changes are tracked in version control systems.',
+  'KSI-CMT-VTD': {
+    name: 'Validating Throughout Deployment',
+    summary: 'Validates that all code and configuration changes are tracked in version control systems with persistent, automated testing and validation throughout deployment.',
     evidenceTypes: [
       { name: 'Repository Coverage', description: 'All code and configuration in version control' },
       { name: 'Branch Protection', description: 'Protected branches requiring reviews' },
@@ -243,9 +80,9 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Code outside VCS', 'Unprotected branches', 'Missing history'],
   },
 
-  'KSI-CMT-04': {
-    name: 'Change Management Procedure',
-    summary: 'Validates that a documented change management procedure is followed for all changes.',
+  'KSI-CMT-RVP': {
+    name: 'Reviewing Change Procedures',
+    summary: 'Validates that a documented change management procedure is followed for all changes and its effectiveness is persistently reviewed.',
     evidenceTypes: [
       { name: 'Change Policy', description: 'Documented change management policy and procedures' },
       { name: 'Approval Workflow', description: 'Change approval and review workflow' },
@@ -259,8 +96,8 @@ const KSI_EVIDENCE_NARRATIVES = {
   // ============================================
   // Cloud Native Architecture (KSI-CNA)
   // ============================================
-  'KSI-CNA-01': {
-    name: 'Restrict Network Traffic',
+  'KSI-CNA-RNT': {
+    name: 'Restricting Network Traffic',
     summary: 'Validates that all resources have properly configured network access controls.',
     evidenceTypes: [
       { name: 'Security Groups', description: 'Inbound and outbound rules for EC2 security groups' },
@@ -272,8 +109,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Unrestricted inbound', 'Missing NACLs', 'Open SSH/RDP to internet'],
   },
 
-  'KSI-CNA-02': {
-    name: 'Minimize Attack Surface',
+  'KSI-CNA-MAT': {
+    name: 'Minimizing Attack Surface',
     summary: 'Validates systems are designed to minimize attack surface and lateral movement.',
     evidenceTypes: [
       { name: 'Network Segmentation', description: 'VPC and subnet segmentation for isolation' },
@@ -285,8 +122,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Flat network', 'Over-exposed services', 'Unnecessary services running'],
   },
 
-  'KSI-CNA-03': {
-    name: 'Enforce Traffic Flow',
+  'KSI-CNA-ULN': {
+    name: 'Using Logical Networking',
     summary: 'Validates use of logical networking to enforce traffic flow controls.',
     evidenceTypes: [
       { name: 'VPC Flow Logs', description: 'Network traffic flow logging enabled' },
@@ -298,9 +135,9 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['No flow logs', 'Misconfigured routes', 'Unenforced policies'],
   },
 
-  'KSI-CNA-04': {
-    name: 'Immutable Infrastructure',
-    summary: 'Validates use of immutable infrastructure with strictly defined functionality.',
+  'KSI-CNA-DFP': {
+    name: 'Defining Functionality and Privileges',
+    summary: 'Validates use of immutable infrastructure with strictly defined functionality and privileges.',
     evidenceTypes: [
       { name: 'Image Management', description: 'Use of hardened, immutable machine images' },
       { name: 'Container Security', description: 'Immutable container configurations' },
@@ -311,9 +148,9 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Mutable infrastructure', 'Runtime modifications', 'No drift detection'],
   },
 
-  'KSI-CNA-05': {
-    name: 'Unwanted Activity Protection',
-    summary: 'Validates protection against denial of service attacks and other unwanted activity.',
+  'KSI-CNA-RVP': {
+    name: 'Reviewing Protections',
+    summary: 'Validates protection against denial of service attacks and other unwanted activity is persistently reviewed.',
     evidenceTypes: [
       { name: 'DDoS Protection', description: 'AWS Shield or equivalent DDoS protection' },
       { name: 'WAF Configuration', description: 'Web Application Firewall rules and policies' },
@@ -324,9 +161,9 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['No DDoS protection', 'WAF disabled', 'No rate limiting'],
   },
 
-  'KSI-CNA-06': {
-    name: 'High Availability',
-    summary: 'Validates infrastructure resilience and high availability configurations.',
+  'KSI-CNA-OFA': {
+    name: 'Optimizing for Availability',
+    summary: 'Validates infrastructure resilience, high availability, and rapid recovery configurations.',
     evidenceTypes: [
       { name: 'Multi-AZ Deployment', description: 'Resources distributed across multiple availability zones' },
       { name: 'Auto Scaling', description: 'Auto scaling group configurations for compute resources' },
@@ -337,8 +174,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Single AZ deployment', 'No auto scaling', 'Failed health checks'],
   },
 
-  'KSI-CNA-07': {
-    name: 'Cloud Provider Best Practices',
+  'KSI-CNA-IBP': {
+    name: 'Implementing Best Practices',
     summary: 'Validates cloud-native resources follow host provider best practices and guidance.',
     evidenceTypes: [
       { name: 'AWS Well-Architected', description: 'Alignment with AWS Well-Architected Framework' },
@@ -350,9 +187,9 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Not Well-Architected', 'Best practices ignored', 'Standards violations'],
   },
 
-  'KSI-CNA-08': {
-    name: 'Persistent Assessment and Automated Enforcement',
-    summary: 'Validates automated services persistently assess security posture and enforce intended state.',
+  'KSI-CNA-EIS': {
+    name: 'Enforcing Intended State',
+    summary: 'Validates automated services persistently assess security posture and enforce intended operational state.',
     evidenceTypes: [
       { name: 'CSPM Tools', description: 'Cloud Security Posture Management tool deployment' },
       { name: 'Auto-Remediation', description: 'Automated remediation of security findings' },
@@ -366,34 +203,26 @@ const KSI_EVIDENCE_NARRATIVES = {
   // ============================================
   // Identity and Access Management (KSI-IAM)
   // ============================================
-  'KSI-IAM-01': {
-    name: 'Phishing-Resistant MFA',
-    summary: 'Validates enforcement of phishing-resistant multi-factor authentication for all users.',
+  // Consolidates legacy KSI-IAM-01 (phishing-resistant MFA) and
+  // KSI-IAM-02 (passwordless authentication) into a single CR26 indicator.
+  'KSI-IAM-APM': {
+    name: 'Adopting Passwordless Methods',
+    summary: 'Validates use of secure passwordless methods for user authentication and authorization where feasible, otherwise strong passwords with phishing-resistant multi-factor authentication.',
     evidenceTypes: [
       { name: 'MFA Policy', description: 'IAM policies requiring MFA for all user authentication' },
       { name: 'MFA Device Types', description: 'Types of MFA devices in use (hardware keys, authenticator apps)' },
       { name: 'MFA Coverage', description: 'Percentage of users with MFA enabled' },
-    ],
-    validationLogic: 'Pass requires: 100% MFA coverage, hardware security keys or TOTP authenticators, no SMS-based MFA.',
-    passIndicators: ['All users have MFA', 'Phishing-resistant methods', 'Root account secured'],
-    failIndicators: ['Users without MFA', 'SMS MFA in use', 'Root MFA missing'],
-  },
-
-  'KSI-IAM-02': {
-    name: 'Passwordless Authentication',
-    summary: 'Validates use of secure passwordless methods or strong passwords with MFA.',
-    evidenceTypes: [
       { name: 'Authentication Methods', description: 'Authentication methods in use across the system' },
       { name: 'Password Policy', description: 'Password complexity and rotation requirements' },
       { name: 'SSO Configuration', description: 'Single sign-on and federation configuration' },
     ],
-    validationLogic: 'Pass requires: Passwordless where feasible, strong password policy enforced, SSO implemented.',
-    passIndicators: ['Passwordless enabled', 'Strong passwords', 'SSO active'],
-    failIndicators: ['Weak passwords', 'No password policy', 'No SSO'],
+    validationLogic: 'Pass requires: Passwordless where feasible, 100% MFA coverage with phishing-resistant methods (hardware security keys or TOTP authenticators, no SMS-based MFA), strong password policy enforced, SSO implemented.',
+    passIndicators: ['Passwordless enabled', 'All users have phishing-resistant MFA', 'Root account secured', 'SSO active'],
+    failIndicators: ['Users without MFA', 'SMS MFA in use', 'Weak passwords', 'No SSO'],
   },
 
-  'KSI-IAM-03': {
-    name: 'Non-User Account Security',
+  'KSI-IAM-SNU': {
+    name: 'Securing Non-User Authentication',
     summary: 'Validates secure authentication methods for non-user accounts and services.',
     evidenceTypes: [
       { name: 'Service Accounts', description: 'Inventory of service and non-user accounts' },
@@ -405,8 +234,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Unknown accounts', 'Stale keys', 'Long-lived credentials'],
   },
 
-  'KSI-IAM-04': {
-    name: 'Just-in-Time Authorization',
+  'KSI-IAM-JIT': {
+    name: 'Authorizing Just-in-Time',
     summary: 'Validates implementation of least-privilege and just-in-time access patterns.',
     evidenceTypes: [
       { name: 'Role Policies', description: 'IAM role permission boundaries and policies' },
@@ -418,8 +247,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Wildcard permissions', 'Long-lived credentials', 'Stale access grants'],
   },
 
-  'KSI-IAM-05': {
-    name: 'Least Privilege',
+  'KSI-IAM-ELP': {
+    name: 'Ensuring Least Privilege',
     summary: 'Validates identity and access management always verifies users can only access needed resources.',
     evidenceTypes: [
       { name: 'Permission Analysis', description: 'Analysis of granted vs. used permissions' },
@@ -431,8 +260,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['No reviews', 'Excessive permissions', 'Stale access'],
   },
 
-  'KSI-IAM-06': {
-    name: 'Suspicious Activity Response',
+  'KSI-IAM-SUS': {
+    name: 'Responding to Suspicious Activity',
     summary: 'Validates automatic disabling or securing of accounts in response to suspicious activity.',
     evidenceTypes: [
       { name: 'Anomaly Detection', description: 'Detection of suspicious account activity' },
@@ -444,8 +273,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['No detection', 'Manual response only', 'No alerts'],
   },
 
-  'KSI-IAM-07': {
-    name: 'Automated Account Management',
+  'KSI-IAM-AAM': {
+    name: 'Automating Account Management',
     summary: 'Validates secure lifecycle management of all accounts, roles, and groups using automation.',
     evidenceTypes: [
       { name: 'Lifecycle Automation', description: 'Automated account provisioning and deprovisioning' },
@@ -460,9 +289,9 @@ const KSI_EVIDENCE_NARRATIVES = {
   // ============================================
   // Incident Response (KSI-INR)
   // ============================================
-  'KSI-INR-01': {
-    name: 'Incident Response Procedure',
-    summary: 'Validates documented and tested incident response procedures are followed.',
+  'KSI-INR-RIR': {
+    name: 'Reviewing Incident Response Procedures',
+    summary: 'Validates documented and tested incident response procedures are followed and their effectiveness persistently reviewed.',
     evidenceTypes: [
       { name: 'IR Plan', description: 'Documented incident response plan and procedures' },
       { name: 'Contact List', description: 'Current incident response team contacts' },
@@ -473,9 +302,9 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['No IR plan', 'Stale contacts', 'Missing playbooks'],
   },
 
-  'KSI-INR-02': {
-    name: 'Incident Logging',
-    summary: 'Validates maintenance of incident logs and periodic review for patterns.',
+  'KSI-INR-RPI': {
+    name: 'Reviewing Past Incidents',
+    summary: 'Validates maintenance of incident logs and persistent review of past incidents for patterns or previously unidentified vulnerabilities.',
     evidenceTypes: [
       { name: 'Incident Log', description: 'Log of security incidents and responses' },
       { name: 'Pattern Analysis', description: 'Analysis of incident patterns and trends' },
@@ -486,8 +315,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['No logging', 'No analysis', 'No reviews'],
   },
 
-  'KSI-INR-03': {
-    name: 'Incident After Action Reports',
+  'KSI-INR-AAR': {
+    name: 'Generating After Action Reports',
     summary: 'Validates generation of after action reports and incorporation of lessons learned.',
     evidenceTypes: [
       { name: 'After Action Reports', description: 'Post-incident analysis reports' },
@@ -502,8 +331,8 @@ const KSI_EVIDENCE_NARRATIVES = {
   // ============================================
   // Monitoring, Logging, and Auditing (KSI-MLA)
   // ============================================
-  'KSI-MLA-01': {
-    name: 'Security Information and Event Management',
+  'KSI-MLA-OSM': {
+    name: 'Operating SIEM Capability',
     summary: 'Validates centralized, tamper-resistant logging through SIEM or equivalent systems.',
     evidenceTypes: [
       { name: 'CloudTrail Configuration', description: 'Trail settings, S3 bucket, and log file validation' },
@@ -515,8 +344,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Missing trails', 'No log validation', 'Decentralized logs'],
   },
 
-  'KSI-MLA-02': {
-    name: 'Audit Logging',
+  'KSI-MLA-RVL': {
+    name: 'Reviewing Logs',
     summary: 'Validates comprehensive audit log collection and regular review processes.',
     evidenceTypes: [
       { name: 'Log Coverage', description: 'Services and actions being logged' },
@@ -528,8 +357,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Log gaps', 'Short retention', 'No review process'],
   },
 
-  'KSI-MLA-05': {
-    name: 'Infrastructure as Code Evaluation',
+  'KSI-MLA-EVC': {
+    name: 'Evaluating Configurations',
     summary: 'Validates Infrastructure as Code and configuration evaluation and testing.',
     evidenceTypes: [
       { name: 'IaC Scanning', description: 'Security scanning of Infrastructure as Code templates' },
@@ -541,8 +370,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['No scanning', 'No policy enforcement', 'Untested configs'],
   },
 
-  'KSI-MLA-07': {
-    name: 'Event Types',
+  'KSI-MLA-LET': {
+    name: 'Logging Event Types',
     summary: 'Validates maintenance of list of monitored resources and event types.',
     evidenceTypes: [
       { name: 'Resource Inventory', description: 'List of resources being monitored' },
@@ -554,9 +383,9 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Missing resources', 'Undocumented events', 'Coverage gaps'],
   },
 
-  'KSI-MLA-08': {
-    name: 'Log Data Access',
-    summary: 'Validates least-privileged, role-based access to log data based on sensitivity.',
+  'KSI-MLA-ALA': {
+    name: 'Authorizing Log Access',
+    summary: 'Validates least-privileged, role-based, just-in-time access to log data based on sensitivity.',
     evidenceTypes: [
       { name: 'Access Controls', description: 'IAM policies governing log data access' },
       { name: 'Role Definitions', description: 'Roles defined for log data access levels' },
@@ -570,9 +399,9 @@ const KSI_EVIDENCE_NARRATIVES = {
   // ============================================
   // Policy and Inventory (KSI-PIY)
   // ============================================
-  'KSI-PIY-01': {
-    name: 'Automated Inventory',
-    summary: 'Validates real-time, automated inventory of all information resources.',
+  'KSI-PIY-GIV': {
+    name: 'Generating Inventories',
+    summary: 'Validates real-time, automated inventory of all information resources from authoritative sources.',
     evidenceTypes: [
       { name: 'AWS Config', description: 'Config recorder status and resource coverage' },
       { name: 'Resource Tagging', description: 'Tagging compliance for inventory classification' },
@@ -583,22 +412,9 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Config disabled', 'Missing resource types', 'Untagged resources'],
   },
 
-  'KSI-PIY-02': {
-    name: 'Security Objectives and Requirements',
-    summary: 'Validates documentation of security objectives and requirements for resources.',
-    evidenceTypes: [
-      { name: 'Security Requirements', description: 'Documented security requirements per resource type' },
-      { name: 'Objectives Documentation', description: 'Security objectives for the system' },
-      { name: 'Compliance Mapping', description: 'Mapping of requirements to controls' },
-    ],
-    validationLogic: 'Pass requires: Requirements documented, objectives defined, compliance mapped.',
-    passIndicators: ['Requirements documented', 'Objectives defined', 'Mapping complete'],
-    failIndicators: ['Missing requirements', 'No objectives', 'Unmapped controls'],
-  },
-
-  'KSI-PIY-03': {
-    name: 'Vulnerability Disclosure Program',
-    summary: 'Validates maintenance of a vulnerability disclosure program.',
+  'KSI-PIY-RVD': {
+    name: 'Reviewing Vulnerability Disclosures',
+    summary: 'Validates maintenance and persistent review of a vulnerability disclosure program.',
     evidenceTypes: [
       { name: 'VDP Policy', description: 'Published vulnerability disclosure policy' },
       { name: 'Submission Process', description: 'Process for receiving vulnerability reports' },
@@ -609,9 +425,9 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['No VDP', 'No submission process', 'Slow responses'],
   },
 
-  'KSI-PIY-04': {
-    name: 'CISA Secure By Design',
-    summary: 'Validates alignment with CISA Secure By Design principles in SDLC.',
+  'KSI-PIY-RSD': {
+    name: 'Reviewing Security in the SDLC',
+    summary: 'Validates alignment with CISA Secure By Design principles in the Software Development Lifecycle.',
     evidenceTypes: [
       { name: 'SDLC Security', description: 'Security integration in software development lifecycle' },
       { name: 'Secure By Design', description: 'Alignment with CISA Secure By Design principles' },
@@ -622,21 +438,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['No SDLC security', 'Not SBD aligned', 'No testing'],
   },
 
-  'KSI-PIY-05': {
-    name: 'Evaluate Implementations',
-    summary: 'Validates documentation of methods used to evaluate information resource implementations.',
-    evidenceTypes: [
-      { name: 'Evaluation Methods', description: 'Documented evaluation methodologies' },
-      { name: 'Assessment Criteria', description: 'Criteria for implementation assessment' },
-      { name: 'Results Documentation', description: 'Documentation of evaluation results' },
-    ],
-    validationLogic: 'Pass requires: Methods documented, criteria defined, results recorded.',
-    passIndicators: ['Methods documented', 'Criteria defined', 'Results recorded'],
-    failIndicators: ['No methods', 'No criteria', 'Missing results'],
-  },
-
-  'KSI-PIY-06': {
-    name: 'Security Investment Effectiveness',
+  'KSI-PIY-RIS': {
+    name: 'Reviewing Investments in Security',
     summary: 'Validates tracking and measurement of security investment outcomes.',
     evidenceTypes: [
       { name: 'Metrics Collection', description: 'Security metrics and KPI tracking mechanisms' },
@@ -648,12 +451,25 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['No metrics', 'Untracked spending', 'No effectiveness review'],
   },
 
+  'KSI-PIY-RES': {
+    name: 'Reviewing Executive Support',
+    summary: 'Validates that executive support for achieving the provider\'s security goals is persistently reviewed and demonstrated.',
+    evidenceTypes: [
+      { name: 'Governance Records', description: 'Executive-level security governance meeting records and charters' },
+      { name: 'Resource Commitments', description: 'Documented staffing and budget commitments to security goals' },
+      { name: 'Leadership Attestations', description: 'Executive attestations and sign-offs on security objectives' },
+    ],
+    validationLogic: 'Pass requires: Executive governance documented, resource commitments current, leadership attestations on record.',
+    passIndicators: ['Governance active', 'Resources committed', 'Attestations current'],
+    failIndicators: ['No executive engagement', 'Unfunded security goals', 'Stale attestations'],
+  },
+
   // ============================================
   // Recovery Planning (KSI-RPL)
   // ============================================
-  'KSI-RPL-01': {
-    name: 'Recovery Objectives',
-    summary: 'Validates definition of Recovery Time Objectives (RTO) and Recovery Point Objectives (RPO).',
+  'KSI-RPL-RRO': {
+    name: 'Reviewing Recovery Objectives',
+    summary: 'Validates definition and persistent review of Recovery Time Objectives (RTO) and Recovery Point Objectives (RPO).',
     evidenceTypes: [
       { name: 'RTO Definition', description: 'Documented maximum acceptable downtime per system' },
       { name: 'RPO Definition', description: 'Documented maximum acceptable data loss per system' },
@@ -664,9 +480,9 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Missing objectives', 'No tiering', 'Unapproved values'],
   },
 
-  'KSI-RPL-02': {
-    name: 'Recovery Testing',
-    summary: 'Validates regular testing of recovery procedures and capabilities.',
+  'KSI-RPL-ARP': {
+    name: 'Aligning Recovery Plan',
+    summary: 'Validates recovery plans are aligned with defined recovery objectives and regularly exercised.',
     evidenceTypes: [
       { name: 'Test Schedule', description: 'Schedule for recovery testing exercises' },
       { name: 'Test Results', description: 'Results from recovery testing exercises' },
@@ -677,8 +493,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['No testing', 'Missing results', 'Unaddressed findings'],
   },
 
-  'KSI-RPL-03': {
-    name: 'System Backups',
+  'KSI-RPL-ABO': {
+    name: 'Aligning Backups with Objectives',
     summary: 'Validates backup configurations align with defined recovery objectives.',
     evidenceTypes: [
       { name: 'Backup Configuration', description: 'AWS Backup plans and vault configurations' },
@@ -690,144 +506,24 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Unprotected resources', 'Short retention', 'Single region only'],
   },
 
-  // ============================================
-  // Service Configuration (KSI-SVC)
-  // ============================================
-  'KSI-SVC-01': {
-    name: 'Secure Configuration',
-    summary: 'Validates all services are configured according to security baselines.',
+  'KSI-RPL-TRC': {
+    name: 'Testing Recovery Capabilities',
+    summary: 'Validates that the capability to recover from incidents and contingencies, aligned with defined recovery objectives, is persistently tested.',
     evidenceTypes: [
-      { name: 'Configuration Baselines', description: 'Documented secure configuration baselines' },
-      { name: 'Compliance Scanning', description: 'Automated configuration compliance scanning' },
-      { name: 'Deviation Management', description: 'Process for managing configuration deviations' },
+      { name: 'Recovery Exercises', description: 'Executed failover, restore, and contingency exercises' },
+      { name: 'Restore Verification', description: 'Verification that backup restores complete within RTO/RPO' },
+      { name: 'Exercise Findings', description: 'Documented findings and remediation from recovery tests' },
     ],
-    validationLogic: 'Pass requires: Baselines defined, compliance scanning active, deviations managed.',
-    passIndicators: ['Baselines defined', 'Scanning active', 'Deviations tracked'],
-    failIndicators: ['No baselines', 'No scanning', 'Untracked deviations'],
-  },
-
-  'KSI-SVC-02': {
-    name: 'Network Encryption',
-    summary: 'Validates encryption of data in transit across all network communications.',
-    evidenceTypes: [
-      { name: 'TLS Configuration', description: 'Load balancer and API gateway TLS settings' },
-      { name: 'Certificate Management', description: 'SSL/TLS certificate validity and management' },
-      { name: 'Internal Encryption', description: 'Encryption between internal services and databases' },
-    ],
-    validationLogic: 'Pass requires: TLS 1.2+ on all public endpoints, valid certificates, internal traffic encrypted.',
-    passIndicators: ['TLS 1.2+ enforced', 'Valid certificates', 'Internal encryption'],
-    failIndicators: ['Weak TLS versions', 'Expired certificates', 'Unencrypted internal traffic'],
-  },
-
-  'KSI-SVC-03': {
-    name: 'Data at Rest Encryption',
-    summary: 'Validates encryption of all data at rest using approved encryption methods.',
-    evidenceTypes: [
-      { name: 'Storage Encryption', description: 'Encryption status for all storage services' },
-      { name: 'Key Management', description: 'Encryption key management and rotation' },
-      { name: 'Encryption Standards', description: 'Compliance with approved encryption standards' },
-    ],
-    validationLogic: 'Pass requires: All storage encrypted, keys properly managed, FIPS-compliant algorithms.',
-    passIndicators: ['Storage encrypted', 'Keys managed', 'FIPS compliant'],
-    failIndicators: ['Unencrypted storage', 'Poor key management', 'Non-FIPS algorithms'],
-  },
-
-  'KSI-SVC-04': {
-    name: 'Public Access Prevention',
-    summary: 'Validates prevention of unintended public access to resources.',
-    evidenceTypes: [
-      { name: 'S3 Block Public Access', description: 'Account and bucket-level public access blocks' },
-      { name: 'Public Resource Audit', description: 'Inventory of intentionally public resources' },
-      { name: 'Access Monitoring', description: 'Monitoring for unexpected public access' },
-    ],
-    validationLogic: 'Pass requires: Public access blocked by default, public resources documented, monitoring active.',
-    passIndicators: ['Access blocked', 'Public documented', 'Monitoring active'],
-    failIndicators: ['Access not blocked', 'Undocumented public', 'No monitoring'],
-  },
-
-  'KSI-SVC-05': {
-    name: 'Endpoint Protection',
-    summary: 'Validates endpoint protection measures are deployed and active.',
-    evidenceTypes: [
-      { name: 'Endpoint Security', description: 'Endpoint protection agent deployment status' },
-      { name: 'Malware Protection', description: 'Anti-malware and threat detection coverage' },
-      { name: 'Endpoint Hardening', description: 'Endpoint hardening configuration status' },
-    ],
-    validationLogic: 'Pass requires: Agents deployed, malware protection active, endpoints hardened.',
-    passIndicators: ['Agents deployed', 'Protection active', 'Endpoints hardened'],
-    failIndicators: ['Missing agents', 'No protection', 'Unhardened endpoints'],
-  },
-
-  'KSI-SVC-06': {
-    name: 'Secret Management',
-    summary: 'Validates secure storage and rotation of secrets, keys, and credentials.',
-    evidenceTypes: [
-      { name: 'Secrets Manager', description: 'AWS Secrets Manager configuration and usage' },
-      { name: 'Rotation Policies', description: 'Automatic rotation schedules for secrets' },
-      { name: 'Access Controls', description: 'IAM policies governing secret access' },
-    ],
-    validationLogic: 'Pass requires: All secrets in Secrets Manager or Parameter Store, automatic rotation enabled, least-privilege access.',
-    passIndicators: ['Centralized secrets', 'Rotation enabled', 'Access controlled'],
-    failIndicators: ['Hardcoded secrets', 'No rotation', 'Overly permissive access'],
-  },
-
-  'KSI-SVC-07': {
-    name: 'Patch Management',
-    summary: 'Validates timely patching of systems and software.',
-    evidenceTypes: [
-      { name: 'Patch Status', description: 'Current patch status across all systems' },
-      { name: 'Patch SLAs', description: 'Patching timeframes by severity' },
-      { name: 'Patch Automation', description: 'Automated patching processes and coverage' },
-    ],
-    validationLogic: 'Pass requires: Critical patches within 15 days, high within 30 days, automation where possible.',
-    passIndicators: ['Patches current', 'SLAs met', 'Automation active'],
-    failIndicators: ['Overdue patches', 'SLAs missed', 'Manual patching'],
-  },
-
-  'KSI-SVC-08': {
-    name: 'Residual Element Prevention',
-    summary: 'Validates changes do not introduce or leave residual elements affecting CIA.',
-    evidenceTypes: [
-      { name: 'Residual Detection', description: 'Detection of residual elements from changes' },
-      { name: 'Cleanup Verification', description: 'Verification of proper cleanup after changes' },
-      { name: 'Impact Assessment', description: 'Assessment of change impact on CIA' },
-    ],
-    validationLogic: 'Pass requires: Residual detection active, cleanup verified, impact assessed.',
-    passIndicators: ['Detection active', 'Cleanup verified', 'Impact assessed'],
-    failIndicators: ['No detection', 'Missing cleanup', 'No assessment'],
-  },
-
-  'KSI-SVC-09': {
-    name: 'Communication Integrity',
-    summary: 'Validates persistent validation of authenticity and integrity of communications.',
-    evidenceTypes: [
-      { name: 'Integrity Validation', description: 'Validation of communication integrity between resources' },
-      { name: 'Authentication', description: 'Mutual authentication between services' },
-      { name: 'Monitoring', description: 'Monitoring of communication integrity' },
-    ],
-    validationLogic: 'Pass requires: Integrity validation active, mutual authentication enabled, monitoring in place.',
-    passIndicators: ['Integrity validated', 'Auth enabled', 'Monitoring active'],
-    failIndicators: ['No validation', 'No auth', 'No monitoring'],
-  },
-
-  'KSI-SVC-10': {
-    name: 'Data Destruction',
-    summary: 'Validates prompt removal of unwanted federal customer data when requested.',
-    evidenceTypes: [
-      { name: 'Data Destruction Policy', description: 'Policy for data destruction requests' },
-      { name: 'Destruction Process', description: 'Process for executing data destruction' },
-      { name: 'Verification', description: 'Verification that data destruction is complete' },
-    ],
-    validationLogic: 'Pass requires: Policy defined, process documented, destruction verified.',
-    passIndicators: ['Policy defined', 'Process documented', 'Destruction verified'],
-    failIndicators: ['No policy', 'No process', 'Unverified destruction'],
+    validationLogic: 'Pass requires: Recovery exercises executed on schedule, restores verified against RTO/RPO, findings remediated.',
+    passIndicators: ['Exercises executed', 'Restores verified', 'Findings closed'],
+    failIndicators: ['No recovery testing', 'Failed restores', 'Open exercise findings'],
   },
 
   // ============================================
-  // Third-Party Information Resources (KSI-TPR)
+  // Supply Chain Risk (KSI-SCR)
   // ============================================
-  'KSI-TPR-03': {
-    name: 'Supply Chain Risk Management',
+  'KSI-SCR-MIT': {
+    name: 'Mitigating Supply Chain Risk',
     summary: 'Validates identification and prioritization of supply chain risk mitigation.',
     evidenceTypes: [
       { name: 'Vendor Inventory', description: 'List of third-party vendors and their risk classifications' },
@@ -839,8 +535,8 @@ const KSI_EVIDENCE_NARRATIVES = {
     failIndicators: ['Unknown vendors', 'Missing assessments', 'No security clauses'],
   },
 
-  'KSI-TPR-04': {
-    name: 'Supply Chain Risk Monitoring',
+  'KSI-SCR-MON': {
+    name: 'Monitoring Supply Chain Risk',
     summary: 'Validates automatic monitoring of third-party software for upstream vulnerabilities.',
     evidenceTypes: [
       { name: 'Dependency Scanning', description: 'Automated scanning of software dependencies' },
@@ -851,6 +547,291 @@ const KSI_EVIDENCE_NARRATIVES = {
     passIndicators: ['Scanning active', 'Notifications enabled', 'Patch process defined'],
     failIndicators: ['No scanning', 'No notifications', 'Delayed patching'],
   },
+
+  // ============================================
+  // Service Configuration (KSI-SVC)
+  // ============================================
+  'KSI-SVC-EIS': {
+    name: 'Evaluating and Improving Security',
+    summary: 'Validates all services are configured according to security baselines and persistently evaluated for security improvements.',
+    evidenceTypes: [
+      { name: 'Configuration Baselines', description: 'Documented secure configuration baselines' },
+      { name: 'Compliance Scanning', description: 'Automated configuration compliance scanning' },
+      { name: 'Deviation Management', description: 'Process for managing configuration deviations' },
+    ],
+    validationLogic: 'Pass requires: Baselines defined, compliance scanning active, deviations managed.',
+    passIndicators: ['Baselines defined', 'Scanning active', 'Deviations tracked'],
+    failIndicators: ['No baselines', 'No scanning', 'Untracked deviations'],
+  },
+
+  'KSI-SVC-SIN': {
+    name: 'Securing Information',
+    summary: 'Validates information is encrypted or otherwise secured from unwanted access or modification, including data in transit across all network communications.',
+    evidenceTypes: [
+      { name: 'TLS Configuration', description: 'Load balancer and API gateway TLS settings' },
+      { name: 'Certificate Management', description: 'SSL/TLS certificate validity and management' },
+      { name: 'Internal Encryption', description: 'Encryption between internal services and databases' },
+    ],
+    validationLogic: 'Pass requires: TLS 1.2+ on all public endpoints, valid certificates, internal traffic encrypted.',
+    passIndicators: ['TLS 1.2+ enforced', 'Valid certificates', 'Internal encryption'],
+    failIndicators: ['Weak TLS versions', 'Expired certificates', 'Unencrypted internal traffic'],
+  },
+
+  'KSI-SVC-ACM': {
+    name: 'Automating Configuration Management',
+    summary: 'Validates configuration of resources is managed with automation, reviewed for drift, and prevents unintended public access.',
+    evidenceTypes: [
+      { name: 'S3 Block Public Access', description: 'Account and bucket-level public access blocks' },
+      { name: 'Public Resource Audit', description: 'Inventory of intentionally public resources' },
+      { name: 'Access Monitoring', description: 'Monitoring for unexpected public access' },
+    ],
+    validationLogic: 'Pass requires: Public access blocked by default, public resources documented, monitoring active.',
+    passIndicators: ['Access blocked', 'Public documented', 'Monitoring active'],
+    failIndicators: ['Access not blocked', 'Undocumented public', 'No monitoring'],
+  },
+
+  'KSI-SVC-VRI': {
+    name: 'Validating Resource Integrity',
+    summary: 'Validates cryptographic methods and endpoint protection measures validate the integrity of machine-based information resources.',
+    evidenceTypes: [
+      { name: 'Endpoint Security', description: 'Endpoint protection agent deployment status' },
+      { name: 'Malware Protection', description: 'Anti-malware and threat detection coverage' },
+      { name: 'Endpoint Hardening', description: 'Endpoint hardening configuration status' },
+    ],
+    validationLogic: 'Pass requires: Agents deployed, malware protection active, endpoints hardened.',
+    passIndicators: ['Agents deployed', 'Protection active', 'Endpoints hardened'],
+    failIndicators: ['Missing agents', 'No protection', 'Unhardened endpoints'],
+  },
+
+  'KSI-SVC-ASM': {
+    name: 'Automating Secret Management',
+    summary: 'Validates secure storage and rotation of secrets, keys, and credentials.',
+    evidenceTypes: [
+      { name: 'Secrets Manager', description: 'AWS Secrets Manager configuration and usage' },
+      { name: 'Rotation Policies', description: 'Automatic rotation schedules for secrets' },
+      { name: 'Access Controls', description: 'IAM policies governing secret access' },
+    ],
+    validationLogic: 'Pass requires: All secrets in Secrets Manager or Parameter Store, automatic rotation enabled, least-privilege access.',
+    passIndicators: ['Centralized secrets', 'Rotation enabled', 'Access controlled'],
+    failIndicators: ['Hardcoded secrets', 'No rotation', 'Overly permissive access'],
+  },
+
+  'KSI-SVC-PRR': {
+    name: 'Preventing Residual Risk',
+    summary: 'Validates changes do not introduce or leave residual elements affecting confidentiality, integrity, or availability.',
+    evidenceTypes: [
+      { name: 'Residual Detection', description: 'Detection of residual elements from changes' },
+      { name: 'Cleanup Verification', description: 'Verification of proper cleanup after changes' },
+      { name: 'Impact Assessment', description: 'Assessment of change impact on CIA' },
+    ],
+    validationLogic: 'Pass requires: Residual detection active, cleanup verified, impact assessed.',
+    passIndicators: ['Detection active', 'Cleanup verified', 'Impact assessed'],
+    failIndicators: ['No detection', 'Missing cleanup', 'No assessment'],
+  },
+
+  'KSI-SVC-VCM': {
+    name: 'Validating Communications',
+    summary: 'Validates persistent validation of authenticity and integrity of communications between machine-based resources.',
+    evidenceTypes: [
+      { name: 'Integrity Validation', description: 'Validation of communication integrity between resources' },
+      { name: 'Authentication', description: 'Mutual authentication between services' },
+      { name: 'Monitoring', description: 'Monitoring of communication integrity' },
+    ],
+    validationLogic: 'Pass requires: Integrity validation active, mutual authentication enabled, monitoring in place.',
+    passIndicators: ['Integrity validated', 'Auth enabled', 'Monitoring active'],
+    failIndicators: ['No validation', 'No auth', 'No monitoring'],
+  },
+
+  'KSI-SVC-RUD': {
+    name: 'Removing Unwanted Data',
+    summary: 'Validates prompt removal of unwanted federal customer data when requested.',
+    evidenceTypes: [
+      { name: 'Data Destruction Policy', description: 'Policy for data destruction requests' },
+      { name: 'Destruction Process', description: 'Process for executing data destruction' },
+      { name: 'Verification', description: 'Verification that data destruction is complete' },
+    ],
+    validationLogic: 'Pass requires: Policy defined, process documented, destruction verified.',
+    passIndicators: ['Policy defined', 'Process documented', 'Destruction verified'],
+    failIndicators: ['No policy', 'No process', 'Unverified destruction'],
+  },
+};
+
+/**
+ * FRR Rule Family Compliance Narratives — CR26
+ *
+ * The legacy KSI-AFR-01..11 indicators were promoted out of the KSI universe
+ * into FRR rule families under the FedRAMP Consolidated Rules for 2026.
+ * Their validation records are published in the `frr_validations` list /
+ * `frr_summary` map of unified_ksi_validations.json; linkage to history is
+ * via the legacy KSI ID.
+ */
+const FRR_COMPLIANCE_NARRATIVES = {
+  // legacy KSI-AFR-01
+  'FRR-MAS': {
+    name: 'Minimum Assessment Scope',
+    legacyKsiId: 'KSI-AFR-01',
+    summary: 'Validates that the cloud service offering scope is properly documented and all components are identified for FedRAMP assessment per the FRR-MAS (Minimum Assessment Scope) rules.',
+    evidenceTypes: [
+      { name: 'System Boundary', description: 'Inventory of all system components within the certification boundary' },
+      { name: 'Data Flow Mapping', description: 'Documentation of data flows between components' },
+      { name: 'Service Catalog', description: 'List of services and their security classifications' },
+    ],
+    validationLogic: 'Pass requires: All system components documented, data flows mapped, and service boundaries clearly defined.',
+    passIndicators: ['Complete system inventory', 'Documented data flows', 'Defined certification boundary'],
+    failIndicators: ['Missing component documentation', 'Undefined data flows', 'Unclear system boundaries'],
+  },
+
+  // legacy KSI-AFR-02
+  'FRR-FRC': {
+    name: 'FedRAMP Certification',
+    legacyKsiId: 'KSI-AFR-02',
+    summary: 'Validates that security goals are set based on the FedRAMP Consolidated Rules for 2026 (CR26) Key Security Indicators with automated validation of status and progress (FRC-CSX 20x subset).',
+    evidenceTypes: [
+      { name: 'KSI Coverage', description: 'Percentage of KSIs with automated validation' },
+      { name: 'Validation Pipeline', description: 'CI/CD integration for continuous KSI assessment' },
+      { name: 'Progress Tracking', description: 'Historical trend data for KSI compliance' },
+    ],
+    validationLogic: 'Pass requires: Automated validation for all applicable KSIs, continuous monitoring pipeline active.',
+    passIndicators: ['Full KSI coverage', 'Automated validation active', 'Progress tracked'],
+    failIndicators: ['Missing KSI validators', 'Manual-only assessment', 'No trend tracking'],
+  },
+
+  // legacy KSI-AFR-03
+  'FRR-CDS': {
+    name: 'Certification Data Sharing',
+    legacyKsiId: 'KSI-AFR-03',
+    summary: 'Validates alignment with the FRR-CDS (Certification Data Sharing) rules for storing and sharing FedRAMP certification data with necessary parties.',
+    evidenceTypes: [
+      { name: 'Data Sharing Policy', description: 'Documented policy for certification data sharing' },
+      { name: 'Access Controls', description: 'Controls governing who can access certification data' },
+      { name: 'Audit Trail', description: 'Logging of certification data access and sharing' },
+    ],
+    validationLogic: 'Pass requires: Documented data sharing policy, appropriate access controls, audit logging enabled.',
+    passIndicators: ['Policy documented', 'Access controlled', 'Sharing audited'],
+    failIndicators: ['No sharing policy', 'Unrestricted access', 'No audit trail'],
+  },
+
+  // legacy KSI-AFR-04
+  'FRR-VDR': {
+    name: 'Vulnerability Detection and Response',
+    legacyKsiId: 'KSI-AFR-04',
+    summary: 'Validates vulnerability scanning coverage and remediation processes per the FRR-VDR / FRR-VER rules, including the VDR-TFR-PVR Class C remediation matrix.',
+    evidenceTypes: [
+      { name: 'Scan Coverage', description: 'Percentage of assets with active vulnerability scanning' },
+      { name: 'Remediation Timeframes', description: 'Time-to-remediate metrics by PAIN N-rating per VDR-TFR-PVR (Class C)' },
+      { name: 'Scanner Configuration', description: 'Validation of scanner settings and schedules' },
+    ],
+    validationLogic: 'Pass requires: 100% scan coverage and remediation within the VDR-TFR-PVR Class C timeframes for each Potential Agency Impact N-rating (PAIN).',
+    passIndicators: ['Full scan coverage', 'VDR-TFR-PVR timeframes met', 'No overdue critical findings'],
+    failIndicators: ['Scan gaps detected', 'Overdue remediations', 'Missing scanner configuration'],
+  },
+
+  // legacy KSI-AFR-05
+  'FRR-SCN': {
+    name: 'Significant Change Notification',
+    legacyKsiId: 'KSI-AFR-05',
+    summary: 'Validates that significant changes to the cloud service are properly classified (routine recurring / adaptive / transformative), documented, and communicated per FRR-SCN requirements.',
+    evidenceTypes: [
+      { name: 'Change Records', description: 'Documentation of significant changes made to the system' },
+      { name: 'Notification Process', description: 'Process for notifying stakeholders of changes per SCN tier' },
+      { name: 'Impact Assessment', description: 'Security impact analysis for changes' },
+    ],
+    validationLogic: 'Pass requires: All significant changes documented, notifications sent within tier deadlines, impact assessed.',
+    passIndicators: ['Changes documented', 'Stakeholders notified', 'Impact assessed'],
+    failIndicators: ['Undocumented changes', 'Missing notifications', 'No impact analysis'],
+  },
+
+  // legacy KSI-AFR-06
+  'FRR-CCM': {
+    name: 'Collaborative Continuous Monitoring',
+    legacyKsiId: 'KSI-AFR-06',
+    summary: 'Validates collaborative continuous monitoring with agencies and FedRAMP per FRR-CCM, including publication of the Ongoing Certification Report (OCR).',
+    evidenceTypes: [
+      { name: 'Collaboration Framework', description: 'Framework for collaborative monitoring with stakeholders' },
+      { name: 'Shared Dashboards', description: 'Shared visibility into security posture' },
+      { name: 'Ongoing Certification Report', description: 'Ongoing Certification Report (OCR) published on the required cadence' },
+    ],
+    validationLogic: 'Pass requires: Collaboration framework defined, shared visibility provided, OCR published on schedule.',
+    passIndicators: ['Framework defined', 'Dashboards shared', 'OCR current'],
+    failIndicators: ['No collaboration', 'No shared visibility', 'OCR overdue'],
+  },
+
+  // legacy KSI-AFR-07
+  'FRR-SCG': {
+    name: 'Secure Configuration Guide',
+    legacyKsiId: 'KSI-AFR-07',
+    summary: 'Validates that a secure configuration guide is documented, published, and maintained per FRR-SCG so agencies and customers understand how to securely configure the service.',
+    evidenceTypes: [
+      { name: 'Configuration Baselines', description: 'Documented secure configuration baselines and customer guidance' },
+      { name: 'Compliance Scanning', description: 'Automated configuration compliance scanning' },
+      { name: 'Deviation Tracking', description: 'Tracking and approval of configuration deviations' },
+    ],
+    validationLogic: 'Pass requires: Secure configuration guide published, compliance scanning active, deviations tracked.',
+    passIndicators: ['Guide published', 'Scanning active', 'Deviations managed'],
+    failIndicators: ['No guide', 'No compliance scanning', 'Untracked deviations'],
+  },
+
+  // legacy KSI-AFR-08
+  'FRR-AFC': {
+    name: 'Addressing FedRAMP Communication',
+    legacyKsiId: 'KSI-AFR-08',
+    summary: 'Validates maintenance of a dedicated, actively monitored channel for FedRAMP communications per FRR-AFC (formerly FedRAMP Security Inbox).',
+    evidenceTypes: [
+      { name: 'Inbox Configuration', description: 'Dedicated address for FedRAMP security communications' },
+      { name: 'Monitoring Process', description: 'Process for monitoring and responding to inbox messages' },
+      { name: 'Response SLAs', description: 'Defined timeframes for responding to communications' },
+    ],
+    validationLogic: 'Pass requires: Dedicated inbox configured, actively monitored, response SLAs defined.',
+    passIndicators: ['Inbox active', 'Monitoring in place', 'SLAs met'],
+    failIndicators: ['No dedicated inbox', 'Unmonitored', 'Slow responses'],
+  },
+
+  // legacy KSI-AFR-09 (FRR-SDR + FRR-IVV)
+  'FRR-SDR': {
+    name: 'Security Decision Record / Independent Verification and Validation',
+    legacyKsiId: 'KSI-AFR-09',
+    summary: 'Validates persistent security assessment and validation processes per FRR-SDR (Security Decision Record) and FRR-IVV (Independent Verification and Validation).',
+    evidenceTypes: [
+      { name: 'Continuous Monitoring', description: 'Automated continuous security monitoring tools' },
+      { name: 'Security Decision Records', description: 'Persistent record of security decisions replacing the traditional SSP' },
+      { name: 'Independent Verification', description: 'Independent verification and validation results' },
+    ],
+    validationLogic: 'Pass requires: Continuous monitoring active, security decision records maintained, independent verification performed.',
+    passIndicators: ['Monitoring active', 'Records maintained', 'IV&V performed'],
+    failIndicators: ['No continuous monitoring', 'Missing decision records', 'No independent verification'],
+  },
+
+  // legacy KSI-AFR-10
+  'FRR-IEC': {
+    name: 'Incident Evaluation and Communication',
+    legacyKsiId: 'KSI-AFR-10',
+    summary: 'Validates documented procedures for evaluating and communicating security incidents to affected parties and FedRAMP per FRR-IEC (formerly Incident Communication Procedures).',
+    evidenceTypes: [
+      { name: 'Communication Plan', description: 'Documented incident communication procedures' },
+      { name: 'Contact Lists', description: 'Current contact information for incident notifications' },
+      { name: 'Timeline Requirements', description: 'Defined timeframes for incident reporting' },
+    ],
+    validationLogic: 'Pass requires: Documented communication plan, current contacts, defined reporting timelines.',
+    passIndicators: ['Plan documented', 'Contacts current', 'Timelines defined'],
+    failIndicators: ['No communication plan', 'Stale contacts', 'Undefined timelines'],
+  },
+
+  // legacy KSI-AFR-11
+  'FRR-CMU': {
+    name: 'Cryptographic Module Use',
+    legacyKsiId: 'KSI-AFR-11',
+    summary: 'Validates that all cryptographic modules protecting federal data comply with FIPS 140-2/140-3 requirements per FRR-CMU.',
+    evidenceTypes: [
+      { name: 'S3 Encryption', description: 'Server-side encryption configuration for all S3 buckets (AES-256 or KMS)' },
+      { name: 'RDS Encryption', description: 'Storage encryption status for all RDS database instances' },
+      { name: 'KMS Key Policy', description: 'Key management configuration and rotation policies' },
+      { name: 'TLS Configuration', description: 'Load balancer listener TLS versions and cipher suites' },
+      { name: 'Crypto Policy', description: 'Organization-wide cryptographic standards documentation' },
+    ],
+    validationLogic: 'Pass requires: All data-at-rest encrypted with FIPS-validated modules, TLS 1.2+ for data-in-transit, KMS keys with appropriate policies.',
+    passIndicators: ['All storage encrypted', 'TLS 1.2+ enforced', 'KMS keys properly configured', 'FIPS-validated algorithms'],
+    failIndicators: ['Unencrypted storage', 'Weak TLS versions', 'Missing key rotation', 'Non-FIPS algorithms'],
+  },
 };
 
 /**
@@ -858,6 +839,17 @@ const KSI_EVIDENCE_NARRATIVES = {
  */
 export const getKsiNarrative = (ksiId) => {
   return KSI_EVIDENCE_NARRATIVES[ksiId] || null;
+};
+
+/**
+ * Get narrative for an FRR rule family. Tolerates compound keys as published
+ * in frr_summary (e.g. "FRR-FRC (FRC-CSX 20x subset)" or "FRR-SDR + FRR-IVV").
+ */
+export const getFrrNarrative = (frrFamily) => {
+  if (!frrFamily) return null;
+  if (FRR_COMPLIANCE_NARRATIVES[frrFamily]) return FRR_COMPLIANCE_NARRATIVES[frrFamily];
+  const match = String(frrFamily).match(/FRR-[A-Z]{3}/);
+  return match ? FRR_COMPLIANCE_NARRATIVES[match[0]] || null : null;
 };
 
 /**
@@ -874,4 +866,5 @@ export const hasNarrative = (ksiId) => {
   return ksiId in KSI_EVIDENCE_NARRATIVES;
 };
 
+export { FRR_COMPLIANCE_NARRATIVES };
 export default KSI_EVIDENCE_NARRATIVES;

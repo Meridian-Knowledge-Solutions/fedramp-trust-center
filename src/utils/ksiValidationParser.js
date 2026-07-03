@@ -43,40 +43,39 @@ const SERVICE_PATTERNS = {
   'curl': { name: 'API/HTTP', icon: 'globe', category: 'Documentation' },
 };
 
-// KSI Category mapping (FedRAMP 20x Phase Two - excludes retired KSIs)
+// KSI Category mapping (FedRAMP Consolidated Rules for 2026 (CR26) — 10 families,
+// 46 mnemonic indicators). Legacy KSI-AFR was promoted to FRR rule families and
+// KSI-TPR became KSI-SCR (Supply Chain Risk).
 const KSI_CATEGORIES = {
-  // Authorization by FedRAMP (KSI-AFR-01 through KSI-AFR-11)
-  'KSI-AFR': { name: 'Authorization by FedRAMP', theme: 'Compliance' },
-  
-  // Cybersecurity Education (KSI-CED-01 through KSI-CED-04)
+  // Cybersecurity Education (KSI-CED-RAT)
   'KSI-CED': { name: 'Cybersecurity Education', theme: 'Training' },
-  
-  // Change Management (KSI-CMT-01 through KSI-CMT-04, CMT-05 retired)
+
+  // Change Management (LMC, RMV, VTD, RVP)
   'KSI-CMT': { name: 'Change Management', theme: 'Operations' },
-  
-  // Cloud Native Architecture (KSI-CNA-01 through KSI-CNA-08)
+
+  // Cloud Native Architecture (RNT, MAT, ULN, DFP, RVP, OFA, IBP, EIS)
   'KSI-CNA': { name: 'Cloud Native Architecture', theme: 'Architecture' },
-  
-  // Identity and Access Management (KSI-IAM-01 through KSI-IAM-07)
+
+  // Identity and Access Management (APM, SNU, JIT, ELP, SUS, AAM)
   'KSI-IAM': { name: 'Identity and Access Management', theme: 'Identity' },
-  
-  // Incident Response (KSI-INR-01 through KSI-INR-03)
+
+  // Incident Response (RIR, RPI, AAR)
   'KSI-INR': { name: 'Incident Response', theme: 'Security' },
-  
-  // Monitoring, Logging, and Auditing (MLA-01, 02, 05, 07, 08 - others retired)
+
+  // Monitoring, Logging, and Auditing (OSM, RVL, EVC, LET, ALA)
   'KSI-MLA': { name: 'Monitoring, Logging, and Auditing', theme: 'Observability' },
-  
-  // Policy and Inventory (PIY-01, 03, 04, 06, 08 - others retired)
+
+  // Policy and Inventory (GIV, RVD, RSD, RIS, RES)
   'KSI-PIY': { name: 'Policy and Inventory', theme: 'Governance' },
-  
-  // Recovery Planning (KSI-RPL-01 through KSI-RPL-04)
+
+  // Recovery Planning (RRO, ARP, ABO, TRC)
   'KSI-RPL': { name: 'Recovery Planning', theme: 'Resilience' },
-  
-  // Service Configuration (SVC-01, 02, 04, 05, 06, 08, 09, 10 - others retired)
+
+  // Supply Chain Risk (MIT, MON) — formerly KSI-TPR
+  'KSI-SCR': { name: 'Supply Chain Risk', theme: 'Supply Chain' },
+
+  // Service Configuration (EIS, SIN, ACM, VRI, ASM, PRR, VCM, RUD)
   'KSI-SVC': { name: 'Service Configuration', theme: 'Configuration' },
-  
-  // Third-Party Information Resources (TPR-03, 04 - others retired)
-  'KSI-TPR': { name: 'Third-Party Information Resources', theme: 'Supply Chain' },
 };
 
 /**
@@ -261,7 +260,7 @@ export const parseCommandExecutions = (executions) => {
 export const getKsiCategory = (ksiId) => {
   if (!ksiId) return { name: 'Unknown', theme: 'Other' };
   
-  // Extract prefix like "KSI-AAA" from "KSI-AAA-01"
+  // Extract prefix like "KSI-AAA" from "KSI-AAA-XXX"
   const parts = ksiId.split('-');
   if (parts.length >= 2) {
     const prefix = `${parts[0]}-${parts[1]}`;
