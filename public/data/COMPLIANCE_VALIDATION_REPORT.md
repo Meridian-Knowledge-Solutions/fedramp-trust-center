@@ -1,7 +1,7 @@
 # FedRAMP Compliance Validation Report
 
 **Report Type:** System 2.5 Validation Integrity Report  
-**Generated:** 2026-07-02T21:02:54.241476  
+**Generated:** 2026-07-06T13:52:11.182842  
 **Purpose:** 3PAO audit readiness and technical validation verification
 
 ---
@@ -10,18 +10,18 @@
 
 ### Validation Results
 - **Total KSIs Validated:** 61
-- **Passed:** 55 ✅
-- **Failed:** 6 ❌
-- **Overall Pass Rate:** 90.2%
+- **Passed:** 54 ✅
+- **Failed:** 7 ❌
+- **Overall Pass Rate:** 88.5%
 
 ### Temporal Consistency Analysis
-- **Average Consistency Score:** 99.7%
+- **Average Consistency Score:** 100.0%
 - **Recent Validations Analyzed:** 10
 - **Consistency Status:** EXCELLENT
 
 ### Execution Quality Analysis
-- **Technical Issues Detected:** 4
-- **Execution Quality Score:** 80%
+- **Technical Issues Detected:** 5
+- **Execution Quality Score:** 75%
 - **Automation Status:** WARNING
 
 ---
@@ -30,25 +30,25 @@
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Integrity Score** | 89.8% | ✔️ Good |
+| **Integrity Score** | 87.5% | ✔️ Good |
 | **Validation Determinism** | verified | ✅ |
 | **Technical Correctness** | issues_detected | ⚠️ |
-| **Audit Readiness** | ready | ✅ Ready |
+| **Audit Readiness** | needs_review | ⚠️ Needs Review |
 
 ---
 
 ## Interpretation
 
 ### Temporal Consistency
-The temporal consistency results (99.7%, across 10 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
+The temporal consistency results (100.0%, across 10 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
 
 ### Execution Quality
-The execution quality score of 80% shows technical issues detected: 4 automation failures require investigation.
+The execution quality score of 75% shows technical issues detected: 5 automation failures require investigation.
 
 ### Audit Readiness
-Overall audit readiness status: **READY**
+Overall audit readiness status: **NEEDS_REVIEW**
 
-✅ The validation system is ready for 3PAO audit. Results are consistent, technically sound, and mathematically verified.
+⚠️ The validation system requires review before 3PAO audit. Address temporal consistency or technical issues identified above.
 
 ---
 
