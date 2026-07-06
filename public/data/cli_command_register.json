@@ -53,8 +53,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CED-01/training_register.json",
-      "evidence_v2/KSI-CED-01/training_curriculum.json"
+      "evidence_v2/KSI-CED-RAT/training_register.json",
+      "evidence_v2/KSI-CED-RAT/training_curriculum.json"
     ],
     "implementation_summary": "Training tracked via GitOps - employees commit signed attestations to training/register.json after completing security awareness modules. CTF-style challenge tokens prove active engagement.",
     "pass_criteria": "PASS if: The training/register.json file exists in CodeCommit containing at least one signed attestation entry with a decoded challenge token, AND the training/security-refresh.md curriculum document exists.",
@@ -100,11 +100,11 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CMT-01/trails.json",
-      "evidence_v2/KSI-CMT-01/event_selectors.json",
-      "evidence_v2/KSI-CMT-01/config_status.json",
-      "evidence_v2/KSI-CMT-01/change_policy.json",
-      "evidence_v2/KSI-CMT-01/s3_data_event_selectors.json"
+      "evidence_v2/KSI-CMT-LMC/trails.json",
+      "evidence_v2/KSI-CMT-LMC/event_selectors.json",
+      "evidence_v2/KSI-CMT-LMC/config_status.json",
+      "evidence_v2/KSI-CMT-LMC/change_policy.json",
+      "evidence_v2/KSI-CMT-LMC/s3_data_event_selectors.json"
     ],
     "implementation_summary": "All modifications logged via CloudTrail (management events) and AWS Config (resource state). Change management policy requires Terraform-only changes with PR approval.",
     "pass_criteria": "PASS if: At least one CloudTrail trail exists and is logging, event selectors are configured to record Management Events (Read/Write API calls), AWS Config recorder is actively recording (recording=true), AND the change-management-policy.md exists in CodeCommit.",
@@ -135,11 +135,11 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CMT-02/terraform_buckets.json",
-      "evidence_v2/KSI-CMT-02/lock_tables.json",
-      "evidence_v2/KSI-CMT-02/managed_instances.json",
-      "evidence_v2/KSI-CMT-02/iac_policy.json",
-      "evidence_v2/KSI-CMT-02/pipeline_executions.json"
+      "evidence_v2/KSI-CMT-RMV/terraform_buckets.json",
+      "evidence_v2/KSI-CMT-RMV/lock_tables.json",
+      "evidence_v2/KSI-CMT-RMV/managed_instances.json",
+      "evidence_v2/KSI-CMT-RMV/iac_policy.json",
+      "evidence_v2/KSI-CMT-RMV/pipeline_executions.json"
     ],
     "implementation_summary": "Infrastructure changes execute exclusively through Terraform: version-controlled configuration, S3 state bucket (versioned) with DynamoDB state locking, peer-reviewed via GitHub pull requests. Application deployment to EC2 is currently a documented manual change-management procedure (see governance/procedures/change-management-procedure.md); automation via AWS Systems Manager (SSM) is on the roadmap and this KSI's evidence will incorporate SSM deployment execution data when it lands. No console changes permitted in production.",
     "pass_criteria": "PASS if: infrastructure changes are evidenced as version-controlled immutable redeployment \u2014 the SCN change history records Terraform-driven changes, running EC2 instances are present in the boundary, AND the configuration-management policy mandating Terraform-managed immutable infrastructure exists. (Terraform state versioning lives in the cross-account mks-states bucket; the version-controlled change path is evidenced git-natively.)",
@@ -164,8 +164,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CMT-04/cm_procedure.json",
-      "evidence_v2/KSI-CMT-04/state_history.json"
+      "evidence_v2/KSI-CMT-RVP/cm_procedure.json",
+      "evidence_v2/KSI-CMT-RVP/state_history.json"
     ],
     "implementation_summary": "Change management effectiveness measured via Terraform state version history and CloudTrail event analysis. All changes traceable to specific PRs and approvers.",
     "pass_criteria": "PASS if: The change-management-procedure.md document exists in CodeCommit, AND the Terraform state file exists in S3 with version history proving sequential, tracked infrastructure changes.",
@@ -201,10 +201,10 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CMT-03/config_recorder.json",
-      "evidence_v2/KSI-CMT-03/active_rules.json",
-      "evidence_v2/KSI-CMT-03/checkov_scan_summary.json",
-      "evidence_v2/KSI-CMT-03/sdlc_policy.json"
+      "evidence_v2/KSI-CMT-VTD/config_recorder.json",
+      "evidence_v2/KSI-CMT-VTD/active_rules.json",
+      "evidence_v2/KSI-CMT-VTD/checkov_scan_summary.json",
+      "evidence_v2/KSI-CMT-VTD/sdlc_policy.json"
     ],
     "implementation_summary": "Changes validated by Checkov scans in CI pipeline before deployment. AWS Config rules provide continuous drift detection post-deployment.",
     "pass_criteria": "PASS if: AWS Config recorder is actively recording, at least one active Config Rule exists enforcing security policies on live resources, AND the sdlc-policy.md mandating automated testing (Checkov) exists in CodeCommit.",
@@ -234,9 +234,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CNA-04/terraform_history.json",
-      "evidence_v2/KSI-CNA-04/restricted_sgs.json",
-      "evidence_v2/KSI-CNA-04/custom_roles.json"
+      "evidence_v2/KSI-CNA-DFP/terraform_history.json",
+      "evidence_v2/KSI-CNA-DFP/restricted_sgs.json",
+      "evidence_v2/KSI-CNA-DFP/custom_roles.json"
     ],
     "implementation_summary": "Immutable infrastructure via Terraform. EC2 instances replaced (not modified) on updates. IAM roles follow least-privilege with no wildcard permissions.",
     "pass_criteria": "PASS if: A Terraform state file exists in S3 (proving IaC management), no security groups allow unrestricted 'All Traffic' protocol (-1) to 0.0.0.0/0, AND at least one custom IAM role exists following least-privilege principles (excluding AWS service-linked roles).",
@@ -270,8 +270,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CNA-08/securityhub_standards.json",
-      "evidence_v2/KSI-CNA-08/guardduty_detectors.json"
+      "evidence_v2/KSI-CNA-EIS/securityhub_standards.json",
+      "evidence_v2/KSI-CNA-EIS/guardduty_detectors.json"
     ],
     "implementation_summary": "Security posture assessed by SecurityHub (CIS/FedRAMP standards), GuardDuty (threat detection), AWS Config (compliance rules), and Inspector (vulnerability scanning).",
     "pass_criteria": "PASS if: At least one Security Hub compliance standard is enabled (CIS, FedRAMP, PCI), at least one GuardDuty detector is active, at least one AWS Config recorder exists, AND at least one resource is covered by Amazon Inspector scanning.",
@@ -315,8 +315,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CNA-07/lambda_functions.json",
-      "evidence_v2/KSI-CNA-07/ec2_instances.json"
+      "evidence_v2/KSI-CNA-IBP/lambda_functions.json",
+      "evidence_v2/KSI-CNA-IBP/ec2_instances.json"
     ],
     "implementation_summary": "Cloud-native architecture: 21 Lambda functions, 1 managed RDS, API Gateway. Legacy EC2 (5 instances) hardened with IMDSv2, no public IPs, VPC-only Lambdas.",
     "pass_criteria": "PASS if: The ratio of managed services (Lambda functions, RDS, API Gateway, ALB, ASG) to legacy EC2 instances demonstrates cloud-native adoption. At least 2 categories of managed services must be in use alongside EC2.",
@@ -345,9 +345,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CNA-02/private_subnets.json",
-      "evidence_v2/KSI-CNA-02/tiered_sgs.json",
-      "evidence_v2/KSI-CNA-02/private_dbs.json"
+      "evidence_v2/KSI-CNA-MAT/private_subnets.json",
+      "evidence_v2/KSI-CNA-MAT/tiered_sgs.json",
+      "evidence_v2/KSI-CNA-MAT/private_dbs.json"
     ],
     "implementation_summary": "Attack surface minimized via private subnets for compute/database, Security Group references (no IP-based rules), and RDS PubliclyAccessible=false.",
     "pass_criteria": "PASS if: At least one private subnet exists (MapPublicIpOnLaunch=false), security groups reference other security groups (tiered access, not broad IP ranges), AND all RDS instances have PubliclyAccessible=false.",
@@ -376,9 +376,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CNA-06/multi_az_lbs.json",
-      "evidence_v2/KSI-CNA-06/multi_az_rds.json",
-      "evidence_v2/KSI-CNA-06/backup_plans.json"
+      "evidence_v2/KSI-CNA-OFA/multi_az_lbs.json",
+      "evidence_v2/KSI-CNA-OFA/multi_az_rds.json",
+      "evidence_v2/KSI-CNA-OFA/backup_plans.json"
     ],
     "implementation_summary": "High availability via Multi-AZ ALB, Multi-AZ RDS, and AWS Backup plans with 24-hour RPO. RTO target: 4 hours for full recovery.",
     "pass_criteria": "PASS if: At least one load balancer spans multiple Availability Zones, at least one RDS instance has MultiAZ=true for automatic failover, AND at least one AWS Backup plan exists for data recovery.",
@@ -407,9 +407,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CNA-01/default_sg.json",
-      "evidence_v2/KSI-CNA-01/active_sgs.json",
-      "evidence_v2/KSI-CNA-01/nacls.json"
+      "evidence_v2/KSI-CNA-RNT/default_sg.json",
+      "evidence_v2/KSI-CNA-RNT/active_sgs.json",
+      "evidence_v2/KSI-CNA-RNT/nacls.json"
     ],
     "implementation_summary": "Network traffic limited via Security Groups (default SG empty, specific allow-lists only) and NACLs at subnet boundaries. All ingress flows through ALB.",
     "pass_criteria": "PASS if: The default VPC security group exists with no inbound or outbound rules (empty/unused as best practice), at least one TCP-permitting security group exists with specific port restrictions (not 0.0.0.0/0 on all ports), AND at least one network ACL provides subnet-level filtering.",
@@ -449,11 +449,11 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CNA-05/waf_acls.json",
-      "evidence_v2/KSI-CNA-05/shield_lbs.json",
-      "evidence_v2/KSI-CNA-05/route53_zones.json",
-      "evidence_v2/KSI-CNA-05/ses_identities.json",
-      "evidence_v2/KSI-CNA-05/api_gateway_throttle.json"
+      "evidence_v2/KSI-CNA-RVP/waf_acls.json",
+      "evidence_v2/KSI-CNA-RVP/shield_lbs.json",
+      "evidence_v2/KSI-CNA-RVP/route53_zones.json",
+      "evidence_v2/KSI-CNA-RVP/ses_identities.json",
+      "evidence_v2/KSI-CNA-RVP/api_gateway_throttle.json"
     ],
     "implementation_summary": "DDoS protection via AWS Shield Standard (automatic on ALB), WAFv2 Web ACLs, and Route53 anycast. SES handles email with DKIM/SPF validation.",
     "pass_criteria": "PASS if: At least one WAFv2 Web ACL exists (Layer 7 protection), at least one load balancer with Shield Standard provides Layer 3/4 protection, at least one Route53 hosted zone exists (DNS resilience), AND if SES is used, verified identities exist with DKIM/SPF.",
@@ -482,9 +482,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-CNA-03/vpc_endpoints.json",
-      "evidence_v2/KSI-CNA-03/nat_gateways.json",
-      "evidence_v2/KSI-CNA-03/lb_schemes.json"
+      "evidence_v2/KSI-CNA-ULN/vpc_endpoints.json",
+      "evidence_v2/KSI-CNA-ULN/nat_gateways.json",
+      "evidence_v2/KSI-CNA-ULN/lb_schemes.json"
     ],
     "implementation_summary": "Traffic flow enforced via VPC Endpoints (S3, DynamoDB), NAT Gateway for egress, and ALB for ingress. No direct internet access from compute tier.",
     "pass_criteria": "PASS if: At least one VPC endpoint exists (enforcing private connectivity to AWS services like S3/DynamoDB), at least one NAT gateway is available (centralized egress for private subnets), AND at least one load balancer manages ingress traffic.",
@@ -508,8 +508,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-IAM-07/credential_report.csv",
-      "evidence_v2/KSI-IAM-07/stale_roles.json"
+      "evidence_v2/KSI-IAM-AAM/credential_report.csv",
+      "evidence_v2/KSI-IAM-AAM/stale_roles.json"
     ],
     "implementation_summary": "Account lifecycle managed via credential report monitoring. Stale credentials (>90 days unused) flagged for removal. Termination process documented.",
     "pass_criteria": "PASS if: The IAM credential report shows all passwords and access keys are compliant with rotation policies (passwords rotated within 90 days, access keys within 90 days), AND no IAM roles older than 365 days exist without recent usage (no zombie roles).",
@@ -575,8 +575,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-IAM-01/iam_users.json",
-      "evidence_v2/KSI-IAM-01/sso_session_durations.json"
+      "evidence_v2/KSI-IAM-APM/iam_users.json",
+      "evidence_v2/KSI-IAM-APM/sso_session_durations.json"
     ],
     "implementation_summary": "MFA enforced for all human users via AWS Identity Center with FIDO2/WebAuthn support. Break-glass IAM users require hardware tokens.",
     "pass_criteria": "PASS if: All IAM users with active password usage (console access) have MFA enabled, AWS Identity Center is configured as the primary identity platform, AND virtual MFA devices are inventoried with no unprotected human accounts.",
@@ -608,8 +608,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-IAM-05/mfa_types.json",
-      "evidence_v2/KSI-IAM-05/sso_config.json"
+      "evidence_v2/KSI-IAM-ELP/mfa_types.json",
+      "evidence_v2/KSI-IAM-ELP/sso_config.json"
     ],
     "implementation_summary": "Phishing-resistant MFA enforced via AWS Identity Center with FIDO2/WebAuthn support. Virtual MFA devices audited to identify non-compliant tokens. IAM password policy provides hard-fail backstop if MFA is missing.",
     "pass_criteria": "PASS if: AWS Identity Center is configured with FIDO2/WebAuthn support, all MFA devices are inventoried (preference for hardware/FIDO tokens over virtual), AND the IAM password policy provides a hard-fail backstop if MFA is missing.",
@@ -639,9 +639,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-IAM-04/sso_instances.json",
-      "evidence_v2/KSI-IAM-04/legacy_users.json",
-      "evidence_v2/KSI-IAM-04/cross_account_trusts.json"
+      "evidence_v2/KSI-IAM-JIT/sso_instances.json",
+      "evidence_v2/KSI-IAM-JIT/legacy_users.json",
+      "evidence_v2/KSI-IAM-JIT/cross_account_trusts.json"
     ],
     "implementation_summary": "Centralized identity via AWS Identity Center. Legacy IAM users audited and minimized (target: 0 human IAM users).",
     "pass_criteria": "PASS if: AWS Identity Center (SSO) is configured and active, AND the number of IAM users with direct console access (bypassing centralized identity) is zero or minimal (break-glass only).",
@@ -670,8 +670,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-IAM-03/iam_roles.json",
-      "evidence_v2/KSI-IAM-03/credential_report.json"
+      "evidence_v2/KSI-IAM-SNU/iam_roles.json",
+      "evidence_v2/KSI-IAM-SNU/credential_report.json"
     ],
     "implementation_summary": "Service accounts use IAM Roles with no long-lived credentials. Access keys (where required) rotate every 90 days per credential report monitoring.",
     "pass_criteria": "PASS if: All custom IAM roles have trust policies scoped to specific services or accounts (no wildcard principals), service accounts (users without console access) rely on roles or have access keys rotated within 90 days per the credential report.",
@@ -702,8 +702,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-IAM-06/guardduty_detectors.json",
-      "evidence_v2/KSI-IAM-06/response_rules.json"
+      "evidence_v2/KSI-IAM-SUS/guardduty_detectors.json",
+      "evidence_v2/KSI-IAM-SUS/response_rules.json"
     ],
     "implementation_summary": "Automated response to suspicious activity via GuardDuty \u2192 EventBridge \u2192 Lambda chain. High-severity findings trigger automatic credential rotation.",
     "pass_criteria": "PASS if: an enabled EventBridge rule triggers automated response on security events (GuardDuty/SecurityHub/IAM/sign-in), AND the access-control policy document defining the privileged-account review/disable process exists.",
@@ -722,8 +722,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-INR-03/post_mortem_repos.json",
-      "evidence_v2/KSI-INR-03/securityhub_findings.json"
+      "evidence_v2/KSI-INR-AAR/post_mortem_repos.json",
+      "evidence_v2/KSI-INR-AAR/securityhub_findings.json"
     ],
     "implementation_summary": "After-action reports generated via Lambda function and stored in CodeCommit. Lessons learned incorporated into playbook updates.",
     "pass_criteria": "PASS if: At least one GuardDuty detector is active and configured, providing continuous monitoring for post-incident review and lessons learned analysis.",
@@ -749,7 +749,7 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-INR-01/policy_repos.json"
+      "evidence_v2/KSI-INR-RIR/policy_repos.json"
     ],
     "implementation_summary": "IR procedures documented in CodeCommit (security-governance/procedures/). Effectiveness reviewed via tabletop exercises and actual incident metrics.",
     "pass_criteria": "PASS if: the documented incident-response procedure exists and is substantive, AND a periodic effectiveness-review artifact exists evidencing that IR procedures are persistently reviewed.",
@@ -773,8 +773,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-INR-02/security_log_groups.json",
-      "evidence_v2/KSI-INR-02/audit_buckets.json"
+      "evidence_v2/KSI-INR-RPI/security_log_groups.json",
+      "evidence_v2/KSI-INR-RPI/audit_buckets.json"
     ],
     "implementation_summary": "Past incidents logged in CloudWatch Logs and S3 audit buckets. GuardDuty findings provide pattern analysis for recurring threats.",
     "pass_criteria": "PASS if: The incident-response-plan.md document exists in CodeCommit defining response procedures, AND GuardDuty is active with at least one detector providing the finding source for incident triggers.",
@@ -813,7 +813,7 @@
     ],
     "outcome_type": "logging",
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-MLA-08/governance_infrastructure.json"
+      "evidence_v2/KSI-MLA-ALA/governance_infrastructure.json"
     ],
     "implementation_summary": "Log access controlled via S3 bucket policies (security team read-only), KMS encryption, and CloudTrail access logging. No broad log access.",
     "pass_criteria": "PASS if: the audit/read-only IAM policy governing log-data access is least-privilege (no Action:* full-admin grant and no write actions on Resource:*), evidencing role-based, scoped access to log data.",
@@ -839,8 +839,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-MLA-05/terraform_artifacts.txt",
-      "evidence_v2/KSI-MLA-05/iac_repos.json"
+      "evidence_v2/KSI-MLA-EVC/terraform_artifacts.txt",
+      "evidence_v2/KSI-MLA-EVC/iac_repos.json"
     ],
     "implementation_summary": "IaC evaluated via Checkov in CI pipeline. Terraform plans reviewed pre-apply. Config rules detect drift post-deployment.",
     "pass_criteria": "PASS if: the live Checkov IaC scan summary shows the scan completed with resources scanned (infrastructure-as-code actively evaluated/tested), AND the SDLC policy documenting IaC review and automated testing exists.",
@@ -875,10 +875,10 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-MLA-07/config_recorders.json",
-      "evidence_v2/KSI-MLA-07/cloudtrail_trails.json",
-      "evidence_v2/KSI-MLA-07/security_logs.json",
-      "evidence_v2/KSI-MLA-07/rds_audit_log_exports.json"
+      "evidence_v2/KSI-MLA-LET/config_recorders.json",
+      "evidence_v2/KSI-MLA-LET/cloudtrail_trails.json",
+      "evidence_v2/KSI-MLA-LET/security_logs.json",
+      "evidence_v2/KSI-MLA-LET/rds_audit_log_exports.json"
     ],
     "implementation_summary": "Resource inventory maintained by AWS Config (continuous recording of all supported resource types). Event types defined in CloudTrail event selectors (multi-region, global service events). Security log groups capture audit, incident, VPC flow, and compliance data with 365-731 day retention.",
     "pass_criteria": "PASS if: At least one CloudTrail trail is actively logging, at least one CloudWatch Log Group exists for log retention, AND the log-management-policy.md document exists in CodeCommit defining retention requirements.",
@@ -920,11 +920,11 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-MLA-01/cloudtrail_config.json",
-      "evidence_v2/KSI-MLA-01/trail_status.json",
-      "evidence_v2/KSI-MLA-01/audit_bucket.json",
-      "evidence_v2/KSI-MLA-01/bucket_logging_coverage.json",
-      "evidence_v2/KSI-MLA-01/alb_access_log_coverage.json"
+      "evidence_v2/KSI-MLA-OSM/cloudtrail_config.json",
+      "evidence_v2/KSI-MLA-OSM/trail_status.json",
+      "evidence_v2/KSI-MLA-OSM/audit_bucket.json",
+      "evidence_v2/KSI-MLA-OSM/bucket_logging_coverage.json",
+      "evidence_v2/KSI-MLA-OSM/alb_access_log_coverage.json"
     ],
     "implementation_summary": "All activity logged to CloudTrail (multi-region, S3 delivery). VPC Flow Logs capture network traffic. Log integrity via S3 Object Lock.",
     "pass_criteria": "PASS if: At least one CloudWatch Log Group exists for centralized logging, CloudTrail is enabled for API audit logging, AND at least one CloudWatch alarm exists to monitor log-derived metrics.",
@@ -953,9 +953,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-MLA-02/metric_filters.json",
-      "evidence_v2/KSI-MLA-02/security_insights.json",
-      "evidence_v2/KSI-MLA-02/cloudwatch_alarms.json"
+      "evidence_v2/KSI-MLA-RVL/metric_filters.json",
+      "evidence_v2/KSI-MLA-RVL/security_insights.json",
+      "evidence_v2/KSI-MLA-RVL/cloudwatch_alarms.json"
     ],
     "implementation_summary": "Log review automated via CloudWatch Metric Filters (root login, unauthorized API calls), SecurityHub Insights for trend analysis, and CloudWatch Alarms for threshold-based alerting on failed logins, log delivery failures, retention violations, and security group changes.",
     "pass_criteria": "PASS if: At least one CloudWatch Logs metric filter exists for automated log scanning patterns, at least one CloudWatch Log Group exists for log aggregation, AND at least one CloudWatch alarm is tied to log metric filters for automated alerting.",
@@ -990,9 +990,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-PIY-01/config_recorders.json",
-      "evidence_v2/KSI-PIY-01/delivery_channels.json",
-      "evidence_v2/KSI-PIY-01/discovered_resource_counts.json"
+      "evidence_v2/KSI-PIY-GIV/config_recorders.json",
+      "evidence_v2/KSI-PIY-GIV/delivery_channels.json",
+      "evidence_v2/KSI-PIY-GIV/discovered_resource_counts.json"
     ],
     "implementation_summary": "Real-time inventory via AWS Config with automatic discovery. SSM Inventory provides OS-level software lists. Delivery to S3 for analysis.",
     "pass_criteria": "PASS if: AWS Systems Manager reports managed instances (SSM agent active), an SSM inventory association exists for asset tracking, AND SSM inventory data contains software/OS information for at least one instance.",
@@ -1021,8 +1021,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-PIY-08/paid_security_tools.json",
-      "evidence_v2/KSI-PIY-08/budget_controls.json"
+      "evidence_v2/KSI-PIY-RES/paid_security_tools.json",
+      "evidence_v2/KSI-PIY-RES/budget_controls.json"
     ],
     "implementation_summary": "Executive support demonstrated via paid security tools (GuardDuty, SecurityHub, Inspector) and dedicated security budget tracked in AWS Budgets.",
     "pass_criteria": "PASS if: A dedicated security-spend S3 bucket or prefix exists, the security-budget-policy.md document exists in CodeCommit, AND at least one AWS Budget exists to track and limit security-related spending.",
@@ -1047,8 +1047,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-PIY-06/monitoring_plan.json",
-      "evidence_v2/KSI-PIY-06/security_hub_standards.json"
+      "evidence_v2/KSI-PIY-RIS/monitoring_plan.json",
+      "evidence_v2/KSI-PIY-RIS/security_hub_standards.json"
     ],
     "implementation_summary": "Security investment effectiveness measured via SecurityHub scores, GuardDuty finding trends, and KSI pass rates over time.",
     "pass_criteria": "PASS if: At least one S3 bucket has lifecycle rules configured for data retention management, AND the data-retention-policy.md document exists in CodeCommit defining retention schedules and disposal procedures.",
@@ -1074,8 +1074,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-PIY-04/sdlc_policy.json",
-      "evidence_v2/KSI-PIY-04/security_builds.json"
+      "evidence_v2/KSI-PIY-RSD/sdlc_policy.json",
+      "evidence_v2/KSI-PIY-RSD/security_builds.json"
     ],
     "implementation_summary": "Secure SDLC enforced via GitHub PR requirements, Checkov scanning, and CodeBuild security projects. CISA Secure by Design principles documented.",
     "pass_criteria": "PASS if: The compliance S3 bucket enforces server-side encryption (SSE-S3 or SSE-KMS), AND the data-protection-policy.md document exists in CodeCommit defining encryption requirements for data at rest and in transit.",
@@ -1095,7 +1095,7 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-PIY-03/vdp_files.json"
+      "evidence_v2/KSI-PIY-RVD/vdp_files.json"
     ],
     "implementation_summary": "Vulnerability Disclosure Policy (VDP) published at trust.meridianks.com/security.txt and in CodeCommit governance repo.",
     "pass_criteria": "PASS if: The data-classification-policy.md document exists in CodeCommit defining data handling categories, sensitivity levels, and handling requirements for federal data.",
@@ -1125,8 +1125,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-RPL-03/restore_jobs.json",
-      "evidence_v2/KSI-RPL-03/dr_test_report.json"
+      "evidence_v2/KSI-RPL-ABO/restore_jobs.json",
+      "evidence_v2/KSI-RPL-ABO/dr_test_report.json"
     ],
     "implementation_summary": "Backup alignment validated via quarterly restore tests. Restore jobs documented with duration metrics. Current success rate: 92.9%.",
     "pass_criteria": "PASS if: At least one restore job has been successfully executed (proving recovery testing), AND the disaster-recovery-test-plan.md document exists in CodeCommit defining testing procedures and schedules.",
@@ -1151,8 +1151,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-RPL-02/dr_plan.json",
-      "evidence_v2/KSI-RPL-02/completed_jobs.json"
+      "evidence_v2/KSI-RPL-ARP/dr_plan.json",
+      "evidence_v2/KSI-RPL-ARP/completed_jobs.json"
     ],
     "implementation_summary": "Recovery plan alignment validated via successful backup job completion (203 jobs tracked). Failed jobs trigger alerts for review.",
     "pass_criteria": "PASS if: The disaster-recovery-plan.md or equivalent recovery plan exists in CodeCommit, AND AWS Backup reports at least one completed backup job proving recovery capability.",
@@ -1182,8 +1182,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-RPL-01/dr_plan.json",
-      "evidence_v2/KSI-RPL-01/backup_plans.json"
+      "evidence_v2/KSI-RPL-RRO/dr_plan.json",
+      "evidence_v2/KSI-RPL-RRO/backup_plans.json"
     ],
     "implementation_summary": "RTO/RPO defined in disaster-recovery-plan.md: RPO=24hrs, RTO=4hrs. AWS Backup enforces daily backups with 30-day retention.",
     "pass_criteria": "PASS if: At least one AWS Backup vault exists for recovery point storage, AND at least one backup plan is configured with defined backup rules and schedules.",
@@ -1213,8 +1213,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-RPL-04/ir_test_report.json",
-      "evidence_v2/KSI-RPL-04/restore_evidence.json"
+      "evidence_v2/KSI-RPL-TRC/ir_test_report.json",
+      "evidence_v2/KSI-RPL-TRC/restore_evidence.json"
     ],
     "implementation_summary": "Contingency testing via tabletop exercises and actual restore operations. IR test reports stored in CodeCommit with remediation tracking.",
     "pass_criteria": "PASS if: The incident-response-communications.md or equivalent continuity document exists in CodeCommit, AND at least one restore job has been executed proving operational recovery capability during incidents.",
@@ -1310,10 +1310,10 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-SVC-04/terraform_buckets.json",
-      "evidence_v2/KSI-SVC-04/lock_tables.json",
-      "evidence_v2/KSI-SVC-04/config_policy.json",
-      "evidence_v2/KSI-SVC-04/instance_patch_states.json"
+      "evidence_v2/KSI-SVC-ACM/terraform_buckets.json",
+      "evidence_v2/KSI-SVC-ACM/lock_tables.json",
+      "evidence_v2/KSI-SVC-ACM/config_policy.json",
+      "evidence_v2/KSI-SVC-ACM/instance_patch_states.json"
     ],
     "implementation_summary": "Configuration management automated via Terraform with state stored in S3 ([tf-state-bucket]) and DynamoDB state locking for concurrency control. Configuration management policy in CodeCommit mandates IaC-only changes.",
     "pass_criteria": "PASS if: A Terraform state S3 bucket exists with versioning enabled, a DynamoDB lock table exists for state locking, AND at least one running EC2 instance is managed via Terraform.",
@@ -1365,11 +1365,11 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-SVC-06/kms_keys.json",
-      "evidence_v2/KSI-SVC-06/rotated_secrets.json",
-      "evidence_v2/KSI-SVC-06/acm_certs.json",
-      "evidence_v2/KSI-SVC-06/cert_expiry.json",
-      "evidence_v2/KSI-SVC-06/secret_rotation.json"
+      "evidence_v2/KSI-SVC-ASM/kms_keys.json",
+      "evidence_v2/KSI-SVC-ASM/rotated_secrets.json",
+      "evidence_v2/KSI-SVC-ASM/acm_certs.json",
+      "evidence_v2/KSI-SVC-ASM/cert_expiry.json",
+      "evidence_v2/KSI-SVC-ASM/secret_rotation.json"
     ],
     "implementation_summary": "Cryptographic operations use AWS KMS with automatic key rotation (annual). Certificate management via ACM with auto-renewal.",
     "pass_criteria": "PASS if: At least one KMS key exists for secrets encryption, Secrets Manager contains at least one secret with rotation configured (RotationEnabled=true), AND the secrets-management-policy.md exists in CodeCommit.",
@@ -1399,9 +1399,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-SVC-01/inspector_status.json",
-      "evidence_v2/KSI-SVC-01/patch_baselines.json",
-      "evidence_v2/KSI-SVC-01/vm_policy.json"
+      "evidence_v2/KSI-SVC-EIS/inspector_status.json",
+      "evidence_v2/KSI-SVC-EIS/patch_baselines.json",
+      "evidence_v2/KSI-SVC-EIS/vm_policy.json"
     ],
     "implementation_summary": "Continuous improvement via Inspector findings \u2192 SSM Patch Manager remediation. Custom patch baselines for security-critical updates.",
     "pass_criteria": "PASS if: AWS SSM Patch Manager reports compliance data for managed instances, at least one custom patch baseline exists (tailored beyond defaults), AND the patch-management-policy.md document exists in CodeCommit.",
@@ -1432,9 +1432,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-SVC-08/lifecycle_rules.json",
-      "evidence_v2/KSI-SVC-08/kms_keys.json",
-      "evidence_v2/KSI-SVC-08/sanitization_policy.json"
+      "evidence_v2/KSI-SVC-PRR/lifecycle_rules.json",
+      "evidence_v2/KSI-SVC-PRR/kms_keys.json",
+      "evidence_v2/KSI-SVC-PRR/sanitization_policy.json"
     ],
     "implementation_summary": "Residual data removal automated via S3 Lifecycle Policies (automatic expiration of temporary data), KMS key management (enabling crypto-shredding of encrypted backups), and a formal Data Sanitization Policy defining destruction procedures.",
     "pass_criteria": "PASS if: S3 lifecycle rules exist on the compliance bucket for automated data tiering/expiration, S3 versioning is enabled on the compliance bucket, AND the data-lifecycle-policy.md exists in CodeCommit.",
@@ -1464,9 +1464,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-SVC-10/sanitization_policy.json",
-      "evidence_v2/KSI-SVC-10/retention_plans.json",
-      "evidence_v2/KSI-SVC-10/kms_destruction_keys.json"
+      "evidence_v2/KSI-SVC-RUD/sanitization_policy.json",
+      "evidence_v2/KSI-SVC-RUD/retention_plans.json",
+      "evidence_v2/KSI-SVC-RUD/kms_destruction_keys.json"
     ],
     "implementation_summary": "Data removal capabilities validated via Data Sanitization Policy (defining promptly SLA and procedures), AWS Backup Plans with automated retention/expiration rules, and KMS keys enabling crypto-shredding of data from immutable backups.",
     "pass_criteria": "PASS if: At least one IAM role has an attached permissions boundary, at least one SCP or IAM policy enforces service restrictions, AND the least-privilege-policy.md exists in CodeCommit.",
@@ -1507,8 +1507,8 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-SVC-02/acm_certs.json",
-      "evidence_v2/KSI-SVC-02/encryption_policy.json"
+      "evidence_v2/KSI-SVC-SIN/acm_certs.json",
+      "evidence_v2/KSI-SVC-SIN/encryption_policy.json"
     ],
     "implementation_summary": "Network traffic encryption enforced via ACM-managed TLS certificates on ALB and CloudFront distributions. Encryption policy documented in CodeCommit governance repo. All external-facing endpoints require HTTPS.",
     "pass_criteria": "PASS if: S3 Block Public Access is enabled at the account level (BlockPublicAcls, BlockPublicPolicy, IgnorePublicAcls, RestrictPublicBuckets all true), the compliance bucket blocks public access, S3 access logging is enabled, AND the s3-security-policy.md exists in CodeCommit.",
@@ -1542,9 +1542,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-SVC-09/active_lbs.json",
-      "evidence_v2/KSI-SVC-09/tls_enforcement.json",
-      "evidence_v2/KSI-SVC-09/issued_certs.json"
+      "evidence_v2/KSI-SVC-VCM/active_lbs.json",
+      "evidence_v2/KSI-SVC-VCM/tls_enforcement.json",
+      "evidence_v2/KSI-SVC-VCM/issued_certs.json"
     ],
     "implementation_summary": "Communication authenticity and integrity validated via HTTPS/TLS enforcement on ALB listeners with specific SSL policies (TLS 1.2+), and ACM-issued certificates proving endpoint identity. All load balancer traffic encrypted in transit.",
     "pass_criteria": "PASS if: At least one ACM certificate exists for TLS termination, load balancer listeners enforce HTTPS/TLS with a secure SSL policy (TLS 1.2+), AND the transport-security-policy.md exists in CodeCommit.",
@@ -1573,9 +1573,9 @@
       }
     ],
     "artifact_evidence_paths": [
-      "evidence_v2/KSI-SVC-05/validated_trails.json",
-      "evidence_v2/KSI-SVC-05/integrity_bucket.json",
-      "evidence_v2/KSI-SVC-05/ssm_integrity.json"
+      "evidence_v2/KSI-SVC-VRI/validated_trails.json",
+      "evidence_v2/KSI-SVC-VRI/integrity_bucket.json",
+      "evidence_v2/KSI-SVC-VRI/ssm_integrity.json"
     ],
     "implementation_summary": "Cryptographic integrity validated via CloudTrail Log File Validation (digest hashing of audit trails), S3 bucket versioning on audit/artifact storage (tamper prevention), and SSM Session Manager for TLS-encrypted, IAM-signed instance access replacing SSH.",
     "pass_criteria": "PASS if: CloudTrail log file validation is enabled (LogFileValidationEnabled=true) ensuring tamper-proof logs, S3 server access logging is enabled on the compliance bucket, AND the audit-logging-policy.md exists in CodeCommit.",
