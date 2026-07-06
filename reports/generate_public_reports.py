@@ -1773,6 +1773,11 @@ class PublicReportGenerator:
         filename = html_filenames.get(report_type)
         if not filename:
             return None
+        # An SCN sample fallback must never publish under the live filename:
+        # downstream bundles copy html/ wholesale into the Trust Center, and a
+        # sample-named scn-report.html would clobber the live notification.
+        if report_type == "scn" and report_data.get("report_type") == "sample":
+            filename = "scn-sample-report.html"
 
         now = self.generation_time
         title_map = {
