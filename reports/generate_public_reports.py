@@ -1082,6 +1082,7 @@ class PublicReportGenerator:
         qar_generator.py) for full Tailwind/Chart.js dashboards, or produces
         a standardized HTML rendering for simpler report types (SCN, VDR).
         """
+        content_hash_prefix = ((report_data.get('integrity') or {}).get('content_hash') or 'N/A')[:16]
         html_filenames = {
             "oar": "oar-report.html",
             "qar": "qar-report.html",
@@ -1151,7 +1152,7 @@ class PublicReportGenerator:
         <div class="max-w-7xl mx-auto px-6 text-center">
             <p class="text-xs text-gray-600 uppercase font-semibold tracking-wide">{title}</p>
             <p class="text-xs text-gray-500 mt-1">Automatically generated per FedRAMP 20x continuous monitoring requirements.</p>
-            <p class="text-xs text-gray-400 mt-1 font-mono">Hash: {(report_data.get('integrity') or {{}}).get('content_hash', 'N/A')[:16]}...</p>
+            <p class="text-xs text-gray-400 mt-1 font-mono">Hash: {content_hash_prefix}...</p>
         </div>
     </footer>
 </body>

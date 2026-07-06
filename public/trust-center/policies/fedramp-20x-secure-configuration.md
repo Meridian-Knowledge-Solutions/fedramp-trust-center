@@ -1,3 +1,30 @@
+# Meridian LMS Secure Configuration Guide (SCG)
+
+**FedRAMP Consolidated Rules for 2026 — FRR-SCG**
+**Version:** 2.0 · **Released:** 2026-07-06 · **Certification Profile:** FedRAMP 20x · Program · Class C
+
+## CR26 rule coverage (FRR-SCG)
+
+| Rule | Force | How this guide satisfies it |
+|---|---|---|
+| SCG-CSO-RSC | MUST | This guide documents every security-relevant configuration setting of the Meridian LMS, including instructions for securely accessing, configuring, operating, and decommissioning top-level administrative access, and explanations of each setting's security implications (see Security Impact columns). |
+| SCG-CSO-AUP | MUST | Instructions for obtaining and using this guide are included in the FedRAMP Certification Package (Trust Center → Policies → Secure Configuration Guide). |
+| SCG-CSO-PUB | SHOULD | Published publicly at the Meridian Trust Center (`/trust-center/policies/fedramp-20x-secure-configuration.md`). |
+| SCG-CSO-SDF | SHOULD | Settings marked "Editable Config: Yes" ship at their recommended secure defaults for newly provisioned sites; deviations are called out in the Description column. |
+| SCG-ENH-MRG | SHOULD | A machine-readable version of this guide is published alongside it (`scg_machine_readable.json`). |
+| SCG-ENH-VRH | SHOULD | Versioning and release history are maintained in the Release History section below. |
+
+**Account terminology (per SCG-CSO-RSC note):** in the Meridian LMS, *top-level administrative accounts* are **Site Administrators**; *privileged accounts* include **Domain Administrators** and **Help Desk Administrators**. The "Security Impact Audience" column identifies which accounts each setting affects.
+
+## Release history (SCG-ENH-VRH)
+
+| Version | Date | Change |
+|---|---|---|
+| 2.0 | 2026-07-06 | Aligned to FedRAMP Consolidated Rules for 2026 (FRR-SCG); added CR26 rule-coverage map, account terminology, and machine-readable companion. |
+| 1.x | 2025 | FedRAMP 20x RSC-era guide (per-setting security configuration tables). |
+
+---
+
 ## Audit
 | Title | Config ID | Client Config Control | Configuration Location | Editable Config | Description HTML | Security Impact Area | Security Impact Sub Area | Security Impact Audience | Security Impact Details HTML |
 |---|---|---|---|---|---|---|---|---|---|
