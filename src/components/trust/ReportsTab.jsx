@@ -6,9 +6,9 @@ import { useTrustCenterData } from '../../hooks/useTrustCenterData';
 
 const REPORT_TYPE_CONFIG = {
   vdr: { label: 'VDR', description: 'Vulnerability Detection & Response' },
-  oar: { label: 'OAR', description: 'Ongoing Authorization Report' },
+  oar: { label: 'OCR', description: 'Ongoing Certification Report (OCR)' },
   scn: { label: 'SCN', description: 'Significant Change Notification' },
-  qar: { label: 'QAR', description: 'Quarterly Authorization Review' },
+  qar: { label: 'QAR', description: 'Quarterly Review (FRR-CCM)' },
 };
 
 // Compliance report as a telemetry-console list row.
