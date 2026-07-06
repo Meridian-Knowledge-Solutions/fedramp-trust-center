@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://meridianks.com/fedramp/schemas/qar-v1.0.json",
-  "title": "FedRAMP 20x Quarterly Authorization Review (QAR)",
+  "title": "FedRAMP 20x Quarterly Review (FRR-CCM) (QAR)",
   "description": "Machine-readable schema for Quarterly Authorization Review reports per FRR-CCM-QR requirements.",
   "type": "object",
   "required": [
@@ -17,7 +17,10 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "1.0.0",
+      "enum": [
+        "1.0.0",
+        "2.0.0"
+      ],
       "description": "Version of this QAR schema"
     },
     "report_id": {
@@ -27,25 +30,46 @@
     },
     "report_type": {
       "type": "string",
-      "enum": ["live", "sample"],
+      "enum": [
+        "live",
+        "sample"
+      ],
       "description": "Whether report contains live production data or sample data"
     },
     "provider": {
       "type": "object",
-      "required": ["name", "fedramp_id", "service_name"],
+      "required": [
+        "name",
+        "fedramp_id",
+        "service_name"
+      ],
       "properties": {
-        "name": { "type": "string" },
-        "fedramp_id": { "type": "string" },
-        "service_name": { "type": "string" },
+        "name": {
+          "type": "string"
+        },
+        "fedramp_id": {
+          "type": "string"
+        },
+        "service_name": {
+          "type": "string"
+        },
         "impact_level": {
           "type": "string",
-          "enum": ["Low", "Moderate", "High"]
+          "enum": [
+            "Low",
+            "Moderate",
+            "High"
+          ]
         }
       }
     },
     "reporting_period": {
       "type": "object",
-      "required": ["quarter", "generated_at", "next_review_date"],
+      "required": [
+        "quarter",
+        "generated_at",
+        "next_review_date"
+      ],
       "properties": {
         "quarter": {
           "type": "string",
@@ -66,7 +90,11 @@
     },
     "executive_summary": {
       "type": "object",
-      "required": ["compliance_rate", "total_ksis", "global_status"],
+      "required": [
+        "compliance_rate",
+        "total_ksis",
+        "global_status"
+      ],
       "description": "FRR-CCM-QR-02: High-level quarterly authorization health summary",
       "properties": {
         "compliance_rate": {
@@ -92,14 +120,20 @@
         },
         "global_status": {
           "type": "string",
-          "enum": ["OPERATIONAL", "DEGRADED", "NON_OPERATIONAL"],
+          "enum": [
+            "OPERATIONAL",
+            "DEGRADED",
+            "NON_OPERATIONAL"
+          ],
           "description": "Overall system operational status"
         }
       }
     },
     "compliance_trend": {
       "type": "object",
-      "required": ["data_points"],
+      "required": [
+        "data_points"
+      ],
       "description": "Temporal compliance data for the review window",
       "properties": {
         "window_days": {
@@ -111,12 +145,26 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["date", "compliance_rate"],
+            "required": [
+              "date",
+              "compliance_rate"
+            ],
             "properties": {
-              "date": { "type": "string", "format": "date" },
-              "compliance_rate": { "type": "number", "minimum": 0, "maximum": 100 },
-              "total_ksis": { "type": "integer" },
-              "passed_ksis": { "type": "integer" }
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "compliance_rate": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "total_ksis": {
+                "type": "integer"
+              },
+              "passed_ksis": {
+                "type": "integer"
+              }
             }
           },
           "description": "Daily compliance data points"
@@ -128,14 +176,28 @@
       "items": {
         "type": "object",
         "properties": {
-          "scn_id": { "type": "string" },
-          "date": { "type": "string", "format": "date" },
+          "scn_id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
           "tier": {
             "type": "string",
-            "enum": ["routine_recurring", "adaptive", "transformative", "certification_class_change"]
+            "enum": [
+              "routine_recurring",
+              "adaptive",
+              "transformative",
+              "certification_class_change"
+            ]
           },
-          "title": { "type": "string" },
-          "description": { "type": "string" }
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
         }
       },
       "description": "Significant changes during this quarter"
@@ -145,12 +207,23 @@
       "items": {
         "type": "object",
         "properties": {
-          "title": { "type": "string" },
-          "description": { "type": "string" },
-          "target_date": { "type": "string", "format": "date" },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "target_date": {
+            "type": "string",
+            "format": "date"
+          },
           "expected_tier": {
             "type": "string",
-            "enum": ["routine_recurring", "adaptive", "transformative"]
+            "enum": [
+              "routine_recurring",
+              "adaptive",
+              "transformative"
+            ]
           }
         }
       },
@@ -158,38 +231,227 @@
     },
     "compliance_attestations": {
       "type": "object",
-      "required": ["qr_02", "qr_04", "qr_05", "qr_06", "qr_11"],
+      "required": [
+        "CCM-QTR-MTG",
+        "CCM-QTR-SAR",
+        "CCM-QTR-NID",
+        "CCM-QTR-REG",
+        "CCM-QTR-NRD",
+        "CCM-QTR-ACT",
+        "CCM-QTR-RTP",
+        "CCM-QTR-RTR",
+        "CCM-QTR-SCR"
+      ],
       "description": "FRR-CCM-QR requirement attestation status",
       "properties": {
-        "qr_02": {
-          "type": "boolean",
-          "description": "FRR-CCM-QR-02: Quarterly review baseline established and maintained"
+        "CCM-QTR-MTG": {
+          "type": "object",
+          "required": [
+            "description",
+            "compliant"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Verbatim CR26 CCM-QTR rule statement"
+            },
+            "compliant": {
+              "type": "boolean"
+            },
+            "next_date": {
+              "type": "string",
+              "description": "Next Quarterly Review date (CCM-QTR-NRD)"
+            }
+          },
+          "additionalProperties": true
         },
-        "qr_04": {
-          "type": "boolean",
-          "description": "FRR-CCM-QR-04: No irresponsible disclosure of sensitive information"
+        "CCM-QTR-SAR": {
+          "type": "object",
+          "required": [
+            "description",
+            "compliant"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Verbatim CR26 CCM-QTR rule statement"
+            },
+            "compliant": {
+              "type": "boolean"
+            },
+            "next_date": {
+              "type": "string",
+              "description": "Next Quarterly Review date (CCM-QTR-NRD)"
+            }
+          },
+          "additionalProperties": true
         },
-        "qr_05": {
-          "type": "boolean",
-          "description": "FRR-CCM-QR-05: Meeting registration information provided"
+        "CCM-QTR-NID": {
+          "type": "object",
+          "required": [
+            "description",
+            "compliant"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Verbatim CR26 CCM-QTR rule statement"
+            },
+            "compliant": {
+              "type": "boolean"
+            },
+            "next_date": {
+              "type": "string",
+              "description": "Next Quarterly Review date (CCM-QTR-NRD)"
+            }
+          },
+          "additionalProperties": true
         },
-        "qr_06": {
-          "type": "boolean",
-          "description": "FRR-CCM-QR-06: Next review date publicly disclosed"
+        "CCM-QTR-REG": {
+          "type": "object",
+          "required": [
+            "description",
+            "compliant"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Verbatim CR26 CCM-QTR rule statement"
+            },
+            "compliant": {
+              "type": "boolean"
+            },
+            "next_date": {
+              "type": "string",
+              "description": "Next Quarterly Review date (CCM-QTR-NRD)"
+            }
+          },
+          "additionalProperties": true
         },
-        "qr_11": {
-          "type": "boolean",
-          "description": "FRR-CCM-QR-11: Content shared responsibly"
+        "CCM-QTR-NRD": {
+          "type": "object",
+          "required": [
+            "description",
+            "compliant"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Verbatim CR26 CCM-QTR rule statement"
+            },
+            "compliant": {
+              "type": "boolean"
+            },
+            "next_date": {
+              "type": "string",
+              "description": "Next Quarterly Review date (CCM-QTR-NRD)"
+            }
+          },
+          "additionalProperties": true
+        },
+        "CCM-QTR-ACT": {
+          "type": "object",
+          "required": [
+            "description",
+            "compliant"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Verbatim CR26 CCM-QTR rule statement"
+            },
+            "compliant": {
+              "type": "boolean"
+            },
+            "next_date": {
+              "type": "string",
+              "description": "Next Quarterly Review date (CCM-QTR-NRD)"
+            }
+          },
+          "additionalProperties": true
+        },
+        "CCM-QTR-RTP": {
+          "type": "object",
+          "required": [
+            "description",
+            "compliant"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Verbatim CR26 CCM-QTR rule statement"
+            },
+            "compliant": {
+              "type": "boolean"
+            },
+            "next_date": {
+              "type": "string",
+              "description": "Next Quarterly Review date (CCM-QTR-NRD)"
+            }
+          },
+          "additionalProperties": true
+        },
+        "CCM-QTR-RTR": {
+          "type": "object",
+          "required": [
+            "description",
+            "compliant"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Verbatim CR26 CCM-QTR rule statement"
+            },
+            "compliant": {
+              "type": "boolean"
+            },
+            "next_date": {
+              "type": "string",
+              "description": "Next Quarterly Review date (CCM-QTR-NRD)"
+            }
+          },
+          "additionalProperties": true
+        },
+        "CCM-QTR-SCR": {
+          "type": "object",
+          "required": [
+            "description",
+            "compliant"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Verbatim CR26 CCM-QTR rule statement"
+            },
+            "compliant": {
+              "type": "boolean"
+            },
+            "next_date": {
+              "type": "string",
+              "description": "Next Quarterly Review date (CCM-QTR-NRD)"
+            }
+          },
+          "additionalProperties": true
         }
       }
     },
     "integrity": {
       "type": "object",
-      "required": ["generated_at", "content_hash"],
+      "required": [
+        "generated_at",
+        "content_hash"
+      ],
       "properties": {
-        "generated_at": { "type": "string", "format": "date-time" },
-        "generator_version": { "type": "string" },
-        "report_version": { "type": "string" },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "generator_version": {
+          "type": "string"
+        },
+        "report_version": {
+          "type": "string"
+        },
         "content_hash": {
           "type": "string",
           "description": "SHA-256 hash for report integrity verification"
