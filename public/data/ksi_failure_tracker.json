@@ -1,9 +1,9 @@
 {
   "metadata": {
     "created_at": "2026-01-17T07:22:37.324152+00:00",
-    "last_updated": "2026-07-06T13:52:11.338378+00:00",
+    "last_updated": "2026-07-06T17:51:15.086155+00:00",
     "schema_version": "1.0.0",
-    "total_runs_processed": 2371,
+    "total_runs_processed": 2372,
     "backfill_complete": true,
     "backfill_since": "all time",
     "backfill_commits": 1256
@@ -87,6 +87,76 @@
       "resources_failed": 0,
       "requirement": "Log all activity on all information resources supporting the cloud service offering to a protected audit log.",
       "score_at_failure": 100
+    },
+    "KSI-CNA-DFP": {
+      "ksi_id": "KSI-CNA-DFP",
+      "failed_at": "2026-07-06T17:51:14.723954+00:00",
+      "failed_commit": "7c45425353c738d0b9076222ff2a03bccb244011",
+      "reason": "Insufficient (98%): The functionality and privileges for infrastructure and services are strictly defined. | 82/84 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes, 4 sections).; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs [4 scoped internal-CIDR rule(s); egress restricted].; RBAC Active: 1 role(s); all 1 parsed trust policies scope assumption to specific principals (no open wildcard trust). | Warnings: SG '[resource]' allows all-protocol/all-port traffic from broad internal CIDRs ([internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All)). FedRAMP best practice: scope these to specific ports or use [security-group] references.; SG '[resource]' allows all-protocol/all-port traffic from broad internal CIDRs ([internal-cidr] (-1 All-All)). FedRAMP best practice: scope these to specific ports or use [security-group] references. | Verdict: Score 98% below threshold 100% (82 pass / 0 fail / 1 warning / 0 unverified).",
+      "score": 98,
+      "resources_failed": 1,
+      "requirement": "The functionality and privileges for infrastructure and services are strictly defined.",
+      "score_at_failure": 98
+    },
+    "KSI-CNA-MAT": {
+      "ksi_id": "KSI-CNA-MAT",
+      "failed_at": "2026-07-06T17:51:14.723954+00:00",
+      "failed_commit": "7c45425353c738d0b9076222ff2a03bccb244011",
+      "reason": "Insufficient (95%): Machine-based information resources are persistently reviewed to ensure they have a minimal attack surface and that l... | 20/22 resources compliant. | Verified: Private Subnet: '[resource]' has public IP mapping disabled (attack surface minimized).; Private Subnet: '[resource]' has public IP mapping disabled (attack surface minimized).; Private Subnet: '[resource]' has public IP mapping disabled (attack surface minimized). |   ...and 17 more verification(s) | Warnings: SG '[resource]' allows all-protocol/all-port traffic from broad internal CIDRs ([internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All)). FedRAMP best practice: scope these to specific ports or use [security-group] references.; SG '[resource]' allows all-protocol/all-port traffic from broad internal CIDRs ([internal-cidr] (-1 All-All)). FedRAMP best practice: scope these to specific ports or use [security-group] references. | Verdict: Score 95% below threshold 100% (20 pass / 0 fail / 1 warning / 0 unverified).",
+      "score": 95,
+      "resources_failed": 1,
+      "requirement": "Machine-based information resources are persistently reviewed to ensure they have a minimal attack surface and that lateral movement is minimized if compromised.",
+      "score_at_failure": 95
+    },
+    "KSI-CNA-RVP": {
+      "ksi_id": "KSI-CNA-RVP",
+      "failed_at": "2026-07-06T17:51:14.723954+00:00",
+      "failed_commit": "7c45425353c738d0b9076222ff2a03bccb244011",
+      "reason": "Insufficient (80%): The effectiveness of protection against denial of service attacks and other unwanted activity for machine-based infor... | 4/6 resources compliant, 1 unverified. | Verified: WAF protection active: 1 Web ACL(s) configured for Layer 7 defense.; 1 load balancer(s) covered by AWS Shield Standard \u2014 automatic, always-on Layer 3/4 DDoS protection for all AWS load balancers (no subscription required; AWS baseline).; DNS resilience: 1 Route53 hosted zone(s) on AWS AnyCast network. | Failures: API stage throttle coverage 0% < target 100% (3/3 stages without throttle \u2014 sample: 30r7mtjz87:prod; 7d7pdwb9t3:Stage; 7d7pdwb9t3:prod). Bulk-API exfiltration risk. | Verdict: Score 80% below threshold 100% (4 pass / 1 fail / 0 warning / 1 unverified).",
+      "score": 80,
+      "resources_failed": 1,
+      "requirement": "The effectiveness of protection against denial of service attacks and other unwanted activity for machine-based information resources is persistently reviewed.",
+      "score_at_failure": 80
+    },
+    "KSI-IAM-APM": {
+      "ksi_id": "KSI-IAM-APM",
+      "failed_at": "2026-07-06T17:51:14.723954+00:00",
+      "failed_commit": "7c45425353c738d0b9076222ff2a03bccb244011",
+      "reason": "Insufficient (45%): Secure passwordless methods are used for user authentication and authorization when feasible, otherwise strong passwo... | 5/11 resources compliant, 6 unverified. | Verified: Modern Identity: AWS Identity Center is active.; Federated auth: 1 SAML provider(s) configured. | Verdict: Required operational metric(s) not measured this run: iam_mfa_metrics, sso_session_duration_metrics",
+      "score": 45,
+      "resources_failed": 0,
+      "requirement": "Secure passwordless methods are used for user authentication and authorization when feasible, otherwise strong passwords with phishing-resistant MFA is used.",
+      "score_at_failure": 45
+    },
+    "KSI-IAM-SNU": {
+      "ksi_id": "KSI-IAM-SNU",
+      "failed_at": "2026-07-06T17:51:14.723954+00:00",
+      "failed_commit": "7c45425353c738d0b9076222ff2a03bccb244011",
+      "reason": "Insufficient (98%): Appropriately secure authentication methods are used and persistently reviewed for non-user accounts and services. | 80/82 resources compliant, 1 unverified. | Verified: RBAC Active: 1 role(s); all 1 parsed trust policies scope assumption to specific principals (no open wildcard trust). | Warnings: Found 1 programmatic IAM users (no console). Recommend migrating service workloads to IAM roles. | Verdict: Score 98% below threshold 100% (80 pass / 0 fail / 1 warning / 1 unverified).",
+      "score": 98,
+      "resources_failed": 1,
+      "requirement": "Appropriately secure authentication methods are used and persistently reviewed for non-user accounts and services.",
+      "score_at_failure": 98
+    },
+    "KSI-MLA-OSM": {
+      "ksi_id": "KSI-MLA-OSM",
+      "failed_at": "2026-07-06T17:51:14.723954+00:00",
+      "failed_commit": "7c45425353c738d0b9076222ff2a03bccb244011",
+      "reason": "Insufficient (100%): A Security Information and Event Management (SIEM) or similar system(s) is used and persistently reviewed for central... | 3/5 resources compliant, 2 unverified. | Verified: Trail is Secure (Multi-Region, Validated, KMS-Encrypted, Global Events) [organization trail; CloudWatch Logs integrated \u2192 arn:aws:[redacted]; delivery role arn:aws:[redacted]; Trail logging rate 100% (1/1 trails actively logging).; S3 access-logging rate 100% (11 buckets covered). | Verdict: Required operational metric(s) not measured this run: alb_access_log_metrics",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "A Security Information and Event Management (SIEM) or similar system(s) is used and persistently reviewed for centralized, tamper-resistant logging of events, activities, and changes.",
+      "score_at_failure": 100
+    },
+    "KSI-SCR-MON": {
+      "ksi_id": "KSI-SCR-MON",
+      "failed_at": "2026-07-06T17:51:14.723954+00:00",
+      "failed_commit": "7c45425353c738d0b9076222ff2a03bccb244011",
+      "reason": "Insufficient (91%): Third party software information resources are automatically monitored for upstream vulnerabilities using mechanisms ... | 11/15 resources compliant, 3 unverified. | Verified: Inspector actively scanning 10/10 resource(s).; SSM agent Online for '[resource]' \u2014 managed channel active (encrypted, IAM-signed).; SSM agent Online for '[resource]' \u2014 managed channel active (encrypted, IAM-signed). |   ...and 8 more verification(s) | Failures: Vulnerability SLA breached: oldest active CRITICAL is 165d > 30d SLA (active: 2 crit, 1 high; remediation rate 0%). | Verdict: Operational metric(s) below target: vulnerability_metrics",
+      "score": 91,
+      "resources_failed": 1,
+      "requirement": "Third party software information resources are automatically monitored for upstream vulnerabilities using mechanisms that may include contractual notification requirements or active monitoring services.",
+      "score_at_failure": 91
     }
   },
   "failure_history": [
@@ -6803,6 +6873,62 @@
       "last_failure": "2026-03-11T06:50:28.470258Z",
       "longest_outage_hours": 1.56,
       "shortest_outage_hours": 1.56
+    },
+    "KSI-CNA-DFP": {
+      "total_failures": 1,
+      "total_remediations": 0,
+      "mttr_hours": null,
+      "last_failure": "2026-07-06T17:51:14.723954+00:00",
+      "longest_outage_hours": null,
+      "shortest_outage_hours": null
+    },
+    "KSI-CNA-MAT": {
+      "total_failures": 1,
+      "total_remediations": 0,
+      "mttr_hours": null,
+      "last_failure": "2026-07-06T17:51:14.723954+00:00",
+      "longest_outage_hours": null,
+      "shortest_outage_hours": null
+    },
+    "KSI-CNA-RVP": {
+      "total_failures": 1,
+      "total_remediations": 0,
+      "mttr_hours": null,
+      "last_failure": "2026-07-06T17:51:14.723954+00:00",
+      "longest_outage_hours": null,
+      "shortest_outage_hours": null
+    },
+    "KSI-IAM-APM": {
+      "total_failures": 1,
+      "total_remediations": 0,
+      "mttr_hours": null,
+      "last_failure": "2026-07-06T17:51:14.723954+00:00",
+      "longest_outage_hours": null,
+      "shortest_outage_hours": null
+    },
+    "KSI-IAM-SNU": {
+      "total_failures": 1,
+      "total_remediations": 0,
+      "mttr_hours": null,
+      "last_failure": "2026-07-06T17:51:14.723954+00:00",
+      "longest_outage_hours": null,
+      "shortest_outage_hours": null
+    },
+    "KSI-MLA-OSM": {
+      "total_failures": 1,
+      "total_remediations": 0,
+      "mttr_hours": null,
+      "last_failure": "2026-07-06T17:51:14.723954+00:00",
+      "longest_outage_hours": null,
+      "shortest_outage_hours": null
+    },
+    "KSI-SCR-MON": {
+      "total_failures": 1,
+      "total_remediations": 0,
+      "mttr_hours": null,
+      "last_failure": "2026-07-06T17:51:14.723954+00:00",
+      "longest_outage_hours": null,
+      "shortest_outage_hours": null
     }
   }
 }

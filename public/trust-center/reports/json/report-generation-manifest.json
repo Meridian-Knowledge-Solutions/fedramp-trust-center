@@ -1,5 +1,5 @@
 {
-  "generation_timestamp": "2026-07-06T15:25:54.520301+00:00",
+  "generation_timestamp": "2026-07-06T09:34:11.821524+00:00",
   "generator": "FedRAMP 20x Public Report Generator v2.0.0",
   "provider": {
     "name": "Meridian Knowledge Solutions",
@@ -7,18 +7,18 @@
     "service_name": "Meridian LMS",
     "impact_level": "Moderate"
   },
-  "purpose": "Machine-readable reports for FedRAMP CR26 completeness requirements. VDR and OAR are generated from live production data. SCN is a sample report (no transformative change has occurred yet).",
+  "purpose": "Machine-readable reports for FedRAMP CR26 completeness requirements. SCN, VDR, OAR, and QAR are all generated from live production pipeline data. SCN is anchored on the most recent adaptive/transformative change recorded in scn_automation/scn_history.jsonl; if none exists, the generator falls back to a sample payload that preserves FedRAMP readiness for future activities.",
   "reports": [
     {
       "type": "scn",
       "name": "Significant Change Notification",
-      "file": "scn-sample-report.json",
+      "file": "scn-report.json",
       "html_file": "scn-report.html",
-      "schema": null,
-      "data_type": "sample",
+      "schema": "scn-schema.json",
+      "data_type": "live",
       "validation_errors": 0,
       "frr_requirements": [
-        "SCN-ADP-NTF / SCN-TRF (Notification delivery)",
+        "FRR-SCN-01 (Notification delivery)",
         "FRR-SCN-TR (Tiered change framework)",
         "FRR-SCN-TF (Timeline compliance)",
         "FRR-SCN-AU (Audit record keeping)"
@@ -29,36 +29,36 @@
       "name": "Vulnerability Detection and Response",
       "file": "vdr-report.json",
       "html_file": "vdr-report.html",
-      "schema": null,
+      "schema": "vdr-schema.json",
       "data_type": "live",
       "validation_errors": 0,
       "frr_requirements": [
-        "VDR-CSO-DET (Detection methodology)",
-        "VDR-CSO-RES (Multi-source scanning)",
-        "VER-EVA-ELX (Reporting cadence)",
-        "VER-EVA-EIR (Internet reachability)",
-        "VER-EVA-EPA (Exploitability tracking)",
-        "VER-RPT-VDT (Adverse impact rating)",
-        "VER-TFR-MHR (Accepted vulnerabilities)",
-        "VER-TFR-MAV (Machine-readable format)"
+        "FRR-VDR-01 (Detection methodology)",
+        "FRR-VDR-02 (Multi-source scanning)",
+        "FRR-VDR-03 (Daily reporting cadence - aggregate public data)",
+        "FRR-VDR-04 (Internet reachability - IRV count)",
+        "FRR-VDR-05 (Exploitability tracking - LEV count)",
+        "FRR-VDR-06 (Adverse impact rating - N-rating distribution)",
+        "FRR-VDR-07 (Accepted vulnerabilities tracked)",
+        "FRR-VDR-08 (Machine-readable and human-readable formats)"
       ]
     },
     {
       "type": "oar",
-      "name": "Ongoing Certification Report (OCR)",
+      "name": "Ongoing Authorization Report",
       "file": "oar-report.json",
       "html_file": "oar-report.html",
-      "schema": null,
+      "schema": "oar-schema.json",
       "data_type": "live",
       "validation_errors": 0,
       "frr_requirements": [
-        "FRR-CCM (OCR with all required sections)",
-        "FRR-CCM (Quarterly schedule)",
-        "FRR-CCM (Public next report date)",
-        "FRR-CCM (Feedback mechanism)",
-        "FRR-CCM (Anonymized summary)",
-        "FRR-CCM (No irresponsible disclosure)",
-        "FRR-CCM (Machine-readable publication)"
+        "FRR-CCM-01 (OAR with all required sections)",
+        "FRR-CCM-02 (Quarterly schedule)",
+        "FRR-CCM-03 (Public next report date)",
+        "FRR-CCM-04 (Feedback mechanism)",
+        "FRR-CCM-05 (Anonymized summary)",
+        "FRR-CCM-06 (No irresponsible disclosure)",
+        "FRR-CCM-07 (Responsible public sharing)"
       ]
     },
     {
@@ -78,5 +78,21 @@
       ]
     }
   ],
-  "schemas": []
+  "schemas": [
+    {
+      "type": "scn",
+      "file": "scn-schema.json",
+      "json_schema_version": "draft/2020-12"
+    },
+    {
+      "type": "vdr",
+      "file": "vdr-schema.json",
+      "json_schema_version": "draft/2020-12"
+    },
+    {
+      "type": "oar",
+      "file": "oar-schema.json",
+      "json_schema_version": "draft/2020-12"
+    }
+  ]
 }
