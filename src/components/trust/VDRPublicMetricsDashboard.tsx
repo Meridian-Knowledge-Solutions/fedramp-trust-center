@@ -307,7 +307,7 @@ export default function VDRDashboard() {
     <div className="wrap" style={{ padding: "32px 32px 60px" }}>
 
       {/* ── Header ── */}
-      <div className="kick">FRR-CVM · COORDINATED DISCLOSURE · PUBLIC</div>
+      <div className="kick">FRR-VDR / FRR-VER · COORDINATED DISCLOSURE · PUBLIC</div>
       <h1 className="big">Vulnerability <span className="g">data</span></h1>
       <p className="lede">
         FedRAMP 20x Vulnerability Detection &amp; Response — aggregate finding counts streamed openly. No sensitive data.
@@ -372,7 +372,7 @@ export default function VDRDashboard() {
       <div className="g2">
         {/* Posture */}
         <div className="panel">
-          <div className="ph"><h4>Posture</h4><span className="map">FRR-CVM-04 · {kpi.compliance_rate >= 100 ? "COMPLIANT" : "REVIEW"}</span></div>
+          <div className="ph"><h4>Posture</h4><span className="map">VER-EVA · {kpi.compliance_rate >= 100 ? "COMPLIANT" : "REVIEW"}</span></div>
           {[
             { l: "Security posture", v: posture ? `${posture.overall_rating} · ${posture.posture_score}` : "—", t: "ok" },
             { l: "Active / accepted", v: `${vdrAcceptance?.active ?? 0} active · ${vdrAcceptance?.accepted ?? 0} accepted`, t: "ok" },

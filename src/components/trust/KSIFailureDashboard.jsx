@@ -1,7 +1,7 @@
 /**
  * KSI Failure Dashboard - Enhanced with Date-Centric Drill-Down
  * 
- * FedRAMP 20x Phase 2 failure tracking visualization:
+ * FedRAMP CR26 failure tracking visualization:
  * - Date-range quick picks (7d / 30d / 90d / All / Custom range)
  * - Failures grouped by date with visual date headers
  * - Click any failure to see full details in a slide-out panel
@@ -241,7 +241,7 @@ const DetailDrawer = ({ failure, isActive, onClose, allHistory }) => {
                         <div className="kpi" style={{ textAlign: 'center' }}>
                             <div className="l" style={{ marginTop: 0, marginBottom: 6 }}>Score</div>
                             {(() => {
-                                // Mode-aware threshold: Output-mode KSIs (e.g. KSI-TPR-04) pass at >=95%,
+                                // Mode-aware threshold: Output-mode KSIs (e.g. KSI-SCR-MON) pass at >=95%,
                                 // Capability-mode KSIs are binary 100/0. Without mode, default to capability.
                                 const target = failure.mode === 'output' ? 95 : 100;
                                 const scoreColor = failure.score == null ? 'var(--ash)'
@@ -636,7 +636,7 @@ const KSIFailureDashboard = () => {
                 <div>
                     <div className="kick">◷ — KSI FAILURE TIMELINE</div>
                     <h1 className="big">Failure <span className="g">history</span></h1>
-                    <p className="lede" style={{ marginBottom: 0 }}>FedRAMP 20x Phase 2 · {stats.runsProcessed.toLocaleString()} runs since {data.metadata?.backfill_since || 'N/A'}. Click any failure for full details.</p>
+                    <p className="lede" style={{ marginBottom: 0 }}>FedRAMP CR26 · {stats.runsProcessed.toLocaleString()} runs since {data.metadata?.backfill_since || 'N/A'}. Click any failure for full details.</p>
                 </div>
                 <div>
                     {stats.activeCount === 0

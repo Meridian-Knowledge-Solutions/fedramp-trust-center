@@ -16,15 +16,19 @@ export const POAMModal = () => {
   
   const totalFindings = failedKsis.length + warningKsis.length + infoKsis.length;
 
-  // Categorize failed KSIs by severity (based on KSI category)
+  // Categorize failed KSIs by severity (based on CR26 KSI family).
+  // Remediation timelines follow the CR26 VDR-TFR-PVR Class C matrix
+  // (days from evaluation: IRV+LEV / NIRV+LEV / Not-Likely-Exploitable):
+  //   N5: 2 / 4 / 16      N4: 4 / 8 / 64
+  //   N3: 16 / 32 / 128   N2: 48 / 128 / 192
   const criticalKsis = failedKsis.filter(ksi => ksi.id.startsWith('KSI-IAM'));
-  const seriousKsis = failedKsis.filter(ksi => 
-    ksi.id.startsWith('KSI-CNA') || ksi.id.startsWith('KSI-SVC')
+  const seriousKsis = failedKsis.filter(ksi =>
+    ksi.id.startsWith('KSI-CNA') || ksi.id.startsWith('KSI-SVC') || ksi.id.startsWith('KSI-SCR')
   );
-  const moderateKsis = failedKsis.filter(ksi => 
+  const moderateKsis = failedKsis.filter(ksi =>
     ksi.id.startsWith('KSI-MLA') || ksi.id.startsWith('KSI-CMT')
   );
-  const minorKsis = failedKsis.filter(ksi => 
+  const minorKsis = failedKsis.filter(ksi =>
     ksi.id.startsWith('KSI-CED') || ksi.id.startsWith('KSI-PIY')
   );
 
@@ -61,34 +65,47 @@ Generated: ${new Date().toLocaleString()}
 - Critical (N4): ${criticalKsis.length}
 - Serious (N3): ${seriousKsis.length}
 - Moderate (N2): ${moderateKsis.length}
-- Minor (N1): ${minorKsis.length}
+- Minor (N2, monitored): ${minorKsis.length}
+
+## Remediation Timeframes — VDR-TFR-PVR · Class C
+Days from evaluation (IRV+LEV / NIRV+LEV / Not-Likely-Exploitable):
+
+| PAIN | IRV+LEV | NIRV+LEV | Not-Likely-Exploitable |
+|------|---------|----------|------------------------|
+| N5   | 2       | 4        | 16                     |
+| N4   | 4       | 8        | 64                     |
+| N3   | 16      | 32       | 128                    |
+| N2   | 48      | 128      | 192                    |
+
+Acceptance: per VER-TFR-MAV, findings not fully mitigated/remediated within
+192 days of evaluation become accepted vulnerabilities.
 
 ## Critical Findings (Identity & Access)
 ${criticalKsis.map(k => `### ${k.id}
 - Description: ${k.description}
-- Timeline: 2-14 days
-- N-Rating: N4
+- Timeline: 4-64 days (VDR-TFR-PVR · Class C)
+- N-Rating (PAIN): N4
 `).join('\n')}
 
-## Serious Findings (Infrastructure)
+## Serious Findings (Infrastructure & Supply Chain)
 ${seriousKsis.map(k => `### ${k.id}
 - Description: ${k.description}
-- Timeline: 16-64 days
-- N-Rating: N3
+- Timeline: 16-128 days (VDR-TFR-PVR · Class C)
+- N-Rating (PAIN): N3
 `).join('\n')}
 
 ## Moderate Findings (Monitoring)
 ${moderateKsis.map(k => `### ${k.id}
 - Description: ${k.description}
-- Timeline: 66-128 days
-- N-Rating: N2
+- Timeline: 48-192 days (VDR-TFR-PVR · Class C)
+- N-Rating (PAIN): N2
 `).join('\n')}
 
 ## Minor Findings (Documentation)
 ${minorKsis.map(k => `### ${k.id}
 - Description: ${k.description}
-- Timeline: 128-192 days
-- N-Rating: N1
+- Timeline: 48-192 days (VDR-TFR-PVR · Class C)
+- N-Rating (PAIN): N2
 `).join('\n')}
 `;
 
@@ -142,7 +159,7 @@ ${minorKsis.map(k => `### ${k.id}
         <div className="bg-red-50 rounded-lg p-4 border border-red-200">
           <div className="text-3xl font-bold text-red-600">{failedKsis.length}</div>
           <div className="text-xs text-red-600 font-medium">VDR Vulnerabilities</div>
-          <div className="text-xs text-red-500 mt-1">2-192 days (N-rated)</div>
+          <div className="text-xs text-red-500 mt-1">2-192 days · VDR-TFR-PVR · Class C</div>
         </div>
         <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
           <div className="text-3xl font-bold text-amber-600">{warningKsis.length}</div>
@@ -165,7 +182,7 @@ ${minorKsis.map(k => `### ${k.id}
             No findings requiring VDR vulnerability creation or remediation tracking.
           </p>
           <div className="mt-4 text-sm text-green-600 bg-green-50 inline-block px-4 py-2 rounded-lg">
-            ✅ RFC-0017 FRR-PVA-03: No KSI failures to convert
+            ✅ FRR-SDR / FRR-IVV: No KSI failures to convert
           </div>
         </div>
       )}
@@ -193,7 +210,7 @@ ${minorKsis.map(k => `### ${k.id}
             {criticalKsis.map(renderFindingItem)}
           </div>
           <div className="mt-3 text-xs text-red-600 bg-red-50 p-3 rounded border border-red-200">
-            ⏰ <strong>VDR Timeline:</strong> 2-14 days remediation required
+            ⏰ <strong>VDR Timeline (VDR-TFR-PVR · Class C):</strong> N4 — 4 / 8 / 64 days (IRV+LEV / NIRV+LEV / Not-Likely-Exploitable)
           </div>
         </div>
       )}
@@ -221,7 +238,7 @@ ${minorKsis.map(k => `### ${k.id}
             {seriousKsis.map(renderFindingItem)}
           </div>
           <div className="mt-3 text-xs text-orange-600 bg-orange-50 p-3 rounded border border-orange-200">
-            ⏰ <strong>VDR Timeline:</strong> 16-64 days remediation cycle
+            ⏰ <strong>VDR Timeline (VDR-TFR-PVR · Class C):</strong> N3 — 16 / 32 / 128 days (IRV+LEV / NIRV+LEV / Not-Likely-Exploitable)
           </div>
         </div>
       )}
@@ -249,7 +266,7 @@ ${minorKsis.map(k => `### ${k.id}
             {moderateKsis.map(renderFindingItem)}
           </div>
           <div className="mt-3 text-xs text-yellow-600 bg-yellow-50 p-3 rounded border border-yellow-200">
-            ⏰ <strong>VDR Timeline:</strong> 66-128 days remediation cycle
+            ⏰ <strong>VDR Timeline (VDR-TFR-PVR · Class C):</strong> N2 — 48 / 128 / 192 days (IRV+LEV / NIRV+LEV / Not-Likely-Exploitable)
           </div>
         </div>
       )}
@@ -277,7 +294,7 @@ ${minorKsis.map(k => `### ${k.id}
             {minorKsis.map(renderFindingItem)}
           </div>
           <div className="mt-3 text-xs text-slate-600 bg-slate-50 p-3 rounded border border-slate-200">
-            ⏰ <strong>VDR Timeline:</strong> 128-192 days remediation cycle
+            ⏰ <strong>VDR Timeline (VDR-TFR-PVR · Class C):</strong> N2 — 48 / 128 / 192 days · VER-TFR-MAV acceptance at 192 days
           </div>
         </div>
       )}

@@ -283,7 +283,7 @@ const DashboardContent = memo(({ onOpenRegister }) => {
 
   return (
     <div className="space-y-6">
-      <div className="kick">LIVE · CONTINUOUSLY MONITORED · {metadata?.impact_level || 'MODERATE'} IMPACT</div>
+      <div className="kick">LIVE · CONTINUOUSLY MONITORED · {metadata?.certification_profile ? `CLASS ${metadata.certification_profile.class}` : (metadata?.impact_level || 'CLASS C')} · FEDRAMP 20x</div>
       <h1 className="big">Continuous validation, <span className="g">observed live.</span></h1>
 
       {/* Posture header */}
@@ -292,7 +292,7 @@ const DashboardContent = memo(({ onOpenRegister }) => {
           <h4 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Shield size={16} style={{ color: statusConfig.color }} />
             <span style={{ color: statusConfig.color }}>{statusConfig.label}</span>
-            <span className={`tag ${statusConfig.tag}`}>{metadata?.impact_level || 'MODERATE'}</span>
+            <span className={`tag ${statusConfig.tag}`}>{metadata?.certification_profile ? `CLASS ${metadata.certification_profile.class}` : (metadata?.impact_level || 'CLASS C')}</span>
           </h4>
           <button onClick={handleRefresh} disabled={isRefreshing}
             style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--indigo)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '.04em' }}>
@@ -314,6 +314,25 @@ const DashboardContent = memo(({ onOpenRegister }) => {
 
       {/* KSI Grid — directly after header, no wrapper chrome */}
       <KSIGrid />
+
+      {/* FRR rule-family compliance — legacy KSI-AFR validations promoted to
+          FRR families under CR26; published in frr_summary */}
+      {metadata?.frr_summary && Object.keys(metadata.frr_summary).length > 0 && (
+        <div className="panel">
+          <div className="ph">
+            <h4><Shield size={13} style={{ verticalAlign: -2, marginRight: 6, color: 'var(--indigo)' }} />FRR Rule Family Compliance</h4>
+            <span className="map">CR26 {metadata?.rules_version ? `· v${metadata.rules_version}` : ''}</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
+            {Object.entries(metadata.frr_summary).map(([family, info]) => (
+              <div key={family} className="row" style={{ justifyContent: 'space-between', gap: 8 }}>
+                <span className="mono" style={{ fontSize: 11, color: 'var(--ash)' }}>{family}</span>
+                <span className={`tag ${info?.status === 'pass' ? 'ok' : 'red'}`}>{(info?.status || 'unknown').toUpperCase()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Trend chart — below the grid for context, not blocking the controls */}
       <ComplianceChart />
