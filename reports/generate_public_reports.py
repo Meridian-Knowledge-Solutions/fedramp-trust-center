@@ -181,11 +181,15 @@ class PublicReportGenerator:
 
     # KSI families most directly exercised by change-management events.
     # Mapped from change-tier so the SCN can publish which KSIs were re-validated.
+    # CR26 mnemonic indicators (KSI-CMT family; incident-response for the
+    # critical fast-path). Legacy KSI-CMT-05 was retired pre-CR26 (superseded
+    # by the FRR-SCN rules themselves) and KSI-AFR-05 was promoted to FRR-SCN,
+    # so neither appears here — the SCN itself evidences FRR-SCN compliance.
     KSI_IMPACT_BY_TIER = {
-        "transformative": ["KSI-CMT-01", "KSI-CMT-02", "KSI-CMT-03", "KSI-CMT-04", "KSI-CMT-05", "KSI-AFR-05"],
-        "adaptive": ["KSI-CMT-01", "KSI-CMT-02", "KSI-CMT-05", "KSI-AFR-05"],
-        "routine_recurring": ["KSI-CMT-01"],
-        "critical": ["KSI-CMT-01", "KSI-CMT-02", "KSI-CMT-05", "KSI-IRP-01"],
+        "transformative": ["KSI-CMT-LMC", "KSI-CMT-RMV", "KSI-CMT-VTD", "KSI-CMT-RVP"],
+        "adaptive": ["KSI-CMT-LMC", "KSI-CMT-RMV", "KSI-CMT-VTD"],
+        "routine_recurring": ["KSI-CMT-LMC"],
+        "critical": ["KSI-CMT-LMC", "KSI-CMT-RMV", "KSI-INR-RIR"],
     }
 
     CONTROL_NAMES = {
@@ -446,7 +450,7 @@ class PublicReportGenerator:
                 ),
             })
 
-        ksi_impact = self.KSI_IMPACT_BY_TIER.get(tier, ["KSI-CMT-01"])
+        ksi_impact = self.KSI_IMPACT_BY_TIER.get(tier, ["KSI-CMT-LMC"])
 
         verification_results = []
         for cid in sorted(control_ids):
@@ -572,7 +576,7 @@ class PublicReportGenerator:
                     "impact": "positive",
                     "notes": "Enhanced WAF rules improve boundary protection",
                 }],
-                "ksi_impact": ["KSI-CNA-04"],
+                "ksi_impact": ["KSI-CNA-DFP"],
                 "data_impact": "none",
             },
             "controls_verification": {
