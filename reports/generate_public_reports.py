@@ -63,8 +63,12 @@ class PublicReportGenerator:
         "impact_level": "Moderate",
     }
 
-    def __init__(self, base_dir="."):
-        self.base_dir = Path(base_dir)
+    def __init__(self, base_dir=None):
+        # Anchor data paths to the repo root (parent of reports/) so report
+        # content does not depend on the caller's working directory — running
+        # from reports/ used to silently miss scn_automation/ and emit the
+        # sample SCN fallback under the live filename.
+        self.base_dir = Path(base_dir) if base_dir else Path(__file__).resolve().parent.parent
         self.schemas_dir = Path(__file__).parent / "schemas"
         self.output_dir = Path(__file__).parent / "samples"
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -2494,6 +2498,11 @@ class PublicReportGenerator:
             else:
                 print(f"  Schema validation: PASS")
 
+            # A sample SCN fallback must never publish under the live JSON
+            # filename — downstream bundles copy samples/*.json into the Trust
+            # Center and would clobber the live notification.
+            if report_type == "scn" and report.get("report_type") == "sample":
+                filename = "scn-sample-report.json"
             output_file = self.output_dir / filename
             with open(output_file, "w") as f:
                 json.dump(report, f, indent=2, default=str)
@@ -2650,7 +2659,7 @@ def main():
     )
     parser.add_argument(
         "--base-dir",
-        default=".",
+        default=None,
         help="Base directory for input data (default: current directory)",
     )
     args = parser.parse_args()
