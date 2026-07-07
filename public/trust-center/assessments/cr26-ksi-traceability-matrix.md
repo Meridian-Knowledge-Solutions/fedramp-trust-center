@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-07-07T05:15:45.462770+00:00 (39 pass / 7 fail of 46)  
-**Generated:** 2026-07-07 06:03 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-07-07T13:21:00.319834+00:00 (39 pass / 7 fail of 46)  
+**Generated:** 2026-07-07 14:08 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -109,7 +109,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-04
 - **NIST 800-53 controls:** cm-2, si-3
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (98%): The functionality and privileges for infrastructure and services are strictly defined. | 82/84 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes,…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (98%): The functionality and privileges for infrastructure and services are strictly defined. | 83/85 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes,…
 - **Measures (validation objectives):**
   - IMMUTABILITY: Validate the documented immutable-infrastructure methodology — all production changes via version-controlled Terraform (state in S3 with versioning + DynamoDB state locking, PR-reviewed plan/apply, change tracked in git history). The Terraform state itself lives in the mks-states bucket in a SEPARATE AWS account (cross-account, not readable by the validation role); the immutable-IaC methodology is evidenced as code in governance/. [Policy-as-code home: governance/ in this git repository; validated via GitHub contents API.]
   - FUNCTIONALITY: Check for Security Groups allowing 'All Traffic' (-1). Absence of these proves strictly defined network functionality.
@@ -304,7 +304,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-IAM-03
 - **NIST 800-53 controls:** ac-2, ac-2.2, ac-4, ac-6.5, ia-3, ia-5.2, ra-5.5
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (98%): Appropriately secure authentication methods are used and persistently reviewed for non-user accounts and services. | 80/82 resources compliant, 1 unverified. | Verified: RBAC Active: 1 role(s); all …
+- **Latest verdict:** **FAIL** — ❌ Insufficient (98%): Appropriately secure authentication methods are used and persistently reviewed for non-user accounts and services. | 81/83 resources compliant, 1 unverified. | Verified: RBAC Active: 1 role(s); all …
 - **Measures (validation objectives):**
   - Validate Trust Policies for CUSTOMER managed roles only.
   - Validate Service Accounts (Bots) that do not have console access (should rely on keys/roles).
