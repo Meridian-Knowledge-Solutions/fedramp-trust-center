@@ -213,7 +213,7 @@
                 },
                 "long_name": {
                   "type": "string",
-                  "description": "Human-readable category name (e.g. 'Supply Chain Risk')"
+                  "description": "Human-readable category name (e.g. 'Authorization by FedRAMP')"
                 }
               }
             }
@@ -221,11 +221,11 @@
         },
         "rules_version": {
           "type": "string",
-          "description": "CR26 consolidated rules version the run was evaluated against"
+          "description": "CR26 consolidated rules version"
         },
         "certification_profile": {
           "type": "object",
-          "description": "FedRAMP Certification Profile (type 20x/Rev5, path Program/Agency, class A-D)"
+          "description": "FedRAMP Certification Profile (type/path/class)"
         }
       }
     },
@@ -469,17 +469,31 @@
                 }
               }
             }
+          },
+          "legacy_ksi_id": {
+            "description": "Pre-CR26 identifier(s) this record migrated from",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
           }
         }
       }
     },
     "frr_validations": {
       "type": "array",
-      "description": "FRR rule-family compliance validations (legacy KSI-AFR indicators promoted under CR26)"
+      "description": "FRR rule-family compliance validations (promoted legacy KSI-AFR)"
     },
     "frr_summary": {
       "type": "object",
-      "description": "FRR family -> {legacy_ksi_id, status} summary"
+      "description": "FRR family -> status summary"
     }
   }
 }
