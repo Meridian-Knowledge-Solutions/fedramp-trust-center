@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-07-07T13:21:00.319834+00:00 (39 pass / 7 fail of 46)  
-**Generated:** 2026-07-07 14:08 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-07-07T21:07:19.254229+00:00 (37 pass / 9 fail of 46)  
+**Generated:** 2026-07-07 21:58 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -61,7 +61,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CMT-02
 - **NIST 800-53 controls:** cm-2, cm-3, cm-5, cm-6, cm-7, cm-8.1, si-3
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Changes to machine-based information resources are executed through the redeployment of version controlled resources ... | 12/12 resources compliant. | Verified: Verified: Governance artifact '[resour…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (91%): Changes to machine-based information resources are executed through the redeployment of version controlled resources ... | 11/12 resources compliant. | Verified: Verified: Governance artifact '[reso…
 - **Measures (validation objectives):**
   - VERSION-CONTROLLED CHANGE RECORD: Validate that infrastructure changes flow through version-controlled, immutable redeployment — the SCN Monitor's append-only history records every Terraform change as a tracked, classified commit. (The Terraform state itself is versioned in the mks-states bucket in a SEPARATE AWS account, not readable by the validation role; the version-controlled change path is evidenced here in git.) [Live artifact home: scn_automation/ in this git repository; validated via GitHub contents API.]
   - INVENTORY: List the active EC2 instances managed by this Terraform state.
@@ -140,7 +140,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-07
 - **NIST 800-53 controls:** ac-17.3, cm-2, pl-10
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 42/42 resources compliant. | Verified: Verified: Active & Compliant; Verified…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (95%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 42/44 resources compliant. | Verified: Verified: Active & Compliant; Verifi…
 - **Measures (validation objectives):**
   - BASELINE: Measure legacy compute footprint (Denominator) to compare against managed service adoption.
   - ACCELERATOR: Validate adoption of serverless compute (High Impact).
@@ -668,7 +668,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-01
 - **NIST 800-53 controls:** cm-7.1, cm-12.1, ma-2, pl-8, sc-7, sc-39, si-2.2, si-4, sr-10
 - **Evaluation policy:** mode `capability`, pass threshold 80%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information resources are persistently evaluated for opportunities to improve security and those improvements are per... | 3/3 resources compliant. | Verified: Inspector actively scanning 23/37 resour…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information resources are persistently evaluated for opportunities to improve security and those improvements are per... | 3/3 resources compliant. | Verified: Inspector actively scanning 22/39 resour…
 - **Measures (validation objectives):**
   - EVALUATION: Validate that Inspector is actively scanning resources (The 'Persistent Evaluation').
   - IMPROVEMENT: Validate existence of custom Patch Baselines (The mechanism for 'Implementing Improvements').
