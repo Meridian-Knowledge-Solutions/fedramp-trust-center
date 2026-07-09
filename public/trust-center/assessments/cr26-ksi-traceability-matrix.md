@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-07-08T13:08:06.680450+00:00 (37 pass / 9 fail of 46)  
-**Generated:** 2026-07-08 13:56 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-07-08T21:01:35.934615+00:00 (38 pass / 8 fail of 46)  
+**Generated:** 2026-07-08 21:52 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -140,7 +140,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-07
 - **NIST 800-53 controls:** ac-17.3, cm-2, pl-10
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (95%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 42/44 resources compliant. | Verified: Verified: Active & Compliant; Verifi…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (97%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 41/42 resources compliant. | Verified: Verified: Active & Compliant; Verifi…
 - **Measures (validation objectives):**
   - BASELINE: Measure legacy compute footprint (Denominator) to compare against managed service adoption.
   - ACCELERATOR: Validate adoption of serverless compute (High Impact).
@@ -614,7 +614,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-TPR-04
 - **NIST 800-53 controls:** ac-20, ca-3, ir-6.3, ps-7, ra-5, sa-9, si-5, sr-5, sr-6, sr-8
 - **Evaluation policy:** mode `output`, pass threshold 80%, required operational metrics: vulnerability_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (91%): Third party software information resources are automatically monitored for upstream vulnerabilities using mechanisms ... | 11/15 resources compliant, 3 unverified. | Verified: Inspector actively sca…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Third party software information resources are automatically monitored for upstream vulnerabilities using mechanisms ... | 12/15 resources compliant, 3 unverified. | Verified: No critical/high finding…
 - **Measures (validation objectives):**
   - Check Inspector configuration for vulnerability scanning
   - Validate OS vulnerability findings from Inspector
@@ -668,7 +668,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-01
 - **NIST 800-53 controls:** cm-7.1, cm-12.1, ma-2, pl-8, sc-7, sc-39, si-2.2, si-4, sr-10
 - **Evaluation policy:** mode `capability`, pass threshold 80%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information resources are persistently evaluated for opportunities to improve security and those improvements are per... | 3/3 resources compliant. | Verified: Inspector actively scanning 21/37 resour…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information resources are persistently evaluated for opportunities to improve security and those improvements are per... | 3/3 resources compliant. | Verified: Inspector actively scanning 22/37 resour…
 - **Measures (validation objectives):**
   - EVALUATION: Validate that Inspector is actively scanning resources (The 'Persistent Evaluation').
   - IMPROVEMENT: Validate existence of custom Patch Baselines (The mechanism for 'Implementing Improvements').
