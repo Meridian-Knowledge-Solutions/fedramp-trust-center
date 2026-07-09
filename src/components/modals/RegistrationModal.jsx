@@ -22,6 +22,14 @@ export const RegistrationModal = () => {
   const [submitStatus, setSubmitStatus] = useState(null);
 
   const validateEmail = (email) => {
+    // One-time domain whitelist (mirrors backend isValidFederalEmail): approved
+    // exceptions to the federal-domain rule. Exact, case-insensitive domain match.
+    // Remove entries here to revoke an exception.
+    const WHITELISTED_DOMAINS = ['frit.frb.org'];
+    const domain = String(email).split('@').pop().toLowerCase().trim();
+    if (WHITELISTED_DOMAINS.includes(domain)) {
+      return true;
+    }
     const govMilPattern = /^[^\s@]+@[^\s@]+\.(gov|mil|fed\.us)$/i; // Updated regex to match backend validation
     return govMilPattern.test(email);
   };
