@@ -1,7 +1,10 @@
 // === AWS API GATEWAY CONFIGURATION ===
+// Tenant-specific values come from src/config/tenant.js (env-var driven).
+import { TENANT } from './tenant';
+
 export const API_CONFIG = {
-    // The core API Gateway endpoint from CloudFormation
-    BASE_URL: 'https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod',
+    // The core API Gateway endpoint from CloudFormation (per-tenant)
+    BASE_URL: TENANT.API_URL,
 
     // API endpoints mapped from legacy SPA
     ENDPOINTS: {
@@ -39,14 +42,13 @@ export const API_CONFIG = {
 // === QUARTERLY REVIEW SESSION ===
 // Canonical registration URL maintained here so pipeline data syncs cannot overwrite it.
 // Update this value whenever a new Teams event is created for the next quarterly session.
-export const QUARTERLY_REGISTRATION_URL =
-    'https://events.teams.microsoft.com/event/7f521f38-4991-4772-8c5d-4d96f215c60c@bc633bf7-1766-4960-bc95-a16fdb861a57';
+export const QUARTERLY_REGISTRATION_URL = TENANT.QUARTERLY_REGISTRATION_URL;
 
 // === GITHUB RAW DATA CONFIGURATION ===
 // Used for fetching static assets directly from the repo
-const REPO_OWNER = 'Meridian-Knowledge-Solutions';
-const REPO_NAME = 'fedramp-trust-center'; // UPDATED: Points to the new repo
-const BRANCH = 'master';
+const REPO_OWNER = TENANT.REPO_OWNER;
+const REPO_NAME = TENANT.REPO_NAME;
+const BRANCH = TENANT.BRANCH;
 
 export const GITHUB_BASE_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}`;
 

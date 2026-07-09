@@ -5,6 +5,7 @@ import {
 } from "recharts";
 
 import { BASE_PATH } from '../../config/theme';
+import { TENANT } from '../../config/tenant';
 
 // Console palette
 const SIGNAL = "#34E0C4";  // teal — live / healthy / pass
@@ -842,7 +843,7 @@ export default function VDRDashboard() {
          ────────────────────────────────────────────── */}
       <div className="cta">
         <h3>Found a vulnerability? Report it through coordinated disclosure.</h3>
-        <button className="btn" onClick={() => window.location.href = "mailto:security@meridianks.com?subject=Vulnerability%20Disclosure"}>Submit a report →</button>
+        <button className="btn" onClick={() => window.location.href = `mailto:${TENANT.SECURITY_EMAIL}?subject=Vulnerability%20Disclosure`}>Submit a report →</button>
       </div>
 
       {/* Footer */}
