@@ -3,6 +3,7 @@ import { useModal } from '../../contexts/ModalContext';
 import { useAuth } from '../../hooks/useAuth';
 import { BaseModal } from './BaseModal';
 import { Shield, Mail, User, FileText, AlertCircle } from 'lucide-react';
+import { TENANT } from '../../config/tenant';
 
 export const RegistrationModal = () => {
   const { modals, closeModal } = useModal();
@@ -61,9 +62,8 @@ export const RegistrationModal = () => {
     try {
       // --- START REAL API INTEGRATION ---
       
-      // 1. Get API Endpoint (Ensure VITE_API_URL is set in your .env file)
-      // Fallback is provided but should be replaced with your real API Gateway URL
-      const API_URL = import.meta.env.VITE_API_URL || 'https://7d7pdwb9t3.execute-api.us-east-1.amazonaws.com/prod';
+      // 1. Get API Endpoint (tenant-configured; see src/config/tenant.js)
+      const API_URL = TENANT.API_URL;
 
       // 2. Prepare payload to match Backend expectations
       const payload = {

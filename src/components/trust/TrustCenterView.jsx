@@ -4,6 +4,7 @@ import { useModal } from '../../contexts/ModalContext';
 import { useSystemStatus } from '../../hooks/useSystemStatus';
 import { useData } from '../../hooks/useData';
 import { API_CONFIG, QUARTERLY_REGISTRATION_URL } from '../../config/api';
+import { TENANT } from '../../config/tenant';
 import { BASE_PATH } from '../../config/theme';
 import { getRouteSegments, setRoute, onRouteChange } from '../../utils/hashRoute';
 import { Download, ExternalLink, Lock, ArrowRight, Video, FileJson, Send } from 'lucide-react';
@@ -136,8 +137,8 @@ export const TrustCenterView = () => {
     const viewConfig = async () => { if (!guard('View Secure Configuration')) return; try { const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`); openModal('markdown', { title: 'Secure Configuration', markdown: await r.text() }); } catch { alert('Load failed.'); } };
     const downloadConfig = async () => { if (!guard('Download Secure Configuration')) return; try { const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`); if (!r.ok) throw new Error(`HTTP ${r.status}`); blobDl(new Blob([await r.text()], { type: 'text/markdown' }), 'secure-configuration.md'); } catch (e) { alert(`Download failed: ${e.message}`); } };
     const downloadPackage = async () => { if (!guard('Download Certification Package')) return; try { const tok = localStorage.getItem(API_CONFIG.TOKEN_KEY); if (!tok) { alert('Session expired.'); return; } const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PACKAGE_DOWNLOAD}`, { headers: { Authorization: `Bearer ${tok}` } }); if (!r.ok) throw new Error('Access Denied'); const j = await r.json(); if (j.url) window.location.href = j.url; } catch (e) { alert(`Download failed: ${e.message}`); } };
-    const apiDocs = () => window.open('https://meridian-knowledge-solutions.github.io/fedramp-20x-public/documentation/api/', '_blank');
-    const security = cso?.contacts?.security || 'security@meridianks.com';
+    const apiDocs = () => window.open(TENANT.API_DOCS_URL, '_blank');
+    const security = cso?.contacts?.security || TENANT.SECURITY_EMAIL;
 
     if (loading) {
         return (
@@ -318,7 +319,7 @@ export const TrustCenterView = () => {
                     {/* feedback */}
                     <div className="panel rv" style={{ marginTop: 14 }}>
                         <div className="grp-h"><h4>Feedback &amp; questions</h4><span className="map">FRR-CCM (OCR + Quarterly Review)</span></div>
-                        <Feedback security={cso?.contacts?.fedramp || 'fedramp_20x@meridianks.com'} entries={feedback} />
+                        <Feedback security={cso?.contacts?.fedramp || TENANT.FEDRAMP_EMAIL} entries={feedback} />
                     </div>
                 </section>
 

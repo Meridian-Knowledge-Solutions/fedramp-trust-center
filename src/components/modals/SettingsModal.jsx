@@ -2,6 +2,7 @@
 import React, { useCallback, memo } from 'react';
 import { Database, XCircle, LogOut, Trash2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { TENANT } from '../../config/tenant';
 
 const THEME = {
     panel: 'bg-[#121217]',
@@ -18,7 +19,7 @@ const SettingsModal = memo(({ isOpen, onClose }) => {
     const handleDataDeletion = useCallback(() => {
         const subject = encodeURIComponent('Data Deletion Request - Trust Center');
         const body = encodeURIComponent(
-            `I am requesting deletion of my data from the Meridian Trust Center.\n\n` +
+            `I am requesting deletion of my data from the ${TENANT.ORG_NAME} Trust Center.\n\n` +
             `Agency: ${user?.agency || 'N/A'}\n` +
             `Email: ${user?.email || 'N/A'}\n\n` +
             `Please delete:\n` +
@@ -27,7 +28,7 @@ const SettingsModal = memo(({ isOpen, onClose }) => {
             `- Any other stored personal data\n\n` +
             `Thank you.`
         );
-        window.location.href = `mailto:fedramp-security@meridianks.com?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:${TENANT.PRIVACY_EMAIL}?subject=${subject}&body=${body}`;
     }, [user]);
 
     if (!isOpen) return null;
