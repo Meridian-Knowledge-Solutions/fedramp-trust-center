@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-07-10T13:18:46.893432+00:00 (38 pass / 8 fail of 46)  
-**Generated:** 2026-07-10 14:02 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-07-10T21:00:20.603948+00:00 (38 pass / 8 fail of 46)  
+**Generated:** 2026-07-10 21:40 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -599,7 +599,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-TPR-03
 - **NIST 800-53 controls:** ac-20, ra-3.1, sa-9, sa-10, sa-11, sa-15.3, sa-22, si-7.1, sr-5, sr-6, ca-7.4, sc-18
 - **Evaluation policy:** mode `capability`, pass threshold 80%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Persistently identify, review, and mitigate potential supply chain risks. | 3/3 resources compliant. | Verified: Verified: Governance document '[resource]' (55074 bytes).; Verified: Governance documen…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Persistently identify, review, and mitigate potential supply chain risks. | 3/3 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (3847 bytes, 10 sections).; V…
 - **Measures (validation objectives):**
   - Retrieve the supply chain risk management policy from CodeCommit to verify its existence and size. [Policy-as-code home: governance/ in this git repository — machine-readable markdown, change requires a commit; validated via GitHub contents API.]
   - Supply-chain dependency review policy-as-code: Dependabot configuration (automated dependency monitoring on the operated GitHub platform; replaces CodeCommit approval-rule template — change approval is enforced via GitHub pull request review).
