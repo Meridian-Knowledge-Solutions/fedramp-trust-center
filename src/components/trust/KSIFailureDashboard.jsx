@@ -137,8 +137,12 @@ const DetailDrawer = ({ failure, isActive, onClose, allHistory }) => {
                                 <span className="mono" style={{ fontSize: 17, fontWeight: 600, color: 'var(--indigo)' }}>{failure.ksi_id}</span>
                                 {isActive && sc && <span className="tag warn">{severity}</span>}
                                 {!isActive && <span className="tag ok">RESOLVED</span>}
+                                {failure.retired_pre_cr26 && <span className="tag vi" title="Indicator retired before the FedRAMP Consolidated Rules for 2026; no CR26 successor exists. Historical record.">RETIRED PRE-CR26</span>}
                             </div>
-                            <div className="mono" style={{ fontSize: 11, color: 'var(--ash)', marginTop: 3 }}>{categoryName}</div>
+                            <div className="mono" style={{ fontSize: 11, color: 'var(--ash)', marginTop: 3 }}>
+                                {categoryName}
+                                {failure.legacy_ksi_id && <span style={{ opacity: .7 }}> · formerly {Array.isArray(failure.legacy_ksi_id) ? failure.legacy_ksi_id.join(', ') : failure.legacy_ksi_id}</span>}
+                            </div>
                         </div>
                     </div>
                     {isActive && hoursActive !== null && (
