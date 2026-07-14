@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-07-13T13:22:37.616683+00:00 (38 pass / 8 fail of 46)  
-**Generated:** 2026-07-13 14:12 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-07-13T20:50:46.142398+00:00 (38 pass / 8 fail of 46)  
+**Generated:** 2026-07-13 21:20 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -462,7 +462,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-PIY-01
 - **NIST 800-53 controls:** cm-2.2, cm-7.5, cm-8, cm-8.1, cm-12, cm-12.1, cp-2.8
 - **Evaluation policy:** mode `output`, pass threshold 80%, required operational metrics: inventory_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 192/192 resources compliant. | Verified: AWS Config recorder '[resource]' con…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 204/204 resources compliant. | Verified: AWS Config recorder '[resource]' con…
 - **Measures (validation objectives):**
   - PRIMARY: Validate that the Configuration Recorder is active (The 'Authoritative Source').
   - STORAGE: Validate that the inventory data is being delivered to a central S3 bucket.
