@@ -1,7 +1,7 @@
 # FedRAMP Compliance Validation Report
 
 **Report Type:** System 2.5 Validation Integrity Report  
-**Generated:** 2026-07-16T20:50:57.007127  
+**Generated:** 2026-07-17T01:04:47.279160  
 **Purpose:** 3PAO audit readiness and technical validation verification
 
 ---
@@ -20,8 +20,8 @@
 - **Consistency Status:** EXCELLENT
 
 ### Execution Quality Analysis
-- **Technical Issues Detected:** 5
-- **Execution Quality Score:** 75%
+- **Technical Issues Detected:** 6
+- **Execution Quality Score:** 70%
 - **Automation Status:** WARNING
 
 ---
@@ -30,7 +30,7 @@
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Integrity Score** | 87.5% | ✔️ Good |
+| **Integrity Score** | 85.0% | ✔️ Good |
 | **Validation Determinism** | verified | ✅ |
 | **Technical Correctness** | issues_detected | ⚠️ |
 | **Audit Readiness** | needs_review | ⚠️ Needs Review |
@@ -40,10 +40,10 @@
 ## Interpretation
 
 ### Temporal Consistency
-The temporal consistency results (100.0%, across 9 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
+The temporal consistency results (100.0%, across 8 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
 
 ### Execution Quality
-The execution quality score of 75% shows technical issues detected: 5 automation failures require investigation.
+The execution quality score of 70% shows technical issues detected: 6 automation failures require investigation.
 
 ### Audit Readiness
 Overall audit readiness status: **NEEDS_REVIEW**

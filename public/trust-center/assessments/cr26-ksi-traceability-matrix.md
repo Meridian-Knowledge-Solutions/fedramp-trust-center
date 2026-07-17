@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-07-16T13:05:36.728956+00:00 (38 pass / 8 fail of 46)  
-**Generated:** 2026-07-16 13:56 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-07-16T20:50:56.718548+00:00 (37 pass / 9 fail of 46)  
+**Generated:** 2026-07-16 21:34 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -90,7 +90,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CMT-03
 - **NIST 800-53 controls:** cm-3, cm-3.2, cm-4.2, si-2
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: change_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant. | Verified: AWS Config recorder '[resource]' configured, recording a scoped resource set.; A…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (66%): Persistent testing and validation of changes throughout deployment is automated. | 2/4 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording a scoped …
 - **Measures (validation objectives):**
   - MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation).
   - VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources.
@@ -124,7 +124,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-08
 - **NIST 800-53 controls:** ca-2.1, ca-7.1
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Automated services are used to persistently assess the security of all machine-based information resources and automa... | 4/4 resources compliant. | Verified: Security Hub standard subscribed and REA…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Automated services are used to persistently assess the security of all machine-based information resources and automa... | 4/4 resources compliant. | Verified: Security Hub standard subscribed and PEN…
 - **Measures (validation objectives):**
   - Validate that Security Hub is active and enforcing specific compliance standards (CIS, PCI, etc).
   - Validate that GuardDuty is enabled (Detector ID exists) for automated threat detection.
@@ -158,7 +158,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-02
 - **NIST 800-53 controls:** ac-17.3, ac-18.1, ac-18.3, ac-20.1, ca-9, sc-7.3, sc-7.4, sc-7.5, sc-7.8, sc-8, sc-10, si-10, si-11, si-16
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (95%): Machine-based information resources are persistently reviewed to ensure they have a minimal attack surface and that l... | 20/22 resources compliant. | Verified: Private Subnet: '[resource]' has pub…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (95%): Machine-based information resources are persistently reviewed to ensure they have a minimal attack surface and that l... | 21/23 resources compliant. | Verified: Private Subnet: '[resource]' has pub…
 - **Measures (validation objectives):**
   - ATTACK SURFACE: Validate the existence of Private Subnets (where Public IP mapping is disabled).
   - LATERAL MOVEMENT: Validate Security Groups that allow access ONLY from other specific Security Groups (Tiered Security), rather than broad IP ranges.
@@ -220,7 +220,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-03
 - **NIST 800-53 controls:** ac-12, ac-17.3, ca-9, sc-4, sc-7, sc-7.7, sc-8, sc-10
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Logical networking and related capabilities are used and persistently reviewed to enforce traffic flow controls. | 9/11 resources compliant, 2 unverified. | Verified: VPC Endpoint '[resource] (us-east…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Logical networking and related capabilities are used and persistently reviewed to enforce traffic flow controls. | 10/12 resources compliant, 2 unverified. | Verified: VPC Endpoint '[resource] (us-eas…
 - **Measures (validation objectives):**
   - PRIVATE FLOW: Validate existence of VPC Endpoints, ensuring traffic to services like S3/DynamoDB bypasses the public internet.
   - EGRESS CONTROL: Validate active NAT Gateways. This proves instances in private subnets route outbound traffic centrally, rather than having individual Public IPs.
@@ -668,7 +668,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-01
 - **NIST 800-53 controls:** cm-7.1, cm-12.1, ma-2, pl-8, sc-7, sc-39, si-2.2, si-4, sr-10
 - **Evaluation policy:** mode `capability`, pass threshold 80%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information resources are persistently evaluated for opportunities to improve security and those improvements are per... | 3/3 resources compliant. | Verified: Inspector actively scanning 22/37 resour…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information resources are persistently evaluated for opportunities to improve security and those improvements are per... | 3/3 resources compliant. | Verified: Inspector actively scanning 33/63 resour…
 - **Measures (validation objectives):**
   - EVALUATION: Validate that Inspector is actively scanning resources (The 'Persistent Evaluation').
   - IMPROVEMENT: Validate existence of custom Patch Baselines (The mechanism for 'Implementing Improvements').
