@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-07-25T20:53:17.008104+00:00 (36 pass / 10 fail of 46)  
-**Generated:** 2026-07-25 21:40 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-07-26T05:43:15.323927+00:00 (36 pass / 10 fail of 46)  
+**Generated:** 2026-07-26 06:30 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -668,7 +668,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-01
 - **NIST 800-53 controls:** cm-7.1, cm-12.1, ma-2, pl-8, sc-7, sc-39, si-2.2, si-4, sr-10
 - **Evaluation policy:** mode `capability`, pass threshold 80%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information resources are persistently evaluated for opportunities to improve security and those improvements are per... | 3/3 resources compliant. | Verified: Inspector actively scanning 34/63 resour…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information resources are persistently evaluated for opportunities to improve security and those improvements are per... | 3/3 resources compliant. | Verified: Inspector actively scanning 35/63 resour…
 - **Measures (validation objectives):**
   - EVALUATION: Validate that Inspector is actively scanning resources (The 'Persistent Evaluation').
   - IMPROVEMENT: Validate existence of custom Patch Baselines (The mechanism for 'Implementing Improvements').
