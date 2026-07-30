@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-07-29T20:54:43.188970+00:00 (36 pass / 10 fail of 46)  
-**Generated:** 2026-07-29 21:42 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-07-30T05:35:12.022335+00:00 (37 pass / 9 fail of 46)  
+**Generated:** 2026-07-30 06:26 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -614,7 +614,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-TPR-04
 - **NIST 800-53 controls:** ac-20, ca-3, ir-6.3, ps-7, ra-5, sa-9, si-5, sr-5, sr-6, sr-8
 - **Evaluation policy:** mode `output`, pass threshold 80%, required operational metrics: vulnerability_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (91%): Third party software information resources are automatically monitored for upstream vulnerabilities using mechanisms ... | 11/15 resources compliant, 3 unverified. | Verified: Inspector actively sca…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Third party software information resources are automatically monitored for upstream vulnerabilities using mechanisms ... | 12/15 resources compliant, 3 unverified. | Verified: No critical/high finding…
 - **Measures (validation objectives):**
   - Check Inspector configuration for vulnerability scanning
   - Validate OS vulnerability findings from Inspector
