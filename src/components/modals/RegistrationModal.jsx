@@ -25,7 +25,7 @@ export const RegistrationModal = () => {
     // One-time domain whitelist (mirrors backend isValidFederalEmail): approved
     // exceptions to the federal-domain rule. Exact, case-insensitive domain match.
     // Remove entries here to revoke an exception.
-    const WHITELISTED_DOMAINS = ['frit.frb.org'];
+    const WHITELISTED_DOMAINS = ['frit.frb.org', 'apexspace.com'];
     const domain = String(email).split('@').pop().toLowerCase().trim();
     if (WHITELISTED_DOMAINS.includes(domain)) {
       return true;
