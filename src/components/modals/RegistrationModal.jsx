@@ -22,16 +22,19 @@ export const RegistrationModal = () => {
   const [submitStatus, setSubmitStatus] = useState(null);
 
   const validateEmail = (email) => {
-    // One-time domain whitelist (mirrors backend isValidFederalEmail): approved
-    // exceptions to the federal-domain rule. Exact, case-insensitive domain match.
-    // Remove entries here to revoke an exception.
-    const WHITELISTED_DOMAINS = ['frit.frb.org', 'apexspace.com'];
-    const domain = String(email).split('@').pop().toLowerCase().trim();
-    if (WHITELISTED_DOMAINS.includes(domain)) {
-      return true;
-    }
-    const govMilPattern = /^[^\s@]+@[^\s@]+\.(gov|mil|fed\.us)$/i; // Updated regex to match backend validation
-    return govMilPattern.test(email);
+    // The authoritative eligibility check (.gov / .mil / .fed.us plus any
+    // approved non-federal exception domains) runs SERVER-SIDE in the backend
+    // register handler (isValidFederalEmail). We intentionally do NOT replicate
+    // the approved-exception allowlist here: this repository is public (it is
+    // published as the GitHub Pages trust center), and listing those domains in
+    // client source would disclose them.
+    //
+    // The client therefore only performs a lightweight syntactic check so the
+    // form can give immediate feedback on obvious typos. The backend has final
+    // say and returns a specific error message (surfaced via submitStatus below)
+    // when a domain is not permitted.
+    const basicEmailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return basicEmailPattern.test(String(email).trim());
   };
 
   const handleChange = (e) => {
@@ -50,7 +53,7 @@ export const RegistrationModal = () => {
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Must be a .gov, .mil, or .fed.us email address';
+      newErrors.email = 'Enter a valid email address';
     }
     if (!formData.agency) {
       newErrors.agency = 'Agency name is required';
