@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-08-06T13:11:27.035711+00:00 (37 pass / 9 fail of 46)  
-**Generated:** 2026-08-06 14:02 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-08-07T19:06:43.226004+00:00 (37 pass / 9 fail of 46)  
+**Generated:** 2026-08-07 19:53 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -109,7 +109,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-04
 - **NIST 800-53 controls:** cm-2, si-3
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (98%): The functionality and privileges for infrastructure and services are strictly defined. | 89/91 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes,…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (98%): The functionality and privileges for infrastructure and services are strictly defined. | 92/94 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes,…
 - **Measures (validation objectives):**
   - IMMUTABILITY: Validate the documented immutable-infrastructure methodology — all production changes via version-controlled Terraform (state in S3 with versioning + DynamoDB state locking, PR-reviewed plan/apply, change tracked in git history). The Terraform state itself lives in the mks-states bucket in a SEPARATE AWS account (cross-account, not readable by the validation role); the immutable-IaC methodology is evidenced as code in governance/. [Policy-as-code home: governance/ in this git repository; validated via GitHub contents API.]
   - FUNCTIONALITY: Check for Security Groups allowing 'All Traffic' (-1). Absence of these proves strictly defined network functionality.
@@ -242,7 +242,8 @@ pre-CR26 assessment history.
 - **Measures (validation objectives):**
   - PRIMARY: Retrieve the full Credential Report to analyze password and key rotation ages.
   - AUDIT: Identify potential 'Zombie Roles' that are older than a specific threshold (adjust date as needed).
-- **Evidence artifacts:** 2 files under `evidence_v2/KSI-IAM-AAM/` (plus `cli_output.json`, `evidence_index.json`)
+  - STATISTICS: Capture root-account activity for the observations layer (frequency analysis). Root use should be break-glass only; recurring use is flagged as a statistical finding.
+- **Evidence artifacts:** 3 files under `evidence_v2/KSI-IAM-AAM/` (plus `cli_output.json`, `evidence_index.json`)
 - **Measure-to-statement rationale:** Validates proper lifecycle management by auditing credential rotation. Instead of listing static roles, it scans the Credential Report for stale passwords (>90 days) and unused access keys.
 
 ### KSI-IAM-APM — Adopting Passwordless Methods
@@ -304,7 +305,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-IAM-03
 - **NIST 800-53 controls:** ac-2, ac-2.2, ac-4, ac-6.5, ia-3, ia-5.2, ra-5.5
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (98%): Appropriately secure authentication methods are used and persistently reviewed for non-user accounts and services. | 87/89 resources compliant, 1 unverified. | Verified: RBAC Active: 1 role(s); all …
+- **Latest verdict:** **FAIL** — ❌ Insufficient (98%): Appropriately secure authentication methods are used and persistently reviewed for non-user accounts and services. | 90/92 resources compliant, 1 unverified. | Verified: RBAC Active: 1 role(s); all …
 - **Measures (validation objectives):**
   - Validate Trust Policies for CUSTOMER managed roles only.
   - Validate Service Accounts (Bots) that do not have console access (should rely on keys/roles).
