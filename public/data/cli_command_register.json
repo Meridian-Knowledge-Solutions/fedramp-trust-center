@@ -505,11 +505,17 @@
         "command": "aws iam list-roles --query \"Roles[?CreateDate<='2024-01-01']\" --output json",
         "note": "AUDIT: Identify potential 'Zombie Roles' that are older than a specific threshold (adjust date as needed).",
         "expected_output": "No IAM roles older than 365 days without recent usage should exist"
+      },
+      {
+        "command": "aws cloudtrail lookup-events --lookup-attributes AttributeKey=Username,AttributeValue=root --start-time $(date -u -d '90 days ago' +%Y-%m-%dT%H:%M:%SZ) --max-results 50 --output json",
+        "note": "STATISTICS: Capture root-account activity for the observations layer (frequency analysis). Root use should be break-glass only; recurring use is flagged as a statistical finding.",
+        "expected_output": "Zero or near-zero root-account events; any event must map to a documented break-glass ticket"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-IAM-AAM/credential_report.csv",
-      "evidence_v2/KSI-IAM-AAM/stale_roles.json"
+      "evidence_v2/KSI-IAM-AAM/stale_roles.json",
+      "evidence_v2/KSI-IAM-AAM/root_activity_events.json"
     ],
     "implementation_summary": "Account lifecycle managed via credential report monitoring. Stale credentials (>90 days unused) flagged for removal. Termination process documented.",
     "pass_criteria": "PASS if: The IAM credential report shows all passwords and access keys are compliant with rotation policies (passwords rotated within 90 days, access keys within 90 days), AND no IAM roles older than 365 days exist without recent usage (no zombie roles).",
