@@ -39,6 +39,7 @@ const THEME = {
 };
 
 import { BASE_PATH } from '../../config/theme';
+import ObservationsPanel from './ObservationsPanel';
 const DATA_URL = `${BASE_PATH}ksi_failure_tracker.json`;
 const KSI_ID_PATTERN = /^KSI-[A-Z]{3}-\d{2}$/;
 
@@ -719,6 +720,11 @@ const KSIFailureDashboard = () => {
                     </ResponsiveContainer>
                 </div>
             )}
+
+            {/* ==========================================
+                STATISTICAL OBSERVATIONS (non-gating)
+               ========================================== */}
+            <ObservationsPanel />
 
             {/* ==========================================
                 DATE-CENTRIC FAILURE HISTORY
