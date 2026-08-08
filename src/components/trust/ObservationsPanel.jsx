@@ -6,10 +6,11 @@
  * credential hygiene, KSI stability. Observations annotate the KSI record
  * but never change an assertion, so this panel is informational by design.
  *
- * Visuals (single-hue, matching the failure-dashboard Recharts idiom):
- * - Flap rate: failures per KSI in the 90-day window
- * - Stalled remediations: how many multiples of the family's median MTTR
- *   each active failure has been open, against the 2x finding threshold
+ * Layout: explainer header with tier legend → two charts (flap rate,
+ * stalled remediations) → observations GROUPED by signal, so a shared
+ * explanation and recommendation appear once per signal instead of being
+ * repeated on every affected KSI. Routine (observe-tier) signals sit
+ * behind a toggle.
  *
  * Consumes: public/data/ksi_observations.json (pipeline-synced).
  * Renders nothing if the artifact has not been synced yet.
@@ -35,17 +36,54 @@ const TIER_META = {
     observe: { label: 'OBSERVE', tagClass: 'tag' },
 };
 
-const SIGNAL_LABELS = {
-    'ksi_stability.flap_rate': 'KSI stability · flap rate',
-    'ksi_stability.stalled_remediation': 'KSI stability · stalled remediation',
-    'ksi_stability.active_failure': 'KSI stability · active failure',
-    'credential_hygiene.aging': 'Credential hygiene · aging & usage',
-    'credential_hygiene.unavailable': 'Credential hygiene',
-    'root_account.access_keys': 'Root account · access keys',
-    'root_account.recent_use': 'Root account · recent use',
-    'root_account.dormancy': 'Root account · dormancy',
-    'root_activity.frequency': 'Root activity · frequency (CloudTrail)',
-    'root_activity.pending': 'Root activity · collection pending',
+// Plain-language identity for each signal: what it measures, why it
+// matters, and how to phrase one affected KSI's statistic. The shared
+// recommendation comes from the observation payload and renders once
+// per group instead of once per KSI.
+const SIGNAL_META = {
+    'ksi_stability.flap_rate': {
+        title: 'Recurring failures',
+        explain: 'KSIs that failed 3 or more times in the last 90 days. A pass/fail cycle that keeps repeating means the remediation treats the symptom while the underlying configuration keeps regressing.',
+        itemStat: o => `${o.statistic.failures_in_window}× in 90d`,
+    },
+    'ksi_stability.stalled_remediation': {
+        title: 'Stalled remediations',
+        explain: "Active failures that have stayed open more than twice their own family's median time-to-fix — abnormal by our historical baseline, not by an arbitrary deadline.",
+        itemStat: o => `${(o.statistic.open_hours / 24).toFixed(0)}d open · median ${Math.round(o.statistic.family_median_mttr_hours)}h`,
+    },
+    'ksi_stability.active_failure': {
+        title: 'Active failures within normal remediation time',
+        explain: "Currently failing, but still inside the family's usual time-to-fix — listed for completeness, not concern.",
+        itemStat: o => `${(o.statistic.open_hours / 24).toFixed(1)}d open`,
+    },
+    'credential_hygiene.aging': {
+        title: 'Credential hygiene',
+        explain: 'Ages and usage of IAM credentials from the AWS credential report: unused active keys, keys overdue for rotation, stale console passwords, missing MFA.',
+    },
+    'credential_hygiene.unavailable': {
+        title: 'Credential hygiene',
+        explain: 'Credential report evidence was not available this run.',
+    },
+    'root_account.access_keys': {
+        title: 'Root account — access keys',
+        explain: 'The root account should never have API access keys.',
+    },
+    'root_account.recent_use': {
+        title: 'Root account — recent console use',
+        explain: 'Root console logins should map to documented break-glass events.',
+    },
+    'root_account.dormancy': {
+        title: 'Root account — dormancy',
+        explain: 'Confirms the root console password is not being used. Dormant is the expected, healthy state.',
+    },
+    'root_activity.frequency': {
+        title: 'Root account activity (CloudTrail)',
+        explain: 'Counts every root-account API event over the last 90 days and checks console logins for MFA. Root should be break-glass only, so the healthy reading is zero.',
+    },
+    'root_activity.pending': {
+        title: 'Root account activity (CloudTrail)',
+        explain: 'First CloudTrail collection has not run yet.',
+    },
 };
 
 const ChartTooltip = ({ active, payload, label, formatter }) => {
@@ -74,26 +112,50 @@ const StatChips = ({ statistic }) => {
     );
 };
 
-const ObservationRow = ({ obs }) => {
-    const meta = TIER_META[obs.tier] || TIER_META.observe;
+/** One card per signal. Multi-KSI signals render the explanation and
+ *  recommendation once, with a compact chip per affected KSI. */
+const SignalGroup = ({ signal, items }) => {
+    const meta = SIGNAL_META[signal] || { title: signal, explain: '' };
+    // A group's tier is its most severe member's tier.
+    const rank = { escalate: 0, finding: 1, observe: 2 };
+    const tier = items.reduce((worst, o) => (rank[o.tier] < rank[worst] ? o.tier : worst), 'observe');
+    const tierMeta = TIER_META[tier] || TIER_META.observe;
+    const multi = items.length > 1;
+    const recommendation = items.find(o => o.recommendation)?.recommendation;
+
     return (
-        <div style={{ display: 'flex', gap: 12, padding: '12px 0', borderTop: '1px solid var(--line)', alignItems: 'flex-start' }}>
-            <span className={`mono ${meta.tagClass}`} style={{ flexShrink: 0, minWidth: 76, textAlign: 'center' }}>{meta.label}</span>
-            <div style={{ minWidth: 0 }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'baseline' }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
-                        {SIGNAL_LABELS[obs.signal] || obs.signal}
-                    </span>
-                    {(obs.ksi_ids || []).map(id => (
-                        <code key={id} className="mono" style={{ fontSize: 11, color: 'var(--indigo)' }}>{id}</code>
+        <div style={{ padding: '14px 0', borderTop: '1px solid var(--line)' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'baseline' }}>
+                <span className={`mono ${tierMeta.tagClass}`} style={{ flexShrink: 0, minWidth: 76, textAlign: 'center' }}>{tierMeta.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{meta.title}</span>
+                {multi && <span className="mono" style={{ fontSize: 11, color: 'var(--faint)' }}>{items.length} KSIs affected</span>}
+            </div>
+            <p className="mono" style={{ fontSize: 12, color: 'var(--ash)', margin: '6px 0 0', lineHeight: 1.55, maxWidth: '72ch' }}>
+                {meta.explain}
+            </p>
+            {multi ? (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                    {items.map(o => (
+                        <span key={o.ksi_ids.join(',')} className="mono" style={{ fontSize: 11, background: 'var(--raise2)', border: '1px solid var(--line)', borderRadius: 4, padding: '3px 9px' }}>
+                            <span style={{ color: 'var(--indigo)', fontWeight: 600 }}>{o.ksi_ids[0]}</span>
+                            {meta.itemStat && <span style={{ color: 'var(--ash)' }}> · {meta.itemStat(o)}</span>}
+                        </span>
                     ))}
                 </div>
-                <p className="mono" style={{ fontSize: 12, color: 'var(--ash)', margin: '4px 0 0', lineHeight: 1.5 }}>{obs.detail}</p>
-                <StatChips statistic={obs.statistic} />
-                {obs.recommendation && obs.tier !== 'observe' && (
-                    <p style={{ fontSize: 12, color: 'var(--ink)', margin: '6px 0 0', lineHeight: 1.5 }}>→ {obs.recommendation}</p>
-                )}
-            </div>
+            ) : (
+                <>
+                    <p className="mono" style={{ fontSize: 12, color: 'var(--ash)', margin: '6px 0 0', lineHeight: 1.5 }}>
+                        {items[0].ksi_ids.map(id => (
+                            <code key={id} className="mono" style={{ fontSize: 11, color: 'var(--indigo)', marginRight: 8 }}>{id}</code>
+                        ))}
+                        {items[0].detail}
+                    </p>
+                    <StatChips statistic={items[0].statistic} />
+                </>
+            )}
+            {recommendation && tier !== 'observe' && (
+                <p style={{ fontSize: 12, color: 'var(--ink)', margin: '8px 0 0', lineHeight: 1.5, maxWidth: '76ch' }}>→ {recommendation}</p>
+            )}
         </div>
     );
 };
@@ -115,10 +177,21 @@ const ObservationsPanel = () => {
 
     const byTier = data.summary?.by_tier || {};
     const observations = data.observations || [];
-    // Escalations and findings always show; observe entries sit behind a toggle.
-    const headline = observations.filter(o => o.tier !== 'observe');
-    const quiet = observations.filter(o => o.tier === 'observe');
-    const visible = expanded ? observations : headline;
+
+    // Group by signal, preserving artifact order (escalate → finding → observe).
+    const groups = [];
+    const bySignal = new Map();
+    for (const o of observations) {
+        if (!bySignal.has(o.signal)) {
+            bySignal.set(o.signal, []);
+            groups.push(o.signal);
+        }
+        bySignal.get(o.signal).push(o);
+    }
+    const isQuiet = signal => bySignal.get(signal).every(o => o.tier === 'observe');
+    const headlineGroups = groups.filter(s => !isQuiet(s));
+    const quietGroups = groups.filter(isQuiet);
+    const visibleGroups = expanded ? groups : headlineGroups;
 
     // --- Chart data (both derive from the stability signal) ---
     const flapData = observations
@@ -150,10 +223,17 @@ const ObservationsPanel = () => {
                     NON-GATING
                 </span>
             </div>
-            <p className="mono" style={{ fontSize: 11, color: 'var(--ash)', margin: '0 0 14px', lineHeight: 1.5 }}>
-                Frequency, breadth, and trend signals computed each pipeline run from collected evidence
-                (root-account activity, credential hygiene, KSI stability). Informational — these do not
-                affect the pass/fail posture above. Generated {data.metadata?.generated_at || 'N/A'}.
+            <p className="mono" style={{ fontSize: 11, color: 'var(--ash)', margin: '0 0 6px', lineHeight: 1.55, maxWidth: '90ch' }}>
+                Automated behavioral review, regenerated on every pipeline run from evidence the pipeline
+                already collects: root-account usage (CloudTrail), credential hygiene (IAM credential
+                report), and the stability of KSI remediations (failure-tracker history). These add the
+                dimension a point-in-time check cannot see — frequency and trend over time.
+            </p>
+            <p className="mono" style={{ fontSize: 11, color: 'var(--faint)', margin: '0 0 14px', lineHeight: 1.55 }}>
+                <span className="tag" style={{ fontSize: 9 }}>OBSERVE</span> expected or benign state
+                &nbsp;·&nbsp; <span className="tag warn" style={{ fontSize: 9 }}>FINDING</span> statistically significant, needs review
+                &nbsp;·&nbsp; <span className="tag red" style={{ fontSize: 9 }}>ESCALATE</span> unambiguous, act now
+                &nbsp;·&nbsp; None of these change the pass/fail posture above. Generated {data.metadata?.generated_at || 'N/A'}.
             </p>
 
             {(flapData.length > 0 || stalledData.length > 0) && (
@@ -204,15 +284,17 @@ const ObservationsPanel = () => {
                 </div>
             )}
 
-            {visible.map((obs, i) => <ObservationRow key={`${obs.signal}-${(obs.ksi_ids || []).join(',')}-${i}`} obs={obs} />)}
-            {quiet.length > 0 && (
+            {visibleGroups.map(signal => (
+                <SignalGroup key={signal} signal={signal} items={bySignal.get(signal)} />
+            ))}
+            {quietGroups.length > 0 && (
                 <button
                     type="button"
                     onClick={() => setExpanded(e => !e)}
                     className="mono"
                     style={{ marginTop: 10, fontSize: 11, color: 'var(--indigo)', background: 'none', border: '1px solid var(--line)', borderRadius: 4, padding: '4px 10px', cursor: 'pointer' }}
                 >
-                    {expanded ? 'Hide' : 'Show'} {quiet.length} routine observation{quiet.length === 1 ? '' : 's'}
+                    {expanded ? 'Hide' : 'Show'} {quietGroups.length} routine signal{quietGroups.length === 1 ? '' : 's'} (all healthy)
                 </button>
             )}
         </div>
