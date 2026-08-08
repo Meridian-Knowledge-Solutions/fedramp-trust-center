@@ -41,7 +41,10 @@ const THEME = {
 import { BASE_PATH } from '../../config/theme';
 import ObservationsPanel from './ObservationsPanel';
 const DATA_URL = `${BASE_PATH}ksi_failure_tracker.json`;
-const KSI_ID_PATTERN = /^KSI-[A-Z]{3}-\d{2}$/;
+// Accepts both ID generations: legacy numeric (KSI-CNA-04) and CR26
+// mnemonic (KSI-CNA-DFP), plus FRR family keys (FRR-CMU-xxx). The legacy
+// 'terraform' sentinel and other malformed keys still get filtered.
+const KSI_ID_PATTERN = /^(?:KSI|FRR)-[A-Z]{3}-(?:\d{2}|[A-Z]{3})$/;
 
 const KSI_CATEGORIES = {
     'INR': 'Incident Response', 'CNA': 'Cloud Native Architecture',
