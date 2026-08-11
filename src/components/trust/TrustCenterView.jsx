@@ -56,6 +56,20 @@ const Sparkbars = ({ data, max }) => {
     );
 };
 
+// Detection-source keys as published by the VDR pipeline (lowercased, spaces
+// collapsed to underscores). The set is open, so unknown keys fall back to the
+// key itself rather than being dropped.
+const SOURCE_LABELS = {
+    inspector: 'Inspector', aws_inspector: 'Inspector',
+    securityhub: 'Security Hub', security_hub: 'Security Hub',
+    cspm: 'CSPM', pentest: 'pentest', penetration_test: 'pentest',
+    external: 'external scan', external_scanner: 'external scan',
+    sca: 'SCA', osv: 'SCA', sast: 'SAST', bandit: 'SAST',
+    processfailure: 'detection-process failure',
+    process_failure: 'detection-process failure',
+    unattributed: 'unattributed',
+};
+
 const Kick = ({ children }) => <div className="kick">{children}</div>;
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -107,7 +121,7 @@ export const TrustCenterView = () => {
             ['ok', 'probe', 'status endpoint → 200 OK · operational'],
             ['vi', 'ksi', `KSI validation run · ${metrics?.passed ?? 0}/${ksis?.length ?? 0} passing`],
             ['ok', 'evidence', `daily evidence snapshot sealed · ${oar?.executive_summary?.evidence_snapshots?.daily ?? 230} today`],
-            ['ok', 'vdr', `VDR pipeline · ${vdr?.risk?.critical ?? 0} critical · ${vdr?.vdr_acceptance?.active ?? 11} active`],
+            ['ok', 'vdr', `VDR pipeline · ${vdr?.risk?.critical ?? 0} critical · ${vdr?.vdr_acceptance?.active ?? 0} active`],
             ...changes.slice(0, 3).map(c => ['vi', 'scn', `${c.scn_id} · ${(c.type || '').replace('_', ' ')}`]),
             ['ok', 'cert', 'TLS 1.2+ chain validated'],
             ['vi', 'ccm', `quarterly CM review · ${schedule?.next_quarterly_review || 'scheduled'}`],
@@ -158,6 +172,31 @@ export const TrustCenterView = () => {
     const uptime = status?.uptime_percent ? parseFloat(status.uptime_percent) : 99.99;
     const sev = vdr?.risk?.severity || {};
     const vcls = (n) => n === 0 ? 'z' : n >= 1 ? 'h' : 'h';
+
+    // Register composition. The CSPM block is a severity view of findings that are
+    // already inside snapshot.total_vulnerabilities when counted_in_total is set,
+    // so it is reported as a share of the register total and never added to it.
+    const registerTotal = vdr?.snapshot?.total_vulnerabilities ?? null;
+    const cspm = vdr?.cspm ?? null;
+    const cspmSummary = !cspm ? null : [
+        `${cspm.total ?? 0} tracked`,
+        cspm.counted_in_total === true && registerTotal != null
+            ? `included in the ${registerTotal} register total`
+            : 'reported separately',
+        `${cspm.by_severity?.CRITICAL ?? 0} critical`,
+    ].join(' · ');
+
+    // Detection-source attribution, rendered from whatever keys the pipeline
+    // publishes — the key set is open and unknown sources must still show up.
+    const detectionSources = vdr?.detection_sources ?? null;
+    const detectionSourceSummary = !detectionSources ? null : (() => {
+        const entries = Object.entries(detectionSources)
+            .map(([k, v]) => [k, typeof v === 'number' ? v : (v?.count ?? 0)])
+            .sort((a, b) => b[1] - a[1]);
+        const sum = entries.reduce((t, [, v]) => t + v, 0);
+        const label = (k) => SOURCE_LABELS[String(k).toLowerCase()] ?? String(k).replace(/[_-]+/g, ' ');
+        return `${entries.map(([k, v]) => `${v} ${label(k)}`).join(' · ')} = ${sum}`;
+    })();
 
     return (
         <div ref={rootRef} className="tcx -m-6 md:-m-8">
@@ -254,11 +293,17 @@ export const TrustCenterView = () => {
                         ))}
                     </div>
                     <div className="panel rv">
-                        {[['Security posture', `${vdr?.posture?.rating || 'EXCELLENT'} · ${vdr?.posture?.score ?? 8.6}`, 'ok'],
-                        ['Active / accepted', `${vdr?.vdr_acceptance?.active ?? 11} active · ${vdr?.vdr_acceptance?.accepted ?? 0} accepted`, 'ok'],
+                        {[['Security posture', vdr?.posture ? `${vdr.posture.rating} · ${vdr.posture.score}` : '—', 'ok'],
+                        ['Active / accepted', vdr?.vdr_acceptance ? `${vdr.vdr_acceptance.active ?? 0} active · ${vdr.vdr_acceptance.accepted ?? 0} accepted` : '—', 'ok'],
                         ['KEV matches', `${vdr?.risk?.kev_matches ?? 0}`, 'ok'],
-                        ['VER-EVA (contextual evaluation)', vdr?.compliance?.frr_cvm_04 || 'COMPLIANT', 'ok'],
-                        ['CSPM findings', `${vdr?.cspm?.total ?? 139} tracked · ${vdr?.cspm?.by_severity?.CRITICAL ?? 1} critical`, 'warn']].map((r, i) => (
+                        ['LEV / IRV', `${vdr?.risk?.lev_count ?? 0} likely exploitable · ${vdr?.risk?.irv_count ?? 0} internet reachable`, (vdr?.risk?.lev_count || vdr?.risk?.irv_count) ? 'warn' : 'ok'],
+                        ['VER-EVA (contextual evaluation)', vdr?.compliance?.frr_cvm_04 || '—', 'ok'],
+                        // Detection sources make the register total legible: a total that moved
+                        // because a new source was ingested is a coverage change, not a spike.
+                        ['Detection sources', detectionSourceSummary, 'ok'],
+                        // CSPM findings are counted inside the register total when the pipeline
+                        // says so — shown as a share of it, never added to it.
+                        ['CSPM findings (cloud misconfiguration)', cspmSummary, 'warn']].filter(r => r[1] !== null).map((r, i) => (
                             <div className="row" key={i}>
                                 <span className="svc" style={{ fontSize: 14 }}>{r[0]}</span>
                                 <span className="mono" style={{ marginLeft: 'auto' }}>{r[1]}</span>
