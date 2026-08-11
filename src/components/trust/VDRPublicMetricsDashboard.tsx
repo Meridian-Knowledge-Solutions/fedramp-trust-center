@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell, CartesianGrid, PieChart, Pie, LineChart, Line,
+  BarChart, Bar, Cell, CartesianGrid, PieChart, Pie, LineChart, Line, ReferenceLine,
 } from "recharts";
 
 import { BASE_PATH } from '../../config/theme';
@@ -27,6 +27,79 @@ const SOURCE_COLORS: Record<string, string> = {
   Inspector: INDIGO, "Security Hub": INDIGO, Pentest: AMBER,
   Audit: AMBER, Incident: RED, SCA: SIGNAL,
   SAST: SIGNAL, DAST: INDIGO, External: ASH
+};
+
+// Detection-source keys arrive lowercased with spaces collapsed to underscores
+// (generate_public_vdr_metrics.py). The key set is deliberately open — a new
+// detector, including the VDR-CSO-FAV process-failure bucket, appears in the
+// data without a frontend change — so unknown keys are labelled from the key
+// itself rather than dropped.
+const SOURCE_LABELS: Record<string, string> = {
+  inspector: "AWS Inspector",
+  aws_inspector: "AWS Inspector",
+  securityhub: "AWS Security Hub",
+  security_hub: "AWS Security Hub",
+  cspm: "CSPM · cloud misconfiguration",
+  pentest: "Penetration test",
+  penetration_test: "Penetration test",
+  external: "External scanner",
+  external_scanner: "External scanner",
+  sca: "SCA · dependency scan",
+  osv: "SCA · dependency scan",
+  sast: "SAST · code scan",
+  bandit: "SAST · code scan",
+  processfailure: "Detection process failure",
+  process_failure: "Detection process failure",
+  unattributed: "Unattributed",
+  unknown: "Unattributed",
+};
+
+const SOURCE_KEY_COLORS: Record<string, string> = {
+  inspector: INDIGO, aws_inspector: INDIGO,
+  securityhub: INDIGO, security_hub: INDIGO,
+  cspm: SIGNAL, pentest: AMBER, penetration_test: AMBER,
+  external: ASH, external_scanner: ASH,
+  sca: SIGNAL, osv: SIGNAL, sast: SIGNAL, bandit: SIGNAL,
+  processfailure: RED, process_failure: RED,
+  unattributed: FAINT, unknown: FAINT,
+};
+
+const normalizeSourceKey = (k: string) => String(k).trim().toLowerCase().replace(/[\s-]+/g, "_");
+const isProcessFailureKey = (k: string) =>
+  ["processfailure", "process_failure"].includes(normalizeSourceKey(k));
+const sourceLabel = (k: string) =>
+  SOURCE_LABELS[normalizeSourceKey(k)] ??
+  String(k).replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+// Shared verdict → tag mapping. Every verdict the pipeline can emit has a
+// branch here: pass/operational as readily as fail/missing, so a state that
+// flips on the next run is rendered rather than falling through to a default.
+const verdictStyle = (v?: string) => {
+  const key = (v || "unknown").toLowerCase();
+  if (["pass", "passing", "clean", "operational", "met"].includes(key))
+    return { tag: "ok", label: key.toUpperCase() };
+  if (["fail", "failing", "missing", "breached"].includes(key))
+    return { tag: "red", label: key.toUpperCase() };
+  if (["partial", "degraded", "warning"].includes(key))
+    return { tag: "warn", label: key.toUpperCase() };
+  return { tag: "vi", label: key.toUpperCase() };
+};
+
+const INDICATOR_LABELS: Record<string, string> = {
+  aws_inspector: "AWS Inspector",
+  security_hub: "AWS Security Hub (CSPM)",
+  threat_intel: "Threat intelligence (KEV / EPSS)",
+  reachability_assessor: "Reachability assessor",
+  pentest_attestation: "Penetration test attestation",
+  external_scanner: "External scanner",
+};
+
+const formatDay = (v?: string) => {
+  if (!v) return null;
+  const d = new Date(`${String(v).slice(0, 10)}T00:00:00Z`);
+  return isNaN(d.getTime())
+    ? String(v)
+    : d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
 };
 
 const mono: React.CSSProperties = { fontFamily: "var(--mono)" };
@@ -102,6 +175,7 @@ const RiskGauge = ({ label, value, max = 100 }: { label: string; value: number; 
 
 export default function VDRDashboard() {
   const [data, setData] = useState<any>(null);
+  const [report, setReport] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [trendMode, setTrendMode] = useState<"daily" | "weekly" | "monthly">("weekly");
   const [scanTableOpen, setScanTableOpen] = useState(false);
@@ -114,6 +188,14 @@ export default function VDRDashboard() {
       .then(d => setData(d))
       .catch(console.error)
       .finally(() => setLoading(false));
+
+    // The published VDR report carries the methodology text and the scan-source
+    // list that the aggregate metrics file does not. Best effort: the dashboard
+    // renders fully without it.
+    fetch(`${BASE_PATH}reports/samples/vdr-report.json?t=${ts}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(r => setReport(r))
+      .catch(() => setReport(null));
   }, []);
 
   // Normalize: the JSON uses "total" in trends, component uses "total_vulnerabilities"
@@ -193,21 +275,62 @@ export default function VDRDashboard() {
     }));
   }, [data]);
 
-  // Detection sources bar data — supports both {name: {count: N}} and {name: N} formats
+  // Detection sources bar data — supports both {name: {count: N}} and {name: N}
+  // formats. Every key present in the data is rendered, including ones this
+  // component has never seen; sorted by count so the breakdown reads at a glance.
   const sourceBarData = useMemo(() => {
     const ds = data?.detection_sources ?? data?.snapshot?.detection_sources;
     if (!ds) return [];
-    return Object.entries(ds).map(([name, info]: [string, any]) => {
-      const displayName = name.charAt(0).toUpperCase() + name.slice(1);
-      const count = typeof info === "number" ? info : info.count;
-      return { name: displayName, count, color: SOURCE_COLORS[displayName] || ASH };
-    });
+    return Object.entries(ds)
+      .map(([key, info]: [string, any]) => {
+        const count = typeof info === "number" ? info : (info?.count ?? 0);
+        return {
+          key,
+          name: sourceLabel(key),
+          count,
+          color: SOURCE_KEY_COLORS[normalizeSourceKey(key)] || SOURCE_COLORS[sourceLabel(key)] || ASH,
+          processFailure: isProcessFailureKey(key),
+        };
+      })
+      .sort((a, b) => b.count - a.count);
   }, [data]);
+
+  const sourceTotal = useMemo(
+    () => sourceBarData.reduce((sum: number, s: any) => sum + (s.count || 0), 0),
+    [sourceBarData]
+  );
+
+  const processFailureCount = useMemo(
+    () => sourceBarData.filter((s: any) => s.processFailure).reduce((sum: number, s: any) => sum + s.count, 0),
+    [sourceBarData]
+  );
 
   // Peak value for trend annotation
   const trendPeak = useMemo(() => {
     if (!dailyTrends.length) return 0;
     return Math.max(...dailyTrends.map((d: any) => d.total_vulnerabilities ?? d.total ?? 0));
+  }, [dailyTrends]);
+
+  // Largest step-up in the daily series. A jump of this size is a detection-scope
+  // change (a new source entering the register), not a change in exposure, and
+  // VER-RPT-PER frames each report as summarising activity since the previous one
+  // — so the step is annotated where it happened and prior points are left as
+  // published rather than backfilled.
+  const scopeSteps = useMemo(() => {
+    if (dailyTrends.length < 2) return [] as { date: string; from: number; to: number; pct: number }[];
+    const totalAt = (d: any) => d?.total_vulnerabilities ?? d?.total ?? 0;
+    const steps: { date: string; from: number; to: number; pct: number }[] = [];
+    for (let i = 1; i < dailyTrends.length; i++) {
+      const from = totalAt(dailyTrends[i - 1]);
+      const to = totalAt(dailyTrends[i]);
+      const delta = to - from;
+      if (delta <= 0 || from <= 0) continue;
+      // Both thresholds: a large relative jump that is also material in absolute
+      // terms, so small-register noise (2 → 4) is not flagged as a scope change.
+      if ((delta / from) * 100 < 50 || delta < 10) continue;
+      steps.push({ date: dailyTrends[i].date, from, to, pct: (delta / from) * 100 });
+    }
+    return steps;
   }, [dailyTrends]);
 
   const formatDate = (v: string) => {
@@ -268,8 +391,55 @@ export default function VDRDashboard() {
   const vdrAcceptance = data.vdr_acceptance;
   const vdrOutcome = data.vdr_outcome;
   const hasDeltas = !!(data.kpi?.delta_7d || data.kpi?.delta_30d || data.deltas);
-  const hasScanSources = Array.isArray(data.scan_sources) && data.scan_sources.length > 0;
-  const hasDetectionSources = !!(data.detection_sources ?? data.snapshot?.detection_sources);
+  const hasDetectionSources = sourceBarData.length > 0;
+
+  // Scan-source detail: the aggregate metrics file does not carry it, the
+  // published VDR report does. Either source is accepted.
+  const scanSources = Array.isArray(data.scan_sources) && data.scan_sources.length > 0
+    ? data.scan_sources
+    : (report?.scan_summary?.scan_sources ?? []);
+  const hasScanSources = scanSources.length > 0;
+  const methodology = report?.methodology ?? null;
+
+  // CSPM: cloud-misconfiguration findings. Two different populations share this
+  // block and must not be conflated:
+  //   • cspm.total is the raw count Security Hub reported (583 at time of
+  //     writing) — the pre-aggregation source volume.
+  //   • detection_sources.cspm is how many records actually entered the register
+  //     (51), which is the number counted_in_total is true of.
+  // Publishing the raw count as "included in the 112" would assert that 583
+  // findings sit inside a 112-record register. The in-register count leads, the
+  // raw volume is shown as context, and neither is ever added to the total.
+  const cspm = data.cspm ?? null;
+  const cspmRawTotal = cspm?.total ?? null;
+  const cspmInRegister = sourceBarData.find((s: any) => normalizeSourceKey(s.key) === "cspm")?.count ?? null;
+  // Only claim inclusion for a figure that can actually be inside the register.
+  const cspmCounted = cspm?.counted_in_total === true &&
+    (cspmInRegister != null || (cspmRawTotal != null && cspmRawTotal <= kpi.total_vulnerabilities));
+  const cspmHeadline = cspmInRegister ?? cspmRawTotal ?? 0;
+  const cspmRawDiffers = cspmRawTotal != null && cspmInRegister != null && cspmRawTotal !== cspmInRegister;
+  const cspmSeverity: [string, number][] = cspm?.by_severity
+    ? (["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"] as const)
+      .map((b) => [b, cspm.by_severity[b] ?? 0] as [string, number])
+      .filter(([, v]) => v > 0)
+    : [];
+  const cspmSeveritySum = cspmSeverity.reduce((t, [, v]) => t + v, 0);
+
+  // Mode 1 capability indicators — the detection capabilities the register
+  // depends on, including the penetration-test attestation.
+  const capability = vdrOutcome?.mode_1_capability ?? null;
+  const indicators: [string, any][] = capability?.indicators
+    ? Object.entries(capability.indicators)
+    : [];
+  const attestation = capability?.indicators?.pentest_attestation ?? null;
+  // The assessor is named in the published report's scan-source list; the
+  // aggregate metrics only carry the verdict and the currency date.
+  const pentestSource = scanSources.find((s: any) =>
+    String(s?.scan_type || "").toLowerCase().includes("penetration") ||
+    String(s?.source_name || "").toLowerCase().includes("penetration test")
+  );
+  const attestationThrough = attestation?.current_through ?? null;
+  const attestationLetters = attestation?.attestation_letters ?? attestation?.letters ?? null;
 
   // Build deltas from either kpi.delta_7d (legacy) or data.deltas.vs_7d (current)
   const zeroDelta = { total: 0, critical: 0, lev: 0, irv: 0, compliance: 0, unique_cves: 0 };
@@ -415,16 +585,6 @@ export default function VDRDashboard() {
           OPERATIONAL STATUS — KPI tiles + verdict
          ────────────────────────────────────────────── */}
       {vdrOutcome && (() => {
-        const verdictStyle = (v?: string) => {
-          const key = (v || "unknown").toLowerCase();
-          if (["pass", "passing", "clean", "operational", "met"].includes(key))
-            return { tag: "ok", label: key.toUpperCase() };
-          if (["fail", "failing", "missing", "breached"].includes(key))
-            return { tag: "red", label: key.toUpperCase() };
-          if (["partial", "degraded", "warning"].includes(key))
-            return { tag: "warn", label: key.toUpperCase() };
-          return { tag: "vi", label: key.toUpperCase() };
-        };
         const overall = verdictStyle(vdrOutcome.overall_verdict);
         const m2 = vdrOutcome.mode_2_output_rate;
         const m3 = vdrOutcome.mode_3_critical_override;
@@ -478,9 +638,113 @@ export default function VDRDashboard() {
                 </div>
               ))}
             </div>
+            {/* The three modes behind the overall verdict, each rendered from its
+                own published verdict rather than inferred from the headline. */}
+            <div className="panel" style={{ marginTop: 12 }}>
+              {[
+                { l: "Mode 1 · detection capability", v: capability?.verdict, n: capability ? `${indicators.length} indicators` : null },
+                { l: "Mode 2 · output rate", v: m2?.verdict, n: m2?.explanation },
+                { l: "Mode 3 · critical override", v: m3?.verdict, n: breachCount === 0 ? "No SLA breaches" : `${breachCount} SLA ${breachCount === 1 ? "breach" : "breaches"}` },
+              ].filter(r => r.v).map((r, i) => {
+                const s = verdictStyle(r.v);
+                return (
+                  <div className="row" key={i}>
+                    <span className="svc" style={{ fontSize: 13 }}>{r.l}</span>
+                    {r.n && <span className="mono" style={{ marginLeft: 16, color: FAINT, fontSize: 11 }}>{r.n}</span>}
+                    <span style={{ marginLeft: "auto" }}><span className={`tag ${s.tag}`}>{s.label}</span></span>
+                  </div>
+                );
+              })}
+            </div>
           </>
         );
       })()}
+
+      {/* ──────────────────────────────────────────────
+          DETECTION CAPABILITY — Mode 1 indicators + pentest attestation
+         ────────────────────────────────────────────── */}
+      {capability && (
+        <>
+          <h3 className="sec">
+            Detection capability
+            <span className={`tag ${verdictStyle(capability.verdict).tag}`} style={{ marginLeft: 10 }}>
+              {verdictStyle(capability.verdict).label}
+            </span>
+          </h3>
+          <div className="g2">
+            <div className="panel">
+              <div className="ph"><h4>Capability indicators</h4><span className="map">VDR Mode 1</span></div>
+              {indicators.map(([key, ind]: [string, any]) => {
+                const s = verdictStyle(ind?.verdict);
+                return (
+                  <div className="row" key={key} style={{ alignItems: "flex-start" }}>
+                    <span style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
+                      <span className="svc" style={{ fontSize: 13 }}>{INDICATOR_LABELS[key] ?? sourceLabel(key)}</span>
+                      {ind?.note && (
+                        <span className="mono" style={{ fontSize: 11, color: FAINT, lineHeight: 1.5 }}>{ind.note}</span>
+                      )}
+                    </span>
+                    <span style={{ marginLeft: "auto", paddingLeft: 12 }}>
+                      <span className={`tag ${s.tag}`}>{s.label}</span>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Attestation card — renders whichever state the pipeline publishes:
+                operational with a currency date, degraded when the letter has
+                aged out, or missing when no evidence is on file. */}
+            <div className="panel">
+              <div className="ph">
+                <h4>Independent penetration test</h4>
+                <span className="map">VER-RPT-HLO</span>
+              </div>
+              {attestation ? (
+                <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <Check ok={verdictStyle(attestation.verdict).tag === "ok"} />
+                    <span className={`tag ${verdictStyle(attestation.verdict).tag}`}>
+                      {verdictStyle(attestation.verdict).label}
+                    </span>
+                    {attestationThrough && (
+                      <span className="mono" style={{ fontSize: 12, color: INK }}>
+                        current through {formatDay(attestationThrough)}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {pentestSource?.source_name && (
+                      <div className="mono" style={{ fontSize: 12, color: ASH }}>
+                        Assessor <span style={{ color: INK }}>{pentestSource.source_name.replace(/\s+penetration test$/i, "")}</span>
+                        {pentestSource.scan_type && (
+                          <span style={{ color: FAINT }}> · {String(pentestSource.scan_type).replace(/_/g, " ")}</span>
+                        )}
+                      </div>
+                    )}
+                    {attestationLetters != null && (
+                      <div className="mono" style={{ fontSize: 12, color: ASH }}>
+                        Attestation letters on file <span style={{ color: INK }}>{attestationLetters}</span>
+                      </div>
+                    )}
+                    {attestation.note && (
+                      <div className="mono" style={{ fontSize: 11, color: FAINT, lineHeight: 1.6 }}>{attestation.note}</div>
+                    )}
+                  </div>
+                  <div className="mono" style={{ fontSize: 11, color: FAINT, lineHeight: 1.6 }}>
+                    Penetration-test findings are ingested into the same register as scanner
+                    findings and are attributed to the <span style={{ color: ASH }}>Penetration test</span> detection source below.
+                  </div>
+                </div>
+              ) : (
+                <div className="row">
+                  <span className="mono" style={{ color: ASH }}>No attestation indicator published</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ──────────────────────────────────────────────
           VDR ACCEPTANCE
@@ -528,10 +792,40 @@ export default function VDRDashboard() {
               <XAxis dataKey="date" tick={{ fill: ASH, fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={formatDate} interval="preserveStartEnd" />
               <YAxis tick={{ fill: ASH, fontSize: 10 }} axisLine={false} tickLine={false} domain={["dataMin - 20", "dataMax + 20"]} />
               <Tooltip content={<ChartTip />} />
+              {trendMode === "daily" && scopeSteps.map((s, i) => (
+                <ReferenceLine
+                  key={i}
+                  x={s.date}
+                  stroke={AMBER}
+                  strokeDasharray="4 4"
+                  label={{ value: "scope change", position: "insideTopRight", fill: AMBER, fontSize: 10 }}
+                />
+              ))}
               <Line type="monotone" dataKey="total_vulnerabilities" name="Total" stroke={SIGNAL} strokeWidth={2} dot={trendMode !== "daily" ? { r: 3, fill: SIGNAL, stroke: RAISE, strokeWidth: 2 } : false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
+        {/* Scope-change annotation. The step is a widening of what is detected,
+            not a deterioration in posture, and it is marked in place: VER-RPT-PER
+            frames each report as summarising activity since the previous one, so
+            already-published points are never restated. */}
+        {scopeSteps.length > 0 && (
+          <div style={{ borderTop: `1px solid ${LINE}`, padding: "14px 20px", display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <span className="tag warn" style={{ flexShrink: 0 }}>SCOPE CHANGE</span>
+            <span className="mono" style={{ fontSize: 11, color: ASH, lineHeight: 1.7 }}>
+              {scopeSteps.map((s, i) => (
+                <span key={i}>
+                  {i > 0 && " "}
+                  {formatDay(s.date)}: {s.from} → {s.to} findings (+{Math.round(s.pct)}%).
+                </span>
+              ))}{" "}
+              {hasDetectionSources
+                ? "Steps of this size reflect new detection sources entering the register — penetration-test and cloud-misconfiguration findings are now ingested alongside scanner findings — rather than a change in exposure. See the detection-source breakdown below."
+                : "Steps of this size reflect a change in what is detected rather than a change in exposure."}{" "}
+              Earlier points are left exactly as published; per VER-RPT-PER each report summarises activity since the previous one, so history is annotated, not restated.
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ──────────────────────────────────────────────
@@ -569,16 +863,27 @@ export default function VDRDashboard() {
 
         {/* N-Rating Bar */}
         <div className="panel">
-          <div className="ph"><h4>N-rating distribution</h4><span className="map">severity tiers</span></div>
+          <div className="ph"><h4>N-rating distribution</h4><span className="map">potential agency impact</span></div>
           <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
             {nRatingData.map((n: any, i: number) => {
               const total = kpi.total_vulnerabilities || 1;
               const pct = (n.value / total) * 100;
-              const nColors: Record<string, string> = { N1: RED, N2: AMBER, N3: AMBER, N4: INDIGO, N5: SIGNAL, unrated: FAINT };
+              // N5 is the most severe tier and N1 the least, so the scale runs
+              // red at N5 down to teal at N1.
+              const nColors: Record<string, string> = { N5: RED, N4: AMBER, N3: AMBER, N2: INDIGO, N1: SIGNAL, unrated: FAINT };
+              const nMeaning: Record<string, string> = {
+                N5: "catastrophic", N4: "serious", N3: "moderate",
+                N2: "limited", N1: "minimal", unrated: "not yet rated",
+              };
               return (
                 <div key={i}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                    <span style={{ fontSize: 13, color: ASH }}>{n.name}</span>
+                    <span style={{ fontSize: 13, color: ASH }}>
+                      {n.name}
+                      {nMeaning[n.name] && (
+                        <span className="mono" style={{ fontSize: 10, color: FAINT, marginLeft: 8 }}>{nMeaning[n.name]}</span>
+                      )}
+                    </span>
                     <span className="mono" style={{ color: INK }}>{n.value}</span>
                   </div>
                   <div style={{ height: 8, borderRadius: 4, background: "#0A0E13", overflow: "hidden" }}>
@@ -587,22 +892,31 @@ export default function VDRDashboard() {
                 </div>
               );
             })}
+            <div className="mono" style={{ fontSize: 11, color: FAINT, lineHeight: 1.7, marginTop: 4 }}>
+              Ratings express potential agency impact under VER-EVA-EFA — severity and data
+              sensitivity together with exploitability, internet reachability and known-threat
+              status — not scanner severity alone.
+            </div>
           </div>
         </div>
       </div>
 
       {/* ──────────────────────────────────────────────
-          DETECTION SOURCES BAR — 9 FedRAMP categories
+          DETECTION SOURCES — attribution of every finding in the register
          ────────────────────────────────────────────── */}
       {hasDetectionSources && (
       <>
-        <h3 className="sec">Detection sources · FedRAMP required categories</h3>
+        <h3 className="sec">Detection sources · what found each finding</h3>
         <div className="panel">
+          <div className="ph">
+            <h4>Attribution</h4>
+            <span className="map">VER-RPT-VDT · VER-RPT-HLO</span>
+          </div>
           <div style={{ padding: "18px 12px 8px" }}>
-            <ResponsiveContainer width="100%" height={180}>
+            <ResponsiveContainer width="100%" height={200}>
               <BarChart data={sourceBarData} barCategoryGap="16%">
                 <CartesianGrid stroke={LINE} strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: ASH, fontSize: 10 }} axisLine={false} tickLine={false} angle={-20} textAnchor="end" height={50} />
+                <XAxis dataKey="name" tick={{ fill: ASH, fontSize: 10 }} axisLine={false} tickLine={false} angle={-20} textAnchor="end" height={70} interval={0} />
                 <YAxis tick={{ fill: FAINT, fontSize: 10 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<ChartTip />} />
                 <Bar dataKey="count" name="Findings" radius={[4, 4, 0, 0]}>
@@ -620,6 +934,97 @@ export default function VDRDashboard() {
               ))}
             </div>
           </div>
+          {/* Reconciliation: the breakdown accounts for the headline total
+              exactly. If a future payload ever disagrees, say so rather than
+              publishing two numbers that quietly contradict each other. */}
+          <div className="row" style={{ borderTop: `1px solid ${LINE}` }}>
+            <span className="svc" style={{ fontSize: 13 }}>Sum of sources</span>
+            <span className="mono" style={{ marginLeft: "auto", color: INK }}>
+              {sourceBarData.map((s: any) => s.count).join(" + ")} = {sourceTotal.toLocaleString()}
+            </span>
+            <span style={{ marginLeft: 12 }}>
+              <span className={`tag ${sourceTotal === kpi.total_vulnerabilities ? "ok" : "warn"}`}>
+                {sourceTotal === kpi.total_vulnerabilities
+                  ? `MATCHES REGISTER TOTAL (${kpi.total_vulnerabilities})`
+                  : `REGISTER TOTAL ${kpi.total_vulnerabilities}`}
+              </span>
+            </span>
+          </div>
+          <div style={{ padding: "14px 20px" }}>
+            <p className="mono" style={{ fontSize: 11, color: FAINT, lineHeight: 1.7, margin: 0 }}>
+              Every finding in the register is attributed to the source that detected it, so a
+              change in the headline total can be read for what it is. Growth driven by a new
+              source — an independent penetration test, or cloud-misconfiguration findings from
+              continuous control testing — is an expansion of detection coverage, not a rise in
+              exposure.
+            </p>
+          </div>
+          {/* VDR-CSO-FAV: a failed, degraded or disabled detection source is
+              itself tracked as a vulnerability. When that bucket is non-empty the
+              register contains findings about our own tooling — deliberate
+              transparency, and it should read that way. */}
+          {processFailureCount > 0 && (
+            <div style={{ borderTop: `1px solid ${LINE}`, padding: "14px 20px", display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <span className="tag warn" style={{ flexShrink: 0 }}>DETECTION PROCESS</span>
+              <span className="mono" style={{ fontSize: 11, color: ASH, lineHeight: 1.7 }}>
+                {processFailureCount} {processFailureCount === 1 ? "finding is" : "findings are"} about our own
+                detection tooling rather than the service. CR26 (VDR-CSO-FAV) requires a failed, degraded or
+                disabled detection source to be treated as a vulnerability and tracked to remediation like any
+                other, so these are published here by design — not a defect in this report.
+              </span>
+            </div>
+          )}
+        </div>
+      </>
+      )}
+
+      {/* ──────────────────────────────────────────────
+          CSPM — severity view of a SUBSET of the register, never an addition
+         ────────────────────────────────────────────── */}
+      {cspm && (
+      <>
+        <h3 className="sec">
+          Cloud misconfiguration (CSPM)
+          <span className={`tag ${cspmCounted ? "ok" : "vi"}`} style={{ marginLeft: 10 }}>
+            {cspmCounted ? "INCLUDED IN REGISTER TOTAL" : "REPORTED SEPARATELY"}
+          </span>
+        </h3>
+        <div className="panel">
+          <div className="ph">
+            <h4>
+              {cspmHeadline.toLocaleString()} {cspmInRegister != null ? "records in the register" : "findings"}
+              {cspmCounted && (
+                <span className="mono" style={{ color: ASH, fontWeight: 400, marginLeft: 8 }}>
+                  of the {kpi.total_vulnerabilities.toLocaleString()} total
+                </span>
+              )}
+            </h4>
+            <span className="map">VDR-CSO-DET</span>
+          </div>
+          {cspmRawDiffers && (
+            <div className="row">
+              <span className="svc" style={{ fontSize: 13 }}>Reported by AWS Security Hub</span>
+              <span className="mono" style={{ marginLeft: "auto", color: INK }}>{cspmRawTotal!.toLocaleString()} findings</span>
+            </div>
+          )}
+          {cspmSeverity.map(([bucket, count]) => (
+            <div className="row" key={bucket}>
+              <span className="svc" style={{ fontSize: 13 }}>{bucket.charAt(0) + bucket.slice(1).toLowerCase()}</span>
+              <span className="mono" style={{ marginLeft: "auto", color: INK }}>{count.toLocaleString()}</span>
+            </div>
+          ))}
+          <div style={{ padding: "14px 20px", borderTop: `1px solid ${LINE}` }}>
+            <p className="mono" style={{ fontSize: 11, color: FAINT, lineHeight: 1.7, margin: 0 }}>
+              {cspmRawDiffers
+                ? `AWS Security Hub reported ${cspmRawTotal!.toLocaleString()} findings; ${cspmInRegister!.toLocaleString()} records entered the register after aggregation${cspmCounted ? `, and those are already counted in the ${kpi.total_vulnerabilities.toLocaleString()} above` : ""}. The severity split ${cspmSeveritySum === cspmRawTotal ? "is of the reported findings, not of the register records, and " : ""}is never added to the register total.`
+                : cspmCounted
+                  ? `These records are already counted in the ${kpi.total_vulnerabilities.toLocaleString()} above. This is a severity view of part of the register, not an additional population — the two are never added together.`
+                  : "Cloud-misconfiguration findings reported by continuous control testing. Counts here are not added to the register total."}
+              {" "}Detection under FRR-VDR is not limited to CVE-type vulnerabilities: cloud
+              misconfigurations identified by automated control testing are tracked as
+              vulnerabilities in their own right (VDR-CSO-DET).
+            </p>
+          </div>
         </div>
       </>
       )}
@@ -634,8 +1039,18 @@ export default function VDRDashboard() {
           <RiskGauge label="IRV Rate" value={kpi.irv_count} max={kpi.total_vulnerabilities} />
           <RiskGauge label="KEV Rate" value={kpi.kev_count} max={kpi.total_vulnerabilities} />
         </div>
-        <div className="mono" style={{ textAlign: "center", padding: "4px 20px 20px", fontSize: 11, color: ASH }}>
-          All rates at 0% — no laterally exploitable, internet-reachable, or known-exploited vulnerabilities
+        {/* Written from the published counts. LEV and IRV are three-value string
+            classifications upstream, not booleans, so they are read here only as
+            the integers the pipeline publishes. */}
+        <div className="mono" style={{ textAlign: "center", padding: "4px 20px 20px", fontSize: 11, color: ASH, lineHeight: 1.7 }}>
+          {kpi.lev_count === 0 && kpi.irv_count === 0 && kpi.kev_count === 0
+            ? "All rates at 0% — no likely-exploitable, internet-reachable, or known-exploited vulnerabilities"
+            : <>
+                Of {kpi.total_vulnerabilities.toLocaleString()} findings:{" "}
+                <span style={{ color: kpi.lev_count > 0 ? AMBER : SIGNAL }}>{kpi.lev_count} likely exploitable (LEV)</span> ·{" "}
+                <span style={{ color: kpi.irv_count > 0 ? AMBER : SIGNAL }}>{kpi.irv_count} internet reachable (IRV)</span> ·{" "}
+                <span style={{ color: kpi.kev_count > 0 ? RED : SIGNAL }}>{kpi.kev_count} matching the CISA KEV catalog</span>
+              </>}
         </div>
       </div>
 
@@ -745,6 +1160,45 @@ export default function VDRDashboard() {
       </div>
 
       {/* ──────────────────────────────────────────────
+          METHODOLOGY — mirrors the published VDR report
+         ────────────────────────────────────────────── */}
+      <h3 className="sec">Detection methodology</h3>
+      <div className="panel">
+        <div className="ph">
+          <h4>How findings are detected and rated</h4>
+          <span className="map">VER-RPT-HLO · VDR-CSO-DET</span>
+        </div>
+        <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
+          {/* Rendered from the published report so site copy cannot drift away
+              from the bundle it describes. */}
+          {methodology?.detection_approach && (
+            <p style={{ fontSize: 13, color: ASH, lineHeight: 1.7, margin: 0 }}>{methodology.detection_approach}</p>
+          )}
+          {methodology?.prioritization_framework && (
+            <p style={{ fontSize: 13, color: ASH, lineHeight: 1.7, margin: 0 }}>{methodology.prioritization_framework}</p>
+          )}
+          {!methodology && (
+            <p style={{ fontSize: 13, color: ASH, lineHeight: 1.7, margin: 0 }}>
+              Detection combines authenticated and unauthenticated scanning, software-composition
+              and static analysis, threat intelligence (CISA KEV / EPSS), continuous cloud control
+              testing, and independent third-party penetration testing. Findings from every source
+              enter one register and are rated on potential agency impact.
+            </p>
+          )}
+          <p className="mono" style={{ fontSize: 11, color: FAINT, lineHeight: 1.7, margin: 0 }}>
+            Detection is not limited to CVE-type vulnerabilities. Cloud misconfigurations
+            identified by automated control testing are tracked as vulnerabilities under
+            FRR-VDR (VDR-CSO-DET), which is why CSPM findings appear in this register;
+            failures of the detection process itself are tracked the same way (VDR-CSO-FAV).
+            {verdictStyle(attestation?.verdict).tag === "ok" && (
+              <> Independent penetration-test findings are ingested into the same register
+              rather than reported separately (VER-RPT-HLO).</>
+            )}
+          </p>
+        </div>
+      </div>
+
+      {/* ──────────────────────────────────────────────
           SCAN SOURCES TABLE — expandable for 3PAO reviewers
          ────────────────────────────────────────────── */}
       {hasScanSources && (
@@ -752,36 +1206,41 @@ export default function VDRDashboard() {
         <div className="ph" style={{ cursor: "pointer" }} onClick={() => setScanTableOpen(!scanTableOpen)}>
           <h4 style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             Scan sources detail
-            <span className="mono" style={{ color: ASH, fontSize: 11, fontWeight: 400 }}>{data.scan_sources?.length || 0} active scan sources — click to {scanTableOpen ? "collapse" : "expand"}</span>
+            <span className="mono" style={{ color: ASH, fontSize: 11, fontWeight: 400 }}>{scanSources.length} detection sources on the published report — click to {scanTableOpen ? "collapse" : "expand"}</span>
           </h4>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ color: ASH, transition: "transform .15s", transform: scanTableOpen ? "rotate(180deg)" : "none" }}>
             <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        {scanTableOpen && data.scan_sources && (
+        {scanTableOpen && (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: `1px solid ${LINE}` }}>
-                  {["Source", "Type", "Category", "Findings", "Last Scan"].map((h, i) => (
-                    <th key={i} className="mono" style={{ textAlign: i === 3 ? "right" : "left", padding: "12px 20px", fontSize: 10, letterSpacing: ".05em", color: ASH, textTransform: "uppercase", fontWeight: 500 }}>{h}</th>
+                  {["Source", "Type", "Findings", "Last Scan"].map((h, i) => (
+                    <th key={i} className="mono" style={{ textAlign: i === 2 ? "right" : "left", padding: "12px 20px", fontSize: 10, letterSpacing: ".05em", color: ASH, textTransform: "uppercase", fontWeight: 500 }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {data.scan_sources.map((src: any, i: number) => (
-                  <tr key={i} style={{ borderBottom: `1px solid ${LINE}` }}>
-                    <td style={{ padding: "12px 20px", color: INK, fontWeight: 500 }}>{src.source_name}</td>
-                    <td style={{ padding: "12px 20px", color: ASH }}>{src.scan_type}</td>
-                    <td style={{ padding: "12px 20px" }}>
-                      <span className="mono" style={{ padding: "2px 8px", borderRadius: 6, fontSize: 10, background: `${SOURCE_COLORS[src.category] || FAINT}20`, color: SOURCE_COLORS[src.category] || ASH }}>
-                        {src.category}
-                      </span>
-                    </td>
-                    <td className="mono" style={{ padding: "12px 20px", textAlign: "right", color: INK }}>{src.findings}</td>
-                    <td style={{ padding: "12px 20px", color: ASH }}>{new Date(src.last_scan).toLocaleDateString()}</td>
-                  </tr>
-                ))}
+                {scanSources.map((src: any, i: number) => {
+                  const type = String(src.scan_type || "").replace(/_/g, " ");
+                  const last = src.last_scan ? formatDay(src.last_scan) : "—";
+                  return (
+                    <tr key={i} style={{ borderBottom: `1px solid ${LINE}` }}>
+                      <td style={{ padding: "12px 20px", color: INK, fontWeight: 500 }}>{src.source_name}</td>
+                      <td style={{ padding: "12px 20px" }}>
+                        <span className="mono" style={{ padding: "2px 8px", borderRadius: 6, fontSize: 10, background: `${SOURCE_COLORS[src.category] || FAINT}20`, color: SOURCE_COLORS[src.category] || ASH }}>
+                          {src.category || type || "—"}
+                        </span>
+                      </td>
+                      <td className="mono" style={{ padding: "12px 20px", textAlign: "right", color: src.findings == null ? FAINT : INK }}>
+                        {src.findings ?? "—"}
+                      </td>
+                      <td style={{ padding: "12px 20px", color: ASH }}>{last}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
