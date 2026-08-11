@@ -401,17 +401,29 @@ export default function VDRDashboard() {
   const hasScanSources = scanSources.length > 0;
   const methodology = report?.methodology ?? null;
 
-  // CSPM: cloud-misconfiguration findings. When counted_in_total is set these
-  // records are already inside snapshot.total_vulnerabilities — this block is a
-  // severity view of a subset of the register, never an addition to it. Nothing
-  // here is ever summed with the headline total.
+  // CSPM: cloud-misconfiguration findings. Two different populations share this
+  // block and must not be conflated:
+  //   • cspm.total is the raw count Security Hub reported (583 at time of
+  //     writing) — the pre-aggregation source volume.
+  //   • detection_sources.cspm is how many records actually entered the register
+  //     (51), which is the number counted_in_total is true of.
+  // Publishing the raw count as "included in the 112" would assert that 583
+  // findings sit inside a 112-record register. The in-register count leads, the
+  // raw volume is shown as context, and neither is ever added to the total.
   const cspm = data.cspm ?? null;
-  const cspmCounted = cspm?.counted_in_total === true;
+  const cspmRawTotal = cspm?.total ?? null;
+  const cspmInRegister = sourceBarData.find((s: any) => normalizeSourceKey(s.key) === "cspm")?.count ?? null;
+  // Only claim inclusion for a figure that can actually be inside the register.
+  const cspmCounted = cspm?.counted_in_total === true &&
+    (cspmInRegister != null || (cspmRawTotal != null && cspmRawTotal <= kpi.total_vulnerabilities));
+  const cspmHeadline = cspmInRegister ?? cspmRawTotal ?? 0;
+  const cspmRawDiffers = cspmRawTotal != null && cspmInRegister != null && cspmRawTotal !== cspmInRegister;
   const cspmSeverity: [string, number][] = cspm?.by_severity
     ? (["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"] as const)
       .map((b) => [b, cspm.by_severity[b] ?? 0] as [string, number])
       .filter(([, v]) => v > 0)
     : [];
+  const cspmSeveritySum = cspmSeverity.reduce((t, [, v]) => t + v, 0);
 
   // Mode 1 capability indicators — the detection capabilities the register
   // depends on, including the penetration-test attestation.
@@ -980,15 +992,21 @@ export default function VDRDashboard() {
         <div className="panel">
           <div className="ph">
             <h4>
-              {(cspm.total ?? 0).toLocaleString()} findings
+              {cspmHeadline.toLocaleString()} {cspmInRegister != null ? "records in the register" : "findings"}
               {cspmCounted && (
                 <span className="mono" style={{ color: ASH, fontWeight: 400, marginLeft: 8 }}>
-                  of the {kpi.total_vulnerabilities.toLocaleString()} in the register
+                  of the {kpi.total_vulnerabilities.toLocaleString()} total
                 </span>
               )}
             </h4>
             <span className="map">VDR-CSO-DET</span>
           </div>
+          {cspmRawDiffers && (
+            <div className="row">
+              <span className="svc" style={{ fontSize: 13 }}>Reported by AWS Security Hub</span>
+              <span className="mono" style={{ marginLeft: "auto", color: INK }}>{cspmRawTotal!.toLocaleString()} findings</span>
+            </div>
+          )}
           {cspmSeverity.map(([bucket, count]) => (
             <div className="row" key={bucket}>
               <span className="svc" style={{ fontSize: 13 }}>{bucket.charAt(0) + bucket.slice(1).toLowerCase()}</span>
@@ -997,9 +1015,11 @@ export default function VDRDashboard() {
           ))}
           <div style={{ padding: "14px 20px", borderTop: `1px solid ${LINE}` }}>
             <p className="mono" style={{ fontSize: 11, color: FAINT, lineHeight: 1.7, margin: 0 }}>
-              {cspmCounted
-                ? `These findings are already counted in the ${kpi.total_vulnerabilities.toLocaleString()} above. This is a severity view of part of the register, not an additional population — the two are never added together.`
-                : "Cloud-misconfiguration findings reported by continuous control testing. Counts here are not added to the register total."}
+              {cspmRawDiffers
+                ? `AWS Security Hub reported ${cspmRawTotal!.toLocaleString()} findings; ${cspmInRegister!.toLocaleString()} records entered the register after aggregation${cspmCounted ? `, and those are already counted in the ${kpi.total_vulnerabilities.toLocaleString()} above` : ""}. The severity split ${cspmSeveritySum === cspmRawTotal ? "is of the reported findings, not of the register records, and " : ""}is never added to the register total.`
+                : cspmCounted
+                  ? `These records are already counted in the ${kpi.total_vulnerabilities.toLocaleString()} above. This is a severity view of part of the register, not an additional population — the two are never added together.`
+                  : "Cloud-misconfiguration findings reported by continuous control testing. Counts here are not added to the register total."}
               {" "}Detection under FRR-VDR is not limited to CVE-type vulnerabilities: cloud
               misconfigurations identified by automated control testing are tracked as
               vulnerabilities in their own right (VDR-CSO-DET).

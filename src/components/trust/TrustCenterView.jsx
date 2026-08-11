@@ -178,13 +178,23 @@ export const TrustCenterView = () => {
     // so it is reported as a share of the register total and never added to it.
     const registerTotal = vdr?.snapshot?.total_vulnerabilities ?? null;
     const cspm = vdr?.cspm ?? null;
-    const cspmSummary = !cspm ? null : [
-        `${cspm.total ?? 0} tracked`,
-        cspm.counted_in_total === true && registerTotal != null
-            ? `included in the ${registerTotal} register total`
-            : 'reported separately',
-        `${cspm.by_severity?.CRITICAL ?? 0} critical`,
-    ].join(' · ');
+    // cspm.total is the raw Security Hub volume; detection_sources.cspm is how
+    // many records actually reached the register, and that is the figure
+    // counted_in_total describes. Claiming the raw count sits inside the
+    // register total would assert 583 findings inside a 112-record register.
+    const cspmInRegister = vdr?.detection_sources?.cspm ?? null;
+    const cspmSummary = !cspm ? null : (() => {
+        const raw = cspm.total ?? 0;
+        const counted = cspm.counted_in_total === true &&
+            (cspmInRegister != null || (registerTotal != null && raw <= registerTotal));
+        if (cspmInRegister != null) {
+            return [
+                `${cspmInRegister} in the register${counted && registerTotal != null ? ` of ${registerTotal}` : ''}`,
+                raw !== cspmInRegister ? `${raw} reported by Security Hub` : null,
+            ].filter(Boolean).join(' · ');
+        }
+        return `${raw} tracked · ${counted && registerTotal != null ? `included in the ${registerTotal} register total` : 'reported separately'}`;
+    })();
 
     // Detection-source attribution, rendered from whatever keys the pipeline
     // publishes — the key set is open and unknown sources must still show up.
