@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-08-17T12:39:31.852543+00:00 (36 pass / 10 fail of 46)  
-**Generated:** 2026-08-17 13:27 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-08-17T20:34:33.708284+00:00 (36 pass / 10 fail of 46)  
+**Generated:** 2026-08-17 21:09 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -140,7 +140,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-07
 - **NIST 800-53 controls:** ac-17.3, cm-2, pl-10
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (97%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 41/42 resources compliant. | Verified: Verified: Active & Compliant; Verifi…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (85%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 36/42 resources compliant. | Verified: Verified: Active & Compliant; Verifi…
 - **Measures (validation objectives):**
   - BASELINE: Measure legacy compute footprint (Denominator) to compare against managed service adoption.
   - ACCELERATOR: Validate adoption of serverless compute (High Impact).
