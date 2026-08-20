@@ -425,6 +425,26 @@ export default function VDRDashboard() {
     : [];
   const cspmSeveritySum = cspmSeverity.reduce((t, [, v]) => t + v, 0);
 
+  // Compliance verdict. The pipeline publishes its own FRR-CVM-04 status and a
+  // Mode 2 target; the site must not substitute a stricter bar of its own. At
+  // 99.11% against a 95% target, testing `rate >= 100` published NON-COMPLIANT
+  // on the same page that showed an overall PASS, a passing Mode 2 ("all
+  // output-rate targets met") and a published status of COMPLIANT.
+  const complianceStatusPublished = typeof compliance.frr_cvm_04 === "string" && compliance.frr_cvm_04 !== "UNKNOWN"
+    ? compliance.frr_cvm_04.replace(/_/g, "-").toUpperCase()
+    : null;
+  const complianceTarget = vdrOutcome?.mode_2_output_rate?.metrics?.remediation_target_pct ?? null;
+  const complianceMet = complianceStatusPublished
+    ? complianceStatusPublished === "COMPLIANT"
+    : complianceTarget != null
+      ? kpi.compliance_rate >= complianceTarget
+      : kpi.compliance_rate >= 100;
+  const complianceLabel = complianceStatusPublished ?? (complianceMet ? "COMPLIANT" : "NON-COMPLIANT");
+  const complianceTag = complianceMet ? "ok" : "red";
+  const complianceCounts = typeof compliance.compliant === "number" && typeof compliance.non_compliant === "number"
+    ? `${compliance.compliant.toLocaleString()} of ${(compliance.compliant + compliance.non_compliant).toLocaleString()} findings within their SLA window`
+    : null;
+
   // Mode 1 capability indicators — the detection capabilities the register
   // depends on, including the penetration-test attestation.
   const capability = vdrOutcome?.mode_1_capability ?? null;
@@ -543,7 +563,7 @@ export default function VDRDashboard() {
       <div className="g2">
         {/* Posture */}
         <div className="panel">
-          <div className="ph"><h4>Posture</h4><span className="map">VER-EVA · {kpi.compliance_rate >= 100 ? "COMPLIANT" : "REVIEW"}</span></div>
+          <div className="ph"><h4>Posture</h4><span className="map">VER-EVA · {complianceMet ? "COMPLIANT" : "REVIEW"}</span></div>
           {[
             { l: "Security posture", v: posture ? `${posture.overall_rating} · ${posture.posture_score}` : "—", t: "ok" },
             { l: "Active / accepted", v: `${vdrAcceptance?.active ?? 0} active · ${vdrAcceptance?.accepted ?? 0} accepted`, t: "ok" },
@@ -1127,7 +1147,7 @@ export default function VDRDashboard() {
       {/* ──────────────────────────────────────────────
           COMPLIANCE BANNER
          ────────────────────────────────────────────── */}
-      <h3 className="sec">Compliance status · <span className={`tag ${kpi.compliance_rate >= 100 ? "ok" : "red"}`} style={{ marginLeft: 6 }}>{kpi.compliance_rate >= 100 ? "COMPLIANT" : "NON-COMPLIANT"}</span></h3>
+      <h3 className="sec">Compliance status · <span className={`tag ${complianceTag}`} style={{ marginLeft: 6 }}>{complianceLabel}</span></h3>
       <div className="panel">
         <div style={{ padding: "18px 20px" }}>
           {meta.sla_threshold && (
@@ -1135,14 +1155,22 @@ export default function VDRDashboard() {
               SLA Threshold: <span style={{ color: INK }}>{meta.sla_threshold}</span>
             </div>
           )}
-          {/* Compliance rate bar */}
+          {/* Compliance rate bar, measured against the published target rather
+              than an assumed 100%. */}
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ flex: 1, background: "#0A0E13", borderRadius: 6, height: 12, overflow: "hidden" }}>
-              <div style={{ height: "100%", borderRadius: 6, transition: "width .7s", width: `${kpi.compliance_rate}%`, background: kpi.compliance_rate >= 100 ? SIGNAL : kpi.compliance_rate >= 90 ? AMBER : RED }} />
+              <div style={{ height: "100%", borderRadius: 6, transition: "width .7s", width: `${Math.min(kpi.compliance_rate, 100)}%`, background: complianceMet ? SIGNAL : kpi.compliance_rate >= 90 ? AMBER : RED }} />
             </div>
-            <span className="mono" style={{ fontSize: 16, fontWeight: 600, color: kpi.compliance_rate >= 100 ? SIGNAL : AMBER }}>
+            <span className="mono" style={{ fontSize: 16, fontWeight: 600, color: complianceMet ? SIGNAL : AMBER }}>
               {kpi.compliance_rate}%
             </span>
+          </div>
+          <div className="mono" style={{ fontSize: 11, color: FAINT, lineHeight: 1.7, marginTop: 10 }}>
+            {complianceCounts && <>{complianceCounts}. </>}
+            {complianceTarget != null
+              ? <>Target {complianceTarget}% (VDR Mode 2 output rate).</>
+              : <>Rate of findings remediated within their SLA window.</>}
+            {complianceStatusPublished && <> Published FRR-CVM-04 status: {complianceStatusPublished}.</>}
           </div>
           {/* FRR Requirements */}
           {data.compliance_requirements && (
