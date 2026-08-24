@@ -1,7 +1,7 @@
 # FedRAMP Compliance Validation Report
 
 **Report Type:** System 2.5 Validation Integrity Report  
-**Generated:** 2026-08-24T12:44:03.093834  
+**Generated:** 2026-08-24T16:46:05.749376  
 **Purpose:** 3PAO audit readiness and technical validation verification
 
 ---
@@ -10,12 +10,12 @@
 
 ### Validation Results
 - **Total KSIs Validated:** 46
-- **Passed:** 36 ✅
-- **Failed:** 10 ❌
-- **Overall Pass Rate:** 78.3%
+- **Passed:** 35 ✅
+- **Failed:** 11 ❌
+- **Overall Pass Rate:** 76.1%
 
 ### Temporal Consistency Analysis
-- **Average Consistency Score:** 100.0%
+- **Average Consistency Score:** 99.8%
 - **Recent Validations Analyzed:** 10
 - **Consistency Status:** EXCELLENT
 
@@ -30,7 +30,7 @@
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Integrity Score** | 85.0% | ✔️ Good |
+| **Integrity Score** | 84.9% | ⚠️ Needs Attention |
 | **Validation Determinism** | verified | ✅ |
 | **Technical Correctness** | issues_detected | ⚠️ |
 | **Audit Readiness** | needs_review | ⚠️ Needs Review |
@@ -40,7 +40,7 @@
 ## Interpretation
 
 ### Temporal Consistency
-The temporal consistency results (100.0%, across 10 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
+The temporal consistency results (99.8%, across 10 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
 
 ### Execution Quality
 The execution quality score of 70% shows technical issues detected: 6 automation failures require investigation.
