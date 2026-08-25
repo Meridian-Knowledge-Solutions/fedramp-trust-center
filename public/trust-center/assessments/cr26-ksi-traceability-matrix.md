@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-08-24T12:44:02.724236+00:00 (36 pass / 10 fail of 46)  
-**Generated:** 2026-08-24 13:38 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-08-24T20:43:12.774709+00:00 (35 pass / 11 fail of 46)  
+**Generated:** 2026-08-24 21:37 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -650,7 +650,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-06
 - **NIST 800-53 controls:** ac-17.2, ia-5.2, ia-5.6, sc-12, sc-17
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: kms_rotation_metrics, cert_expiry_metrics, secret_rotation_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Management, protection, and regular rotation of digital keys, certificates, and other secrets is automated and persis... | 6/22 resources compliant, 10 unverified. | Verified: Secret '[resource]' has …
+- **Latest verdict:** **FAIL** — ❌ Insufficient (83%): Management, protection, and regular rotation of digital keys, certificates, and other secrets is automated and persis... | 5/22 resources compliant, 10 unverified. | Verified: Secret '[resource]' ha…
 - **Measures (validation objectives):**
   - KEYS: Validate existence of KMS Customer Managed Keys (CMKs) for centralized management.
   - ROTATION: Validate Secrets Manager entries (Look for 'RotationEnabled': true in the output).
