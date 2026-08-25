@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-08-24T20:43:12.774709+00:00 (35 pass / 11 fail of 46)  
-**Generated:** 2026-08-24 21:37 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-08-25T04:44:24.749388+00:00 (34 pass / 12 fail of 46)  
+**Generated:** 2026-08-25 05:21 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -714,7 +714,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-02
 - **NIST 800-53 controls:** ac-1, ac-17.2, cp-9.8, sc-8, sc-8.1, sc-13, sc-20, sc-21, sc-22, sc-23, sc-28, sc-28.1
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: tls_listener_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information is encrypted or otherwise secured from unwanted access or modification. | 3/6 resources compliant, 3 unverified. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; Verified: …
+- **Latest verdict:** **FAIL** — ❌ Insufficient (33%): Information is encrypted or otherwise secured from unwanted access or modification. | 2/6 resources compliant, 4 unverified. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; Verified…
 - **Measures (validation objectives):**
   - KEYS: Validate existence of active, issued TLS certificates.
   - GATEKEEPERS: List Load Balancers handling traffic.
