@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-08-27T06:39:32.502290+00:00 (33 pass / 13 fail of 46)  
-**Generated:** 2026-08-27 07:24 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-08-27T16:16:56.696146+00:00 (34 pass / 12 fail of 46)  
+**Generated:** 2026-08-27 17:12 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -714,7 +714,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-02
 - **NIST 800-53 controls:** ac-1, ac-17.2, cp-9.8, sc-8, sc-8.1, sc-13, sc-20, sc-21, sc-22, sc-23, sc-28, sc-28.1
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: tls_listener_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (37%): Information is encrypted or otherwise secured from unwanted access or modification. | 2/8 resources compliant, 5 unverified. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; Verified…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (37%): Information is encrypted or otherwise secured from unwanted access or modification. | 3/8 resources compliant, 5 unverified. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; Verified…
 - **Measures (validation objectives):**
   - KEYS: Validate existence of active, issued TLS certificates.
   - GATEKEEPERS: List Load Balancers handling traffic.
@@ -731,7 +731,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-09
 - **NIST 800-53 controls:** sc-23, si-7.1
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (77%): The authenticity and integrity of communications between machine-based information resources is persistently validate... | 7/13 resources compliant, 4 unverified. | Verified: Listener 'arn:aws:[reda…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The authenticity and integrity of communications between machine-based information resources is persistently validate... | 9/13 resources compliant, 4 unverified. | Verified: Listener 'arn:aws:[redact…
 - **Measures (validation objectives):**
   - ENFORCERS: Identify active Load Balancers handling traffic.
   - VALIDATION: Verify that listeners are enforcing HTTPS/TLS with specific SSL Policies (authenticity/integrity checks).
