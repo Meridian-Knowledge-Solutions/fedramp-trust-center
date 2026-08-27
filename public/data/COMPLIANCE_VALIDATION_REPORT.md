@@ -1,7 +1,7 @@
 # FedRAMP Compliance Validation Report
 
 **Report Type:** System 2.5 Validation Integrity Report  
-**Generated:** 2026-08-27T02:04:17.174241  
+**Generated:** 2026-08-27T03:55:17.226028  
 **Purpose:** 3PAO audit readiness and technical validation verification
 
 ---
@@ -10,9 +10,9 @@
 
 ### Validation Results
 - **Total KSIs Validated:** 46
-- **Passed:** 35 ✅
-- **Failed:** 11 ❌
-- **Overall Pass Rate:** 76.1%
+- **Passed:** 33 ✅
+- **Failed:** 13 ❌
+- **Overall Pass Rate:** 71.7%
 
 ### Temporal Consistency Analysis
 - **Average Consistency Score:** 100.0%
@@ -40,7 +40,7 @@
 ## Interpretation
 
 ### Temporal Consistency
-The temporal consistency results (100.0%, across 9 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
+The temporal consistency results (100.0%, across 8 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
 
 ### Execution Quality
 The execution quality score of 70% shows technical issues detected: 6 automation failures require investigation.
