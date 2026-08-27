@@ -1,7 +1,7 @@
 # FedRAMP Compliance Validation Report
 
 **Report Type:** System 2.5 Validation Integrity Report  
-**Generated:** 2026-08-27T11:50:21.888142  
+**Generated:** 2026-08-27T16:16:57.074703  
 **Purpose:** 3PAO audit readiness and technical validation verification
 
 ---
@@ -10,18 +10,18 @@
 
 ### Validation Results
 - **Total KSIs Validated:** 46
-- **Passed:** 33 ✅
-- **Failed:** 13 ❌
-- **Overall Pass Rate:** 71.7%
+- **Passed:** 34 ✅
+- **Failed:** 12 ❌
+- **Overall Pass Rate:** 73.9%
 
 ### Temporal Consistency Analysis
-- **Average Consistency Score:** 100.0%
+- **Average Consistency Score:** 99.7%
 - **Recent Validations Analyzed:** 10
 - **Consistency Status:** EXCELLENT
 
 ### Execution Quality Analysis
-- **Technical Issues Detected:** 6
-- **Execution Quality Score:** 70%
+- **Technical Issues Detected:** 7
+- **Execution Quality Score:** 65%
 - **Automation Status:** WARNING
 
 ---
@@ -30,7 +30,7 @@
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Integrity Score** | 85.0% | ✔️ Good |
+| **Integrity Score** | 82.4% | ⚠️ Needs Attention |
 | **Validation Determinism** | verified | ✅ |
 | **Technical Correctness** | issues_detected | ⚠️ |
 | **Audit Readiness** | needs_review | ⚠️ Needs Review |
@@ -40,10 +40,10 @@
 ## Interpretation
 
 ### Temporal Consistency
-The temporal consistency results (100.0%, across 8 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
+The temporal consistency results (99.7%, across 8 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
 
 ### Execution Quality
-The execution quality score of 70% shows technical issues detected: 6 automation failures require investigation.
+The execution quality score of 65% shows technical issues detected: 7 automation failures require investigation.
 
 ### Audit Readiness
 Overall audit readiness status: **NEEDS_REVIEW**
