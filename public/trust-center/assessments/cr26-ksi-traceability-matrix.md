@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-08-26T21:20:58.022060+00:00 (35 pass / 11 fail of 46)  
-**Generated:** 2026-08-26 22:15 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-08-27T06:39:32.502290+00:00 (33 pass / 13 fail of 46)  
+**Generated:** 2026-08-27 07:24 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -140,7 +140,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-07
 - **NIST 800-53 controls:** ac-17.3, cm-2, pl-10
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (85%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 36/42 resources compliant. | Verified: Verified: Active & Compliant; Verifi…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (86%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 38/44 resources compliant. | Verified: Verified: Active & Compliant; Verifi…
 - **Measures (validation objectives):**
   - BASELINE: Measure legacy compute footprint (Denominator) to compare against managed service adoption.
   - ACCELERATOR: Validate adoption of serverless compute (High Impact).
@@ -158,7 +158,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-02
 - **NIST 800-53 controls:** ac-17.3, ac-18.1, ac-18.3, ac-20.1, ca-9, sc-7.3, sc-7.4, sc-7.5, sc-7.8, sc-8, sc-10, si-10, si-11, si-16
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (95%): Machine-based information resources are persistently reviewed to ensure they have a minimal attack surface and that l... | 21/23 resources compliant. | Verified: Private Subnet: '[resource]' has pub…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (95%): Machine-based information resources are persistently reviewed to ensure they have a minimal attack surface and that l... | 22/24 resources compliant. | Verified: Private Subnet: '[resource]' has pub…
 - **Measures (validation objectives):**
   - ATTACK SURFACE: Validate the existence of Private Subnets (where Public IP mapping is disabled).
   - LATERAL MOVEMENT: Validate Security Groups that allow access ONLY from other specific Security Groups (Tiered Security), rather than broad IP ranges.
@@ -173,7 +173,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-06
 - **NIST 800-53 controls:** —
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Machine-based information resources are persistently reviewed to ensure they are appropriately optimized for high ava... | 5/5 resources compliant. | Verified: Load Balancer '[resource]' spans 2 AZs.;…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Machine-based information resources are persistently reviewed to ensure they are appropriately optimized for high ava... | 7/7 resources compliant. | Verified: Load Balancer '[resource]' spans 2 AZs.;…
 - **Measures (validation objectives):**
   - NETWORK HA: Validate that Load Balancers are configured across multiple Availability Zones.
   - DATABASE HA: Validate that critical RDS instances have Multi-AZ enabled for automatic failover.
@@ -203,7 +203,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-05
 - **NIST 800-53 controls:** sc-5, si-8, si-8.2
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (80%): The effectiveness of protection against denial of service attacks and other unwanted activity for machine-based infor... | 4/6 resources compliant, 1 unverified. | Verified: WAF protection active: 1…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (85%): The effectiveness of protection against denial of service attacks and other unwanted activity for machine-based infor... | 6/8 resources compliant, 1 unverified. | Verified: WAF protection active: 1…
 - **Measures (validation objectives):**
   - DDOS LAYER 7: Validate existence of Web Application Firewalls (WAF) to block malicious requests.
   - DDOS LAYER 3/4 (Shield): Validate Load Balancers. AWS Shield Standard provides automatic, always-on Layer 3/4 DDoS protection for every ALB/NLB at no cost — load balancers ARE the protected perimeter. (No per-resource subscription exists for Shield Standard; this is the AWS baseline.)
@@ -220,7 +220,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-03
 - **NIST 800-53 controls:** ac-12, ac-17.3, ca-9, sc-4, sc-7, sc-7.7, sc-8, sc-10
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Logical networking and related capabilities are used and persistently reviewed to enforce traffic flow controls. | 10/12 resources compliant, 2 unverified. | Verified: VPC Endpoint '[resource] (us-eas…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Logical networking and related capabilities are used and persistently reviewed to enforce traffic flow controls. | 10/14 resources compliant, 4 unverified. | Verified: VPC Endpoint '[resource] (us-eas…
 - **Measures (validation objectives):**
   - PRIVATE FLOW: Validate existence of VPC Endpoints, ensuring traffic to services like S3/DynamoDB bypasses the public internet.
   - EGRESS CONTROL: Validate active NAT Gateways. This proves instances in private subnets route outbound traffic centrally, rather than having individual Public IPs.
@@ -714,7 +714,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-02
 - **NIST 800-53 controls:** ac-1, ac-17.2, cp-9.8, sc-8, sc-8.1, sc-13, sc-20, sc-21, sc-22, sc-23, sc-28, sc-28.1
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: tls_listener_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information is encrypted or otherwise secured from unwanted access or modification. | 3/6 resources compliant, 3 unverified. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; Verified: …
+- **Latest verdict:** **FAIL** — ❌ Insufficient (37%): Information is encrypted or otherwise secured from unwanted access or modification. | 2/8 resources compliant, 5 unverified. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; Verified…
 - **Measures (validation objectives):**
   - KEYS: Validate existence of active, issued TLS certificates.
   - GATEKEEPERS: List Load Balancers handling traffic.
@@ -731,7 +731,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-09
 - **NIST 800-53 controls:** sc-23, si-7.1
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The authenticity and integrity of communications between machine-based information resources is persistently validate... | 5/7 resources compliant, 2 unverified. | Verified: Listener 'arn:aws:[redacte…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (77%): The authenticity and integrity of communications between machine-based information resources is persistently validate... | 7/13 resources compliant, 4 unverified. | Verified: Listener 'arn:aws:[reda…
 - **Measures (validation objectives):**
   - ENFORCERS: Identify active Load Balancers handling traffic.
   - VALIDATION: Verify that listeners are enforcing HTTPS/TLS with specific SSL Policies (authenticity/integrity checks).
