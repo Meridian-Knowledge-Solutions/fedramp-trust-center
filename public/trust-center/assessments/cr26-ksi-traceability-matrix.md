@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-08-26T12:34:42.628404+00:00 (35 pass / 11 fail of 46)  
-**Generated:** 2026-08-26 13:04 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-08-26T21:20:58.022060+00:00 (35 pass / 11 fail of 46)  
+**Generated:** 2026-08-26 22:15 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -382,7 +382,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-MLA-08
 - **NIST 800-53 controls:** si-11
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): A least-privileged, role and attribute-based, and just-in-time access authorization model is used and persistently re... | 12/12 resources compliant. | Verified: Audit/compliance bucket present: '[res…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): A least-privileged, role and attribute-based, and just-in-time access authorization model is used and persistently re... | 13/13 resources compliant. | Verified: Audit/compliance bucket present: '[res…
 - **Measures (validation objectives):**
   - VAULT: Validate existence of compliance/security buckets.
   - LOCK: Validate existence of encryption keys.
