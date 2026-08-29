@@ -176,6 +176,13 @@ export const TrustCenterView = () => {
     // Register composition. The CSPM block is a severity view of findings that are
     // already inside snapshot.total_vulnerabilities when counted_in_total is set,
     // so it is reported as a share of the register total and never added to it.
+    // The posture badge is coloured from the published rating rather than always
+    // green, so a MODERATE posture does not read as a clean one.
+    const postureRating = String(vdr?.posture?.rating || '').toUpperCase();
+    const postureTag = !postureRating ? 'vi'
+        : ['EXCELLENT', 'GOOD', 'STRONG'].includes(postureRating) ? 'ok'
+            : ['MODERATE', 'FAIR'].includes(postureRating) ? 'warn' : 'red';
+
     const registerTotal = vdr?.snapshot?.total_vulnerabilities ?? null;
     const cspm = vdr?.cspm ?? null;
     // cspm.total is the raw Security Hub volume; detection_sources.cspm is how
@@ -277,8 +284,8 @@ export const TrustCenterView = () => {
                         <div className="row">
                             <span className="svc" style={{ width: 180 }}>Vulnerability Posture</span>
                             <Sparkbars data={vdrTrend} />
-                            <span className="mono" style={{ width: 70, textAlign: 'right', marginLeft: 'auto' }}>{vdr?.posture?.score ?? '8.6'}</span>
-                            <span style={{ marginLeft: 16 }}><span className="tag ok">{vdr?.posture?.rating || 'EXCELLENT'}</span></span>
+                            <span className="mono" style={{ width: 70, textAlign: 'right', marginLeft: 'auto' }}>{vdr?.posture?.score ?? '—'}</span>
+                            <span style={{ marginLeft: 16 }}><span className={`tag ${postureTag}`}>{vdr?.posture?.rating || '—'}</span></span>
                         </div>
                         {[['Platform Uptime', `${uptime.toFixed(2)}%`, 'OPERATIONAL', 'ok'],
                         ['Evidence Pipeline', `${ex?.evidence_snapshots?.daily ?? 230}/day`, 'SEALED', 'ok'],
