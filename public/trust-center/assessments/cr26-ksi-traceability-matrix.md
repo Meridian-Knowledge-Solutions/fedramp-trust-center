@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-09-03T20:35:14.031523+00:00 (34 pass / 12 fail of 46)  
-**Generated:** 2026-09-03 21:18 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-09-04T04:42:55.884262+00:00 (34 pass / 12 fail of 46)  
+**Generated:** 2026-09-04 05:37 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
