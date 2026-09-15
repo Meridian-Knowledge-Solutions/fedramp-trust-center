@@ -74,7 +74,7 @@ const Kick = ({ children }) => <div className="kick">{children}</div>;
 
 // ─────────────────────────────────────────────────────────────────────────
 export const TrustCenterView = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, sessionExpired } = useAuth();
     const { openModal } = useModal();
     const { status } = useSystemStatus();
     // Live KSI numbers — same source the Overview uses, so the two never drift.
@@ -150,7 +150,7 @@ export const TrustCenterView = () => {
     const blobDl = (blob, filename) => { const u = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = u; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); };
     const viewConfig = async () => { if (!guard('View Secure Configuration')) return; try { const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`); openModal('markdown', { title: 'Secure Configuration', markdown: await r.text() }); } catch { alert('Load failed.'); } };
     const downloadConfig = async () => { if (!guard('Download Secure Configuration')) return; try { const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONFIG_PUBLIC}`); if (!r.ok) throw new Error(`HTTP ${r.status}`); blobDl(new Blob([await r.text()], { type: 'text/markdown' }), 'secure-configuration.md'); } catch (e) { alert(`Download failed: ${e.message}`); } };
-    const downloadPackage = async () => { if (!guard('Download Certification Package')) return; try { const tok = localStorage.getItem(API_CONFIG.TOKEN_KEY); if (!tok) { alert('Session expired.'); return; } const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PACKAGE_DOWNLOAD}`, { headers: { Authorization: `Bearer ${tok}` } }); if (!r.ok) throw new Error('Access Denied'); const j = await r.json(); if (j.url) window.location.href = j.url; } catch (e) { alert(`Download failed: ${e.message}`); } };
+    const downloadPackage = async () => { if (!guard('Download Certification Package')) return; try { const tok = localStorage.getItem(API_CONFIG.TOKEN_KEY); if (!tok) { alert('Session expired.'); return; } const r = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PACKAGE_DOWNLOAD}`, { headers: { Authorization: `Bearer ${tok}` } }); if (r.status === 401 || r.status === 403) { sessionExpired(); openModal('accessRequired', { featureName: 'Download Certification Package', benefits: ['Your session has ended — please re-verify your federal email to continue'] }); return; } if (!r.ok) throw new Error(`HTTP ${r.status}`); const j = await r.json(); if (j.url) window.location.href = j.url; } catch (e) { alert(`Download failed: ${e.message}`); } };
     const apiDocs = () => window.open(TENANT.API_DOCS_URL, '_blank');
     const security = cso?.contacts?.security || TENANT.SECURITY_EMAIL;
 

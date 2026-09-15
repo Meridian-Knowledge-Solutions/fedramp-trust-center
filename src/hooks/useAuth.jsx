@@ -33,12 +33,12 @@ export const AuthProvider = ({ children }) => {
 
       const now = Date.now() / 1000;
 
-      // Check for exp claim
+      // Check for exp claim. The Trust Center backend always sets exp (tokens
+      // are issued with a fixed lifetime), so a token without one is malformed
+      // and the server would reject it — don't accept it client-side either.
       if (!payload.exp) {
-        console.warn('[useAuth] validateToken: token has no exp claim — accepting it anyway');
-        // Some backends issue tokens without exp for long-lived sessions.
-        // If your backend ALWAYS sets exp, change this to return null.
-        return payload;
+        console.warn('[useAuth] validateToken: token has no exp claim — rejecting');
+        return null;
       }
 
       // Apply clock-skew tolerance
@@ -115,6 +115,18 @@ export const AuthProvider = ({ children }) => {
     console.log('[useAuth] User logged out');
   }, []);
 
+  // Call when the backend rejects a token (HTTP 401/403). Client-side
+  // validateToken only decodes and checks exp — it cannot see a token that the
+  // server has revoked, superseded, or invalidated by rotating the signing
+  // secret. When that happens the stored token is dead, so end the session and
+  // let the UI prompt re-verification instead of leaving the user "logged in"
+  // with every request denied.
+  const sessionExpired = useCallback(() => {
+    localStorage.removeItem(TOKEN_KEY);
+    setUser(null);
+    console.warn('[useAuth] Backend rejected token — session ended, re-verification required');
+  }, []);
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -123,6 +135,7 @@ export const AuthProvider = ({ children }) => {
       handleVerifyResponse,
       getToken,
       logout,
+      sessionExpired,
     }}>
       {children}
     </AuthContext.Provider>
