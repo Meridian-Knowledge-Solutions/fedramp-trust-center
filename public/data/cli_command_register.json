@@ -194,17 +194,17 @@
         "service": "documentation"
       },
       {
-        "command": "aws configservice describe-compliance-by-config-rule --output json",
+        "command": "aws configservice describe-compliance-by-config-rule --max-items 200 --output json",
         "service": "change_metrics",
-        "note": "Phase 4: per-rule compliance status \u2014 required by audit #9.",
+        "note": "Phase 4: per-rule compliance status \u2014 required by audit #9. Bounded with --max-items 200: unbounded pagination over several hundred Config rules can exceed the engine's 30s command timeout, which surfaced as change_metrics 'not measured'.",
         "expected_output": "All AWS Config rules must report COMPLIANT or NON_COMPLIANT (not INSUFFICIENT_DATA)"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-CMT-VTD/config_recorder.json",
       "evidence_v2/KSI-CMT-VTD/active_rules.json",
-      "evidence_v2/KSI-CMT-VTD/checkov_scan_summary.json",
-      "evidence_v2/KSI-CMT-VTD/sdlc_policy.json"
+      "evidence_v2/KSI-CMT-VTD/sdlc_policy.json",
+      "evidence_v2/KSI-CMT-VTD/config_rule_compliance.json"
     ],
     "implementation_summary": "Changes validated by Checkov scans in CI pipeline before deployment. AWS Config rules provide continuous drift detection post-deployment.",
     "pass_criteria": "PASS if: AWS Config recorder is actively recording, at least one active Config Rule exists enforcing security policies on live resources, AND the sdlc-policy.md mandating automated testing (Checkov) exists in CodeCommit.",
@@ -543,25 +543,25 @@
         "expected_output": "Virtual MFA devices should be assigned to all human users"
       },
       {
-        "command": "echo '{}' | jq --argjson users \"$(aws iam list-users --output json | jq '.Users // []')\" --argjson mfa \"$(aws iam list-virtual-mfa-devices --output json | jq '.VirtualMFADevices // []')\" --argjson scim \"$(aws identitystore list-users --identity-store-id $(aws sso-admin list-instances --query 'Instances[0].IdentityStoreId' --output text) --output json | jq '.Users // []')\" '{HumanUsers: ($users | map(select(.PasswordLastUsed != null))), VirtualMFADevices: $mfa, ScimUsers: $scim}'",
+        "command": "SIDS=$(aws sso-admin list-instances --query 'Instances[].IdentityStoreId' --output text) || exit 1; SCIM_DOCS=$(for SID in $SIDS; do aws identitystore list-users --identity-store-id \"$SID\" --output json || exit 1; done) || exit 1; jq -n --argjson users \"$(aws iam list-users --output json | jq '.Users // []')\" --argjson mfa \"$(aws iam list-virtual-mfa-devices --output json | jq '.VirtualMFADevices // []')\" --argjson scim \"$(printf '%s\\n' \"$SCIM_DOCS\" | jq -s '[.[].Users // []] | add // []')\" '{HumanUsers: ($users | map(select(.PasswordLastUsed != null))), VirtualMFADevices: $mfa, ScimUsers: $scim}'",
         "service": "iam_mfa_metrics",
-        "note": "Mode 2 (operational effectiveness) \u2014 cross-source correlator. Combines list-users (filtered to human users via PasswordLastUsed!=null), list-virtual-mfa-devices, and identitystore list-users (SCIM-provisioned AWS Identity Center users, which carry ExternalIds={Issuer,Id} only when federated from an external IdP such as Okta). IAMMFAMetricsPrimitive computes combined MFA coverage = SCIM-federated Identity Center users (MFA enforced upstream at the IdP) + local IAM console users with a virtual MFA device, over all human identities. SCIM credit is given ONLY for users whose collected data actually carries ExternalIds. KSI-IAM-01 target is 95% (FedRAMP IA-2(1); direct IdP MFA-policy verification pending the Okta API integration).",
+        "note": "Mode 2 (operational effectiveness) \u2014 cross-source correlator. Combines list-users (filtered to human users via PasswordLastUsed!=null), list-virtual-mfa-devices, and identitystore list-users (SCIM-provisioned AWS Identity Center users, which carry ExternalIds={Issuer,Id} only when federated from an external IdP such as Okta). IAMMFAMetricsPrimitive computes combined MFA coverage = SCIM-federated Identity Center users (MFA enforced upstream at the IdP) + local IAM console users with a virtual MFA device, over all human identities. SCIM credit is given ONLY for users whose collected data actually carries ExternalIds. KSI-IAM-01 target is 95% (FedRAMP IA-2(1); direct IdP MFA-policy verification pending the Okta API integration). Iterates every Identity Center instance (the account has more than one, so a single-instance Instances[0] text substitution is unsafe) and fails fast on any collection error instead of emitting invalid JSON.",
         "expected_output": "Combined HumanUsers + VirtualMFADevices payload; primitive computes mfa_enrollment_rate"
       },
       {
-        "command": "aws sso-admin list-permission-sets --instance-arn $(aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text) --output json",
-        "note": "Phase 4: SSO permission sets (IA-2(1)) \u2014 required for phishing-resistant MFA verification.",
+        "command": "IARNS=$(aws sso-admin list-instances --query 'Instances[].InstanceArn' --output text) || exit 1; OUT=$(for IN in $IARNS; do E=\"/tmp/ps_err_$$\"; if J=$(aws sso-admin list-permission-sets --instance-arn \"$IN\" --output json 2>\"$E\"); then printf '%s\\n' \"$J\"; elif grep -q 'not supported for account instances' \"$E\"; then :; else cat \"$E\" >&2; exit 1; fi; rm -f \"$E\"; done) || exit 1; printf '%s\\n' \"$OUT\" | jq -s '{PermissionSets: [.[].PermissionSets // [] | .[]?]}'",
+        "note": "Phase 4: SSO permission sets (IA-2(1)) \u2014 required for phishing-resistant MFA verification. Iterates every Identity Center instance; ACCOUNT instances (where ListPermissionSets raises ValidationException 'not supported for account instances') are skipped, since permission sets only exist on the organization instance. Any other error fails the command.",
         "expected_output": "At least one permission set defined; downstream describe-permission-set must show MFA-required posture"
       },
       {
-        "command": "aws identitystore list-users --identity-store-id $(aws sso-admin list-instances --query 'Instances[0].IdentityStoreId' --output text) --output json",
-        "note": "Phase 4: enumerate SSO-managed user identities for IA-2 coverage.",
+        "command": "SIDS=$(aws sso-admin list-instances --query 'Instances[].IdentityStoreId' --output text) || exit 1; OUT=$(for SID in $SIDS; do aws identitystore list-users --identity-store-id \"$SID\" --output json || exit 1; done) || exit 1; printf '%s\\n' \"$OUT\" | jq -s '{Users: [.[].Users // [] | .[]?]}'",
+        "note": "Phase 4: enumerate SSO-managed user identities for IA-2 coverage. Iterates every Identity Center instance instead of assuming exactly one; the previous single-instance $(... Instances[0] ...) substitution broke when a second instance existed.",
         "expected_output": "At least one Identity Center user must exist when SSO is the auth path"
       },
       {
-        "command": "( IN=$(aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text 2>/dev/null); for ps in $(aws sso-admin list-permission-sets --instance-arn \"$IN\" --query 'PermissionSets[]' --output text 2>/dev/null); do aws sso-admin describe-permission-set --instance-arn \"$IN\" --permission-set-arn \"$ps\" --output json 2>/dev/null | jq '.PermissionSet'; done ) | jq -s '{PermissionSets: .}'",
+        "command": "IARNS=$(aws sso-admin list-instances --query 'Instances[].InstanceArn' --output text) || exit 1; OUT=$(for IN in $IARNS; do E=\"/tmp/psd_err_$$\"; if PS=$(aws sso-admin list-permission-sets --instance-arn \"$IN\" --query 'PermissionSets[]' --output text 2>\"$E\"); then for ps in $PS; do D=$(aws sso-admin describe-permission-set --instance-arn \"$IN\" --permission-set-arn \"$ps\" --output json) || exit 1; printf '%s\\n' \"$D\" | jq '.PermissionSet'; done; elif grep -q 'not supported for account instances' \"$E\"; then :; else cat \"$E\" >&2; exit 1; fi; rm -f \"$E\"; done) || exit 1; printf '%s\\n' \"$OUT\" | jq -s '{PermissionSets: .}'",
         "service": "sso_session_duration_metrics",
-        "note": "Mode 2 (operational effectiveness) \u2014 SSOSessionDurationMetrics computes within_target_rate as % of permission sets with SessionDuration <= 8h. Long-lived sessions extend the LMS session-theft attack window (vector 1). Target 100%.",
+        "note": "Mode 2 (operational effectiveness) \u2014 SSOSessionDurationMetrics computes within_target_rate as % of permission sets with SessionDuration <= 8h. Long-lived sessions extend the LMS session-theft attack window (vector 1). Target 100%. Iterates every Identity Center instance, skipping ACCOUNT instances (ListPermissionSets is only supported on the organization instance); any other collection error fails the command instead of silently emitting an empty list.",
         "expected_output": "Permission sets with SessionDuration; primitive computes within_target_rate; auditor reviews exceeding_sets"
       },
       {
@@ -582,7 +582,15 @@
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-IAM-APM/iam_users.json",
-      "evidence_v2/KSI-IAM-APM/sso_session_durations.json"
+      "evidence_v2/KSI-IAM-APM/sso_instances.json",
+      "evidence_v2/KSI-IAM-APM/virtual_mfa_devices.json",
+      "evidence_v2/KSI-IAM-APM/iam_mfa_correlation.json",
+      "evidence_v2/KSI-IAM-APM/permission_sets.json",
+      "evidence_v2/KSI-IAM-APM/identity_store_users.json",
+      "evidence_v2/KSI-IAM-APM/sso_session_durations.json",
+      "evidence_v2/KSI-IAM-APM/sso_instances_verify.json",
+      "evidence_v2/KSI-IAM-APM/saml_providers.json",
+      "evidence_v2/KSI-IAM-APM/password_policy.json"
     ],
     "implementation_summary": "MFA enforced for all human users via AWS Identity Center with FIDO2/WebAuthn support. Break-glass IAM users require hardware tokens.",
     "pass_criteria": "PASS if: All IAM users with active password usage (console access) have MFA enabled, AWS Identity Center is configured as the primary identity platform, AND virtual MFA devices are inventoried with no unprotected human accounts.",
@@ -919,9 +927,9 @@
         "expected_output": "BucketLoggingStatus list; primitive computes logging_rate, lists unlogged_buckets"
       },
       {
-        "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-load-balancer-attributes --load-balancer-arn \"$arn\" --output json 2>/dev/null | jq --arg arn \"$arn\" '. + {LoadBalancerArn: $arn}'; done ) | jq -s '{LoadBalancerAttributes: .}'",
+        "command": "LB_ARNS=$(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text) || exit 1; OUT=$(for arn in $LB_ARNS; do A=$(aws elbv2 describe-load-balancer-attributes --load-balancer-arn \"$arn\" --output json) || exit 1; printf '%s\\n' \"$A\" | jq --arg arn \"$arn\" '. + {LoadBalancerArn: $arn}'; done) || exit 1; printf '%s\\n' \"$OUT\" | jq -s '{LoadBalancerAttributes: .}'",
         "service": "alb_access_log_metrics",
-        "note": "Mode 2 \u2014 ALBAccessLogCoverageMetrics computes logging_rate as % of ALBs exporting access_logs.s3 to S3 (vectors 5, 6). Without ALB access logs, request-level visibility into the LMS edge depends solely on application logs (which an attacker may suppress). Target 100%.",
+        "note": "Mode 2 \u2014 ALBAccessLogCoverageMetrics computes logging_rate as % of ALBs exporting access_logs.s3 to S3 (vectors 5, 6). Without ALB access logs, request-level visibility into the LMS edge depends solely on application logs (which an attacker may suppress). Target 100%. Fails fast if the load-balancer list or any describe call errors, instead of silently returning an empty set (which previously failed the KSI as 'metric not measured' while ALBs existed).",
         "expected_output": "LoadBalancer attribute list; primitive checks access_logs.s3.enabled"
       }
     ],
@@ -933,8 +941,8 @@
       "evidence_v2/KSI-MLA-OSM/alb_access_log_coverage.json"
     ],
     "implementation_summary": "All activity logged to CloudTrail (multi-region, S3 delivery). VPC Flow Logs capture network traffic. Log integrity via S3 Object Lock.",
-    "pass_criteria": "PASS if: At least one CloudWatch Log Group exists for centralized logging, CloudTrail is enabled for API audit logging, AND at least one CloudWatch alarm exists to monitor log-derived metrics.",
-    "fail_criteria": "FAIL if: No CloudWatch Log Groups exist, CloudTrail is not enabled, or no CloudWatch alarms are configured for monitoring.",
+    "pass_criteria": "PASS if: at least one CloudTrail trail exists and is actively logging (IsLogging=true), a dedicated audit-log S3 bucket exists, S3 server access logging covers the bucket estate (s3_logging_coverage_metrics at target), AND every ALB has access logging enabled (alb_access_log_metrics at target).",
+    "fail_criteria": "FAIL if: no CloudTrail trail exists or the trail is not logging, no audit-log bucket exists, or S3/ALB access-logging coverage is below target.",
     "legacy_ksi_id": "KSI-MLA-01",
     "legacy_description": "Log all activity on all information resources supporting the cloud service offering to a protected audit log."
   },
@@ -1347,24 +1355,24 @@
         "expected_output": "At least 1 ACM certificate must exist"
       },
       {
-        "command": "( for arn in $(aws secretsmanager list-secrets --query 'SecretList[].ARN' --output text 2>/dev/null); do aws secretsmanager describe-secret --secret-id \"$arn\" --output json; done ) | jq -s '{SecretList: .}'",
-        "note": "Phase 4: per-secret rotation metadata (RotationEnabled, NextRotationDate).",
+        "command": "SECRET_ARNS=$(aws secretsmanager list-secrets --query 'SecretList[].ARN' --output text) || exit 1; OUT=$(for arn in $SECRET_ARNS; do aws secretsmanager describe-secret --secret-id \"$arn\" --output json || exit 1; done) || exit 1; printf '%s\\n' \"$OUT\" | jq -s '{SecretList: .}'",
+        "note": "Phase 4: per-secret rotation metadata (RotationEnabled, NextRotationDate). Fails fast on collection errors instead of silently skipping secrets.",
         "expected_output": "Every secret must have RotationEnabled=true (SC-12(c))"
       },
       {
-        "command": "( for k in $(aws kms list-keys --query 'Keys[].KeyId' --output text 2>/dev/null); do aws kms get-key-rotation-status --key-id \"$k\" --output json; done ) | jq -s '{KeyRotationStatuses: .}'",
+        "command": "KEY_IDS=$(aws kms list-keys --query 'Keys[].KeyId' --output text) || exit 1; ( for k in $KEY_IDS; do aws kms get-key-rotation-status --key-id \"$k\" --output json; done ) | jq -s '{KeyRotationStatuses: .}'",
         "service": "kms_rotation_metrics",
         "note": "Phase 4: KMS key rotation status \u2014 KeyRotationEnabled must be true for CMKs. Mode 2 (operational effectiveness) \u2014 KMSRotationMetricsPrimitive computes rotation_rate as % of CMKs with KeyRotationEnabled=true; KSI-SVC-06 target is 100% (FedRAMP SC-12 expectation).",
         "expected_output": "Every customer-managed KMS key must have KeyRotationEnabled=true"
       },
       {
-        "command": "( for arn in $(aws acm list-certificates --certificate-statuses ISSUED --query 'CertificateSummaryList[].CertificateArn' --output text 2>/dev/null); do aws acm describe-certificate --certificate-arn \"$arn\" --output json 2>/dev/null | jq '.Certificate | {CertificateArn, NotAfter, DomainName, Status}'; done ) | jq -s '{Certificates: .}'",
+        "command": "CERT_ARNS=$(aws acm list-certificates --certificate-statuses ISSUED --query 'CertificateSummaryList[].CertificateArn' --output text) || exit 1; ( for arn in $CERT_ARNS; do aws acm describe-certificate --certificate-arn \"$arn\" --output json | jq '.Certificate | {CertificateArn, NotAfter, DomainName, Status, Type, RenewalEligibility, RenewalSummary}'; done ) | jq -s '{Certificates: .}'",
         "service": "cert_expiry_metrics",
-        "note": "Mode 2 \u2014 CertExpiryCoverageMetrics computes healthy_rate as % of ACM certs >30d from expiry (vectors 1, 8). Expired cert FAILs immediately; certs <30d trigger WARNING. Target 100%.",
+        "note": "Mode 2 \u2014 CertExpiryCoverageMetrics computes healthy_rate as % of ACM certs >30d from expiry (vectors 1, 8). Expired cert FAILs immediately; certs <30d trigger WARNING. Target 100%. Also captures Type, RenewalEligibility and RenewalSummary so an ACM-managed cert pending auto-renewal is distinguishable from an imported cert that genuinely needs manual rotation.",
         "expected_output": "Per-cert NotAfter timestamps; primitive computes healthy_rate, lists certs_at_risk"
       },
       {
-        "command": "( for arn in $(aws secretsmanager list-secrets --query 'SecretList[].ARN' --output text 2>/dev/null); do aws secretsmanager describe-secret --secret-id \"$arn\" --output json 2>/dev/null | jq '{ARN, Name, RotationEnabled, RotationRules}'; done ) | jq -s '{Secrets: .}'",
+        "command": "SECRET_ARNS=$(aws secretsmanager list-secrets --query 'SecretList[].ARN' --output text) || exit 1; ( for arn in $SECRET_ARNS; do aws secretsmanager describe-secret --secret-id \"$arn\" --output json | jq '{ARN, Name, RotationEnabled, RotationRules}'; done ) | jq -s '{Secrets: .}'",
         "service": "secret_rotation_metrics",
         "note": "Mode 2 \u2014 SecretRotationMetrics computes rotation_rate as % of Secrets Manager secrets with RotationEnabled=true (vector 7 / supply-chain hygiene). Target 100% on secrets feeding production CI/CD and DB credentials.",
         "expected_output": "Per-secret rotation status; primitive computes rotation_rate, lists secrets_without_rotation"
@@ -1374,6 +1382,8 @@
       "evidence_v2/KSI-SVC-ASM/kms_keys.json",
       "evidence_v2/KSI-SVC-ASM/rotated_secrets.json",
       "evidence_v2/KSI-SVC-ASM/acm_certs.json",
+      "evidence_v2/KSI-SVC-ASM/secret_details.json",
+      "evidence_v2/KSI-SVC-ASM/kms_rotation.json",
       "evidence_v2/KSI-SVC-ASM/cert_expiry.json",
       "evidence_v2/KSI-SVC-ASM/secret_rotation.json"
     ],
@@ -1506,19 +1516,22 @@
         "service": "documentation"
       },
       {
-        "command": "( for arn in $(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text 2>/dev/null); do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json; done ) | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
+        "command": "LB_ARNS=$(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text) || exit 1; OUT=$(for arn in $LB_ARNS; do aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json || exit 1; done) || exit 1; printf '%s\\n' \"$OUT\" | jq -s '{Listeners: [.[].Listeners // [] | .[]?]}'",
         "service": "tls_listener_metrics",
-        "note": "Phase 4: full listener enumeration (was truncated to LoadBalancers[0]) \u2014 TLS policy whitelist enforcement. Mode 2 (operational effectiveness) \u2014 TLSListenerMetricsPrimitive computes tls_rate as % of listeners using HTTPS/TLS protocol vs HTTP/TCP plaintext; KSI-SVC-02 target is 100% (no plaintext listeners on production load balancers).",
+        "note": "Phase 4: full listener enumeration (was truncated to LoadBalancers[0]) \u2014 TLS policy whitelist enforcement. Mode 2 (operational effectiveness) \u2014 TLSListenerMetricsPrimitive computes tls_rate as % of listeners using HTTPS/TLS protocol vs HTTP/TCP plaintext; KSI-SVC-02 target is 100% (no plaintext listeners on production load balancers). Fails fast on collection errors instead of silently returning an empty listener set.",
         "expected_output": "All HTTPS/TLS listeners must use FedRAMP-approved SslPolicy (TLS13-* or TLS-1-2-2021)"
       }
     ],
     "artifact_evidence_paths": [
       "evidence_v2/KSI-SVC-SIN/acm_certs.json",
-      "evidence_v2/KSI-SVC-SIN/encryption_policy.json"
+      "evidence_v2/KSI-SVC-SIN/load_balancers.json",
+      "evidence_v2/KSI-SVC-SIN/cloudfront_distributions.json",
+      "evidence_v2/KSI-SVC-SIN/encryption_policy.json",
+      "evidence_v2/KSI-SVC-SIN/tls_listeners.json"
     ],
     "implementation_summary": "Network traffic encryption enforced via ACM-managed TLS certificates on ALB and CloudFront distributions. Encryption policy documented in CodeCommit governance repo. All external-facing endpoints require HTTPS.",
-    "pass_criteria": "PASS if: S3 Block Public Access is enabled at the account level (BlockPublicAcls, BlockPublicPolicy, IgnorePublicAcls, RestrictPublicBuckets all true), the compliance bucket blocks public access, S3 access logging is enabled, AND the s3-security-policy.md exists in CodeCommit.",
-    "fail_criteria": "FAIL if: Account-level S3 Block Public Access is not fully enabled, the compliance bucket allows public access, access logging is disabled, or the S3 security policy is missing.",
+    "pass_criteria": "PASS if: at least one ISSUED ACM certificate exists, every load balancer listener uses HTTPS/TLS (tls_listener_metrics at 100%), CloudFront distributions (when present) are configured with ACM certificates, AND the encryption-policy.md governance document exists in the repository.",
+    "fail_criteria": "FAIL if: no ISSUED ACM certificate exists, any load balancer exposes a plaintext (HTTP) listener without TLS, or the encryption policy document is missing.",
     "legacy_ksi_id": "KSI-SVC-02",
     "legacy_description": "Encrypt or otherwise secure network traffic."
   },
