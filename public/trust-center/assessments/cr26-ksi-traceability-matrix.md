@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-09-16T12:37:33.903521+00:00 (34 pass / 12 fail of 46)  
-**Generated:** 2026-09-16 13:04 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-09-16T20:44:34.947101+00:00 (34 pass / 12 fail of 46)  
+**Generated:** 2026-09-16 21:39 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -95,7 +95,7 @@ pre-CR26 assessment history.
   - MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation).
   - VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources.
   - GOVERNANCE: Validate the SDLC Policy which mandates 'Automated Testing' (Checkov) before deployment. [Policy-as-code home: governance/ in this git repository — machine-readable markdown, change requires a commit; validated via GitHub contents API.]
-  - Phase 4: per-rule compliance status — required by audit #9.
+  - Phase 4: per-rule compliance status — required by audit #9. Bounded with --max-items 200: unbounded pagination over several hundred Config rules can exceed the engine's 30s command timeout, which surfaced as change_metrics 'not measured'.
 - **Evidence artifacts:** 4 files under `evidence_v2/KSI-CMT-VTD/` (plus `cli_output.json`, `evidence_index.json`)
 - **Measure-to-statement rationale:** Validates the Hybrid Compliance Strategy. Checks for: 1) Active AWS Config Recorder (The Persistent Monitor), 2) Active Config Rules (The Validation Logic), and 3) The Testing Policy (Governance of the CI/CD pipeline).
 
@@ -253,19 +253,19 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-IAM-01, KSI-IAM-02
 - **NIST 800-53 controls:** ac-3, ia-5.1, ia-5.2, ia-5.6, ia-6, ac-2, ia-2, ia-2.1, ia-2.2, ia-2.8, ia-5, ia-8, sc-23
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: iam_mfa_metrics, sso_session_duration_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (45%): Secure passwordless methods are used for user authentication and authorization when feasible, otherwise strong passwo... | 5/11 resources compliant, 6 unverified. | Verified: Modern Identity: AWS Id…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (28%): Secure passwordless methods are used for user authentication and authorization when feasible, otherwise strong passwo... | 6/25 resources compliant, 4 unverified. | Verified: Modern Identity: AWS Id…
 - **Measures (validation objectives):**
   - FILTERED: Retrieve only IAM Users who have active password usage (Humans).
   - Verify that AWS Identity Center is the primary identity platform.
   - Get list of all Virtual MFA devices to validate protection (replaces list-mfa-devices which requires user).
-  - Mode 2 (operational effectiveness) — cross-source correlator. Combines list-users (filtered to human users via PasswordLastUsed!=null), list-virtual-mfa-devices, and identitystore list-users (SCIM-provisioned AWS Identity Center users, which carry ExternalIds={Issuer,Id} only when federated from an external IdP such as Okta). IAMMFAMetricsPrimitive computes combined MFA coverage = SCIM-federated Identity Center users (MFA enforced upstream at the IdP) + local IAM console users with a virtual MFA device, over all human identities. SCIM credit is given ONLY for users whose collected data actually carries ExternalIds. KSI-IAM-01 target is 95% (FedRAMP IA-2(1); direct IdP MFA-policy verification pending the Okta API integration).
-  - Phase 4: SSO permission sets (IA-2(1)) — required for phishing-resistant MFA verification.
-  - Phase 4: enumerate SSO-managed user identities for IA-2 coverage.
-  - Mode 2 (operational effectiveness) — SSOSessionDurationMetrics computes within_target_rate as % of permission sets with SessionDuration <= 8h. Long-lived sessions extend the LMS session-theft attack window (vector 1). Target 100%.
+  - Mode 2 (operational effectiveness) — cross-source correlator. Combines list-users (filtered to human users via PasswordLastUsed!=null), list-virtual-mfa-devices, and identitystore list-users (SCIM-provisioned AWS Identity Center users, which carry ExternalIds={Issuer,Id} only when federated from an external IdP such as Okta). IAMMFAMetricsPrimitive computes combined MFA coverage = SCIM-federated Identity Center users (MFA enforced upstream at the IdP) + local IAM console users with a virtual MFA device, over all human identities. SCIM credit is given ONLY for users whose collected data actually carries ExternalIds. KSI-IAM-01 target is 95% (FedRAMP IA-2(1); direct IdP MFA-policy verification pending the Okta API integration). Iterates every Identity Center instance (the account has more than one, so a single-instance Instances[0] text substitution is unsafe) and fails fast on any collection error instead of emitting invalid JSON.
+  - Phase 4: SSO permission sets (IA-2(1)) — required for phishing-resistant MFA verification. Iterates every Identity Center instance; ACCOUNT instances (where ListPermissionSets raises ValidationException 'not supported for account instances') are skipped, since permission sets only exist on the organization instance. Any other error fails the command.
+  - Phase 4: enumerate SSO-managed user identities for IA-2 coverage. Iterates every Identity Center instance instead of assuming exactly one; the previous single-instance $(... Instances[0] ...) substitution broke when a second instance existed.
+  - Mode 2 (operational effectiveness) — SSOSessionDurationMetrics computes within_target_rate as % of permission sets with SessionDuration <= 8h. Long-lived sessions extend the LMS session-theft attack window (vector 1). Target 100%. Iterates every Identity Center instance, skipping ACCOUNT instances (ListPermissionSets is only supported on the organization instance); any other collection error fails the command instead of silently emitting an empty list.
   - MODERN: Validate presence of AWS Identity Center (Single Sign-On).
   - LEGACY/FEDERATED: Validate presence of external Identity Providers (Okta, Azure AD).
   - FALLBACK: Validate that if passwords ARE used, the policy enforces complexity and rotation.
-- **Evidence artifacts:** 2 files under `evidence_v2/KSI-IAM-APM/` (plus `cli_output.json`, `evidence_index.json`)
+- **Evidence artifacts:** 10 files under `evidence_v2/KSI-IAM-APM/` (plus `cli_output.json`, `evidence_index.json`)
 - **Measure-to-statement rationale:** Validates MFA compliance by filtering for users who actively log in via password (Humans) and verifying Identity Center usage. Excludes API-only service accounts. | Validates the authentication hierarchy: Checks for Identity Center (Best) and SAML Providers (Good) first. If those are absent, it validates the IAM Password Policy (Fallback) to ensure strong controls are in place.
 
 ### KSI-IAM-ELP — Ensuring Least Privilege
@@ -434,7 +434,7 @@ pre-CR26 assessment history.
   - STATUS: Confirm CloudTrail is actually 'IsLogging': true. Uses TrailARN to avoid naming conflicts. Mode 2 (operational effectiveness) — TrailLoggingMetricsPrimitive computes logging_rate as % of trails with IsLogging=true; KSI-MLA-01 target is 100%.
   - STORAGE: Validate the specific S3 bucket used for audit log retention.
   - Mode 2 — S3LoggingCoverageMetrics computes logging_rate as % of S3 buckets with server access logging enabled (vector 6). Target 100%. KSI-MLA-01's outcome (log all activity) requires every bucket to log; gaps are blind spots for object-read attacks.
-  - Mode 2 — ALBAccessLogCoverageMetrics computes logging_rate as % of ALBs exporting access_logs.s3 to S3 (vectors 5, 6). Without ALB access logs, request-level visibility into the LMS edge depends solely on application logs (which an attacker may suppress). Target 100%.
+  - Mode 2 — ALBAccessLogCoverageMetrics computes logging_rate as % of ALBs exporting access_logs.s3 to S3 (vectors 5, 6). Without ALB access logs, request-level visibility into the LMS edge depends solely on application logs (which an attacker may suppress). Target 100%. Fails fast if the load-balancer list or any describe call errors, instead of silently returning an empty set (which previously failed the KSI as 'metric not measured' while ALBs existed).
 - **Evidence artifacts:** 5 files under `evidence_v2/KSI-MLA-OSM/` (plus `cli_output.json`, `evidence_index.json`)
 - **Measure-to-statement rationale:** Validates the master audit record. Checks for the existence of an active CloudTrail and the security (ACLs/Encryption) of the specific S3 bucket storing those logs.
 
@@ -655,11 +655,11 @@ pre-CR26 assessment history.
   - KEYS: Validate existence of KMS Customer Managed Keys (CMKs) for centralized management.
   - ROTATION: Validate Secrets Manager entries (Look for 'RotationEnabled': true in the output).
   - CERTIFICATES: Validate active ACM Certificates (Proof of managed renewal).
-  - Phase 4: per-secret rotation metadata (RotationEnabled, NextRotationDate).
+  - Phase 4: per-secret rotation metadata (RotationEnabled, NextRotationDate). Fails fast on collection errors instead of silently skipping secrets.
   - Phase 4: KMS key rotation status — KeyRotationEnabled must be true for CMKs. Mode 2 (operational effectiveness) — KMSRotationMetricsPrimitive computes rotation_rate as % of CMKs with KeyRotationEnabled=true; KSI-SVC-06 target is 100% (FedRAMP SC-12 expectation).
-  - Mode 2 — CertExpiryCoverageMetrics computes healthy_rate as % of ACM certs >30d from expiry (vectors 1, 8). Expired cert FAILs immediately; certs <30d trigger WARNING. Target 100%.
+  - Mode 2 — CertExpiryCoverageMetrics computes healthy_rate as % of ACM certs >30d from expiry (vectors 1, 8). Expired cert FAILs immediately; certs <30d trigger WARNING. Target 100%. Also captures Type, RenewalEligibility and RenewalSummary so an ACM-managed cert pending auto-renewal is distinguishable from an imported cert that genuinely needs manual rotation.
   - Mode 2 — SecretRotationMetrics computes rotation_rate as % of Secrets Manager secrets with RotationEnabled=true (vector 7 / supply-chain hygiene). Target 100% on secrets feeding production CI/CD and DB credentials.
-- **Evidence artifacts:** 5 files under `evidence_v2/KSI-SVC-ASM/` (plus `cli_output.json`, `evidence_index.json`)
+- **Evidence artifacts:** 7 files under `evidence_v2/KSI-SVC-ASM/` (plus `cli_output.json`, `evidence_index.json`)
 - **Measure-to-statement rationale:** Validates Automated Secret Lifecycle. Checks for: 1) KMS Keys (Encryption Foundation), 2) Secrets Manager (Automated Rotation of credentials), and 3) ACM Certificates (Automated Renewal of TLS identities).
 
 ### KSI-SVC-EIS — Evaluating and Improving Security
@@ -720,8 +720,8 @@ pre-CR26 assessment history.
   - GATEKEEPERS: List Load Balancers handling traffic.
   - EDGE: Validate CloudFront distributions (CDN) are configured with certificates.
   - GOVERNANCE: Validate the Encryption Policy document. [Policy-as-code home: governance/ in this git repository — machine-readable markdown, change requires a commit; validated via GitHub contents API.]
-  - Phase 4: full listener enumeration (was truncated to LoadBalancers[0]) — TLS policy whitelist enforcement. Mode 2 (operational effectiveness) — TLSListenerMetricsPrimitive computes tls_rate as % of listeners using HTTPS/TLS protocol vs HTTP/TCP plaintext; KSI-SVC-02 target is 100% (no plaintext listeners on production load balancers).
-- **Evidence artifacts:** 2 files under `evidence_v2/KSI-SVC-SIN/` (plus `cli_output.json`, `evidence_index.json`)
+  - Phase 4: full listener enumeration (was truncated to LoadBalancers[0]) — TLS policy whitelist enforcement. Mode 2 (operational effectiveness) — TLSListenerMetricsPrimitive computes tls_rate as % of listeners using HTTPS/TLS protocol vs HTTP/TCP plaintext; KSI-SVC-02 target is 100% (no plaintext listeners on production load balancers). Fails fast on collection errors instead of silently returning an empty listener set.
+- **Evidence artifacts:** 5 files under `evidence_v2/KSI-SVC-SIN/` (plus `cli_output.json`, `evidence_index.json`)
 - **Measure-to-statement rationale:** Validates Encryption in Transit. Checks for the Encryption Policy (Governance), ACM Certificates (The Keys), and Load Balancer/CloudFront configurations (The Enforcers).
 
 ### KSI-SVC-VCM — Validating Communications
