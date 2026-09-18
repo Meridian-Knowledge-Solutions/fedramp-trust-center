@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-09-17T12:44:26.441546+00:00 (34 pass / 12 fail of 46)  
-**Generated:** 2026-09-17 13:40 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-09-17T20:39:53.209741+00:00 (34 pass / 12 fail of 46)  
+**Generated:** 2026-09-17 21:36 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -253,7 +253,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-IAM-01, KSI-IAM-02
 - **NIST 800-53 controls:** ac-3, ia-5.1, ia-5.2, ia-5.6, ia-6, ac-2, ia-2, ia-2.1, ia-2.2, ia-2.8, ia-5, ia-8, sc-23
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: iam_mfa_metrics, sso_session_duration_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (28%): Secure passwordless methods are used for user authentication and authorization when feasible, otherwise strong passwo... | 6/25 resources compliant, 4 unverified. | Verified: Modern Identity: AWS Id…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (27%): Secure passwordless methods are used for user authentication and authorization when feasible, otherwise strong passwo... | 6/26 resources compliant, 4 unverified. | Verified: Modern Identity: AWS Id…
 - **Measures (validation objectives):**
   - FILTERED: Retrieve only IAM Users who have active password usage (Humans).
   - Verify that AWS Identity Center is the primary identity platform.
