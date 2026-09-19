@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-09-18T20:40:10.502331+00:00 (34 pass / 12 fail of 46)  
-**Generated:** 2026-09-18 21:35 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-09-19T04:35:14.277300+00:00 (34 pass / 12 fail of 46)  
+**Generated:** 2026-09-19 05:19 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -109,7 +109,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-04
 - **NIST 800-53 controls:** cm-2, si-3
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (98%): The functionality and privileges for infrastructure and services are strictly defined. | 92/94 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes,…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (0%): The functionality and privileges for infrastructure and services are strictly defined. | 92/96 resources compliant. CRITICAL OVERRIDE: All Traffic protocol open to internet; Open ingress (0.0.0.0/0) …
 - **Measures (validation objectives):**
   - IMMUTABILITY: Validate the documented immutable-infrastructure methodology — all production changes via version-controlled Terraform (state in S3 with versioning + DynamoDB state locking, PR-reviewed plan/apply, change tracked in git history). The Terraform state itself lives in the mks-states bucket in a SEPARATE AWS account (cross-account, not readable by the validation role); the immutable-IaC methodology is evidenced as code in governance/. [Policy-as-code home: governance/ in this git repository; validated via GitHub contents API.]
   - FUNCTIONALITY: Check for Security Groups allowing 'All Traffic' (-1). Absence of these proves strictly defined network functionality.
@@ -158,7 +158,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-02
 - **NIST 800-53 controls:** ac-17.3, ac-18.1, ac-18.3, ac-20.1, ca-9, sc-7.3, sc-7.4, sc-7.5, sc-7.8, sc-8, sc-10, si-10, si-11, si-16
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (95%): Machine-based information resources are persistently reviewed to ensure they have a minimal attack surface and that l... | 22/24 resources compliant. | Verified: Private Subnet: '[resource]' has pub…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (0%): Machine-based information resources are persistently reviewed to ensure they have a minimal attack surface and that l... | 20/24 resources compliant. CRITICAL OVERRIDE: Open ingress (0.0.0.0/0) on EC…
 - **Measures (validation objectives):**
   - ATTACK SURFACE: Validate the existence of Private Subnets (where Public IP mapping is disabled).
   - LATERAL MOVEMENT: Validate Security Groups that allow access ONLY from other specific Security Groups (Tiered Security), rather than broad IP ranges.
