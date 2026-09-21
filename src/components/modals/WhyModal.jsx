@@ -334,7 +334,10 @@ export const WhyModal = () => {
     <BaseModal
       isOpen={isOpen}
       onClose={() => closeModal('why')}
-      title={`${parsed.id} — ${parsed.category}`}
+      title={parsed.id}
+      eyebrow={parsed.category}
+      icon={StatusIcon}
+      accent={{ passed: 'green', meets_threshold: 'green', failed: 'red', warning: 'amber', info: 'indigo' }[parsed.status] || 'indigo'}
       size="large"
       variant="dark"
     >

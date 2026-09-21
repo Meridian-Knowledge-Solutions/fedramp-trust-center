@@ -163,12 +163,10 @@ export const MarkdownModal = () => {
     <BaseModal
       isOpen={isOpen}
       onClose={() => closeModal('markdown')}
-      title={
-        <div className="flex items-center gap-2.5">
-          <FileText size={18} className="text-[#34E0C4]" />
-          <span>{data?.title || 'Document'}</span>
-        </div>
-      }
+      title={data?.title || 'Document'}
+      eyebrow="Document"
+      icon={FileText}
+      accent="teal"
       size="large"
       variant="dark"
     >

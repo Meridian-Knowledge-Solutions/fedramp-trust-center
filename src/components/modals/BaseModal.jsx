@@ -9,6 +9,7 @@ const ACCENTS = {
   amber:  { fg: '#fcd34d', bg: 'rgba(245,158,11,0.12)', ring: 'rgba(245,158,11,0.24)', bar: '#f59e0b' },
   green:  { fg: '#6ee7b7', bg: 'rgba(16,185,129,0.12)', ring: 'rgba(16,185,129,0.24)', bar: '#10b981' },
   red:    { fg: '#fca5a5', bg: 'rgba(239,68,68,0.12)',  ring: 'rgba(239,68,68,0.24)',  bar: '#ef4444' },
+  teal:   { fg: '#34E0C4', bg: 'rgba(52,224,196,0.10)', ring: 'rgba(52,224,196,0.24)', bar: '#34E0C4' },
 };
 
 /**

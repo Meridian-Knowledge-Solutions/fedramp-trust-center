@@ -141,26 +141,17 @@ export const RegistrationModal = () => {
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
-      title="🇺🇸 Request Federal Agency Access"
+      title="Request Federal Agency Access"
+      eyebrow="Federal Access"
+      icon={Shield}
+      accent="indigo"
       size="large"
       variant="dark"
     >
-      <div className="mb-6">
-        <div className="bg-[#818cf8]/[0.06] border border-[#818cf8]/30 rounded-xl p-5 flex items-start gap-3">
-          <div className="p-2 bg-[#818cf8]/10 rounded-lg border border-[#818cf8]/30 flex-shrink-0">
-            <Shield className="text-[#818CF8]" size={20} />
-          </div>
-          <div className="text-sm">
-            <p className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#818CF8] mb-2">
-              Federal Agency Personnel Only
-            </p>
-            <p className="text-[#788596] leading-relaxed">
-              Access to detailed technical validation findings and certification package materials
-              is restricted to authorized federal personnel with valid .gov or .mil email addresses.
-            </p>
-          </div>
-        </div>
-      </div>
+      <p className="text-sm text-[#788596] leading-relaxed mb-6">
+        Access to detailed technical validation findings and certification package materials
+        is restricted to authorized federal personnel with valid .gov or .mil email addresses.
+      </p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Email */}
