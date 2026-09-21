@@ -4,6 +4,7 @@ import { POAMModal } from './POAMModal';
 import { EnhancementModal } from './EnhancementModal';
 import { RegistrationModal } from './RegistrationModal';
 import { AccessRequiredModal } from './AccessRequiredModal';
+import { SessionExpiredModal } from './SessionExpiredModal';
 import { MarkdownModal } from './MarkdownModal';
 
 export const ModalContainer = () => {
@@ -14,6 +15,7 @@ export const ModalContainer = () => {
       <EnhancementModal />
       <RegistrationModal />
       <AccessRequiredModal />
+      <SessionExpiredModal />
       <MarkdownModal />
     </>
   );
