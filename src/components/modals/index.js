@@ -5,4 +5,5 @@ export { POAMModal } from './POAMModal';
 export { EnhancementModal } from './EnhancementModal';
 export { RegistrationModal } from './RegistrationModal';
 export { AccessRequiredModal } from './AccessRequiredModal';
+export { SessionExpiredModal } from './SessionExpiredModal';
 export { MarkdownModal } from './MarkdownModal';

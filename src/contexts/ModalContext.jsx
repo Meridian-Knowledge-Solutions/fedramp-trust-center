@@ -9,6 +9,7 @@ export const ModalProvider = ({ children }) => {
     enhancement: { isOpen: false, data: null },
     registration: { isOpen: false, data: null },
     accessRequired: { isOpen: false, data: null },
+    sessionExpired: { isOpen: false, data: null },
     markdown: { isOpen: false, data: null },
   });
 
@@ -35,6 +36,7 @@ export const ModalProvider = ({ children }) => {
       enhancement: { isOpen: false, data: null },
       registration: { isOpen: false, data: null },
       accessRequired: { isOpen: false, data: null },
+      sessionExpired: { isOpen: false, data: null },
       markdown: { isOpen: false, data: null },
     });
     document.body.style.overflow = 'unset';
