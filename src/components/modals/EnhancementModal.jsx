@@ -13,11 +13,13 @@ export const EnhancementModal = () => {
     <BaseModal
       isOpen={isOpen}
       onClose={() => closeModal('enhancement')}
-      title={`🗂️ Additional Context: ${data.ksiId || 'KSI'}`}
+      title={`Additional Context: ${data.ksiId || 'KSI'}`}
+      eyebrow="Enhancement"
+      icon={Lightbulb}
+      accent="indigo"
       size="default"
     >
       <div className="text-center py-8">
-        <div className="text-6xl mb-4">🗂️</div>
         <h3 className="text-xl font-bold text-slate-900 mb-3">Additional Context Available</h3>
         <p className="text-slate-600 mb-6">
           This KSI provides additional context and enhancement opportunities beyond baseline compliance requirements.

@@ -151,7 +151,10 @@ ${minorKsis.map(k => `### ${k.id}
     <BaseModal
       isOpen={isOpen}
       onClose={() => closeModal('poam')}
-      title="📊 KSI Risk-Based Tracking System (VDR Integrated)"
+      title="KSI Risk-Based Tracking System"
+      eyebrow="VDR Integrated"
+      icon={Target}
+      accent="indigo"
       size="xlarge"
     >
       {/* Summary Cards */}
