@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-09-22T20:40:51.061755+00:00 (35 pass / 11 fail of 46)  
-**Generated:** 2026-09-22 21:36 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-09-23T04:41:43.132391+00:00 (34 pass / 12 fail of 46)  
+**Generated:** 2026-09-23 05:37 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -238,7 +238,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-IAM-07
 - **NIST 800-53 controls:** ac-2.2, ac-2.3, ac-2.13, ac-6.7, ia-4.4, ia-12, ia-12.2, ia-12.3, ia-12.5
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The lifecycle and privileges of all accounts, roles, and groups are securely managed using automation. | 1/2 resources compliant, 1 unverified. | Verified: IAM credential report (2 users): root is loc…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (0%): The lifecycle and privileges of all accounts, roles, and groups are securely managed using automation. | 0/2 resources compliant, 1 unverified. | Failures: IAM credential report (2 users): 1 access k…
 - **Measures (validation objectives):**
   - PRIMARY: Retrieve the full Credential Report to analyze password and key rotation ages.
   - AUDIT: Identify potential 'Zombie Roles' that are older than a specific threshold (adjust date as needed).
