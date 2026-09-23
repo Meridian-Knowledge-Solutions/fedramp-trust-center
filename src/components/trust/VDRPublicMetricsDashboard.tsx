@@ -1224,7 +1224,11 @@ export default function VDRDashboard() {
               </thead>
               <tbody>
                 {scanSources.map((src: any, i: number) => {
-                  const type = String(src.scan_type || "").replace(/_/g, " ");
+                  // The schema's enum term "incident" (GuardDuty) is clearer
+                  // to a reviewer as "threat detection".
+                  const type = src.scan_type === "incident"
+                    ? "threat detection"
+                    : String(src.scan_type || "").replace(/_/g, " ");
                   const last = src.last_scan ? formatDay(src.last_scan) : "—";
                   return (
                     <tr key={i} style={{ borderBottom: `1px solid ${LINE}` }}>
