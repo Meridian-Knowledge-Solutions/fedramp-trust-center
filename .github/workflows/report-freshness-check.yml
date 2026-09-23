@@ -1,0 +1,84 @@
+# Freshness watchdog for the trust center's published VDR report.
+#
+# Why: the VDR report is generated and synced here daily by the source repo's
+# "FedRAMP 20x Public Report Generation Pipeline". When that pipeline broke
+# (a schema validation error, mid-Aug to mid-Sep 2026), the trust center
+# silently served the last successfully published report for five weeks —
+# the "Scan sources detail" table froze at Aug 11 with nothing red in THIS
+# repo to show for it.
+#
+# This check is the consumer-side safety net: it looks only at the published
+# artifact, so it catches EVERY upstream failure mode (generation failures,
+# sync failures, expired tokens, a stalled scheduler) without needing to know
+# about any of them. If the report is older than MAX_REPORT_AGE_HOURS, the
+# run goes red and opens/updates a GitHub issue so the outage is visible.
+#
+# Same pattern as the VDR dashboard's scheduled-data-refresh freshness gate.
+
+name: Published Report Freshness Check
+
+on:
+  schedule:
+    # 10:00 UTC daily — after the source pipeline's 08:00 UTC generation run
+    # has had time to generate, sync, and commit here.
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  REPORT_PATH: public/data/reports/samples/vdr-report.json
+  # Generation is daily; 48h allows one missed/late run before alarming.
+  MAX_REPORT_AGE_HOURS: 48
+
+jobs:
+  check-freshness:
+    name: Verify published VDR report is fresh
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trust center
+        uses: actions/checkout@v4
+
+      - name: Check report age
+        id: check
+        run: |
+          set -euo pipefail
+          TS="$(jq -r '.reporting_period.generated_at // empty' "${REPORT_PATH}")"
+          if [ -z "${TS}" ]; then
+            echo "::error::No reporting_period.generated_at in ${REPORT_PATH} — cannot verify freshness."
+            exit 1
+          fi
+          # Strip fractional seconds so GNU date can parse the ISO-8601 value.
+          CLEAN="$(echo "${TS}" | sed -E 's/\.[0-9]+//')"
+          TS_EPOCH="$(date -u -d "${CLEAN}" +%s)"
+          NOW_EPOCH="$(date -u +%s)"
+          AGE_H=$(( (NOW_EPOCH - TS_EPOCH) / 3600 ))
+          echo "Published VDR report generated_at=${TS} (age ${AGE_H}h, threshold ${MAX_REPORT_AGE_HOURS}h)"
+          if [ "${AGE_H}" -ge "${MAX_REPORT_AGE_HOURS}" ]; then
+            echo "::error::Published VDR report is ${AGE_H}h old (>= ${MAX_REPORT_AGE_HOURS}h). The source repo's Public Report Generation Pipeline is likely failing or not syncing — the trust center is serving stale data."
+            exit 1
+          fi
+
+      - name: Create or update staleness issue
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          TITLE="🚨 Trust center is serving a stale VDR report"
+          BODY="The published VDR report (${REPORT_PATH}) is older than ${MAX_REPORT_AGE_HOURS}h: ${RUN_URL}
+
+          The source repo's Public Report Generation Pipeline (fedramp-20x-submission-final, public-report-generation.yml) is likely failing or its trust-center sync is not landing — check its recent runs first.
+
+          This issue is updated by each failing check; close it once the report is fresh again."
+          EXISTING="$(gh issue list --repo "${GITHUB_REPOSITORY}" --state open --search "\"${TITLE}\" in:title" --json number --jq '.[0].number // empty')"
+          if [ -n "${EXISTING}" ]; then
+            gh issue comment "${EXISTING}" --repo "${GITHUB_REPOSITORY}" --body "Still stale: ${RUN_URL}"
+            echo "Updated existing issue #${EXISTING}"
+          else
+            gh issue create --repo "${GITHUB_REPOSITORY}" --title "${TITLE}" --body "${BODY}"
+            echo "Opened new staleness issue"
+          fi
