@@ -1,9 +1,9 @@
 # CR26 KSI Traceability Matrix — Meridian LMS
 
-**Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.07.02.02  
+**Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-09-28T04:42:36.966916+00:00 (34 pass / 12 fail of 46)  
-**Generated:** 2026-09-28 05:38 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-09-28T20:40:45.610361+00:00 (34 pass / 12 fail of 46)  
+**Generated:** 2026-09-28 21:36 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -253,7 +253,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-IAM-01, KSI-IAM-02
 - **NIST 800-53 controls:** ac-3, ia-5.1, ia-5.2, ia-5.6, ia-6, ac-2, ia-2, ia-2.1, ia-2.2, ia-2.8, ia-5, ia-8, sc-23
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: iam_mfa_metrics, sso_session_duration_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (26%): Secure passwordless methods are used for user authentication and authorization when feasible, otherwise strong passwo... | 6/27 resources compliant, 4 unverified. | Verified: Modern Identity: AWS Id…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (21%): Secure passwordless methods are used for user authentication and authorization when feasible, otherwise strong passwo... | 5/27 resources compliant, 4 unverified. | Verified: Modern Identity: AWS Id…
 - **Measures (validation objectives):**
   - FILTERED: Retrieve only IAM Users who have active password usage (Humans).
   - Verify that AWS Identity Center is the primary identity platform.
@@ -398,7 +398,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-MLA-05
 - **NIST 800-53 controls:** ca-7, cm-2, cm-6, si-7.7
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources, especially infrastructure as code, is persistently evaluate... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 142 resource(s):…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources, especially infrastructure as code, is persistently evaluate... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 143 resource(s):…
 - **Measures (validation objectives):**
   - EVALUATION/TESTING: Validate the live Checkov IaC scan summary — Checkov (policy-as-code static analysis) scans the Terraform in meridian-aws-resources every run and records resources scanned + checks passed/failed. This is direct proof that infrastructure-as-code configuration is persistently evaluated and tested. Regenerated each run by the IaC Checkov Scan workflow. [Live artifact home: dashboard-data/ in this git repository; validated via GitHub contents API.]
   - PROCESS: Validate the SDLC policy mandating IaC review and automated security testing (SAST/DAST/CI-CD gates), the documented basis for persistently evaluating and testing infrastructure configuration. [Policy-as-code home: governance/ in this git repository; validated via GitHub contents API.]
@@ -636,7 +636,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-04
 - **NIST 800-53 controls:** ac-2.4, cm-2, cm-2.2, cm-2.3, cm-6, cm-7.1, pl-9, pl-10, sa-5, si-5, sr-10
 - **Evaluation policy:** mode `capability`, pass threshold 80%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources is managed using automation and persistently reviewed for dr... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 142 resource(s):…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources is managed using automation and persistently reviewed for dr... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 143 resource(s):…
 - **Measures (validation objectives):**
   - IAC AUTOMATION: Validate the live policy-as-code (Checkov) scan summary — proof that infrastructure is Terraform-managed and continuously scanned for configuration drift. [The Terraform state backend lives in the cross-account mks-states S3 bucket, not visible to list-buckets in the validation account; the proof of automation is the IaC + its policy gate, validated git-natively via the GitHub contents API.]
   - GOVERNANCE: Validate the Configuration Management Policy document. [Policy-as-code home: governance/ in this git repository — machine-readable markdown, change requires a commit; validated via GitHub contents API.]
