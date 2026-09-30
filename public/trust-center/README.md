@@ -1,6 +1,6 @@
 # Meridian Knowledge Solutions — FedRAMP 20x Trust Center Authorization Package
 
-**FedRAMP ID:** FR2412075M
+**FedRAMP ID:** FR2527956755
 **Provider:** Meridian Knowledge Solutions
 
 ## Package Contents

@@ -58,7 +58,7 @@ class PublicReportGenerator:
 
     PROVIDER = {
         "name": "Meridian Knowledge Solutions",
-        "fedramp_id": "FR2412075M",
+        "fedramp_id": "FR2527956755",
         "service_name": "Meridian LMS",
         "impact_level": "Moderate",
     }
