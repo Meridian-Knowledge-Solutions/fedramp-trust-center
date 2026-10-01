@@ -29,7 +29,11 @@
     },
     "provider": {
       "type": "object",
-      "required": ["name", "fedramp_id", "service_name"],
+      "required": [
+        "name",
+        "fedramp_id",
+        "service_name"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -45,19 +49,65 @@
         },
         "impact_level": {
           "type": "string",
-          "enum": ["Low", "Moderate", "High"],
-          "description": "FedRAMP impact level"
+          "enum": [
+            "Low",
+            "Moderate",
+            "High"
+          ],
+          "description": "Deprecated pre-CR26 impact level; retained for backward compatibility. See certification_profile."
+        },
+        "certification_profile": {
+          "type": "object",
+          "description": "CR26 Certification Profile (FRD-CPF): type x path x class",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "20x",
+                "Rev5"
+              ]
+            },
+            "path": {
+              "type": "string",
+              "enum": [
+                "Program",
+                "Agency"
+              ]
+            },
+            "class": {
+              "type": "string",
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "path",
+            "class"
+          ]
         }
       }
     },
     "change_classification": {
       "type": "object",
-      "required": ["tier", "category"],
+      "required": [
+        "tier",
+        "category"
+      ],
       "description": "FRR-SCN change classification per tiered framework",
       "properties": {
         "tier": {
           "type": "string",
-          "enum": ["routine_recurring", "adaptive", "transformative", "certification_class_change"],
+          "enum": [
+            "routine_recurring",
+            "adaptive",
+            "transformative",
+            "certification_class_change"
+          ],
           "description": "Change tier per FRR-SCN tiered change framework"
         },
         "category": {
@@ -77,7 +127,11 @@
     },
     "change_summary": {
       "type": "object",
-      "required": ["title", "description", "affected_components"],
+      "required": [
+        "title",
+        "description",
+        "affected_components"
+      ],
       "properties": {
         "title": {
           "type": "string",
@@ -92,7 +146,10 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["component_type", "component_id"],
+            "required": [
+              "component_type",
+              "component_id"
+            ],
             "properties": {
               "component_type": {
                 "type": "string",
@@ -104,7 +161,12 @@
               },
               "change_type": {
                 "type": "string",
-                "enum": ["added", "modified", "removed", "replaced"],
+                "enum": [
+                  "added",
+                  "modified",
+                  "removed",
+                  "replaced"
+                ],
                 "description": "Nature of the change to this component"
               },
               "description": {
@@ -124,7 +186,10 @@
     },
     "timeline": {
       "type": "object",
-      "required": ["change_initiated", "change_completed"],
+      "required": [
+        "change_initiated",
+        "change_completed"
+      ],
       "description": "FRR-SCN-TF timeline tracking",
       "properties": {
         "change_initiated": {
@@ -148,7 +213,10 @@
           "description": "When notification was sent to all necessary parties"
         },
         "documentation_updated": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "format": "date-time",
           "description": "When service documentation was updated (within 30 business days for transformative). Null if not yet completed."
         },
@@ -158,7 +226,10 @@
           "description": "Deadline for notification (5 business days after verification for transformative)"
         },
         "documentation_deadline": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "format": "date-time",
           "description": "Deadline for documentation update (30 business days for transformative). Null for non-transformative changes."
         }
@@ -166,18 +237,30 @@
     },
     "security_impact_assessment": {
       "type": "object",
-      "required": ["overall_risk_level", "controls_affected"],
+      "required": [
+        "overall_risk_level",
+        "controls_affected"
+      ],
       "properties": {
         "overall_risk_level": {
           "type": "string",
-          "enum": ["none", "low", "moderate", "high", "critical"],
+          "enum": [
+            "none",
+            "low",
+            "moderate",
+            "high",
+            "critical"
+          ],
           "description": "Overall risk level of this change"
         },
         "controls_affected": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["control_id", "impact"],
+            "required": [
+              "control_id",
+              "impact"
+            ],
             "properties": {
               "control_id": {
                 "type": "string",
@@ -189,7 +272,12 @@
               },
               "impact": {
                 "type": "string",
-                "enum": ["none", "positive", "negative", "neutral"],
+                "enum": [
+                  "none",
+                  "positive",
+                  "negative",
+                  "neutral"
+                ],
                 "description": "Impact of the change on this control"
               },
               "notes": {
@@ -210,19 +298,33 @@
         },
         "data_impact": {
           "type": "string",
-          "enum": ["none", "access_pattern_change", "new_data_flow", "data_location_change", "encryption_change"],
+          "enum": [
+            "none",
+            "access_pattern_change",
+            "new_data_flow",
+            "data_location_change",
+            "encryption_change"
+          ],
           "description": "Impact on federal customer data handling"
         }
       }
     },
     "controls_verification": {
       "type": "object",
-      "required": ["verification_method", "verification_timestamp", "results"],
+      "required": [
+        "verification_method",
+        "verification_timestamp",
+        "results"
+      ],
       "description": "Post-change security control verification results",
       "properties": {
         "verification_method": {
           "type": "string",
-          "enum": ["automated", "manual", "hybrid"],
+          "enum": [
+            "automated",
+            "manual",
+            "hybrid"
+          ],
           "description": "Method used for post-change verification"
         },
         "verification_timestamp": {
@@ -238,7 +340,10 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["control_id", "status"],
+            "required": [
+              "control_id",
+              "status"
+            ],
             "properties": {
               "control_id": {
                 "type": "string"
@@ -248,7 +353,12 @@
               },
               "status": {
                 "type": "string",
-                "enum": ["operational", "degraded", "non_operational", "not_applicable"]
+                "enum": [
+                  "operational",
+                  "degraded",
+                  "non_operational",
+                  "not_applicable"
+                ]
               },
               "verification_detail": {
                 "type": "string"
@@ -259,31 +369,54 @@
         },
         "overall_status": {
           "type": "string",
-          "enum": ["pass", "pass_with_findings", "fail"],
+          "enum": [
+            "pass",
+            "pass_with_findings",
+            "fail"
+          ],
           "description": "Overall verification result"
         }
       }
     },
     "notification_recipients": {
       "type": "object",
-      "required": ["fedramp_pmo", "agency_customers"],
+      "required": [
+        "fedramp_pmo",
+        "agency_customers"
+      ],
       "description": "FRR-SCN-TR notification delivery tracking",
       "properties": {
         "fedramp_pmo": {
           "type": "object",
           "properties": {
-            "notified": { "type": "boolean" },
-            "notification_timestamp": { "type": "string", "format": "date-time" },
-            "method": { "type": "string" }
+            "notified": {
+              "type": "boolean"
+            },
+            "notification_timestamp": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "method": {
+              "type": "string"
+            }
           }
         },
         "three_pao": {
           "type": "object",
           "properties": {
-            "name": { "type": "string" },
-            "notified": { "type": "boolean" },
-            "notification_timestamp": { "type": "string", "format": "date-time" },
-            "method": { "type": "string" }
+            "name": {
+              "type": "string"
+            },
+            "notified": {
+              "type": "boolean"
+            },
+            "notification_timestamp": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "method": {
+              "type": "string"
+            }
           }
         },
         "agency_customers": {
@@ -291,10 +424,19 @@
           "items": {
             "type": "object",
             "properties": {
-              "agency_id": { "type": "string" },
-              "notified": { "type": "boolean" },
-              "notification_timestamp": { "type": "string", "format": "date-time" },
-              "method": { "type": "string" },
+              "agency_id": {
+                "type": "string"
+              },
+              "notified": {
+                "type": "boolean"
+              },
+              "notification_timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "method": {
+                "type": "string"
+              },
               "consulted_in_advance": {
                 "type": "boolean",
                 "description": "Required for transformative changes"
@@ -307,7 +449,10 @@
     },
     "audit_trail": {
       "type": "object",
-      "required": ["record_id", "created_at"],
+      "required": [
+        "record_id",
+        "created_at"
+      ],
       "description": "FRR-SCN audit record keeping requirement",
       "properties": {
         "record_id": {
@@ -327,10 +472,19 @@
           "items": {
             "type": "object",
             "properties": {
-              "activity": { "type": "string" },
-              "timestamp": { "type": "string", "format": "date-time" },
-              "actor": { "type": "string" },
-              "outcome": { "type": "string" }
+              "activity": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "actor": {
+                "type": "string"
+              },
+              "outcome": {
+                "type": "string"
+              }
             }
           },
           "description": "Auditable log of significant change evaluation activities"
@@ -351,10 +505,19 @@
       "items": {
         "type": "object",
         "properties": {
-          "name": { "type": "string" },
-          "type": { "type": "string" },
-          "url": { "type": "string", "format": "uri" },
-          "hash": { "type": "string" }
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "hash": {
+            "type": "string"
+          }
         }
       },
       "description": "Supporting documentation and evidence"
@@ -364,7 +527,9 @@
     "properties": {
       "change_classification": {
         "properties": {
-          "tier": { "const": "transformative" }
+          "tier": {
+            "const": "transformative"
+          }
         }
       }
     }
@@ -375,7 +540,9 @@
         "properties": {
           "agency_customers": {
             "items": {
-              "required": ["consulted_in_advance"]
+              "required": [
+                "consulted_in_advance"
+              ]
             }
           }
         }
