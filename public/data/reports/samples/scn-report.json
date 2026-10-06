@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
-  "notification_id": "SCN-20261005-0119",
+  "notification_id": "SCN-20261006-0113",
   "report_type": "live",
-  "report_type_rationale": "Generated from the most recent adaptive/transformative event recorded by the SCN pipeline (change_id=SCN-20261005-ADA-011932, observed_at=2026-10-05T01:19:32.570945Z).",
-  "source_change_id": "SCN-20261005-ADA-011932",
+  "report_type_rationale": "Generated from the most recent adaptive/transformative event recorded by the SCN pipeline (change_id=SCN-20261006-ADA-011306, observed_at=2026-10-06T01:13:06.052428Z).",
+  "source_change_id": "SCN-20261006-ADA-011306",
   "source_reclassification": null,
   "provider": {
     "name": "Meridian Knowledge Solutions",
@@ -20,17 +20,23 @@
     "tier": "adaptive",
     "category": "Configuration / Security Adaptation",
     "is_emergency": false,
-    "evaluation_rationale": "SCN pipeline classified this change as adaptive based on contextual diff analysis across 3 repositories (26 commits, 3 production-path edits). Tier reflects FRR-SCN tiered framework: production-path edits, breadth of affected services, and observed contextual signals."
+    "evaluation_rationale": "SCN pipeline classified this change as adaptive based on contextual diff analysis across 4 repositories (39 commits, 1 production-path edits). Tier reflects FRR-SCN tiered framework: production-path edits, breadth of affected services, and observed contextual signals."
   },
   "change_summary": {
     "title": "Adaptive configuration update to core aws infrastructure",
-    "description": "Pipeline-classified adaptive change covering 3 repositories, 26 commits, and 8 files (3 in production paths). Affected services: Core AWS infrastructure, S3 storage infrastructure, FSx managed file storage.",
+    "description": "Pipeline-classified adaptive change covering 4 repositories, 39 commits, and 10 files (1 in production paths). Affected services: Core AWS infrastructure, VPC network fabric, S3 storage infrastructure, FSx managed file storage.",
     "affected_components": [
       {
         "component_type": "infrastructure",
         "component_id": "meridian-aws-resources",
         "change_type": "modified",
-        "description": "Core AWS infrastructure: 6 file(s) changed, 3 touching production paths. Service impact: adaptive."
+        "description": "Core AWS infrastructure: 4 file(s) changed, 1 touching production paths. Service impact: adaptive."
+      },
+      {
+        "component_type": "network",
+        "component_id": "meridian-terraform-aws-vpc-resources",
+        "change_type": "modified",
+        "description": "VPC network fabric: 4 file(s) changed, 0 touching production paths. Service impact: adaptive."
       },
       {
         "component_type": "storage",
@@ -48,17 +54,23 @@
     "boundary_impact": false
   },
   "timeline": {
-    "change_initiated": "2026-10-04T21:19:32.570945+00:00",
-    "change_completed": "2026-10-05T01:19:32.570945+00:00",
-    "verification_completed": "2026-10-05T01:19:32.570945+00:00",
-    "notification_sent": "2026-10-05T03:19:32.570945+00:00",
-    "documentation_updated": "2026-10-05T03:19:32.570945+00:00",
-    "notification_deadline": "2026-10-10T01:19:32.570945+00:00",
+    "change_initiated": "2026-10-05T21:13:06.052428+00:00",
+    "change_completed": "2026-10-06T01:13:06.052428+00:00",
+    "verification_completed": "2026-10-06T01:13:06.052428+00:00",
+    "notification_sent": "2026-10-06T03:13:06.052428+00:00",
+    "documentation_updated": "2026-10-06T03:13:06.052428+00:00",
+    "notification_deadline": "2026-10-11T01:13:06.052428+00:00",
     "documentation_deadline": null
   },
   "security_impact_assessment": {
     "overall_risk_level": "low",
     "controls_affected": [
+      {
+        "control_id": "AC-4",
+        "control_name": "Information Flow Enforcement",
+        "impact": "neutral",
+        "notes": "Re-evaluated via continuous monitoring after a adaptive change."
+      },
       {
         "control_id": "AU-9",
         "control_name": "Protection of Audit Information",
@@ -104,6 +116,18 @@
       {
         "control_id": "SC-28",
         "control_name": "Protection of Information at Rest",
+        "impact": "neutral",
+        "notes": "Re-evaluated via continuous monitoring after a adaptive change."
+      },
+      {
+        "control_id": "SC-7",
+        "control_name": "Boundary Protection",
+        "impact": "neutral",
+        "notes": "Re-evaluated via continuous monitoring after a adaptive change."
+      },
+      {
+        "control_id": "SC-8",
+        "control_name": "Transmission Confidentiality and Integrity",
         "impact": "neutral",
         "notes": "Re-evaluated via continuous monitoring after a adaptive change."
       },
@@ -123,9 +147,15 @@
   },
   "controls_verification": {
     "verification_method": "automated",
-    "verification_timestamp": "2026-10-05T01:19:32.570945+00:00",
+    "verification_timestamp": "2026-10-06T01:13:06.052428+00:00",
     "assessor": "Automated KSI Validation Pipeline",
     "results": [
+      {
+        "control_id": "AC-4",
+        "control_name": "Information Flow Enforcement",
+        "status": "operational",
+        "verification_detail": "Post-change KSI pipeline re-execution confirmed control remains operational."
+      },
       {
         "control_id": "AU-9",
         "control_name": "Protection of Audit Information",
@@ -175,6 +205,18 @@
         "verification_detail": "Post-change KSI pipeline re-execution confirmed control remains operational."
       },
       {
+        "control_id": "SC-7",
+        "control_name": "Boundary Protection",
+        "status": "operational",
+        "verification_detail": "Post-change KSI pipeline re-execution confirmed control remains operational."
+      },
+      {
+        "control_id": "SC-8",
+        "control_name": "Transmission Confidentiality and Integrity",
+        "status": "operational",
+        "verification_detail": "Post-change KSI pipeline re-execution confirmed control remains operational."
+      },
+      {
         "control_id": "SI-4",
         "control_name": "System Monitoring",
         "status": "operational",
@@ -186,63 +228,63 @@
   "notification_recipients": {
     "fedramp_pmo": {
       "notified": true,
-      "notification_timestamp": "2026-10-05T03:19:32.570945+00:00",
+      "notification_timestamp": "2026-10-06T03:13:06.052428+00:00",
       "method": "trust_center_publication"
     },
     "three_pao": {
       "name": "Fortreum",
       "notified": true,
-      "notification_timestamp": "2026-10-05T03:19:32.570945+00:00",
+      "notification_timestamp": "2026-10-06T03:13:06.052428+00:00",
       "method": "email_and_trust_center"
     },
     "agency_customers": [
       {
         "agency_id": "[AGENCY-REDACTED]",
         "notified": true,
-        "notification_timestamp": "2026-10-05T03:19:32.570945+00:00",
+        "notification_timestamp": "2026-10-06T03:13:06.052428+00:00",
         "method": "email_and_trust_center",
         "consulted_in_advance": false
       }
     ]
   },
   "audit_trail": {
-    "record_id": "AUDIT-SCN-20261005-ADA-011932",
-    "created_at": "2026-10-05T03:19:32.570945+00:00",
-    "last_updated": "2026-10-05T03:19:32.570945+00:00",
+    "record_id": "AUDIT-SCN-20261006-ADA-011306",
+    "created_at": "2026-10-06T03:13:06.052428+00:00",
+    "last_updated": "2026-10-06T03:13:06.052428+00:00",
     "evaluation_activities": [
       {
         "activity": "Change classification assessment",
-        "timestamp": "2026-10-04T20:49:32.570945+00:00",
+        "timestamp": "2026-10-05T20:43:06.052428+00:00",
         "actor": "SCN Pipeline (enhanced_external_repo_monitor)",
         "outcome": "Classified as adaptive based on contextual diff analysis."
       },
       {
         "activity": "Change implementation window opened",
-        "timestamp": "2026-10-04T21:19:32.570945+00:00",
+        "timestamp": "2026-10-05T21:13:06.052428+00:00",
         "actor": "Engineering",
         "outcome": "First commit recorded in monitored repositories."
       },
       {
         "activity": "Change implementation window closed",
-        "timestamp": "2026-10-05T01:19:32.570945+00:00",
+        "timestamp": "2026-10-06T01:13:06.052428+00:00",
         "actor": "Engineering",
         "outcome": "Final commit in monitored window recorded."
       },
       {
         "activity": "Post-change control verification",
-        "timestamp": "2026-10-05T01:19:32.570945+00:00",
+        "timestamp": "2026-10-06T01:13:06.052428+00:00",
         "actor": "Automated KSI Pipeline",
         "outcome": "Affected KSIs re-validated - all PASS."
       },
       {
         "activity": "SCN report generated and published",
-        "timestamp": "2026-10-05T03:19:32.570945+00:00",
+        "timestamp": "2026-10-06T03:13:06.052428+00:00",
         "actor": "Report Generation Pipeline",
         "outcome": "Published to trust center."
       }
     ],
-    "retention_until": "2027-10-05",
-    "integrity_hash": "46d151f894d74fda0f4cf5cff195e32c99decd64130e147a58faeec7b6ad7195"
+    "retention_until": "2027-10-06",
+    "integrity_hash": "d066455540f7d343bf20293f35415981facc9e6602cd96979b115688da6d6c38"
   },
   "attachments": [
     {
