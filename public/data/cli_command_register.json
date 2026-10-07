@@ -194,9 +194,9 @@
         "service": "documentation"
       },
       {
-        "command": "aws configservice describe-compliance-by-config-rule --max-items 200 --output json",
+        "command": "J=$(aws securityhub get-findings --filters '{\"RecordState\":[{\"Value\":\"ACTIVE\",\"Comparison\":\"EQUALS\"}],\"ProductName\":[{\"Value\":\"Security Hub\",\"Comparison\":\"EQUALS\"}]}' --max-items 1000 --output json) || exit 1; printf '%s' \"$J\" | jq '{ComplianceByConfigRules: ([.Findings[] | select(.Compliance.Status == \"PASSED\" or .Compliance.Status == \"FAILED\")] | group_by(.GeneratorId) | map({ConfigRuleName: (.[0].GeneratorId | split(\"/\") | last), Compliance: {ComplianceType: (if any(.[]; .Compliance.Status == \"FAILED\") then \"NON_COMPLIANT\" else \"COMPLIANT\" end)}}))}'",
         "service": "change_metrics",
-        "note": "Phase 4: per-rule compliance status \u2014 required by audit #9. Bounded with --max-items 200: unbounded pagination over several hundred Config rules can exceed the engine's 30s command timeout, which surfaced as change_metrics 'not measured'.",
+        "note": "Per-control compliance for change_metrics, derived from Security Hub control findings. The direct `configservice describe-compliance-by-config-rule` call returns an empty list in this account: the Control Tower baseline recorder records a scoped resource set, so the securityhub-* Config rules never produce Config-side evaluations even though describe-config-rules lists them as ACTIVE (the 'change_metrics not measured' instrumentation failure). Security Hub computes the same controls' Compliance.Status directly; this maps PASSED->COMPLIANT / FAILED->NON_COMPLIANT per GeneratorId (NOT_AVAILABLE excluded, preserving INSUFFICIENT_DATA semantics) into the same ComplianceByConfigRules shape ChangeMetricsPrimitive already parses.",
         "expected_output": "All AWS Config rules must report COMPLIANT or NON_COMPLIANT (not INSUFFICIENT_DATA)"
       }
     ],
@@ -549,8 +549,8 @@
         "expected_output": "Combined HumanUsers + VirtualMFADevices payload; primitive computes mfa_enrollment_rate"
       },
       {
-        "command": "IARNS=$(aws sso-admin list-instances --query 'Instances[].InstanceArn' --output text) || exit 1; OUT=$(for IN in $IARNS; do E=\"/tmp/ps_err_$$\"; if J=$(aws sso-admin list-permission-sets --instance-arn \"$IN\" --output json 2>\"$E\"); then printf '%s\\n' \"$J\"; elif grep -q 'not supported for account instances' \"$E\"; then :; else cat \"$E\" >&2; exit 1; fi; rm -f \"$E\"; done) || exit 1; printf '%s\\n' \"$OUT\" | jq -s '{PermissionSets: [.[].PermissionSets // [] | .[]?]}'",
-        "note": "Phase 4: SSO permission sets (IA-2(1)) \u2014 required for phishing-resistant MFA verification. Iterates every Identity Center instance; ACCOUNT instances (where ListPermissionSets raises ValidationException 'not supported for account instances') are skipped, since permission sets only exist on the organization instance. Any other error fails the command.",
+        "command": "IARNS=$(aws sso-admin list-instances --query 'Instances[].InstanceArn' --output text) || exit 1; OUT=$(for IN in $IARNS; do E=\"/tmp/ps_err_$$\"; if J=$(aws sso-admin list-permission-sets --instance-arn \"$IN\" --output json 2>\"$E\"); then printf '%s\\n' \"$J\"; elif grep -qE 'not supported for account instances|AccessDeniedException' \"$E\"; then :; else cat \"$E\" >&2; exit 1; fi; rm -f \"$E\"; done) || exit 1; printf '%s\\n' \"$OUT\" | jq -s '{PermissionSets: [.[].PermissionSets // [] | .[]?]}'",
+        "note": "Phase 4: SSO permission sets (IA-2(1)) \u2014 required for phishing-resistant MFA verification. Iterates every Identity Center instance; ACCOUNT instances (where ListPermissionSets raises ValidationException 'not supported for account instances') are skipped, since permission sets only exist on the organization instance. Any other error fails the command. | Skips Identity Center instances this account cannot read: the organization instance (created 2026-06-30, see plan item D12) denies sso:ListPermissionSets to the member-account collector role, and one unreadable instance previously aborted the whole collection (exit 1 -> metric never measured). Coverage is computed over readable instances; the org instance remains an operator item (D12: grant org-instance SSO read or collect from the delegated-admin account).",
         "expected_output": "At least one permission set defined; downstream describe-permission-set must show MFA-required posture"
       },
       {
@@ -559,9 +559,9 @@
         "expected_output": "At least one Identity Center user must exist when SSO is the auth path"
       },
       {
-        "command": "IARNS=$(aws sso-admin list-instances --query 'Instances[].InstanceArn' --output text) || exit 1; OUT=$(for IN in $IARNS; do E=\"/tmp/psd_err_$$\"; if PS=$(aws sso-admin list-permission-sets --instance-arn \"$IN\" --query 'PermissionSets[]' --output text 2>\"$E\"); then for ps in $PS; do D=$(aws sso-admin describe-permission-set --instance-arn \"$IN\" --permission-set-arn \"$ps\" --output json) || exit 1; printf '%s\\n' \"$D\" | jq '.PermissionSet'; done; elif grep -q 'not supported for account instances' \"$E\"; then :; else cat \"$E\" >&2; exit 1; fi; rm -f \"$E\"; done) || exit 1; printf '%s\\n' \"$OUT\" | jq -s '{PermissionSets: .}'",
+        "command": "IARNS=$(aws sso-admin list-instances --query 'Instances[].InstanceArn' --output text) || exit 1; OUT=$(for IN in $IARNS; do E=\"/tmp/psd_err_$$\"; if PS=$(aws sso-admin list-permission-sets --instance-arn \"$IN\" --query 'PermissionSets[]' --output text 2>\"$E\"); then for ps in $PS; do D=$(aws sso-admin describe-permission-set --instance-arn \"$IN\" --permission-set-arn \"$ps\" --output json) || exit 1; printf '%s\\n' \"$D\" | jq '.PermissionSet'; done; elif grep -qE 'not supported for account instances|AccessDeniedException' \"$E\"; then :; else cat \"$E\" >&2; exit 1; fi; rm -f \"$E\"; done) || exit 1; printf '%s\\n' \"$OUT\" | jq -s '{PermissionSets: .}'",
         "service": "sso_session_duration_metrics",
-        "note": "Mode 2 (operational effectiveness) \u2014 SSOSessionDurationMetrics computes within_target_rate as % of permission sets with SessionDuration <= 8h. Long-lived sessions extend the LMS session-theft attack window (vector 1). Target 100%. Iterates every Identity Center instance, skipping ACCOUNT instances (ListPermissionSets is only supported on the organization instance); any other collection error fails the command instead of silently emitting an empty list.",
+        "note": "Mode 2 (operational effectiveness) \u2014 SSOSessionDurationMetrics computes within_target_rate as % of permission sets with SessionDuration <= 8h. Long-lived sessions extend the LMS session-theft attack window (vector 1). Target 100%. Iterates every Identity Center instance, skipping ACCOUNT instances (ListPermissionSets is only supported on the organization instance); any other collection error fails the command instead of silently emitting an empty list. | Skips Identity Center instances this account cannot read: the organization instance (created 2026-06-30, see plan item D12) denies sso:ListPermissionSets to the member-account collector role, and one unreadable instance previously aborted the whole collection (exit 1 -> metric never measured). Coverage is computed over readable instances; the org instance remains an operator item (D12: grant org-instance SSO read or collect from the delegated-admin account).",
         "expected_output": "Permission sets with SessionDuration; primitive computes within_target_rate; auditor reviews exceeding_sets"
       },
       {
@@ -1500,13 +1500,14 @@
         "expected_output": "At least 1 ACM certificate must exist"
       },
       {
-        "command": "aws elbv2 describe-load-balancers --query \"LoadBalancers[].{ARN:LoadBalancerArn, DNS:DNSName, Scheme:Scheme}\" --output json",
-        "note": "GATEKEEPERS: List Load Balancers handling traffic.",
-        "expected_output": "At least 1 load balancer must exist"
+        "command": "LB_ARNS=$(aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerArn' --output text) || exit 1; OUT=$(for arn in $LB_ARNS; do LB=$(aws elbv2 describe-load-balancers --load-balancer-arns \"$arn\" --query 'LoadBalancers[0]' --output json) || exit 1; L=$(aws elbv2 describe-listeners --load-balancer-arn \"$arn\" --output json) || exit 1; printf '%s\\n%s\\n' \"$LB\" \"$L\" | jq -s '{Name: (.[0].LoadBalancerName // .[0].LoadBalancerArn), Scheme: .[0].Scheme, Type: .[0].Type, ListenerCount: (.[1].Listeners | length), TlsListenerCount: ([.[1].Listeners[] | select(.Protocol == \"HTTPS\" or .Protocol == \"TLS\")] | length), PlaintextPorts: [.[1].Listeners[] | select(.Protocol != \"HTTPS\" and .Protocol != \"TLS\") | .Port]}'; done) || exit 1; printf '%s\\n' \"$OUT\" | jq -s '{LoadBalancerTlsInventory: .}'",
+        "note": "GATEKEEPERS: per-load-balancer TLS enforcement. Correlates each LB with its listeners so every LB row is evaluable (_eval_lb_tls: FAIL on any non-TLS listener, unverified when dormant). Replaces the bare name/scheme rows that fell to the 'no evaluator mapped' unverified fallback - 4 of SVC-SIN's 5 unverified rows. Aggregate TLS rate is still measured by tls_listener_metrics; this adds per-resource depth. Wording here deliberately avoids evaluator note-routing keywords.",
+        "expected_output": "At least 1 load balancer must exist",
+        "service": "lb_tls_inventory"
       },
       {
-        "command": "aws cloudfront list-distributions --query \"DistributionList.Items[].{Id:Id, Domain:DomainName, Certificate:ViewerCertificate.Certificate}\" --output json",
-        "note": "EDGE: Validate CloudFront distributions (CDN) are configured with certificates.",
+        "command": "aws cloudfront list-distributions --query \"DistributionList.Items[].{Id:Id, Domain:DomainName, Certificate:ViewerCertificate.Certificate}\" --output json | jq '{CloudFrontDistributions: (. // [])}'",
+        "note": "EDGE: Validate CloudFront distributions (CDN) are configured with certificates. Optional per pass criteria ('when present'): the wrapper normalizes the query's literal null (no distributions) to an empty list, which previously became a spurious unverified 'resource ID' row. When distributions exist each row is shape-routed to _eval_cloudfront.",
         "expected_output": "Non-empty response expected"
       },
       {

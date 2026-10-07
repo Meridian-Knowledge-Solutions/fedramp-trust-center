@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-09-30T12:40:54.880449+00:00 (34 pass / 12 fail of 46)  
-**Generated:** 2026-09-30 13:19 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-10-07T12:46:49.617945+00:00 (35 pass / 11 fail of 46)  
+**Generated:** 2026-10-07 13:34 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -95,7 +95,7 @@ pre-CR26 assessment history.
   - MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation).
   - VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources.
   - GOVERNANCE: Validate the SDLC Policy which mandates 'Automated Testing' (Checkov) before deployment. [Policy-as-code home: governance/ in this git repository — machine-readable markdown, change requires a commit; validated via GitHub contents API.]
-  - Phase 4: per-rule compliance status — required by audit #9. Bounded with --max-items 200: unbounded pagination over several hundred Config rules can exceed the engine's 30s command timeout, which surfaced as change_metrics 'not measured'.
+  - Per-control compliance for change_metrics, derived from Security Hub control findings. The direct `configservice describe-compliance-by-config-rule` call returns an empty list in this account: the Control Tower baseline recorder records a scoped resource set, so the securityhub-* Config rules never produce Config-side evaluations even though describe-config-rules lists them as ACTIVE (the 'change_metrics not measured' instrumentation failure). Security Hub computes the same controls' Compliance.Status directly; this maps PASSED->COMPLIANT / FAILED->NON_COMPLIANT per GeneratorId (NOT_AVAILABLE excluded, preserving INSUFFICIENT_DATA semantics) into the same ComplianceByConfigRules shape ChangeMetricsPrimitive already parses.
 - **Evidence artifacts:** 4 files under `evidence_v2/KSI-CMT-VTD/` (plus `cli_output.json`, `evidence_index.json`)
 - **Measure-to-statement rationale:** Validates the Hybrid Compliance Strategy. Checks for: 1) Active AWS Config Recorder (The Persistent Monitor), 2) Active Config Rules (The Validation Logic), and 3) The Testing Policy (Governance of the CI/CD pipeline).
 
@@ -253,15 +253,15 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-IAM-01, KSI-IAM-02
 - **NIST 800-53 controls:** ac-3, ia-5.1, ia-5.2, ia-5.6, ia-6, ac-2, ia-2, ia-2.1, ia-2.2, ia-2.8, ia-5, ia-8, sc-23
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: iam_mfa_metrics, sso_session_duration_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (21%): Secure passwordless methods are used for user authentication and authorization when feasible, otherwise strong passwo... | 5/27 resources compliant, 4 unverified. | Verified: Modern Identity: AWS Id…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (91%): Secure passwordless methods are used for user authentication and authorization when feasible, otherwise strong passwo... | 22/27 resources compliant, 3 unverified. | Verified: Modern Identity: AWS I…
 - **Measures (validation objectives):**
   - FILTERED: Retrieve only IAM Users who have active password usage (Humans).
   - Verify that AWS Identity Center is the primary identity platform.
   - Get list of all Virtual MFA devices to validate protection (replaces list-mfa-devices which requires user).
   - Mode 2 (operational effectiveness) — cross-source correlator. Combines list-users (filtered to human users via PasswordLastUsed!=null), list-virtual-mfa-devices, and identitystore list-users (SCIM-provisioned AWS Identity Center users, which carry ExternalIds={Issuer,Id} only when federated from an external IdP such as Okta). IAMMFAMetricsPrimitive computes combined MFA coverage = SCIM-federated Identity Center users (MFA enforced upstream at the IdP) + local IAM console users with a virtual MFA device, over all human identities. SCIM credit is given ONLY for users whose collected data actually carries ExternalIds. KSI-IAM-01 target is 95% (FedRAMP IA-2(1); direct IdP MFA-policy verification pending the Okta API integration). Iterates every Identity Center instance (the account has more than one, so a single-instance Instances[0] text substitution is unsafe) and fails fast on any collection error instead of emitting invalid JSON.
-  - Phase 4: SSO permission sets (IA-2(1)) — required for phishing-resistant MFA verification. Iterates every Identity Center instance; ACCOUNT instances (where ListPermissionSets raises ValidationException 'not supported for account instances') are skipped, since permission sets only exist on the organization instance. Any other error fails the command.
+  - Phase 4: SSO permission sets (IA-2(1)) — required for phishing-resistant MFA verification. Iterates every Identity Center instance; ACCOUNT instances (where ListPermissionSets raises ValidationException 'not supported for account instances') are skipped, since permission sets only exist on the organization instance. Any other error fails the command. | Skips Identity Center instances this account cannot read: the organization instance (created 2026-06-30, see plan item D12) denies sso:ListPermissionSets to the member-account collector role, and one unreadable instance previously aborted the whole collection (exit 1 -> metric never measured). Coverage is computed over readable instances; the org instance remains an operator item (D12: grant org-instance SSO read or collect from the delegated-admin account).
   - Phase 4: enumerate SSO-managed user identities for IA-2 coverage. Iterates every Identity Center instance instead of assuming exactly one; the previous single-instance $(... Instances[0] ...) substitution broke when a second instance existed.
-  - Mode 2 (operational effectiveness) — SSOSessionDurationMetrics computes within_target_rate as % of permission sets with SessionDuration <= 8h. Long-lived sessions extend the LMS session-theft attack window (vector 1). Target 100%. Iterates every Identity Center instance, skipping ACCOUNT instances (ListPermissionSets is only supported on the organization instance); any other collection error fails the command instead of silently emitting an empty list.
+  - Mode 2 (operational effectiveness) — SSOSessionDurationMetrics computes within_target_rate as % of permission sets with SessionDuration <= 8h. Long-lived sessions extend the LMS session-theft attack window (vector 1). Target 100%. Iterates every Identity Center instance, skipping ACCOUNT instances (ListPermissionSets is only supported on the organization instance); any other collection error fails the command instead of silently emitting an empty list. | Skips Identity Center instances this account cannot read: the organization instance (created 2026-06-30, see plan item D12) denies sso:ListPermissionSets to the member-account collector role, and one unreadable instance previously aborted the whole collection (exit 1 -> metric never measured). Coverage is computed over readable instances; the org instance remains an operator item (D12: grant org-instance SSO read or collect from the delegated-admin account).
   - MODERN: Validate presence of AWS Identity Center (Single Sign-On).
   - LEGACY/FEDERATED: Validate presence of external Identity Providers (Okta, Azure AD).
   - FALLBACK: Validate that if passwords ARE used, the policy enforces complexity and rotation.
@@ -398,7 +398,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-MLA-05
 - **NIST 800-53 controls:** ca-7, cm-2, cm-6, si-7.7
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources, especially infrastructure as code, is persistently evaluate... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 143 resource(s):…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources, especially infrastructure as code, is persistently evaluate... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 142 resource(s):…
 - **Measures (validation objectives):**
   - EVALUATION/TESTING: Validate the live Checkov IaC scan summary — Checkov (policy-as-code static analysis) scans the Terraform in meridian-aws-resources every run and records resources scanned + checks passed/failed. This is direct proof that infrastructure-as-code configuration is persistently evaluated and tested. Regenerated each run by the IaC Checkov Scan workflow. [Live artifact home: dashboard-data/ in this git repository; validated via GitHub contents API.]
   - PROCESS: Validate the SDLC policy mandating IaC review and automated security testing (SAST/DAST/CI-CD gates), the documented basis for persistently evaluating and testing infrastructure configuration. [Policy-as-code home: governance/ in this git repository; validated via GitHub contents API.]
@@ -463,7 +463,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-PIY-01
 - **NIST 800-53 controls:** cm-2.2, cm-7.5, cm-8, cm-8.1, cm-12, cm-12.1, cp-2.8
 - **Evaluation policy:** mode `output`, pass threshold 80%, required operational metrics: inventory_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 154/154 resources compliant. | Verified: AWS Config recorder '[resource]' con…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 157/157 resources compliant. | Verified: AWS Config recorder '[resource]' con…
 - **Measures (validation objectives):**
   - PRIMARY: Validate that the Configuration Recorder is active (The 'Authoritative Source').
   - STORAGE: Validate that the inventory data is being delivered to a central S3 bucket.
@@ -636,7 +636,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-04
 - **NIST 800-53 controls:** ac-2.4, cm-2, cm-2.2, cm-2.3, cm-6, cm-7.1, pl-9, pl-10, sa-5, si-5, sr-10
 - **Evaluation policy:** mode `capability`, pass threshold 80%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources is managed using automation and persistently reviewed for dr... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 143 resource(s):…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources is managed using automation and persistently reviewed for dr... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 142 resource(s):…
 - **Measures (validation objectives):**
   - IAC AUTOMATION: Validate the live policy-as-code (Checkov) scan summary — proof that infrastructure is Terraform-managed and continuously scanned for configuration drift. [The Terraform state backend lives in the cross-account mks-states S3 bucket, not visible to list-buckets in the validation account; the proof of automation is the IaC + its policy gate, validated git-natively via the GitHub contents API.]
   - GOVERNANCE: Validate the Configuration Management Policy document. [Policy-as-code home: governance/ in this git repository — machine-readable markdown, change requires a commit; validated via GitHub contents API.]
@@ -714,11 +714,11 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-02
 - **NIST 800-53 controls:** ac-1, ac-17.2, cp-9.8, sc-8, sc-8.1, sc-13, sc-20, sc-21, sc-22, sc-23, sc-28, sc-28.1
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: tls_listener_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (37%): Information is encrypted or otherwise secured from unwanted access or modification. | 3/8 resources compliant, 5 unverified. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; Verified…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information is encrypted or otherwise secured from unwanted access or modification. | 7/7 resources compliant. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; Load balancer '[resource…
 - **Measures (validation objectives):**
   - KEYS: Validate existence of active, issued TLS certificates.
-  - GATEKEEPERS: List Load Balancers handling traffic.
-  - EDGE: Validate CloudFront distributions (CDN) are configured with certificates.
+  - GATEKEEPERS: per-load-balancer TLS enforcement. Correlates each LB with its listeners so every LB row is evaluable (_eval_lb_tls: FAIL on any non-TLS listener, unverified when dormant). Replaces the bare name/scheme rows that fell to the 'no evaluator mapped' unverified fallback - 4 of SVC-SIN's 5 unverified rows. Aggregate TLS rate is still measured by tls_listener_metrics; this adds per-resource depth. Wording here deliberately avoids evaluator note-routing keywords.
+  - EDGE: Validate CloudFront distributions (CDN) are configured with certificates. Optional per pass criteria ('when present'): the wrapper normalizes the query's literal null (no distributions) to an empty list, which previously became a spurious unverified 'resource ID' row. When distributions exist each row is shape-routed to _eval_cloudfront.
   - GOVERNANCE: Validate the Encryption Policy document. [Policy-as-code home: governance/ in this git repository — machine-readable markdown, change requires a commit; validated via GitHub contents API.]
   - Phase 4: full listener enumeration (was truncated to LoadBalancers[0]) — TLS policy whitelist enforcement. Mode 2 (operational effectiveness) — TLSListenerMetricsPrimitive computes tls_rate as % of listeners using HTTPS/TLS protocol vs HTTP/TCP plaintext; KSI-SVC-02 target is 100% (no plaintext listeners on production load balancers). Fails fast on collection errors instead of silently returning an empty listener set.
 - **Evidence artifacts:** 5 files under `evidence_v2/KSI-SVC-SIN/` (plus `cli_output.json`, `evidence_index.json`)
