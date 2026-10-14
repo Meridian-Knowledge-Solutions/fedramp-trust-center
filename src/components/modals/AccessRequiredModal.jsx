@@ -72,7 +72,7 @@ export const AccessRequiredModal = () => {
     >
       <p style={s.sub}>
         Access to technical validation findings and certification materials is restricted to
-        authorized federal personnel.
+        authorized federal personnel and approved organizations.
       </p>
 
       {data?.benefits && data.benefits.length > 0 && (
@@ -87,7 +87,7 @@ export const AccessRequiredModal = () => {
         </div>
       )}
 
-      <p style={s.hint}>Requires a valid .gov or .mil email address.</p>
+      <p style={s.hint}>Requires a .gov / .mil email address or an approved organization address.</p>
     </BaseModal>
   );
 };

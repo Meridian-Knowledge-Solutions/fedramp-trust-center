@@ -150,7 +150,8 @@ export const RegistrationModal = () => {
     >
       <p className="text-sm text-[#788596] leading-relaxed mb-6">
         Access to detailed technical validation findings and certification package materials
-        is restricted to authorized federal personnel with valid .gov or .mil email addresses.
+        is restricted to authorized federal personnel (.gov / .mil / .fed.us) and to organizations
+        Meridian has approved for access.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -177,7 +178,7 @@ export const RegistrationModal = () => {
               {errors.email}
             </p>
           )}
-          <p className="text-[11px] text-[#424E5C] mt-1.5 font-mono">Must be a .gov, .mil, or .fed.us email address</p>
+          <p className="text-[11px] text-[#424E5C] mt-1.5 font-mono">Must be a .gov, .mil, or .fed.us address, or an approved organization address</p>
         </div>
 
         {/* Agency */}
@@ -301,7 +302,7 @@ export const RegistrationModal = () => {
       <div className="mt-6 pt-6 border-t border-[#1A222D]">
         <p className="text-[11px] text-[#788596] text-center leading-relaxed font-mono">
           By registering, you acknowledge that access is restricted to federal personnel
-          for official government use only.
+          and approved organizations, for official use only.
         </p>
       </div>
     </BaseModal>
