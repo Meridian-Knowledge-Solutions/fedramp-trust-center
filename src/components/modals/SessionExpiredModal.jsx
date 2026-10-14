@@ -68,7 +68,7 @@ export const SessionExpiredModal = () => {
         Federal access sessions are time-limited and can end when credentials are rotated.
         Re-verifying takes a moment and restores full access to certification materials.
       </div>
-      <p style={s.hint}>Requires a valid .gov or .mil email address.</p>
+      <p style={s.hint}>Requires a .gov / .mil email address or an approved organization address.</p>
     </BaseModal>
   );
 };

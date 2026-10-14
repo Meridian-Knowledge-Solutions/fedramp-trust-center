@@ -718,9 +718,10 @@ const AppShell = () => {
                     <h3 className="font-semibold text-white text-xl mb-3">Verified federal access required</h3>
                     <p className="text-sm text-gray-400 mb-4 leading-relaxed">
                       This section contains detailed certification data for the service. To keep that
-                      data with verified government and DoD audiences, we ask you to register with your
-                      <span className="text-gray-300"> .gov / .mil email</span> before viewing it — it
-                      only takes a minute, and it's how we confirm you're a federal stakeholder.
+                      data with verified audiences, we ask you to register with your
+                      <span className="text-gray-300"> .gov / .mil email</span> (or an organization address
+                      Meridian has approved) before viewing it — it only takes a minute, and it's how we
+                      confirm you're an authorized stakeholder.
                     </p>
                     <p className="text-sm text-gray-400 mb-6 leading-relaxed">
                       No registration is needed for our public transparency views:
