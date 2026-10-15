@@ -135,9 +135,80 @@ function debugToken(jwt) {
 
 const VerifyHandler = () => {
   const { handleVerifyResponse, isAuthenticated } = useAuth();
-  const [state, setState] = useState('idle'); // idle | verifying | success | error
+  const [state, setState] = useState('idle'); // idle | confirm | verifying | success | error
   const [errorMsg, setErrorMsg] = useState('');
+  const [pending, setPending] = useState(null); // { token, email } awaiting the user's click
+  const [verifiedAs, setVerifiedAs] = useState('');
   const hasRun = useRef(false); // Prevent double-run in React StrictMode
+
+  // POST the verification code to the backend. Called ONLY from the
+  // "Complete verification" button, never on page load: email security
+  // scanners (M365 Safe Links etc.) open links in a sandbox that runs the
+  // page, and an automatic POST would let them consume the single-use link
+  // before the real user clicks it.
+  const submitVerification = () => {
+    if (!pending) return;
+    setState('verifying');
+
+    const payload = { token: pending.token };
+    if (pending.email) payload.email = pending.email;
+
+    const verifyUrl = API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.VERIFY;
+    console.log('[VerifyHandler] POSTing to:', verifyUrl);
+
+    fetch(verifyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(async (res) => {
+        const text = await res.text();
+        console.log('[VerifyHandler] /verify response status:', res.status);
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          throw new Error('Backend returned non-JSON response: ' + text.substring(0, 200));
+        }
+
+        if (!res.ok) {
+          throw new Error(data.error || data.message || 'Verification failed (HTTP ' + res.status + ')');
+        }
+
+        // Check all possible token field names the backend might use
+        const tokenValue = data.fedRAMPAccessToken || data.token || data.access_token || data.jwt || data.accessToken;
+        if (!data.fedRAMPAccessToken && tokenValue) {
+          console.warn('[VerifyHandler] Token found under non-standard key. Normalizing.');
+          data.fedRAMPAccessToken = tokenValue;
+        }
+
+        // --- THE CRITICAL LINE: Store the JWT ---
+        const stored = handleVerifyResponse(data);
+
+        if (stored) {
+          console.log('[VerifyHandler] JWT stored in localStorage successfully');
+          setVerifiedAs(data.agency || '');
+          setState('success');
+          cleanUrl();
+          setTimeout(() => setState('idle'), 2500);
+        } else {
+          console.error('[VerifyHandler] handleVerifyResponse returned false');
+          if (data.fedRAMPAccessToken) {
+            debugToken(data.fedRAMPAccessToken);
+          } else {
+            console.error('[VerifyHandler] Response did NOT contain fedRAMPAccessToken. Keys:', Object.keys(data));
+          }
+          setState('error');
+          setErrorMsg('Token validation failed after verification. Check browser console for details.');
+        }
+      })
+      .catch((err) => {
+        console.error('[VerifyHandler] Fetch error:', err);
+        setState('error');
+        setErrorMsg(err.message);
+      });
+  };
 
   useEffect(() => {
     // Guard: don't run twice (React StrictMode), don't run if already authed
@@ -178,80 +249,13 @@ const VerifyHandler = () => {
     }
 
     // --- PATH B: Verification code (needs /verify API call) ---
+    // Do NOT call /verify here. Park the code and ask the user to click; see
+    // submitVerification for why.
     if (params.token) {
       hasRun.current = true;
       console.log('[VerifyHandler] Verification code found via:', params.source, '| code length:', params.token.length);
-      setState('verifying');
-
-      const payload = { token: params.token };
-      if (params.email) payload.email = params.email;
-
-      const verifyUrl = API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.VERIFY;
-      console.log('[VerifyHandler] POSTing to:', verifyUrl);
-      console.log('[VerifyHandler] Payload:', JSON.stringify(payload));
-
-      fetch(verifyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-        .then(async (res) => {
-          const text = await res.text();
-          console.log('[VerifyHandler] /verify response status:', res.status);
-          console.log('[VerifyHandler] /verify raw response (first 500 chars):', text.substring(0, 500));
-
-          let data;
-          try {
-            data = JSON.parse(text);
-          } catch (e) {
-            throw new Error('Backend returned non-JSON response: ' + text.substring(0, 200));
-          }
-
-          if (!res.ok) {
-            throw new Error(data.error || data.message || 'Verification failed (HTTP ' + res.status + ')');
-          }
-
-          console.log('[VerifyHandler] /verify response keys:', Object.keys(data));
-          console.log('[VerifyHandler] Has fedRAMPAccessToken:', !!data.fedRAMPAccessToken);
-
-          // Check all possible token field names the backend might use
-          const tokenValue = data.fedRAMPAccessToken || data.token || data.access_token || data.jwt || data.accessToken;
-          
-          if (!data.fedRAMPAccessToken && tokenValue) {
-            console.warn('[VerifyHandler] Token found under non-standard key. Normalizing.');
-            data.fedRAMPAccessToken = tokenValue;
-          }
-
-          // --- THE CRITICAL LINE: Store the JWT ---
-          const stored = handleVerifyResponse(data);
-
-          if (stored) {
-            console.log('[VerifyHandler] JWT stored in localStorage successfully');
-            // Double-check it's actually there
-            const check = localStorage.getItem('fedRAMPAccessToken');
-            console.log('[VerifyHandler] localStorage verification:', check ? 'Present (' + check.length + ' chars)' : 'MISSING');
-            setState('success');
-            cleanUrl();
-            setTimeout(() => setState('idle'), 2500);
-          } else {
-            console.error('[VerifyHandler] handleVerifyResponse returned false');
-            if (data.fedRAMPAccessToken) {
-              debugToken(data.fedRAMPAccessToken);
-            } else {
-              console.error('[VerifyHandler] Response did NOT contain fedRAMPAccessToken.');
-              console.error('[VerifyHandler] Available keys:', Object.keys(data));
-              console.error('[VerifyHandler] Full response:', JSON.stringify(data, null, 2));
-            }
-            setState('error');
-            setErrorMsg('Token validation failed after verification. Check browser console for details.');
-          }
-        })
-        .catch((err) => {
-          console.error('[VerifyHandler] Fetch error:', err);
-          setState('error');
-          setErrorMsg(err.message);
-        });
-
+      setPending({ token: params.token, email: params.email || null });
+      setState('confirm');
       return;
     }
 
@@ -261,6 +265,12 @@ const VerifyHandler = () => {
 
   // --- Render ---
   if (state === 'idle') return null;
+
+  const primaryButton = {
+    padding: '12px 28px', background: '#3b82f6',
+    border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px',
+    color: 'white', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+  };
 
   return (
     <div style={{
@@ -274,6 +284,32 @@ const VerifyHandler = () => {
         borderRadius: '16px', padding: '32px', textAlign: 'center',
         boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
       }}>
+        {state === 'confirm' && (
+          <>
+            <div style={{
+              width: '48px', height: '48px', margin: '0 auto 16px',
+              background: 'rgba(59,130,246,0.1)', borderRadius: '12px',
+              border: '1px solid rgba(59,130,246,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '24px',
+            }}>
+              &#9993;
+            </div>
+            <h3 style={{ color: 'white', fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>
+              Complete Your Verification
+            </h3>
+            <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '20px' }}>
+              Click below to confirm your email address and activate access to the trust center.
+            </p>
+            <button onClick={submitVerification} style={primaryButton}>
+              Complete verification
+            </button>
+            <p style={{ color: '#64748b', fontSize: '12px', marginTop: '16px' }}>
+              Links are activated only by this click, so email security scanners cannot use them.
+            </p>
+          </>
+        )}
+
         {state === 'verifying' && (
           <>
             <div style={{ marginBottom: '16px' }}>
@@ -289,7 +325,7 @@ const VerifyHandler = () => {
               Verifying Your Access
             </h3>
             <p style={{ color: '#94a3b8', fontSize: '14px' }}>
-              Confirming your federal agency credentials...
+              Confirming your email address...
             </p>
             <style>{'@keyframes verifyHandlerSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }'}</style>
           </>
@@ -310,7 +346,7 @@ const VerifyHandler = () => {
               Access Verified
             </h3>
             <p style={{ color: '#94a3b8', fontSize: '14px' }}>
-              Welcome. You now have authenticated federal access.
+              {verifiedAs ? `Welcome. You are signed in as ${verifiedAs}.` : 'Welcome. You now have authenticated access.'}
             </p>
           </>
         )}
