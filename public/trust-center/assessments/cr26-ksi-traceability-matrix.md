@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-10-17T12:36:23.521432+00:00 (34 pass / 12 fail of 46)  
-**Generated:** 2026-10-17 13:21 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-10-17T18:31:18.753293+00:00 (36 pass / 10 fail of 46)  
+**Generated:** 2026-10-17 19:26 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -90,7 +90,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CMT-03
 - **NIST 800-53 controls:** cm-3, cm-3.2, cm-4.2, si-2
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: change_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (100%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording a scoped…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (87%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant. | Verified: AWS Config recorder '[resource]' configured, recording a scoped resource set.;…
 - **Measures (validation objectives):**
   - MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation).
   - VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources.
@@ -252,8 +252,8 @@ pre-CR26 assessment history.
 
 - **Legacy source(s):** KSI-IAM-01, KSI-IAM-02
 - **NIST 800-53 controls:** ac-3, ia-5.1, ia-5.2, ia-5.6, ia-6, ac-2, ia-2, ia-2.1, ia-2.2, ia-2.8, ia-5, ia-8, sc-23
-- **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: iam_mfa_metrics, sso_session_duration_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (91%): Secure passwordless methods are used for user authentication and authorization when feasible, otherwise strong passwo... | 22/27 resources compliant, 3 unverified. | Verified: Modern Identity: AWS I…
+- **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: iam_mfa_metrics
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Secure passwordless methods are used for user authentication and authorization when feasible, otherwise strong passwo... | 23/26 resources compliant, 3 unverified. | Verified: Modern Identity: AWS Ide…
 - **Measures (validation objectives):**
   - FILTERED: Retrieve only IAM Users who have active password usage (Humans).
   - Verify that AWS Identity Center is the primary identity platform.
@@ -463,7 +463,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-PIY-01
 - **NIST 800-53 controls:** cm-2.2, cm-7.5, cm-8, cm-8.1, cm-12, cm-12.1, cp-2.8
 - **Evaluation policy:** mode `output`, pass threshold 80%, required operational metrics: inventory_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 157/157 resources compliant. | Verified: AWS Config recorder '[resource]' con…
 - **Measures (validation objectives):**
   - PRIMARY: Validate that the Configuration Recorder is active (The 'Authoritative Source').
   - STORAGE: Validate that the inventory data is being delivered to a central S3 bucket.
