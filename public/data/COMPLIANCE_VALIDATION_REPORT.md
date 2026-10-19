@@ -1,7 +1,7 @@
 # FedRAMP Compliance Validation Report
 
 **Report Type:** System 2.5 Validation Integrity Report  
-**Generated:** 2026-10-19T06:45:09.517403  
+**Generated:** 2026-10-19T08:47:07.536769  
 **Purpose:** 3PAO audit readiness and technical validation verification
 
 ---
@@ -10,18 +10,18 @@
 
 ### Validation Results
 - **Total KSIs Validated:** 46
-- **Passed:** 36 ✅
-- **Failed:** 10 ❌
-- **Overall Pass Rate:** 78.3%
+- **Passed:** 37 ✅
+- **Failed:** 9 ❌
+- **Overall Pass Rate:** 80.4%
 
 ### Temporal Consistency Analysis
-- **Average Consistency Score:** 99.8%
+- **Average Consistency Score:** 99.5%
 - **Recent Validations Analyzed:** 10
 - **Consistency Status:** EXCELLENT
 
 ### Execution Quality Analysis
-- **Technical Issues Detected:** 4
-- **Execution Quality Score:** 80%
+- **Technical Issues Detected:** 2
+- **Execution Quality Score:** 90%
 - **Automation Status:** WARNING
 
 ---
@@ -30,7 +30,7 @@
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Integrity Score** | 89.9% | ✔️ Good |
+| **Integrity Score** | 94.8% | ✔️ Good |
 | **Validation Determinism** | verified | ✅ |
 | **Technical Correctness** | issues_detected | ⚠️ |
 | **Audit Readiness** | ready | ✅ Ready |
@@ -40,10 +40,10 @@
 ## Interpretation
 
 ### Temporal Consistency
-The temporal consistency results (99.8%, across 9 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
+The temporal consistency results (99.5%, across 9 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
 
 ### Execution Quality
-The execution quality score of 80% shows technical issues detected: 4 automation failures require investigation.
+The execution quality score of 90% shows technical issues detected: 2 automation failures require investigation.
 
 ### Audit Readiness
 Overall audit readiness status: **READY**
