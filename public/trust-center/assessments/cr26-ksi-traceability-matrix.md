@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-10-18T20:40:15.264908+00:00 (36 pass / 10 fail of 46)  
-**Generated:** 2026-10-18 21:35 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-10-19T03:06:06.810422+00:00 (37 pass / 9 fail of 46)  
+**Generated:** 2026-10-19 03:35 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -90,7 +90,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CMT-03
 - **NIST 800-53 controls:** cm-3, cm-3.2, cm-4.2, si-2
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: change_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (87%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant. | Verified: AWS Config recorder '[resource]' configured, recording a scoped resource set.;…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (100%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording a scoped…
 - **Measures (validation objectives):**
   - MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation).
   - VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources.
@@ -305,7 +305,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-IAM-03
 - **NIST 800-53 controls:** ac-2, ac-2.2, ac-4, ac-6.5, ia-3, ia-5.2, ra-5.5
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (98%): Appropriately secure authentication methods are used and persistently reviewed for non-user accounts and services. | 91/93 resources compliant, 1 unverified. | Verified: RBAC Active: 1 role(s); all …
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Appropriately secure authentication methods are used and persistently reviewed for non-user accounts and services. | 91/93 resources compliant, 1 unverified. | Verified: RBAC Active: 1 role(s); all 1 …
 - **Measures (validation objectives):**
   - Validate Trust Policies for CUSTOMER managed roles only.
   - Validate Service Accounts (Bots) that do not have console access (should rely on keys/roles).
@@ -650,7 +650,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-06
 - **NIST 800-53 controls:** ac-17.2, ia-5.2, ia-5.6, sc-12, sc-17
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: kms_rotation_metrics, cert_expiry_metrics, secret_rotation_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (60%): Management, protection, and regular rotation of digital keys, certificates, and other secrets is automated and persis... | 6/26 resources compliant, 10 unverified. | Verified: Secret '[resource]' ha…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (66%): Management, protection, and regular rotation of digital keys, certificates, and other secrets is automated and persis... | 6/26 resources compliant, 10 unverified. | Verified: Secret '[resource]' ha…
 - **Measures (validation objectives):**
   - KEYS: Validate existence of KMS Customer Managed Keys (CMKs) for centralized management.
   - ROTATION: Validate Secrets Manager entries (Look for 'RotationEnabled': true in the output).
