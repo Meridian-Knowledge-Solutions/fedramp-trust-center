@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-10-20T19:04:25.949946+00:00 (37 pass / 9 fail of 46)  
-**Generated:** 2026-10-20 20:00 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-10-20T20:36:21.978340+00:00 (37 pass / 9 fail of 46)  
+**Generated:** 2026-10-20 21:21 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -90,7 +90,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CMT-03
 - **NIST 800-53 controls:** cm-3, cm-3.2, cm-4.2, si-2
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: change_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (100%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording a scoped…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (87%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant. | Verified: AWS Config recorder '[resource]' configured, recording a scoped resource set.;…
 - **Measures (validation objectives):**
   - MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation).
   - VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources.
@@ -428,7 +428,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-MLA-01
 - **NIST 800-53 controls:** ac-17.1, ac-20.1, au-2, au-3, au-3.1, au-4, au-5, au-6.1, au-6.3, au-7, au-7.1, au-8, au-9, au-11, ir-4.1, si-4.2, si-4.4, si-7.7
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: trail_logging_metrics, s3_logging_coverage_metrics, alb_access_log_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (100%): A Security Information and Event Management (SIEM) or similar system(s) is used and persistently reviewed for central... | 3/5 resources compliant, 2 unverified. | Verified: Trail is Secure (Multi-…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (75%): A Security Information and Event Management (SIEM) or similar system(s) is used and persistently reviewed for central... | 3/5 resources compliant, 1 unverified. | Verified: Trail is Secure (Multi-R…
 - **Measures (validation objectives):**
   - PRIMARY: Validate existence and configuration of the CloudTrail trail.
   - STATUS: Confirm CloudTrail is actually 'IsLogging': true. Uses TrailARN to avoid naming conflicts. Mode 2 (operational effectiveness) — TrailLoggingMetricsPrimitive computes logging_rate as % of trails with IsLogging=true; KSI-MLA-01 target is 100%.
