@@ -1,7 +1,7 @@
 # FedRAMP Compliance Validation Report
 
 **Report Type:** System 2.5 Validation Integrity Report  
-**Generated:** 2026-10-22T10:02:53.512142  
+**Generated:** 2026-10-22T12:48:51.636361  
 **Purpose:** 3PAO audit readiness and technical validation verification
 
 ---
@@ -20,9 +20,9 @@
 - **Consistency Status:** EXCELLENT
 
 ### Execution Quality Analysis
-- **Technical Issues Detected:** 0
-- **Execution Quality Score:** 100%
-- **Automation Status:** PASS
+- **Technical Issues Detected:** 1
+- **Execution Quality Score:** 95%
+- **Automation Status:** WARNING
 
 ---
 
@@ -30,9 +30,9 @@
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Integrity Score** | 100.0% | ✅ Excellent |
+| **Integrity Score** | 97.5% | ✅ Excellent |
 | **Validation Determinism** | verified | ✅ |
-| **Technical Correctness** | verified | ✅ |
+| **Technical Correctness** | issues_detected | ⚠️ |
 | **Audit Readiness** | ready | ✅ Ready |
 
 ---
@@ -43,7 +43,7 @@
 The temporal consistency results (100.0%, across 7 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
 
 ### Execution Quality
-The execution quality score of 100% shows **excellent** automation quality - no technical failures detected.
+The execution quality score of 95% shows technical issues detected: 1 automation failures require investigation.
 
 ### Audit Readiness
 Overall audit readiness status: **READY**
