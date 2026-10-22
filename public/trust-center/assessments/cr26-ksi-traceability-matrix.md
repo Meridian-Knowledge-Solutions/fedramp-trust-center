@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-10-21T12:41:28.447588+00:00 (37 pass / 9 fail of 46)  
-**Generated:** 2026-10-21 13:26 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-10-21T20:38:51.891494+00:00 (35 pass / 11 fail of 46)  
+**Generated:** 2026-10-21 21:19 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -76,7 +76,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CMT-04
 - **NIST 800-53 controls:** cm-3, cm-3.2, cm-3.4, cm-5, cm-7.1, cm-9
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The effectiveness of documented change management procedures is persistently reviewed. | 1/2 resources compliant, 1 unverified. | Verified: Verified: Governance document '[resource]' is substantive (3…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (50%): The effectiveness of documented change management procedures is persistently reviewed. | 1/2 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (3747 bytes, 1…
 - **Measures (validation objectives):**
   - GOVERNANCE: Validate the existence of the Change Management Procedure document. [Policy-as-code home: governance/ in this git repository — machine-readable markdown, change requires a commit; validated via GitHub contents API.]
   - Terraform state backend versioning (mks-states). Status=Enabled proves every infrastructure change is retained as an immutable, recoverable state revision — the change-tracking control. (list-object-versions is denied cross-account; get-bucket-versioning is the reachable, sufficient evidence.)
@@ -188,7 +188,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-01
 - **NIST 800-53 controls:** ac-17.3, ca-9, cm-7.1, sc-7.5, si-8
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Machine-based information resources are persistently reviewed to ensure they are appropriately configured to limit in... | 7/7 resources compliant. | Verified: SG '[resource]' properly limits traffic …
+- **Latest verdict:** **FAIL** — ❌ Insufficient (85%): Machine-based information resources are persistently reviewed to ensure they are appropriately configured to limit in... | 6/7 resources compliant. | Verified: SG '[resource]' properly limits traffi…
 - **Measures (validation objectives):**
   - BASELINE: Validate that the 'default' VPC Security Group restricts all traffic (Best practice is to leave this empty/unused).
   - ACTIVE CONTROLS: Validate a sample of active Security Groups to verify specific port restrictions (Limit Inbound).
