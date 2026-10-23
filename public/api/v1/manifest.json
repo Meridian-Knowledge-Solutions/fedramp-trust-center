@@ -1,0 +1,1233 @@
+{
+  "manifest_version": "1.0",
+  "schema": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/api/v1/manifest.schema.json",
+  "package_version": "2026.10.20.1",
+  "sequence": 1,
+  "generated_at": "2026-10-20T03:38:06Z",
+  "provider": "Meridian Knowledge Solutions",
+  "cso_name": "Meridian LMS",
+  "fedramp_id": "FR2527956755",
+  "base_url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center",
+  "transport": "static files over HTTPS (GitHub Pages); GET only; no authentication; CORS: same as GitHub Pages defaults",
+  "stable_paths": {
+    "manifest": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/api/v1/manifest.json",
+    "manifest_schema": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/api/v1/manifest.schema.json",
+    "manifest_history": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/api/v1/manifest-history.jsonl",
+    "ksi_run_history_index": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/api/v1/ksi-runs-index.json",
+    "policies_index": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/api/v1/policies.json"
+  },
+  "versioning": {
+    "policy": "Paths are stable; artifacts are replaced in place on each publish and identified by sha256 + generated_at. manifest-history.jsonl records every publish (append-only). Per-run KSI history is immutable per file. A path rename or field removal bumps manifest_version.",
+    "previous_manifest_sha256": null,
+    "previous_generated_at": null
+  },
+  "categories": {
+    "cso": "Public information about the cloud service offering (CDS-CSO-PUB)",
+    "ksi": "Key Security Indicator validation output and register (FRC-*, SDR-*)",
+    "ksi-history": "Historical KSI metrics (FRC-CSX-MOT, SDR-CSX-KMT)",
+    "vdr": "Vulnerability detection and response data (VDR-*, VER-*)",
+    "scn": "Significant change notifications (SCN-*)",
+    "reports": "Ongoing / quarterly certification reports (CCM-OCR-*, CCM-QTR-*)",
+    "mas": "Minimum Assessment Standard boundary and dashboard data (MAS-*)",
+    "scg": "Secure configuration guidance (SCG-*)",
+    "assessments": "Independent assessment reports and FedRAMP certification documents (CDS-CSO-FRC, IVV-*)",
+    "policies": "Policies and procedures (CDS-CSO-IRP)",
+    "remediation": "Continuous remediation register",
+    "crm": "Customer responsibility matrix",
+    "schemas": "JSON Schemas for the machine-readable artifacts",
+    "integrity": "Pipeline self-checks and data-quality records",
+    "meta": "Trust Center bundle manifests and scheduling",
+    "crypto": "Cryptographic module and post-quantum inventories (CMU-*)",
+    "foci": "Foreign ownership, control or influence register (KSI-PIY-DFC/RFP/RFB/MFD, RFC-0036)"
+  },
+  "artifact_count": 45,
+  "artifacts": [
+    {
+      "id": "cso-public-info",
+      "category": "cso",
+      "description": "Public CSO record: FedRAMP ID, UEI, service/deployment model, business category, contacts, service description, access methods.",
+      "cadence": "on change",
+      "producer": "fedramp-20x-submission-final (trust_center_static)",
+      "rules": [
+        "CDS-CSO-PUB",
+        "CDS-CSO-FID",
+        "CDS-CSO-SVC"
+      ],
+      "path": "data/cso_public_info.json",
+      "url_path": "/data/cso_public_info.json",
+      "media_type": "application/json",
+      "size_bytes": 2853,
+      "sha256": "38851d57c0e7bc287fe3be4fce48ea06ae465ba6023f5e74d6d3e6a170e1ab60",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/cso_public_info.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "contact-config",
+      "category": "cso",
+      "description": "Security and FedRAMP contact addresses, quarterly-review mechanism.",
+      "cadence": "on change",
+      "producer": "fedramp-20x-submission-final",
+      "rules": [
+        "CDS-CSO-PUB"
+      ],
+      "path": "data/contact_config.json",
+      "url_path": "/data/contact_config.json",
+      "media_type": "application/json",
+      "size_bytes": 462,
+      "sha256": "ab15d7818917bbb287aedb51d846549d93b84e602ace6401ff554ad39d231001",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/contact_config.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "next-report-date",
+      "category": "meta",
+      "description": "Next Ongoing Certification Report and quarterly review dates, last data refresh, data-quality flags.",
+      "cadence": "every validation run",
+      "producer": "FedRAMP 20x CLI Validation Pipeline",
+      "rules": [
+        "CCM-OCR-NRD",
+        "CCM-QTR-MTG"
+      ],
+      "path": "data/next_report_date.json",
+      "url_path": "/data/next_report_date.json",
+      "media_type": "application/json",
+      "size_bytes": 890,
+      "sha256": "8135b23b73aad8742b5b8b4bef1385fb824ea79fda09cb0a27ab1ffdf7a08807",
+      "last_modified": "2026-10-19T08:22:50Z",
+      "generated_at": "2026-10-19T00:00:00Z",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/next_report_date.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "quarterly-meetings",
+      "category": "meta",
+      "description": "Quarterly review session schedule and registration.",
+      "cadence": "on change",
+      "producer": "fedramp-trust-center",
+      "rules": [
+        "CCM-QTR-MTG"
+      ],
+      "path": "data/quarterly_meetings.json",
+      "url_path": "/data/quarterly_meetings.json",
+      "media_type": "application/json",
+      "size_bytes": 397,
+      "sha256": "dff69bac91e5567b5ab77ce8250d6ab7d8b830b99c18c6dee5137c6649cebdda",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/quarterly_meetings.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "ksi-validations",
+      "category": "ksi",
+      "description": "Current verdict for every KSI and FRR family: assertion, status, mode, score, per-resource evaluations (redacted), command executions, rules version, certification profile.",
+      "cadence": "every 4 hours",
+      "producer": "src/engine.py",
+      "rules": [
+        "FRC-CSX-VVK",
+        "SDR-CSX-KMT",
+        "CDS-CSO-CBF"
+      ],
+      "path": "data/unified_ksi_validations.json",
+      "url_path": "/data/unified_ksi_validations.json",
+      "media_type": "application/json",
+      "size_bytes": 517856,
+      "sha256": "6db3a3166cba27b13644bd84a17a6698752a3de25e1d7cd5c37986b0e402d202",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": "2026-10-19T17:39:13Z",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/unified_ksi_validations.json",
+      "changed_since_previous": null,
+      "schema": {
+        "path": "trust-center/schemas/unified-ksi-validations-schema.json",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/schemas/unified-ksi-validations-schema.json",
+        "present": true
+      },
+      "human_readable": {
+        "path": "reports/COMPLIANCE_VALIDATION_REPORT.html",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/reports/COMPLIANCE_VALIDATION_REPORT.html",
+        "present": true
+      }
+    },
+    {
+      "id": "ksi-register",
+      "category": "ksi",
+      "description": "The per-KSI validation register: every automated check (command, note, expected output, Mode 2 metric hint) the engine executes.",
+      "cadence": "on change",
+      "producer": "config/cli_command_register.json",
+      "rules": [
+        "FRC-CSX-VVK",
+        "SDR-CSX-VMD"
+      ],
+      "path": "data/cli_command_register.json",
+      "url_path": "/data/cli_command_register.json",
+      "media_type": "application/json",
+      "size_bytes": 147485,
+      "sha256": "7d53655e204f5c846ca2834e19486ec1d796eeefc1342970685fa277e7e4fced",
+      "last_modified": "2026-10-18T04:31:46Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/cli_command_register.json",
+      "changed_since_previous": null,
+      "schema": {
+        "path": "trust-center/schemas/cli-command-register-schema.json",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/schemas/cli-command-register-schema.json",
+        "present": true
+      }
+    },
+    {
+      "id": "ksi-failure-tracker",
+      "category": "ksi",
+      "description": "Active KSI failures and the full failure/remediation history with time-to-remediate.",
+      "cadence": "every 4 hours",
+      "producer": "repo utilities/ksi_failure_tracker.py",
+      "rules": [
+        "FRC-CSX-MOT",
+        "SDR-CSX-KMT"
+      ],
+      "path": "data/ksi_failure_tracker.json",
+      "url_path": "/data/ksi_failure_tracker.json",
+      "media_type": "application/json",
+      "size_bytes": 425469,
+      "sha256": "fa6d1d2a7e15ebc1ce8d478158424c36bbd7f938be021b5a1a968bd9d2dc663c",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/ksi_failure_tracker.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "ksi-observations",
+      "category": "ksi",
+      "description": "Non-gating statistical observations (stability, credential hygiene, root activity) — aggregate only.",
+      "cadence": "every 4 hours",
+      "producer": "scripts/generate_ksi_observations.py",
+      "rules": [
+        "FRC-CSX-VVK"
+      ],
+      "path": "data/ksi_observations.json",
+      "url_path": "/data/ksi_observations.json",
+      "media_type": "application/json",
+      "size_bytes": 7466,
+      "sha256": "35dcd3ff3f377692e1f65d4c072f022f79be7ada48ada5ad3bcbf64ec27174d2",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": "2026-10-19T17:37:38Z",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/ksi_observations.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "ksi-history-rollup",
+      "category": "ksi-history",
+      "description": "Append-only roll-up per validation run since 2025-11-18: total / passed / failed / compliance rate (one JSON object per run).",
+      "cadence": "every 4 hours",
+      "producer": "FedRAMP 20x CLI Validation Pipeline",
+      "rules": [
+        "FRC-CSX-MOT",
+        "SDR-CSX-KMT"
+      ],
+      "path": "data/ksi_history.jsonl",
+      "url_path": "/data/ksi_history.jsonl",
+      "media_type": "application/x-ndjson",
+      "size_bytes": 304449,
+      "sha256": "5452153853fb8d3023bf452043ae08cc2a632c5d81960225a6a7fe7b6a7b66ce",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/ksi_history.jsonl",
+      "changed_since_previous": null
+    },
+    {
+      "id": "ksi-run-snapshots",
+      "category": "ksi-history",
+      "description": "Per-run, per-KSI status snapshots at 4-hour granularity since 2025-05-29 (status, mode, score, resource counts for all KSIs and FRR families). The index lists every snapshot URL; files are immutable once written. Retention: indefinite (historical-data/RETENTION_POLICY.md).",
+      "cadence": "every validation run",
+      "producer": "scripts/archive_ksi_run_snapshot.py",
+      "rules": [
+        "FRC-CSX-MOT",
+        "SDR-CSX-KMT"
+      ],
+      "external_url": "https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/main/historical-data/ksi-runs/",
+      "status": "external",
+      "index_url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/api/v1/ksi-runs-index.json",
+      "index_url_path": "/api/v1/ksi-runs-index.json"
+    },
+    {
+      "id": "metrics-history",
+      "category": "ksi-history",
+      "description": "Weekly security-investment activity metrics (commits, Dependabot, CI success).",
+      "cadence": "weekly",
+      "producer": ".github/workflows/collect-metrics.yml",
+      "rules": [
+        "KSI-PIY-RIS"
+      ],
+      "path": "data/metrics_history.jsonl",
+      "url_path": "/data/metrics_history.jsonl",
+      "media_type": "application/x-ndjson",
+      "size_bytes": 424,
+      "sha256": "90ebd8d23a5cc0ff252faaf90da750f95fda37811d27863b4ebf4c66fe654ee8",
+      "last_modified": "2026-10-18T01:18:55Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/metrics_history.jsonl",
+      "changed_since_previous": null
+    },
+    {
+      "id": "vdr-public-metrics",
+      "category": "vdr",
+      "description": "Public vulnerability detection and response metrics: population, N-rating distribution, LEV/IRV classification, acceptance tracking, remediation timeliness.",
+      "cadence": "daily",
+      "producer": "rfc-0012/generate_public_vdr_metrics.py",
+      "rules": [
+        "VER-TFR-MRH",
+        "VER-TFR-MHR",
+        "VER-RPT-VDT"
+      ],
+      "path": "data/vdr_public_metrics.json",
+      "url_path": "/data/vdr_public_metrics.json",
+      "media_type": "application/json",
+      "size_bytes": 8557,
+      "sha256": "1314daaa37ed435e26692c95201b4bfe12e83d89773cebf77a4069deacaa9826",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": "2026-10-19T17:38:27Z",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/vdr_public_metrics.json",
+      "changed_since_previous": null,
+      "human_readable": {
+        "path": "trust-center/reports/html/vdr-report.html",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/html/vdr-report.html",
+        "present": true
+      }
+    },
+    {
+      "id": "vdr-extended-metrics",
+      "category": "vdr",
+      "description": "Extended VDR metrics (weekly/monthly layers).",
+      "cadence": "daily",
+      "producer": ".github/workflows/publish-vdr-metrics.yml",
+      "rules": [
+        "VER-TFR-MRH"
+      ],
+      "path": "data/vdr_extended_metrics.json",
+      "url_path": "/data/vdr_extended_metrics.json",
+      "media_type": "application/json",
+      "size_bytes": 3557,
+      "sha256": "890e363cfcc1c1aae1b76d1d7c40ca1ea60bdf34ba0a689583bb70ae1bed1c02",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": "2026-02-09T08:40:43Z",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/vdr_extended_metrics.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "vdr-report",
+      "category": "vdr",
+      "description": "Vulnerability detection and response report (machine-readable).",
+      "cadence": "daily",
+      "producer": "rfc-0012/report_generator.py",
+      "rules": [
+        "VER-TFR-MHR"
+      ],
+      "path": "trust-center/reports/json/vdr-report.json",
+      "url_path": "/trust-center/reports/json/vdr-report.json",
+      "media_type": "application/json",
+      "size_bytes": 13967,
+      "sha256": "0ec670b5b819d2ce2ee82f0eadb30e74886145b96c33a8c12c9b1aa7729edc7a",
+      "last_modified": "2026-10-19T10:59:38Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/json/vdr-report.json",
+      "changed_since_previous": null,
+      "schema": {
+        "path": "trust-center/schemas/vdr-schema.json",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/schemas/vdr-schema.json",
+        "present": true
+      },
+      "human_readable": {
+        "path": "trust-center/reports/html/vdr-report.html",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/html/vdr-report.html",
+        "present": true
+      }
+    },
+    {
+      "id": "scn-report",
+      "category": "scn",
+      "description": "Significant change notification report.",
+      "cadence": "every 8 hours",
+      "producer": "scripts/scn_monitor_v3.py",
+      "rules": [
+        "SCN-TFR-*",
+        "SCN-RPT-*"
+      ],
+      "path": "trust-center/reports/json/scn-report.json",
+      "url_path": "/trust-center/reports/json/scn-report.json",
+      "media_type": "application/json",
+      "size_bytes": 12260,
+      "sha256": "52fcbd1447db91356225ef2108dd938098ea056782d70733d09667745571375c",
+      "last_modified": "2026-10-15T17:07:31Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/json/scn-report.json",
+      "changed_since_previous": null,
+      "schema": {
+        "path": "trust-center/schemas/scn-schema.json",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/schemas/scn-schema.json",
+        "present": true
+      },
+      "human_readable": {
+        "path": "trust-center/reports/html/scn-report.html",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/html/scn-report.html",
+        "present": true
+      }
+    },
+    {
+      "id": "scn-recent-events",
+      "category": "scn",
+      "description": "Recent classified infrastructure change events.",
+      "cadence": "every 8 hours",
+      "producer": "scripts/scn_monitor_v3.py",
+      "rules": [
+        "SCN-*"
+      ],
+      "path": "trust-center/reports/json/scn-recent-events.json",
+      "url_path": "/trust-center/reports/json/scn-recent-events.json",
+      "media_type": "application/json",
+      "size_bytes": 51608,
+      "sha256": "045da5cd8b752d1eee6f8a020ab683b80ed369e039748fff448ea549db2f9525",
+      "last_modified": "2026-10-19T10:59:38Z",
+      "generated_at": "2026-10-19T08:22:29Z",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/json/scn-recent-events.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "ocr-report",
+      "category": "reports",
+      "description": "Ongoing Certification Report (machine-readable).",
+      "cadence": "quarterly (next: see next-report-date)",
+      "producer": "reports/ocr_generator.py",
+      "rules": [
+        "CCM-OCR-*",
+        "CDS-CSO-HAD"
+      ],
+      "path": "trust-center/reports/json/oar-report.json",
+      "url_path": "/trust-center/reports/json/oar-report.json",
+      "media_type": "application/json",
+      "size_bytes": 9631,
+      "sha256": "0e3e2cdb298bcd975f0498592ef90f36d1ab700e6012619a1297f345cbf4dd18",
+      "last_modified": "2026-10-19T10:59:38Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/json/oar-report.json",
+      "changed_since_previous": null,
+      "schema": {
+        "path": "trust-center/schemas/oar-schema.json",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/schemas/oar-schema.json",
+        "present": true
+      },
+      "human_readable": {
+        "path": "trust-center/reports/html/oar-report.html",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/html/oar-report.html",
+        "present": true
+      }
+    },
+    {
+      "id": "qtr-report",
+      "category": "reports",
+      "description": "Quarterly review report (machine-readable).",
+      "cadence": "quarterly",
+      "producer": "reports/qar_generator.py",
+      "rules": [
+        "CCM-QTR-*"
+      ],
+      "path": "trust-center/reports/json/qar-report.json",
+      "url_path": "/trust-center/reports/json/qar-report.json",
+      "media_type": "application/json",
+      "size_bytes": 5959,
+      "sha256": "ce879171002fab8b395660c987a93c874978e6dda9f8df57660be079d81fd5c5",
+      "last_modified": "2026-10-19T10:59:38Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/json/qar-report.json",
+      "changed_since_previous": null,
+      "human_readable": {
+        "path": "trust-center/reports/html/qar-report.html",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/html/qar-report.html",
+        "present": true
+      }
+    },
+    {
+      "id": "ocr-q4-2025",
+      "category": "reports",
+      "description": "Ongoing certification report snapshot, Q4 2025 (historical certification data).",
+      "cadence": "static",
+      "producer": "reports/ocr_generator.py",
+      "rules": [
+        "CDS-CSO-HAD"
+      ],
+      "path": "data/ongoing_authorization_report_Q4_2025.json",
+      "url_path": "/data/ongoing_authorization_report_Q4_2025.json",
+      "media_type": "application/json",
+      "size_bytes": 121539,
+      "sha256": "7278555f027db9e61627f23c538cbb7a653499f7aca3a95a31941863e4794aa1",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/ongoing_authorization_report_Q4_2025.json",
+      "changed_since_previous": null,
+      "human_readable": {
+        "path": "data/ongoing_authorization_report_Q4_2025.md",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/ongoing_authorization_report_Q4_2025.md",
+        "present": true
+      }
+    },
+    {
+      "id": "compliance-validation-report",
+      "category": "reports",
+      "description": "Human-readable rendering of the current KSI validation output.",
+      "cadence": "every 4 hours",
+      "producer": "reports/generate_public_reports.py",
+      "rules": [
+        "CDS-TRC-HMR",
+        "CDS-CSO-CBF"
+      ],
+      "path": "reports/COMPLIANCE_VALIDATION_REPORT.html",
+      "url_path": "/reports/COMPLIANCE_VALIDATION_REPORT.html",
+      "media_type": "text/html",
+      "size_bytes": 29771,
+      "sha256": "e73e83df874ac67bb05d962ca955bb5962077784623da06066416798dbf6fc59",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/reports/COMPLIANCE_VALIDATION_REPORT.html",
+      "changed_since_previous": null
+    },
+    {
+      "id": "quarterly-authorization-report",
+      "category": "reports",
+      "description": "Human-readable quarterly report.",
+      "cadence": "quarterly",
+      "producer": "reports/qar_generator.py",
+      "rules": [
+        "CCM-QTR-*"
+      ],
+      "path": "reports/QUARTERLY_AUTHORIZATION_REPORT.html",
+      "url_path": "/reports/QUARTERLY_AUTHORIZATION_REPORT.html",
+      "media_type": "text/html",
+      "size_bytes": 22829,
+      "sha256": "18c58e81a6f4d11c9eb7d57e348bf404d0dc583382d78308ae876e3be102640b",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/reports/QUARTERLY_AUTHORIZATION_REPORT.html",
+      "changed_since_previous": null
+    },
+    {
+      "id": "report-generation-manifest",
+      "category": "meta",
+      "description": "Provenance of the generated reports.",
+      "cadence": "every 4 hours",
+      "producer": "reports/generate_public_reports.py",
+      "rules": [
+        "CDS-CSO-CBF"
+      ],
+      "path": "trust-center/reports/json/report-generation-manifest.json",
+      "url_path": "/trust-center/reports/json/report-generation-manifest.json",
+      "media_type": "application/json",
+      "size_bytes": 3563,
+      "sha256": "322e49a10decd2db9de607c600720e636bac8bbe19ae5d1efca7ef73ddb3d5f9",
+      "last_modified": "2026-10-19T10:59:38Z",
+      "generated_at": "2026-10-19T08:22:29Z",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/json/report-generation-manifest.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "mas-boundary",
+      "category": "mas",
+      "description": "Authorization boundary: zones, integrations, Terraform-vs-AWS drift record, fingerprint.",
+      "cadence": "every 4 hours",
+      "producer": "MAS/generate_live_mas.py",
+      "rules": [
+        "MAS-*",
+        "KSI-PIY-GIV"
+      ],
+      "path": "data/mas_boundary.json",
+      "url_path": "/data/mas_boundary.json",
+      "media_type": "application/json",
+      "size_bytes": 9738,
+      "sha256": "acdfb0caedd17f875eb7c48cdb45c6a84281692186446794a36c6cd239972e6f",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/mas_boundary.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "mas-dashboard",
+      "category": "mas",
+      "description": "Unified MAS dashboard (services, cost drift, boundary drift).",
+      "cadence": "daily",
+      "producer": ".github/workflows/unified-mas-collection.yml",
+      "rules": [
+        "MAS-*"
+      ],
+      "path": "data/mas_dashboard.json",
+      "url_path": "/data/mas_dashboard.json",
+      "media_type": "application/json",
+      "size_bytes": 31073,
+      "sha256": "85d549f9f294c085f89899133d7145e791b094baf503de571db1011039766ce6",
+      "last_modified": "2026-10-19T13:07:41Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/mas_dashboard.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "scg-machine-readable",
+      "category": "scg",
+      "description": "Machine-readable Secure Configuration Guide (settings, defaults, rule coverage, release history).",
+      "cadence": "on change",
+      "producer": "scripts/generate_scg_machine_readable.py",
+      "rules": [
+        "SCG-ENH-MRG",
+        "SCG-ENH-VRH",
+        "CDS-CSO-PUB"
+      ],
+      "path": "trust-center/scg_machine_readable.json",
+      "url_path": "/trust-center/scg_machine_readable.json",
+      "media_type": "application/json",
+      "size_bytes": 110457,
+      "sha256": "c8d795022ab64b930673c0a880a2587ff3ac2cc769ccacf31074a5ceda4ef548",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/scg_machine_readable.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "remediation-register",
+      "category": "remediation",
+      "description": "Continuous Remediation Register — public-safe per-resource findings with state tracking.",
+      "cadence": "every 4 hours",
+      "producer": "src/engine.py (dump_backlog)",
+      "rules": [
+        "FRC-CSX-VVK"
+      ],
+      "path": "trust-center/remediation_backlog.json",
+      "url_path": "/trust-center/remediation_backlog.json",
+      "media_type": "application/json",
+      "size_bytes": 15608,
+      "sha256": "23c3442af19bc3ba49bf646ca10c388021582978024a29ceb70117f0cb794d32",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": "2026-10-19T16:41:45Z",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/remediation_backlog.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "nist-crm",
+      "category": "crm",
+      "description": "Customer responsibility matrix (NIST 800-53 Rev 5 mapping), machine-readable.",
+      "cadence": "on change",
+      "producer": "fedramp-20x-submission-final",
+      "rules": [
+        "CDS-CSO-PUB"
+      ],
+      "path": "data/nist_crm.json",
+      "url_path": "/data/nist_crm.json",
+      "media_type": "application/json",
+      "size_bytes": 324601,
+      "sha256": "2581c255d242778ef7861f51b91f10da06ef79003285ca841f82e7f4028a3f95",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/nist_crm.json",
+      "changed_since_previous": null,
+      "human_readable": {
+        "path": "data/Meridian_LMS_CRM_NIST_800-53_Rev5.xlsx",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/Meridian_LMS_CRM_NIST_800-53_Rev5.xlsx",
+        "present": true
+      }
+    },
+    {
+      "id": "nist-crm-cmmc",
+      "category": "crm",
+      "description": "Customer responsibility matrix with CMMC/CUI overlay (human-readable).",
+      "cadence": "on change",
+      "producer": "fedramp-20x-submission-final",
+      "rules": [
+        "CDS-CSO-PUB"
+      ],
+      "path": "data/Meridian_LMS_CRM_NIST_800-53_Rev5_CMMC_CUI.xlsx",
+      "url_path": "/data/Meridian_LMS_CRM_NIST_800-53_Rev5_CMMC_CUI.xlsx",
+      "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "size_bytes": 76258,
+      "sha256": "5c267bb7dde7093e5275eb7a9c62ed87f371f9db7a25234f432184f64adfc66a",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/Meridian_LMS_CRM_NIST_800-53_Rev5_CMMC_CUI.xlsx",
+      "changed_since_previous": null
+    },
+    {
+      "id": "assessment-reports-manifest",
+      "category": "assessments",
+      "description": "Index of independent assessment reports and FedRAMP certification documents with scope, result and file names.",
+      "cadence": "on change",
+      "producer": "config/reports-manifest.json",
+      "rules": [
+        "CDS-CSO-FRC",
+        "IVV-CSX-AIA"
+      ],
+      "path": "trust-center/assessments/reports-manifest.json",
+      "url_path": "/trust-center/assessments/reports-manifest.json",
+      "media_type": "application/json",
+      "size_bytes": 1642,
+      "sha256": "b3224c2d91efe5635e24b56eaba7ca813b0d0584c515b97b2649e2cca9928f7e",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/assessments/reports-manifest.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "ksi-traceability-matrix",
+      "category": "assessments",
+      "description": "CR26 KSI traceability matrix.",
+      "cadence": "every 4 hours",
+      "producer": "scripts/generate_ksi_traceability.py",
+      "rules": [
+        "FRC-CSX-VVK"
+      ],
+      "path": "trust-center/assessments/cr26-ksi-traceability-matrix.md",
+      "url_path": "/trust-center/assessments/cr26-ksi-traceability-matrix.md",
+      "media_type": "text/markdown",
+      "size_bytes": 80744,
+      "sha256": "9a935fa5e78a5ec90419c3f01723c49a5cd050bc66de9ac4d0662d3538d3ff3b",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/assessments/cr26-ksi-traceability-matrix.md",
+      "changed_since_previous": null
+    },
+    {
+      "id": "trust-center-bundle-manifest",
+      "category": "meta",
+      "description": "Manifest of the Trust Center data bundle (schemas, reports, assessments, policies) with SHA-256 per file; the same bundle is released as trust-center-data.zip.",
+      "cadence": "every 4 hours",
+      "producer": "FedRAMP 20x CLI Validation Pipeline (build-trust-center-bundle)",
+      "rules": [
+        "CDS-CSO-HAD",
+        "CDS-TRC-PAC"
+      ],
+      "path": "trust-center/manifest.json",
+      "url_path": "/trust-center/manifest.json",
+      "media_type": "application/json",
+      "size_bytes": 10511,
+      "sha256": "b1774fb995ad62f065100a2d67d11270c332ad3df269ffd83e7fa872749e2ef6",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": "2026-10-19T17:38:46Z",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/manifest.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "execution-quality-report",
+      "category": "integrity",
+      "description": "Validation pipeline execution quality (command success, collector health).",
+      "cadence": "every 4 hours",
+      "producer": "repo utilities/execution_quality_monitor.py",
+      "rules": [
+        "FRC-CSX-VVK"
+      ],
+      "path": "data/execution_quality_report.json",
+      "url_path": "/data/execution_quality_report.json",
+      "media_type": "application/json",
+      "size_bytes": 1487,
+      "sha256": "d42e721181e9cff71415a8540ad5f885cdcf71ad674e430d1a60bd6ea50ff412",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": "2026-10-19T16:41:45Z",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/execution_quality_report.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "validation-integrity-report",
+      "category": "integrity",
+      "description": "Integrity seals and consistency checks for the published validation output.",
+      "cadence": "every 4 hours",
+      "producer": "repo utilities/redact_and_validate.py",
+      "rules": [
+        "CDS-CSO-CBF"
+      ],
+      "path": "data/validation_integrity_report.json",
+      "url_path": "/data/validation_integrity_report.json",
+      "media_type": "application/json",
+      "size_bytes": 859,
+      "sha256": "8e86f93c1dcc40f0909d624ff6d988aa7d6c50a6e17b8ad875353a7d714be7fd",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/validation_integrity_report.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "temporal-consistency-log",
+      "category": "integrity",
+      "description": "Run-over-run consistency log (fingerprint flaps, timing).",
+      "cadence": "every 4 hours",
+      "producer": "FedRAMP 20x CLI Validation Pipeline",
+      "rules": [
+        "FRC-CSX-VVK"
+      ],
+      "path": "data/temporal_consistency_log.json",
+      "url_path": "/data/temporal_consistency_log.json",
+      "media_type": "application/json",
+      "size_bytes": 118663,
+      "sha256": "0af5947b8f32977a576e4cc4fbf9bc47f242fa4eed5458f06862fe2a4c25dd79",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/temporal_consistency_log.json",
+      "changed_since_previous": null
+    },
+    {
+      "id": "package-readme",
+      "category": "meta",
+      "description": "Human-readable guide to the Trust Center data bundle and historical package access.",
+      "cadence": "on change",
+      "producer": "trust_center_static/PACKAGE_README.md",
+      "rules": [
+        "CDS-CSO-PUB",
+        "CDS-TRC-PAC"
+      ],
+      "path": "trust-center/README.md",
+      "url_path": "/trust-center/README.md",
+      "media_type": "text/markdown",
+      "size_bytes": 3177,
+      "sha256": "a64197c941655e442771b1b138afff1d015d1aa5a9a413fd661033f8607af50d",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/README.md",
+      "changed_since_previous": null
+    },
+    {
+      "id": "assessment-3pao-2026-01",
+      "category": "assessments",
+      "description": "Independent assessment report (Fortreum), 2026-01-30 — human-readable; indexed by assessment-reports-manifest.",
+      "cadence": "static",
+      "producer": "Fortreum",
+      "rules": [
+        "CDS-CSO-FRC",
+        "IVV-CSX-AIA"
+      ],
+      "path": "trust-center/assessments/Meridian-FedRAMP-20x-3PAO-Assessment-Report-2026-01-30.pdf",
+      "url_path": "/trust-center/assessments/Meridian-FedRAMP-20x-3PAO-Assessment-Report-2026-01-30.pdf",
+      "media_type": "application/pdf",
+      "size_bytes": 158933,
+      "sha256": "9beb8a6fd33d75f0aea9c1e898cbca72d72437cb3ac94be49f1955872621564e",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/assessments/Meridian-FedRAMP-20x-3PAO-Assessment-Report-2026-01-30.pdf",
+      "changed_since_previous": null
+    },
+    {
+      "id": "assessment-sar-2025-12",
+      "category": "assessments",
+      "description": "Security assessment report, 2025-12-19 — human-readable.",
+      "cadence": "static",
+      "producer": "Fortreum",
+      "rules": [
+        "CDS-CSO-FRC"
+      ],
+      "path": "trust-center/assessments/Meridian-Knowledge-Solutions-Security-Assessment-Report-2025-12-19.pdf",
+      "url_path": "/trust-center/assessments/Meridian-Knowledge-Solutions-Security-Assessment-Report-2025-12-19.pdf",
+      "media_type": "application/pdf",
+      "size_bytes": 141448,
+      "sha256": "a42bb72260d91bac36df5b6b155b48a41c757b3f69ab16a8b5fe5106c268a432",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/assessments/Meridian-Knowledge-Solutions-Security-Assessment-Report-2025-12-19.pdf",
+      "changed_since_previous": null
+    },
+    {
+      "id": "fedramp-authorization-letter",
+      "category": "assessments",
+      "description": "FedRAMP 20x authorization letter — human-readable.",
+      "cadence": "static",
+      "producer": "FedRAMP",
+      "rules": [
+        "CDS-CSO-FRC",
+        "CDS-CSO-FID"
+      ],
+      "path": "trust-center/assessments/Meridian Knowledge Solutions 20x FedRAMP Authorization Letter.pdf",
+      "url_path": "/trust-center/assessments/Meridian Knowledge Solutions 20x FedRAMP Authorization Letter.pdf",
+      "media_type": "application/pdf",
+      "size_bytes": 370289,
+      "sha256": "277362a62394731a791aa2187cd49ac412ae2f00ffc90825a3a0435bf09a8f88",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/assessments/Meridian Knowledge Solutions 20x FedRAMP Authorization Letter.pdf",
+      "changed_since_previous": null
+    },
+    {
+      "id": "scn-sample-report",
+      "category": "scn",
+      "description": "Sample SCN report illustrating the schema (not a live notification).",
+      "cadence": "static",
+      "producer": "reports/samples",
+      "rules": [
+        "SCN-RPT-*"
+      ],
+      "path": "trust-center/reports/json/scn-sample-report.json",
+      "url_path": "/trust-center/reports/json/scn-sample-report.json",
+      "media_type": "application/json",
+      "size_bytes": 3578,
+      "sha256": "43c4bcea68228655fdbeb0cfaa2f50a8af8af6650b7f7264d2839dbd10b859d8",
+      "last_modified": "2026-10-15T03:12:25Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/json/scn-sample-report.json",
+      "changed_since_previous": null,
+      "schema": {
+        "path": "trust-center/schemas/scn-schema.json",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/schemas/scn-schema.json",
+        "present": true
+      },
+      "human_readable": {
+        "path": "trust-center/reports/html/scn-sample-report.html",
+        "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/html/scn-sample-report.html",
+        "present": true
+      }
+    },
+    {
+      "id": "compliance-validation-report-md",
+      "category": "reports",
+      "description": "Markdown rendering of the current KSI validation output (human-readable).",
+      "cadence": "every 4 hours",
+      "producer": "reports/generate_public_reports.py",
+      "rules": [
+        "CDS-TRC-HMR"
+      ],
+      "path": "data/COMPLIANCE_VALIDATION_REPORT.md",
+      "url_path": "/data/COMPLIANCE_VALIDATION_REPORT.md",
+      "media_type": "text/markdown",
+      "size_bytes": 2097,
+      "sha256": "334f1783b4df7d2b64390d14cd0ad22270dff17a5655c20ee6fef99f8aa35e9e",
+      "last_modified": "2026-10-19T17:39:13Z",
+      "generated_at": null,
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/COMPLIANCE_VALIDATION_REPORT.md",
+      "changed_since_previous": null
+    },
+    {
+      "id": "pqc-inventory",
+      "category": "crypto",
+      "description": "Post-quantum cryptography inventory: every key-establishment and signature use protecting federal data with algorithm, PQC status (pqc/hybrid/neither/unknown) and transition target; evidence cross-checked each generation.",
+      "cadence": "on change (reviewed every 180 days)",
+      "producer": "governance/cryptography/pqc_inventory.json (human-readable: PQC_INVENTORY.md generated by scripts/generate_pqc_inventory.py)",
+      "rules": [
+        "CMU-CSO-PQS",
+        "CMU-CSO-UVM"
+      ],
+      "external_url": "https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/main/governance/cryptography/pqc_inventory.json",
+      "status": "external"
+    },
+    {
+      "id": "pqc-inventory-human",
+      "category": "crypto",
+      "description": "Human-readable rendering of the PQC inventory with the evidence cross-check.",
+      "cadence": "on change",
+      "producer": "scripts/generate_pqc_inventory.py",
+      "rules": [
+        "CMU-CSO-PQS",
+        "CDS-CSO-CBF"
+      ],
+      "external_url": "https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/main/governance/cryptography/PQC_INVENTORY.md",
+      "status": "external"
+    },
+    {
+      "id": "ucm-cryptographic-modules",
+      "category": "crypto",
+      "description": "Cryptographic module inventory with CMVP validation references.",
+      "cadence": "on change",
+      "producer": "governance (policy-as-code)",
+      "rules": [
+        "CMU-CSO-UVM"
+      ],
+      "external_url": "https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/main/governance/cryptography/UCM.md",
+      "status": "external"
+    },
+    {
+      "id": "foci-register",
+      "category": "foci",
+      "description": "Public-safe FOCI register structure: ownership declaration state, foreign-persons count, business relationships with FOCI relevance and review state, USG determinations. Sensitive details are held only in the private record.",
+      "cadence": "every 90 days + on change",
+      "producer": "governance/foci (validated by scripts/check_foci_register.py)",
+      "rules": [
+        "KSI-PIY-DFC",
+        "KSI-PIY-RFP",
+        "KSI-PIY-RFB",
+        "KSI-PIY-MFD"
+      ],
+      "external_url": "https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/main/governance/foci/foci_register.json",
+      "status": "external"
+    },
+    {
+      "id": "foci-review-cadence",
+      "category": "foci",
+      "description": "FOCI register review cadence, change triggers, handling rules and the aggregate-only metric derivation.",
+      "cadence": "on change",
+      "producer": "governance/foci",
+      "rules": [
+        "KSI-PIY-RFP",
+        "KSI-PIY-RFB"
+      ],
+      "external_url": "https://raw.githubusercontent.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/main/governance/foci/FOCI_REVIEW_CADENCE.md",
+      "status": "external"
+    }
+  ],
+  "schemas": [
+    {
+      "path": "trust-center/schemas/cli-command-register-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/schemas/cli-command-register-schema.json",
+      "sha256": "dedc1816e147cda65834aa0170fbc523618ea5522cb0f37d99680d23be9c0108",
+      "size_bytes": 3879
+    },
+    {
+      "path": "trust-center/schemas/cli-evidence-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/schemas/cli-evidence-schema.json",
+      "sha256": "b6b970e41498c62b339dd0be33878447682690116d87572dd798ef1cbe4c8a84",
+      "size_bytes": 3023
+    },
+    {
+      "path": "trust-center/schemas/oar-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/schemas/oar-schema.json",
+      "sha256": "2bfcdeba383579833c58e3a613bef0a2239d5408173f1b79719b189b17cafd73",
+      "size_bytes": 13768
+    },
+    {
+      "path": "trust-center/schemas/scn-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/schemas/scn-schema.json",
+      "sha256": "e42a13a4f82f26ae3a7a9ea4ceb245c1b8b9e1287fbbabc303fcb8d66538926e",
+      "size_bytes": 15401
+    },
+    {
+      "path": "trust-center/schemas/unified-ksi-validations-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/schemas/unified-ksi-validations-schema.json",
+      "sha256": "3c2da06c357674d118b12f10cbef67c7b9d7797cbfb76c49a0ef591cdb7fcb80",
+      "size_bytes": 17714
+    },
+    {
+      "path": "trust-center/schemas/vdr-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/schemas/vdr-schema.json",
+      "sha256": "516de423b9028e812911d3a37203be1525bfed633046b2bfc551a32f1a9689de",
+      "size_bytes": 16645
+    },
+    {
+      "path": "data/reports/schemas/cli-command-register-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/schemas/cli-command-register-schema.json",
+      "sha256": "dedc1816e147cda65834aa0170fbc523618ea5522cb0f37d99680d23be9c0108",
+      "size_bytes": 3879
+    },
+    {
+      "path": "data/reports/schemas/cli-evidence-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/schemas/cli-evidence-schema.json",
+      "sha256": "b6b970e41498c62b339dd0be33878447682690116d87572dd798ef1cbe4c8a84",
+      "size_bytes": 3023
+    },
+    {
+      "path": "data/reports/schemas/oar-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/schemas/oar-schema.json",
+      "sha256": "2bfcdeba383579833c58e3a613bef0a2239d5408173f1b79719b189b17cafd73",
+      "size_bytes": 13768
+    },
+    {
+      "path": "data/reports/schemas/qar-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/schemas/qar-schema.json",
+      "sha256": "d987d0109c688f1245973bc21bee1db66ca7796050a83f51fedae563f18af4c2",
+      "size_bytes": 12128
+    },
+    {
+      "path": "data/reports/schemas/scn-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/schemas/scn-schema.json",
+      "sha256": "e42a13a4f82f26ae3a7a9ea4ceb245c1b8b9e1287fbbabc303fcb8d66538926e",
+      "size_bytes": 15401
+    },
+    {
+      "path": "data/reports/schemas/unified-ksi-validations-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/schemas/unified-ksi-validations-schema.json",
+      "sha256": "3c2da06c357674d118b12f10cbef67c7b9d7797cbfb76c49a0ef591cdb7fcb80",
+      "size_bytes": 17714
+    },
+    {
+      "path": "data/reports/schemas/vdr-schema.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/schemas/vdr-schema.json",
+      "sha256": "516de423b9028e812911d3a37203be1525bfed633046b2bfc551a32f1a9689de",
+      "size_bytes": 16645
+    }
+  ],
+  "policies": {
+    "count": 21,
+    "index_url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/api/v1/policies.json"
+  },
+  "ksi_run_history": {
+    "count": 3657,
+    "first": "2025-05-29T21:06:01Z",
+    "last": "2026-10-19T16:41:45Z",
+    "index_url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/api/v1/ksi-runs-index.json"
+  },
+  "additional_distribution": [
+    {
+      "id": "release-latest-compliance-data",
+      "url": "https://github.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/releases/tag/latest-compliance-data",
+      "description": "GitHub release carrying the same validation artifacts as downloadable assets."
+    },
+    {
+      "id": "release-trust-center-data",
+      "url": "https://github.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/releases/tag/trust-center-data",
+      "description": "GitHub release of the Trust Center data bundle (trust-center-data.zip + manifest.json)."
+    },
+    {
+      "id": "release-latest-vdr-metrics",
+      "url": "https://github.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final/releases/tag/latest-vdr-metrics",
+      "description": "GitHub release of vdr_public_metrics.json."
+    },
+    {
+      "id": "source-repository",
+      "url": "https://github.com/Meridian-Knowledge-Solutions/fedramp-20x-submission-final",
+      "description": "Validation pipeline source, register, vendored ruleset, governance documents and metric history (public)."
+    }
+  ],
+  "deprecated": [
+    {
+      "path": "data/reports/QUARTERLY_AUTHORIZATION_REPORT.html",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/QUARTERLY_AUTHORIZATION_REPORT.html",
+      "media_type": "text/html",
+      "size_bytes": 28787,
+      "sha256": "d53a36560785942db6cd4578daa91ab7e052172ec5a0b10f3b0ec3d0e93ed09a",
+      "replacement": "trust-center/reports/QUARTERLY_AUTHORIZATION_REPORT.html",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/html/oar-report.html",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/html/oar-report.html",
+      "media_type": "text/html",
+      "size_bytes": 25859,
+      "sha256": "d286222fb62f570740db870ca71f8ed32d2cfdd296441ffca96da91cd8c9dcfb",
+      "replacement": "trust-center/reports/html/oar-report.html",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/html/qar-report.html",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/html/qar-report.html",
+      "media_type": "text/html",
+      "size_bytes": 19857,
+      "sha256": "9268ec5c14a29b583714ad555922ba946e86d0983e255052029de2f7db9962e3",
+      "replacement": "trust-center/reports/html/qar-report.html",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/html/scn-report.html",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/html/scn-report.html",
+      "media_type": "text/html",
+      "size_bytes": 20891,
+      "sha256": "50ef19f07e6828985fe375b715634d64e1e17b222d2d831169310f788e9a237d",
+      "replacement": "trust-center/reports/html/scn-report.html",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/html/scn-sample-report.html",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/html/scn-sample-report.html",
+      "media_type": "text/html",
+      "size_bytes": 14343,
+      "sha256": "036f923aadb49ad8d9712cd41f0273281c16b61cfe8cdb260b5a824493967988",
+      "replacement": "trust-center/reports/html/scn-sample-report.html",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/html/vdr-report.html",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/html/vdr-report.html",
+      "media_type": "text/html",
+      "size_bytes": 28470,
+      "sha256": "4c9b04976b0594f25da6ebb2a3301745762ce4f1a8874ac2b13dfd71f034e5fa",
+      "replacement": "trust-center/reports/html/vdr-report.html",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/samples/next_report_date.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/samples/next_report_date.json",
+      "media_type": "application/json",
+      "size_bytes": 890,
+      "sha256": "8135b23b73aad8742b5b8b4bef1385fb824ea79fda09cb0a27ab1ffdf7a08807",
+      "replacement": "trust-center/reports/samples/next_report_date.json",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/samples/oar-report.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/samples/oar-report.json",
+      "media_type": "application/json",
+      "size_bytes": 9631,
+      "sha256": "0e3e2cdb298bcd975f0498592ef90f36d1ab700e6012619a1297f345cbf4dd18",
+      "replacement": "trust-center/reports/samples/oar-report.json",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/samples/qar-report.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/samples/qar-report.json",
+      "media_type": "application/json",
+      "size_bytes": 5959,
+      "sha256": "ce879171002fab8b395660c987a93c874978e6dda9f8df57660be079d81fd5c5",
+      "replacement": "trust-center/reports/samples/qar-report.json",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/samples/quarterly_meetings.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/samples/quarterly_meetings.json",
+      "media_type": "application/json",
+      "size_bytes": 188,
+      "sha256": "fc004e85d952b31dbfa1175e8053d95ee7a8761360d7c0c89530fd6258a4d92d",
+      "replacement": "trust-center/reports/samples/quarterly_meetings.json",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/samples/report-generation-manifest.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/samples/report-generation-manifest.json",
+      "media_type": "application/json",
+      "size_bytes": 3563,
+      "sha256": "322e49a10decd2db9de607c600720e636bac8bbe19ae5d1efca7ef73ddb3d5f9",
+      "replacement": "trust-center/reports/samples/report-generation-manifest.json",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/samples/scn-recent-events.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/samples/scn-recent-events.json",
+      "media_type": "application/json",
+      "size_bytes": 51608,
+      "sha256": "045da5cd8b752d1eee6f8a020ab683b80ed369e039748fff448ea549db2f9525",
+      "replacement": "trust-center/reports/samples/scn-recent-events.json",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/samples/scn-report.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/samples/scn-report.json",
+      "media_type": "application/json",
+      "size_bytes": 12260,
+      "sha256": "52fcbd1447db91356225ef2108dd938098ea056782d70733d09667745571375c",
+      "replacement": "trust-center/reports/samples/scn-report.json",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/samples/scn-sample-report.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/samples/scn-sample-report.json",
+      "media_type": "application/json",
+      "size_bytes": 3578,
+      "sha256": "43c4bcea68228655fdbeb0cfaa2f50a8af8af6650b7f7264d2839dbd10b859d8",
+      "replacement": "trust-center/reports/samples/scn-sample-report.json",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "data/reports/samples/vdr-report.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/data/reports/samples/vdr-report.json",
+      "media_type": "application/json",
+      "size_bytes": 13967,
+      "sha256": "0ec670b5b819d2ce2ee82f0eadb30e74886145b96c33a8c12c9b1aa7729edc7a",
+      "replacement": "trust-center/reports/samples/vdr-report.json",
+      "note": "Legacy duplicate of the Trust Center bundle reports; kept for existing consumers, not updated independently."
+    },
+    {
+      "path": "trust-center/reports/json/next_report_date.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/json/next_report_date.json",
+      "media_type": "application/json",
+      "size_bytes": 890,
+      "sha256": "8135b23b73aad8742b5b8b4bef1385fb824ea79fda09cb0a27ab1ffdf7a08807",
+      "replacement": "data/next_report_date.json",
+      "note": "Duplicate; canonical copy is data/next_report_date.json."
+    },
+    {
+      "path": "trust-center/reports/json/quarterly_meetings.json",
+      "url": "https://meridian-knowledge-solutions.github.io/fedramp-trust-center/trust-center/reports/json/quarterly_meetings.json",
+      "media_type": "application/json",
+      "size_bytes": 188,
+      "sha256": "fc004e85d952b31dbfa1175e8053d95ee7a8761360d7c0c89530fd6258a4d92d",
+      "replacement": "data/quarterly_meetings.json",
+      "note": "Duplicate; canonical copy is data/quarterly_meetings.json."
+    }
+  ],
+  "uncatalogued": [],
+  "missing_catalogued_artifacts": []
+}
