@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-10-23T12:43:32.276172+00:00 (35 pass / 11 fail of 46)  
-**Generated:** 2026-10-23 13:39 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-10-23T20:31:37.713465+00:00 (37 pass / 9 fail of 46)  
+**Generated:** 2026-10-23 21:01 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -76,7 +76,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CMT-04
 - **NIST 800-53 controls:** cm-3, cm-3.2, cm-3.4, cm-5, cm-7.1, cm-9
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (50%): The effectiveness of documented change management procedures is persistently reviewed. | 1/2 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (3747 bytes, 1…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The effectiveness of documented change management procedures is persistently reviewed. | 2/2 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (3747 bytes, 13 …
 - **Measures (validation objectives):**
   - GOVERNANCE: Validate the existence of the Change Management Procedure document. [Policy-as-code home: governance/ in this git repository — machine-readable markdown, change requires a commit; validated via GitHub contents API.]
   - Terraform state backend versioning (mks-states). Status=Enabled proves every infrastructure change is retained as an immutable, recoverable state revision — the change-tracking control. (list-object-versions is denied cross-account; get-bucket-versioning is the reachable, sufficient evidence.)
@@ -90,7 +90,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CMT-03
 - **NIST 800-53 controls:** cm-3, cm-3.2, cm-4.2, si-2
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: change_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (87%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant. | Verified: AWS Config recorder '[resource]' configured, recording a scoped resource set.;…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (100%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording a scoped…
 - **Measures (validation objectives):**
   - MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation).
   - VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources.
@@ -428,7 +428,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-MLA-01
 - **NIST 800-53 controls:** ac-17.1, ac-20.1, au-2, au-3, au-3.1, au-4, au-5, au-6.1, au-6.3, au-7, au-7.1, au-8, au-9, au-11, ir-4.1, si-4.2, si-4.4, si-7.7
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: trail_logging_metrics, s3_logging_coverage_metrics, alb_access_log_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (75%): A Security Information and Event Management (SIEM) or similar system(s) is used and persistently reviewed for central... | 3/5 resources compliant, 1 unverified. | Verified: Trail is Secure (Multi-R…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): A Security Information and Event Management (SIEM) or similar system(s) is used and persistently reviewed for central... | 4/5 resources compliant, 1 unverified. | Verified: Trail is Secure (Multi-Reg…
 - **Measures (validation objectives):**
   - PRIMARY: Validate existence and configuration of the CloudTrail trail.
   - STATUS: Confirm CloudTrail is actually 'IsLogging': true. Uses TrailARN to avoid naming conflicts. Mode 2 (operational effectiveness) — TrailLoggingMetricsPrimitive computes logging_rate as % of trails with IsLogging=true; KSI-MLA-01 target is 100%.
