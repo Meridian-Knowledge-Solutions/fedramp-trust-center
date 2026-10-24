@@ -1,7 +1,7 @@
 # FedRAMP Compliance Validation Report
 
 **Report Type:** System 2.5 Validation Integrity Report  
-**Generated:** 2026-10-24T16:30:09.774872  
+**Generated:** 2026-10-24T20:39:59.818185  
 **Purpose:** 3PAO audit readiness and technical validation verification
 
 ---
@@ -10,19 +10,19 @@
 
 ### Validation Results
 - **Total KSIs Validated:** 46
-- **Passed:** 37 ✅
-- **Failed:** 9 ❌
-- **Overall Pass Rate:** 80.4%
+- **Passed:** 36 ✅
+- **Failed:** 10 ❌
+- **Overall Pass Rate:** 78.3%
 
 ### Temporal Consistency Analysis
-- **Average Consistency Score:** 99.0%
+- **Average Consistency Score:** 98.9%
 - **Recent Validations Analyzed:** 10
 - **Consistency Status:** EXCELLENT
 
 ### Execution Quality Analysis
-- **Technical Issues Detected:** 0
-- **Execution Quality Score:** 100%
-- **Automation Status:** PASS
+- **Technical Issues Detected:** 1
+- **Execution Quality Score:** 95%
+- **Automation Status:** WARNING
 
 ---
 
@@ -30,9 +30,9 @@
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Integrity Score** | 99.5% | ✅ Excellent |
+| **Integrity Score** | 97.0% | ✅ Excellent |
 | **Validation Determinism** | verified | ✅ |
-| **Technical Correctness** | verified | ✅ |
+| **Technical Correctness** | issues_detected | ⚠️ |
 | **Audit Readiness** | ready | ✅ Ready |
 
 ---
@@ -40,10 +40,10 @@
 ## Interpretation
 
 ### Temporal Consistency
-The temporal consistency results (99.0%, across 9 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
+The temporal consistency results (98.9%, across 8 comparable run(s)) indicate that the validation engine produces **deterministic** results — runs over an identical evaluated infrastructure scope yielded identical KSI verdicts.
 
 ### Execution Quality
-The execution quality score of 100% shows **excellent** automation quality - no technical failures detected.
+The execution quality score of 95% shows technical issues detected: 1 automation failures require investigation.
 
 ### Audit Readiness
 Overall audit readiness status: **READY**
