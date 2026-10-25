@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-10-24T12:42:24.692148+00:00 (37 pass / 9 fail of 46)  
-**Generated:** 2026-10-24 13:39 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-10-24T20:39:59.420784+00:00 (36 pass / 10 fail of 46)  
+**Generated:** 2026-10-24 21:35 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -90,7 +90,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CMT-03
 - **NIST 800-53 controls:** cm-3, cm-3.2, cm-4.2, si-2
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: change_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (100%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording a scoped…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (87%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant. | Verified: AWS Config recorder '[resource]' configured, recording a scoped resource set.;…
 - **Measures (validation objectives):**
   - MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation).
   - VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources.
@@ -290,7 +290,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-IAM-04
 - **NIST 800-53 controls:** ac-2, ac-2.1, ac-2.2, ac-2.3, ac-2.4, ac-2.6, ac-3, ac-4, ac-5, ac-6, ac-6.1, ac-6.2, ac-6.5, ac-6.7, ac-6.9, ac-6.10, ac-7, ac-20.1, ac-17, au-9.4, cm-5, cm-7, cm-7.2, cm-7.5, cm-9, ia-4, ia-4.4, ia-7, ps-2, ps-3, ps-4, ps-5, ps-6, ps-9, ra-5.5, sc-2, sc-23, sc-39
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: cross_account_trust_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): A least-privileged, role and attribute-based, and just-in-time security authorization model is used and persistently ... | 3/4 resources compliant, 1 unverified. | Verified: Modern Identity: AWS Ident…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (100%): A least-privileged, role and attribute-based, and just-in-time security authorization model is used and persistently ... | 2/4 resources compliant, 2 unverified. | Verified: Modern Identity: AWS Id…
 - **Measures (validation objectives):**
   - PRIMARY: Validate that AWS Identity Center (SSO) is configured and running.
   - AUDIT: List human users who are bypassing the Centralized System (should be empty or minimal).
