@@ -22,7 +22,7 @@ const NAV = [
 const NAV_IDS = new Set(NAV.map(n => n[0]));
 
 const FRAMEWORKS = [
-    ['FedRAMP 20x', 'CERTIFIED'], ['NIST 800-53 R5', 'MODERATE'], ['FedRAMP KSI', 'MAPPED'],
+    ['FedRAMP 20x', '20X PILOT'], ['NIST 800-53 R5', 'MODERATE'], ['FedRAMP KSI', 'MAPPED'],
     ['CMMC 2.0 L2', 'CROSS-REF'], ['CUI · DoDI 5200.48', 'ATTESTED'], ['OMB A-130', 'ALIGNED'],
 ];
 
@@ -223,13 +223,13 @@ export const TrustCenterView = () => {
                 {/* 01 OVERVIEW */}
                 <section id="overview" className="hero">
                     <div className="rv in">
-                        <Kick>LIVE · CONTINUOUSLY MONITORED · {cso?.package_id || 'CERTIFIED'}</Kick>
+                        <Kick>LIVE · CONTINUOUSLY MONITORED · {cso?.package_id || '20X PILOT'}</Kick>
                         <h1>Certification, observed in <span className="g">real time.</span></h1>
-                        <p className="sub">A living view of how {cso?.cso_name || 'Meridian LMS'} maintains its {cso?.authorization_type || 'FedRAMP 20x'} Class C {cso?.impact_level || 'Moderate'} Certification — KSI posture, vulnerability data, and the controls beneath them, streaming as evidence is collected.</p>
+                        <p className="sub">A living view of how {cso?.cso_name || 'Meridian LMS'} maintains its {cso?.authorization_type || 'FedRAMP 20x Pilot'} Class C Certification — KSI posture, vulnerability data, and the controls beneath them, streaming as evidence is collected. The current certification was earned in the FedRAMP 20x pilots and expires {cso?.certification_profile?.certification_expires || '2027-03-07'}; a full CR26-compliant FedRAMP 20x Certification is in progress.</p>
                         <div className="hbadges">
-                            <span className="badge s">● CERTIFIED</span>
-                            <span className="badge i">{cso?.authorization_type || 'FedRAMP 20x'}</span>
-                            <span className="badge">{cso?.impact_level || 'Moderate'} IMPACT</span>
+                            <span className="badge s">● 20X PILOT CERTIFIED</span>
+                            <span className="badge i">{cso?.authorization_type || 'FedRAMP 20x Pilot'}</span>
+                            <span className="badge">FULL CR26 CERTIFICATION IN PROGRESS</span>
                             <span className="badge">{cso?.service_model || 'SaaS'} · {cso?.cloud_provider || 'AWS'}</span>
                         </div>
                     </div>
