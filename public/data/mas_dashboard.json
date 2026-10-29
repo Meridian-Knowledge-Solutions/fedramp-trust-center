@@ -1,15 +1,15 @@
 {
   "meta": {
-    "generated_at": "2026-10-28T18:14:48.367027+00:00",
+    "generated_at": "2026-10-29T00:31:16.368079+00:00",
     "compliance_ver": "FedRAMP 20x",
     "scope": "PUBLIC_SAFE",
-    "fingerprint": "c6bf66d6ffd3"
+    "fingerprint": "72a81fb5bc57"
   },
   "health": {
     "overall": "critical",
     "connected_systems": 1,
     "total_systems": 6,
-    "total_integrations": 8,
+    "total_integrations": 9,
     "non_fedramp_integrations": 3,
     "drift_count": 19,
     "critical_drift": 2,
@@ -61,6 +61,16 @@
       "total": 1,
       "drift_count": 0,
       "health": "healthy"
+    },
+    {
+      "id": "email_intake",
+      "label": "Email Intake",
+      "icon": "box",
+      "connected": 0,
+      "total": 0,
+      "drift_count": 0,
+      "health": "healthy",
+      "integrations": 1
     },
     {
       "id": "content_library",
@@ -242,6 +252,44 @@
     }
   ],
   "integrations": [
+    {
+      "id": "ses_inbound_reports",
+      "name": "Amazon SES Inbound (reports.meridianks.com)",
+      "category": "email_intake",
+      "status": "In-boundary AWS service",
+      "health": "n/a",
+      "resource_count": 1,
+      "drift_count": 0,
+      "connected": false,
+      "documented": true,
+      "is_third_party": false,
+      "is_fedramp_authorized": true,
+      "cia_impact": {
+        "C": "Moderate",
+        "I": "Moderate",
+        "A": "Low",
+        "rationale": "Receives the weekly LMS training completion report by email and archives it to the access-controlled Audit S3 bucket. Scope is a single report workflow on a dedicated subdomain; root-domain mail is unaffected. Spoofed or tampered inbound mail could plant misleading audit records, mitigated by DKIM verification and S3 access controls."
+      },
+      "data_source": "SES receipt rule (documented)",
+      "connection_type": "SMTP inbound (MX 10 inbound-smtp.us-east-1.amazonaws.com) \u2192 SES receipt rule \u2192 Audit S3 bucket",
+      "auth_method": "DKIM-verified SES domain identity (3 CNAMEs in public DNS); receipt scoped to the reports subdomain only",
+      "risk": "low",
+      "pii_shared": [
+        "Learner name",
+        "Training completion status"
+      ],
+      "compensating_controls": null,
+      "justification": null,
+      "data_flow": {
+        "classification": "federal-internal",
+        "direction": "Inbound",
+        "data_types": [
+          "Weekly LMS training completion report"
+        ],
+        "omb_a130": "Federal employee training records received via DKIM-verified mail on a dedicated subdomain and archived to the access-controlled Audit S3 bucket"
+      },
+      "system_type": "integration"
+    },
     {
       "id": "skillsoft",
       "name": "Skillsoft Percipio",
@@ -708,7 +756,7 @@
       "rule": "VDR-TFR-NMV",
       "requirement": "Verify and validate the status of non-machine-based information resources at least once every 3 months.",
       "required_interval_days": 90,
-      "evaluated_at": "2026-10-28T18:14:48.367771+00:00",
+      "evaluated_at": "2026-10-29T00:31:16.368709+00:00",
       "human_resources": {
         "status": "unverified",
         "method": "Paylocity HR API \u2014 live employee roster",
@@ -737,28 +785,28 @@
         {
           "process": "Incident Response",
           "evidence_artifact": "unified_ksi_validations.json",
-          "last_evidence_at": "2026-10-28T16:41:45.360904+00:00",
+          "last_evidence_at": "2026-10-28T20:42:32.546215+00:00",
           "age_days": 0,
           "status": "verified"
         },
         {
           "process": "Change Management",
           "evidence_artifact": "scn_automation/scn_history.jsonl",
-          "last_evidence_at": "2026-10-28T18:14:38.901603+00:00",
+          "last_evidence_at": "2026-10-29T00:31:07.361990+00:00",
           "age_days": 0,
           "status": "verified"
         },
         {
           "process": "Access Control and Identity Management",
           "evidence_artifact": "dashboard-data/user_access_analysis.json",
-          "last_evidence_at": "2026-10-28T18:14:38.762771+00:00",
+          "last_evidence_at": "2026-10-29T00:31:07.259086+00:00",
           "age_days": 0,
           "status": "verified"
         },
         {
           "process": "Security Governance",
           "evidence_artifact": "unified_ksi_validations.json",
-          "last_evidence_at": "2026-10-28T16:41:45.360904+00:00",
+          "last_evidence_at": "2026-10-28T20:42:32.546215+00:00",
           "age_days": 0,
           "status": "verified"
         }
@@ -768,32 +816,31 @@
     }
   },
   "aws_services": {
-    "AWS CloudTrail": 0.17,
-    "AWS Config": 0.47,
-    "AWS Cost Explorer": 0.14,
-    "AWS Directory Service": 8.49,
-    "AWS Key Management Service": 1.07,
+    "AWS CloudTrail": 0.12,
+    "AWS Config": 0.33,
+    "AWS Cost Explorer": 0.09,
+    "AWS Directory Service": 5.26,
+    "AWS Key Management Service": 0.74,
     "AWS Lambda": 0.0,
-    "AWS Network Firewall": 56.88,
-    "AWS Secrets Manager": 0.25,
-    "AWS Security Hub": 5.91,
-    "AWS Step Functions": 0.0,
-    "AWS Systems Manager": 0.3,
-    "AWS Transfer Family": 21.6,
-    "AWS WAF": 2.19,
+    "AWS Network Firewall": 37.92,
+    "AWS Secrets Manager": 0.16,
+    "AWS Security Hub": 3.94,
+    "AWS Systems Manager": 0.2,
+    "AWS Transfer Family": 14.4,
+    "AWS WAF": 1.44,
     "Amazon API Gateway": 0.0,
-    "EC2 - Other": 19.17,
-    "Amazon Elastic Compute Cloud - Compute": 114.57,
-    "Amazon Elastic Load Balancing": 8.92,
-    "Amazon FSx": 90.43,
-    "Amazon RDS Optimize CPU License Included Third Party Fees": 47.81,
-    "Amazon Relational Database Service": 33.87,
-    "Amazon Route 53": 0.28,
+    "EC2 - Other": 12.78,
+    "Amazon Elastic Compute Cloud - Compute": 76.33,
+    "Amazon Elastic Load Balancing": 5.64,
+    "Amazon FSx": 60.29,
+    "Amazon RDS Optimize CPU License Included Third Party Fees": 31.87,
+    "Amazon Relational Database Service": 22.59,
+    "Amazon Route 53": 0.18,
     "Amazon Simple Email Service": 0.03,
     "Amazon Simple Notification Service": 0.0,
-    "Amazon Simple Storage Service": 1.26,
-    "Amazon Virtual Private Cloud": 10.8,
-    "AmazonCloudWatch": 4.15
+    "Amazon Simple Storage Service": 0.84,
+    "Amazon Virtual Private Cloud": 7.2,
+    "AmazonCloudWatch": 2.71
   },
   "drift_summary": [
     {
@@ -801,7 +848,7 @@
       "type": "zombie_cost",
       "resource_type": "directory_service",
       "severity": "warning",
-      "description": "'AWS Directory Service' billing ($8.49/mo) but 0 resources in us-east-1.",
+      "description": "'AWS Directory Service' billing ($5.26/mo) but 0 resources in us-east-1.",
       "expected": ">0",
       "actual": 0,
       "delta": 1
@@ -811,7 +858,7 @@
       "type": "zombie_cost",
       "resource_type": "transfer",
       "severity": "warning",
-      "description": "'AWS Transfer Family' billing ($21.6/mo) but 0 resources in us-east-1.",
+      "description": "'AWS Transfer Family' billing ($14.4/mo) but 0 resources in us-east-1.",
       "expected": ">0",
       "actual": 0,
       "delta": 1
