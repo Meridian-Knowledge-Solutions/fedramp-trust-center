@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-11-02T20:28:43.511924+00:00 (38 pass / 8 fail of 46)  
-**Generated:** 2026-11-02 20:58 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-11-03T04:33:56.936849+00:00 (38 pass / 8 fail of 46)  
+**Generated:** 2026-11-03 05:19 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -398,7 +398,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-MLA-05
 - **NIST 800-53 controls:** ca-7, cm-2, cm-6, si-7.7
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources, especially infrastructure as code, is persistently evaluate... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 142 resource(s):…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources, especially infrastructure as code, is persistently evaluate... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 147 resource(s):…
 - **Measures (validation objectives):**
   - EVALUATION/TESTING: Validate the live Checkov IaC scan summary — Checkov (policy-as-code static analysis) scans the Terraform in meridian-aws-resources every run and records resources scanned + checks passed/failed. This is direct proof that infrastructure-as-code configuration is persistently evaluated and tested. Regenerated each run by the IaC Checkov Scan workflow. [Live artifact home: dashboard-data/ in this git repository; validated via GitHub contents API.]
   - PROCESS: Validate the SDLC policy mandating IaC review and automated security testing (SAST/DAST/CI-CD gates), the documented basis for persistently evaluating and testing infrastructure configuration. [Policy-as-code home: governance/ in this git repository; validated via GitHub contents API.]
@@ -636,7 +636,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-04
 - **NIST 800-53 controls:** ac-2.4, cm-2, cm-2.2, cm-2.3, cm-6, cm-7.1, pl-9, pl-10, sa-5, si-5, sr-10
 - **Evaluation policy:** mode `capability`, pass threshold 80%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources is managed using automation and persistently reviewed for dr... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 142 resource(s):…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources is managed using automation and persistently reviewed for dr... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 147 resource(s):…
 - **Measures (validation objectives):**
   - IAC AUTOMATION: Validate the live policy-as-code (Checkov) scan summary — proof that infrastructure is Terraform-managed and continuously scanned for configuration drift. [The Terraform state backend lives in the cross-account mks-states S3 bucket, not visible to list-buckets in the validation account; the proof of automation is the IaC + its policy gate, validated git-natively via the GitHub contents API.]
   - GOVERNANCE: Validate the Configuration Management Policy document. [Policy-as-code home: governance/ in this git repository — machine-readable markdown, change requires a commit; validated via GitHub contents API.]
