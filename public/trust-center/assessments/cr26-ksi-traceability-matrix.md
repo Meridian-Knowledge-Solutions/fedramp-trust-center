@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-11-02T12:42:39.269329+00:00 (36 pass / 10 fail of 46)  
-**Generated:** 2026-11-02 13:31 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-11-02T20:28:43.511924+00:00 (38 pass / 8 fail of 46)  
+**Generated:** 2026-11-02 20:58 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -140,7 +140,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-07
 - **NIST 800-53 controls:** ac-17.3, cm-2, pl-10
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (97%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 43/44 resources compliant. | Verified: Verified: Active & Compliant; Verifi…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 44/44 resources compliant. | Verified: Verified: Active & Compliant; Verified…
 - **Measures (validation objectives):**
   - BASELINE: Measure legacy compute footprint (Denominator) to compare against managed service adoption.
   - ACCELERATOR: Validate adoption of serverless compute (High Impact).
@@ -463,7 +463,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-PIY-01
 - **NIST 800-53 controls:** cm-2.2, cm-7.5, cm-8, cm-8.1, cm-12, cm-12.1, cp-2.8
 - **Evaluation policy:** mode `output`, pass threshold 80%, required operational metrics: inventory_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 157/157 resources compliant. | Verified: AWS Config recorder '[resource]' con…
 - **Measures (validation objectives):**
   - PRIMARY: Validate that the Configuration Recorder is active (The 'Authoritative Source').
   - STORAGE: Validate that the inventory data is being delivered to a central S3 bucket.
@@ -650,7 +650,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-06
 - **NIST 800-53 controls:** ac-17.2, ia-5.2, ia-5.6, sc-12, sc-17
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: kms_rotation_metrics, cert_expiry_metrics, secret_rotation_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (66%): Management, protection, and regular rotation of digital keys, certificates, and other secrets is automated and persis... | 6/26 resources compliant, 10 unverified. | Verified: Secret '[resource]' ha…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (70%): Management, protection, and regular rotation of digital keys, certificates, and other secrets is automated and persis... | 7/27 resources compliant, 10 unverified. | Verified: Secret '[resource]' ha…
 - **Measures (validation objectives):**
   - KEYS: Validate existence of KMS Customer Managed Keys (CMKs) for centralized management.
   - ROTATION: Validate Secrets Manager entries (Look for 'RotationEnabled': true in the output).
@@ -714,7 +714,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-02
 - **NIST 800-53 controls:** ac-1, ac-17.2, cp-9.8, sc-8, sc-8.1, sc-13, sc-20, sc-21, sc-22, sc-23, sc-28, sc-28.1
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: tls_listener_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information is encrypted or otherwise secured from unwanted access or modification. | 8/8 resources compliant. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; Load balancer '[resource…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information is encrypted or otherwise secured from unwanted access or modification. | 9/9 resources compliant. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; ACM certificate for '[re…
 - **Measures (validation objectives):**
   - KEYS: Validate existence of active, issued TLS certificates.
   - GATEKEEPERS: per-load-balancer TLS enforcement. Correlates each LB with its listeners so every LB row is evaluable (_eval_lb_tls: FAIL on any non-TLS listener, unverified when dormant). Replaces the bare name/scheme rows that fell to the 'no evaluator mapped' unverified fallback - 4 of SVC-SIN's 5 unverified rows. Aggregate TLS rate is still measured by tls_listener_metrics; this adds per-resource depth. Wording here deliberately avoids evaluator note-routing keywords.
@@ -731,7 +731,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-09
 - **NIST 800-53 controls:** sc-23, si-7.1
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The authenticity and integrity of communications between machine-based information resources is persistently validate... | 10/14 resources compliant, 4 unverified. | Verified: Listener 'arn:aws:[redac…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The authenticity and integrity of communications between machine-based information resources is persistently validate... | 11/15 resources compliant, 4 unverified. | Verified: Listener 'arn:aws:[redac…
 - **Measures (validation objectives):**
   - ENFORCERS: Identify active Load Balancers handling traffic.
   - VALIDATION: Verify that listeners are enforcing HTTPS/TLS with specific SSL Policies (authenticity/integrity checks).
