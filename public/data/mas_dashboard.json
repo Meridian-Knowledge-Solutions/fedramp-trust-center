@@ -1,15 +1,15 @@
 {
   "meta": {
-    "generated_at": "2026-10-26T18:24:44.357313+00:00",
+    "generated_at": "2026-11-12T12:15:05.114262+00:00",
     "compliance_ver": "FedRAMP 20x",
     "scope": "PUBLIC_SAFE",
-    "fingerprint": "866e5ac9f4d4"
+    "fingerprint": "061bda583d00"
   },
   "health": {
     "overall": "critical",
     "connected_systems": 1,
     "total_systems": 6,
-    "total_integrations": 8,
+    "total_integrations": 9,
     "non_fedramp_integrations": 3,
     "drift_count": 19,
     "critical_drift": 2,
@@ -61,6 +61,16 @@
       "total": 1,
       "drift_count": 0,
       "health": "healthy"
+    },
+    {
+      "id": "email_intake",
+      "label": "Email Intake",
+      "icon": "box",
+      "connected": 0,
+      "total": 0,
+      "drift_count": 0,
+      "health": "healthy",
+      "integrations": 1
     },
     {
       "id": "content_library",
@@ -120,7 +130,7 @@
       "category": "infrastructure",
       "status": "connected",
       "health": "warning",
-      "resource_count": 88,
+      "resource_count": 89,
       "drift_count": 19,
       "incident_count": 0,
       "connected": true,
@@ -242,6 +252,44 @@
     }
   ],
   "integrations": [
+    {
+      "id": "ses_inbound_reports",
+      "name": "Amazon SES Inbound (reports.meridianks.com)",
+      "category": "email_intake",
+      "status": "In-boundary AWS service",
+      "health": "n/a",
+      "resource_count": 1,
+      "drift_count": 0,
+      "connected": false,
+      "documented": true,
+      "is_third_party": false,
+      "is_fedramp_authorized": true,
+      "cia_impact": {
+        "C": "Moderate",
+        "I": "Moderate",
+        "A": "Low",
+        "rationale": "Receives the weekly LMS training completion report by email and archives it to the access-controlled Audit S3 bucket. Scope is a single report workflow on a dedicated subdomain; root-domain mail is unaffected. Spoofed or tampered inbound mail could plant misleading audit records, mitigated by DKIM verification and S3 access controls."
+      },
+      "data_source": "SES receipt rule (documented)",
+      "connection_type": "SMTP inbound (MX 10 inbound-smtp.us-east-1.amazonaws.com) \u2192 SES receipt rule \u2192 Audit S3 bucket",
+      "auth_method": "DKIM-verified SES domain identity (3 CNAMEs in public DNS); receipt scoped to the reports subdomain only",
+      "risk": "low",
+      "pii_shared": [
+        "Learner name",
+        "Training completion status"
+      ],
+      "compensating_controls": null,
+      "justification": null,
+      "data_flow": {
+        "classification": "federal-internal",
+        "direction": "Inbound",
+        "data_types": [
+          "Weekly LMS training completion report"
+        ],
+        "omb_a130": "Federal employee training records received via DKIM-verified mail on a dedicated subdomain and archived to the access-controlled Audit S3 bucket"
+      },
+      "system_type": "integration"
+    },
     {
       "id": "skillsoft",
       "name": "Skillsoft Percipio",
@@ -708,7 +756,7 @@
       "rule": "VDR-TFR-NMV",
       "requirement": "Verify and validate the status of non-machine-based information resources at least once every 3 months.",
       "required_interval_days": 90,
-      "evaluated_at": "2026-10-26T18:24:44.357915+00:00",
+      "evaluated_at": "2026-11-12T12:15:05.114777+00:00",
       "human_resources": {
         "status": "unverified",
         "method": "Paylocity HR API \u2014 live employee roster",
@@ -723,42 +771,42 @@
         {
           "process": "Continuous Monitoring (ConMon)",
           "evidence_artifact": "dashboard-data/dashboard_metadata.json",
-          "last_evidence_at": "2026-10-26T06:32:01Z",
+          "last_evidence_at": "2026-11-12T02:04:48Z",
           "age_days": 0,
           "status": "verified"
         },
         {
           "process": "Vulnerability Management",
           "evidence_artifact": "dashboard-data/evaluated_vulnerabilities.json",
-          "last_evidence_at": "2026-10-26T06:31:27.284242+00:00",
+          "last_evidence_at": "2026-11-12T02:04:16.708685+00:00",
           "age_days": 0,
           "status": "verified"
         },
         {
           "process": "Incident Response",
           "evidence_artifact": "unified_ksi_validations.json",
-          "last_evidence_at": "2026-10-26T16:43:32.948784+00:00",
+          "last_evidence_at": "2026-11-12T09:59:40.135653+00:00",
           "age_days": 0,
           "status": "verified"
         },
         {
           "process": "Change Management",
           "evidence_artifact": "scn_automation/scn_history.jsonl",
-          "last_evidence_at": "2026-10-26T18:24:24.824453+00:00",
+          "last_evidence_at": "2026-11-12T12:14:55.710444+00:00",
           "age_days": 0,
           "status": "verified"
         },
         {
           "process": "Access Control and Identity Management",
           "evidence_artifact": "dashboard-data/user_access_analysis.json",
-          "last_evidence_at": "2026-10-26T18:24:24.689274+00:00",
+          "last_evidence_at": "2026-11-12T12:14:55.596529+00:00",
           "age_days": 0,
           "status": "verified"
         },
         {
           "process": "Security Governance",
           "evidence_artifact": "unified_ksi_validations.json",
-          "last_evidence_at": "2026-10-26T16:43:32.948784+00:00",
+          "last_evidence_at": "2026-11-12T09:59:40.135653+00:00",
           "age_days": 0,
           "status": "verified"
         }
@@ -768,32 +816,33 @@
     }
   },
   "aws_services": {
-    "AWS CloudTrail": 0.28,
-    "AWS Config": 0.79,
-    "AWS Cost Explorer": 0.22,
-    "AWS Directory Service": 14.19,
-    "AWS Key Management Service": 1.8,
+    "AWS CloudShell": 0.0,
+    "AWS CloudTrail": 1.13,
+    "AWS Config": 3.32,
+    "AWS Cost Explorer": 0.76,
+    "AWS Directory Service": 55.35,
+    "AWS Key Management Service": 6.65,
     "AWS Lambda": 0.0,
-    "AWS Network Firewall": 94.8,
-    "AWS Secrets Manager": 0.41,
-    "AWS Security Hub": 9.84,
+    "AWS Network Firewall": 360.24,
+    "AWS Secrets Manager": 1.5,
+    "AWS Security Hub": 37.45,
     "AWS Step Functions": 0.0,
-    "AWS Systems Manager": 0.5,
-    "AWS Transfer Family": 36.0,
-    "AWS WAF": 3.54,
-    "Amazon API Gateway": 0.0,
-    "EC2 - Other": 31.9,
-    "Amazon Elastic Compute Cloud - Compute": 190.98,
-    "Amazon Elastic Load Balancing": 13.43,
-    "Amazon FSx": 150.72,
-    "Amazon RDS Optimize CPU License Included Third Party Fees": 79.68,
-    "Amazon Relational Database Service": 56.38,
-    "Amazon Route 53": 0.46,
-    "Amazon Simple Email Service": 0.03,
+    "AWS Systems Manager": 2.14,
+    "AWS Transfer Family": 136.8,
+    "AWS WAF": 13.78,
+    "Amazon API Gateway": 0.01,
+    "EC2 - Other": 118.95,
+    "Amazon Elastic Compute Cloud - Compute": 726.55,
+    "Amazon Elastic Load Balancing": 62.92,
+    "Amazon FSx": 554.33,
+    "Amazon RDS Optimize CPU License Included Third Party Fees": 302.78,
+    "Amazon Relational Database Service": 214.59,
+    "Amazon Route 53": 1.69,
+    "Amazon Simple Email Service": 0.13,
     "Amazon Simple Notification Service": 0.0,
-    "Amazon Simple Storage Service": 2.1,
-    "Amazon Virtual Private Cloud": 18.01,
-    "AmazonCloudWatch": 6.41
+    "Amazon Simple Storage Service": 7.82,
+    "Amazon Virtual Private Cloud": 68.45,
+    "AmazonCloudWatch": 27.7
   },
   "drift_summary": [
     {
@@ -801,7 +850,7 @@
       "type": "zombie_cost",
       "resource_type": "directory_service",
       "severity": "warning",
-      "description": "'AWS Directory Service' billing ($14.19/mo) but 0 resources in us-east-1.",
+      "description": "'AWS Directory Service' billing ($55.35/mo) but 0 resources in us-east-1.",
       "expected": ">0",
       "actual": 0,
       "delta": 1
@@ -811,7 +860,7 @@
       "type": "zombie_cost",
       "resource_type": "transfer",
       "severity": "warning",
-      "description": "'AWS Transfer Family' billing ($36.0/mo) but 0 resources in us-east-1.",
+      "description": "'AWS Transfer Family' billing ($136.8/mo) but 0 resources in us-east-1.",
       "expected": ">0",
       "actual": 0,
       "delta": 1

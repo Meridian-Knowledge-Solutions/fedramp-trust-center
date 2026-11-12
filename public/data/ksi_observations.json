@@ -1,38 +1,21 @@
 {
   "metadata": {
     "schema_version": "1.0.0",
-    "rules_version": "2026.09.13.02",
-    "generated_at": "2026-10-26T21:31:02Z",
+    "rules_version": "2026.10.13.01",
+    "generated_at": "2026-11-12T17:31:56Z",
     "non_gating": true,
     "description": "Statistical observations supporting KSI review. Observations annotate behavioral signals (frequency, breadth, trend); they never change a KSI assertion."
   },
   "summary": {
-    "total": 13,
+    "total": 14,
     "by_tier": {
-      "observe": 2,
-      "finding": 11,
+      "observe": 4,
+      "finding": 10,
       "escalate": 0
     },
     "signals_pending": []
   },
   "observations": [
-    {
-      "signal": "credential_hygiene.aging",
-      "ksi_ids": [
-        "KSI-IAM-AAM"
-      ],
-      "tier": "finding",
-      "statistic": {
-        "iam_users": 1,
-        "console_users": 0,
-        "active_keys_older_than_180d": 0,
-        "active_keys_unused_90d": 1,
-        "console_passwords_unused_90d": 0,
-        "console_users_without_mfa": 0
-      },
-      "detail": "1 active access key(s) unused >90d, 0 older than 180d, 0 console password(s) unused >90d, 0 console user(s) without MFA.",
-      "recommendation": "Deactivate unused credentials; rotate aged keys. Unused active credentials are standing attack surface with no operational purpose."
-    },
     {
       "signal": "ksi_stability.flap_rate",
       "ksi_ids": [
@@ -40,10 +23,10 @@
       ],
       "tier": "finding",
       "statistic": {
-        "failures_in_window": 10,
+        "failures_in_window": 20,
         "window_days": 90
       },
-      "detail": "KSI-PIY-GIV failed 10 times in the last 90 days \u2014 repeated remediation without a durable fix.",
+      "detail": "KSI-PIY-GIV failed 20 times in the last 90 days \u2014 repeated remediation without a durable fix.",
       "recommendation": "Review the remediation cluster for this KSI; a recurring failure usually means the fix addresses the symptom, not the configuration source (e.g. unmanaged drift)."
     },
     {
@@ -53,39 +36,11 @@
       ],
       "tier": "finding",
       "statistic": {
-        "open_hours": 2452.5,
+        "open_hours": 2856.5,
         "family_median_mttr_hours": 76.3,
         "multiplier": 2.0
       },
-      "detail": "KSI-CMT-VTD has been failing for 102.2 days \u2014 more than 2x the KSI-CMT family's median remediation time (76h).",
-      "recommendation": "Treat as a stalled remediation: confirm an owner and a target date, or file a documented risk acceptance."
-    },
-    {
-      "signal": "ksi_stability.stalled_remediation",
-      "ksi_ids": [
-        "KSI-CNA-DFP"
-      ],
-      "tier": "finding",
-      "statistic": {
-        "open_hours": 4029.7,
-        "family_median_mttr_hours": 37.9,
-        "multiplier": 2.0
-      },
-      "detail": "KSI-CNA-DFP has been failing for 167.9 days \u2014 more than 2x the KSI-CNA family's median remediation time (38h).",
-      "recommendation": "Treat as a stalled remediation: confirm an owner and a target date, or file a documented risk acceptance."
-    },
-    {
-      "signal": "ksi_stability.stalled_remediation",
-      "ksi_ids": [
-        "KSI-CNA-IBP"
-      ],
-      "tier": "finding",
-      "statistic": {
-        "open_hours": 2664.4,
-        "family_median_mttr_hours": 37.9,
-        "multiplier": 2.0
-      },
-      "detail": "KSI-CNA-IBP has been failing for 111.0 days \u2014 more than 2x the KSI-CNA family's median remediation time (38h).",
+      "detail": "KSI-CMT-VTD has been failing for 119.0 days \u2014 more than 2x the KSI-CMT family's median remediation time (76h).",
       "recommendation": "Treat as a stalled remediation: confirm an owner and a target date, or file a documented risk acceptance."
     },
     {
@@ -95,11 +50,11 @@
       ],
       "tier": "finding",
       "statistic": {
-        "open_hours": 4029.7,
-        "family_median_mttr_hours": 37.9,
+        "open_hours": 4433.7,
+        "family_median_mttr_hours": 47.4,
         "multiplier": 2.0
       },
-      "detail": "KSI-CNA-MAT has been failing for 167.9 days \u2014 more than 2x the KSI-CNA family's median remediation time (38h).",
+      "detail": "KSI-CNA-MAT has been failing for 184.7 days \u2014 more than 2x the KSI-CNA family's median remediation time (47h).",
       "recommendation": "Treat as a stalled remediation: confirm an owner and a target date, or file a documented risk acceptance."
     },
     {
@@ -109,11 +64,11 @@
       ],
       "tier": "finding",
       "statistic": {
-        "open_hours": 120.9,
-        "family_median_mttr_hours": 37.9,
+        "open_hours": 524.9,
+        "family_median_mttr_hours": 47.4,
         "multiplier": 2.0
       },
-      "detail": "KSI-CNA-RNT has been failing for 5.0 days \u2014 more than 2x the KSI-CNA family's median remediation time (38h).",
+      "detail": "KSI-CNA-RNT has been failing for 21.9 days \u2014 more than 2x the KSI-CNA family's median remediation time (47h).",
       "recommendation": "Treat as a stalled remediation: confirm an owner and a target date, or file a documented risk acceptance."
     },
     {
@@ -123,11 +78,11 @@
       ],
       "tier": "finding",
       "statistic": {
-        "open_hours": 3192.0,
-        "family_median_mttr_hours": 37.9,
+        "open_hours": 3596.0,
+        "family_median_mttr_hours": 47.4,
         "multiplier": 2.0
       },
-      "detail": "KSI-CNA-RVP has been failing for 133.0 days \u2014 more than 2x the KSI-CNA family's median remediation time (38h).",
+      "detail": "KSI-CNA-RVP has been failing for 149.8 days \u2014 more than 2x the KSI-CNA family's median remediation time (47h).",
       "recommendation": "Treat as a stalled remediation: confirm an owner and a target date, or file a documented risk acceptance."
     },
     {
@@ -137,11 +92,39 @@
       ],
       "tier": "finding",
       "statistic": {
-        "open_hours": 811.2,
+        "open_hours": 1215.2,
         "family_median_mttr_hours": 29.2,
         "multiplier": 2.0
       },
-      "detail": "KSI-IAM-AAM has been failing for 33.8 days \u2014 more than 2x the KSI-IAM family's median remediation time (29h).",
+      "detail": "KSI-IAM-AAM has been failing for 50.6 days \u2014 more than 2x the KSI-IAM family's median remediation time (29h).",
+      "recommendation": "Treat as a stalled remediation: confirm an owner and a target date, or file a documented risk acceptance."
+    },
+    {
+      "signal": "ksi_stability.stalled_remediation",
+      "ksi_ids": [
+        "KSI-RPL-ABO"
+      ],
+      "tier": "finding",
+      "statistic": {
+        "open_hours": 144.9,
+        "family_median_mttr_hours": 15.3,
+        "multiplier": 2.0
+      },
+      "detail": "KSI-RPL-ABO has been failing for 6.0 days \u2014 more than 2x the KSI-RPL family's median remediation time (15h).",
+      "recommendation": "Treat as a stalled remediation: confirm an owner and a target date, or file a documented risk acceptance."
+    },
+    {
+      "signal": "ksi_stability.stalled_remediation",
+      "ksi_ids": [
+        "KSI-RPL-TRC"
+      ],
+      "tier": "finding",
+      "statistic": {
+        "open_hours": 144.9,
+        "family_median_mttr_hours": 15.3,
+        "multiplier": 2.0
+      },
+      "detail": "KSI-RPL-TRC has been failing for 6.0 days \u2014 more than 2x the KSI-RPL family's median remediation time (15h).",
       "recommendation": "Treat as a stalled remediation: confirm an owner and a target date, or file a documented risk acceptance."
     },
     {
@@ -151,11 +134,11 @@
       ],
       "tier": "finding",
       "statistic": {
-        "open_hours": 1794.4,
+        "open_hours": 2198.4,
         "family_median_mttr_hours": 52.0,
         "multiplier": 2.0
       },
-      "detail": "KSI-SCR-MON has been failing for 74.8 days \u2014 more than 2x the KSI-SCR family's median remediation time (52h).",
+      "detail": "KSI-SCR-MON has been failing for 91.6 days \u2014 more than 2x the KSI-SCR family's median remediation time (52h).",
       "recommendation": "Treat as a stalled remediation: confirm an owner and a target date, or file a documented risk acceptance."
     },
     {
@@ -165,23 +148,45 @@
       ],
       "tier": "finding",
       "statistic": {
-        "open_hours": 1515.6,
+        "open_hours": 1919.6,
         "family_median_mttr_hours": 32.8,
         "multiplier": 2.0
       },
-      "detail": "KSI-SVC-ASM has been failing for 63.2 days \u2014 more than 2x the KSI-SVC family's median remediation time (33h).",
+      "detail": "KSI-SVC-ASM has been failing for 80.0 days \u2014 more than 2x the KSI-SVC family's median remediation time (33h).",
       "recommendation": "Treat as a stalled remediation: confirm an owner and a target date, or file a documented risk acceptance."
     },
     {
-      "signal": "root_account.dormancy",
+      "signal": "credential_hygiene.unavailable",
       "ksi_ids": [
         "KSI-IAM-AAM"
       ],
       "tier": "observe",
+      "statistic": {},
+      "detail": "Credential report evidence not available this run.",
+      "recommendation": ""
+    },
+    {
+      "signal": "ksi_stability.active_failure",
+      "ksi_ids": [
+        "KSI-MLA-OSM"
+      ],
+      "tier": "observe",
       "statistic": {
-        "root_password_last_used_days": null
+        "open_hours": 0.8
       },
-      "detail": "Root account console password has no recorded use \u2014 dormant, the expected state.",
+      "detail": "KSI-MLA-OSM currently failing for 0.0 days (within normal remediation time for its family).",
+      "recommendation": ""
+    },
+    {
+      "signal": "ksi_stability.active_failure",
+      "ksi_ids": [
+        "KSI-PIY-GIV"
+      ],
+      "tier": "observe",
+      "statistic": {
+        "open_hours": 0.8
+      },
+      "detail": "KSI-PIY-GIV currently failing for 0.0 days (within normal remediation time for its family).",
       "recommendation": ""
     },
     {

@@ -1,9 +1,9 @@
 {
   "metadata": {
     "created_at": "2026-01-17T07:22:37.324152+00:00",
-    "last_updated": "2026-10-26T20:42:53.806599+00:00",
+    "last_updated": "2026-11-12T16:45:57.924485+00:00",
     "schema_version": "1.0.0",
-    "total_runs_processed": 3164,
+    "total_runs_processed": 3277,
     "backfill_complete": true,
     "backfill_since": "all time",
     "backfill_commits": 1256
@@ -17,19 +17,6 @@
       "score": 0,
       "resources_failed": 0,
       "requirement": "Unknown requirement"
-    },
-    "KSI-CNA-DFP": {
-      "ksi_id": "KSI-CNA-DFP",
-      "failed_at": "2026-05-11T23:48:15.169562+00:00",
-      "failed_commit": "7c45425353c738d0b9076222ff2a03bccb244011",
-      "reason": "Insufficient (98%): The functionality and privileges for infrastructure and services are strictly defined. | 82/84 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes, 4 sections).; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs [4 scoped internal-CIDR rule(s); egress restricted].; RBAC Active: 1 role(s); all 1 parsed trust policies scope assumption to specific principals (no open wildcard trust). | Warnings: SG '[resource]' allows all-protocol/all-port traffic from broad internal CIDRs ([internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All)). FedRAMP best practice: scope these to specific ports or use [security-group] references.; SG '[resource]' allows all-protocol/all-port traffic from broad internal CIDRs ([internal-cidr] (-1 All-All)). FedRAMP best practice: scope these to specific ports or use [security-group] references. | Verdict: Score 98% below threshold 100% (82 pass / 0 fail / 1 warning / 0 unverified).",
-      "score": 98,
-      "resources_failed": 1,
-      "requirement": "The functionality and privileges for infrastructure and services are strictly defined.",
-      "score_at_failure": 98,
-      "legacy_ksi_id": [
-        "KSI-CNA-04"
-      ]
     },
     "KSI-CNA-MAT": {
       "ksi_id": "KSI-CNA-MAT",
@@ -56,16 +43,6 @@
       "legacy_ksi_id": [
         "KSI-CNA-05"
       ]
-    },
-    "KSI-CNA-IBP": {
-      "ksi_id": "KSI-CNA-IBP",
-      "failed_at": "2026-07-07T21:07:19.254229+00:00",
-      "failed_commit": "9bc22ff864eb75a0204e6d0aedfc405a11f90d0d",
-      "reason": "Insufficient (95%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 42/44 resources compliant. | Verified: Verified: Active & Compliant; Verified: Asset Active (tags not captured in this evidence; tag governance validated under the inventory KSI). | Warnings: Asset Active but inventory-governance gap: tagged (Name) yet missing required ['[resource]', '[resource]']. Add ownership/environment tags to evidence a governed inventory (FRR-MAS/CNA-IBP).; Asset Active but inventory-governance gap: tagged (Name) yet missing required ['[resource]', '[resource]']. Add ownership/environment tags to evidence a governed inventory (FRR-MAS/CNA-IBP). | Verdict: Score 95% below threshold 100% (42 pass / 0 fail / 2 warning / 0 unverified).",
-      "score": 95,
-      "resources_failed": 2,
-      "requirement": "The use and configuration of third-party machine-based information resources is persistently compared against the original provider's best practices and guidance.",
-      "score_at_failure": 95
     },
     "KSI-CMT-VTD": {
       "ksi_id": "KSI-CMT-VTD",
@@ -116,6 +93,46 @@
       "resources_failed": 1,
       "requirement": "Machine-based information resources are persistently reviewed to ensure they are appropriately configured to limit inbound and outbound network traffic.",
       "score_at_failure": 85
+    },
+    "KSI-RPL-ABO": {
+      "ksi_id": "KSI-RPL-ABO",
+      "failed_at": "2026-11-06T16:39:49.320641+00:00",
+      "failed_commit": "e9aed46a2fa044ed6d60c17b5606272037a29674",
+      "reason": "Insufficient (33%): The alignment of machine-based information resource backups with defined recovery objectives is persistently reviewed. | 1/3 resources compliant. | Verified: Verified: Governance artifact '[resource]' contains 46 structured entries (8348 bytes). | Warnings: No backup/restore/snapshot data in evaluation window.; No backup/restore/snapshot data in evaluation window. | Verdict: Operational metric(s) below target: backup_metrics",
+      "score": 33,
+      "resources_failed": 2,
+      "requirement": "The alignment of machine-based information resource backups with defined recovery objectives is persistently reviewed.",
+      "score_at_failure": 33
+    },
+    "KSI-RPL-TRC": {
+      "ksi_id": "KSI-RPL-TRC",
+      "failed_at": "2026-11-06T16:39:49.320641+00:00",
+      "failed_commit": "e9aed46a2fa044ed6d60c17b5606272037a29674",
+      "reason": "Insufficient (33%): The capability to recover from incidents and contingencies aligned with defined recovery objectives is persistently t... | 1/3 resources compliant. | Verified: Verified: Governance artifact '[resource]' contains 46 structured entries (8348 bytes). | Warnings: No backup/restore/snapshot data in evaluation window.; No backup/restore/snapshot data in evaluation window. | Verdict: Operational metric(s) below target: backup_metrics",
+      "score": 33,
+      "resources_failed": 2,
+      "requirement": "The capability to recover from incidents and contingencies aligned with defined recovery objectives is persistently tested.",
+      "score_at_failure": 33
+    },
+    "KSI-MLA-OSM": {
+      "ksi_id": "KSI-MLA-OSM",
+      "failed_at": "2026-11-12T16:45:57.462276+00:00",
+      "failed_commit": "5785a3b2f9d930bcee0b7ec439426898b175c5f5",
+      "reason": "Insufficient (100%): A Security Information and Event Management (SIEM) or similar system(s) is used and persistently reviewed for central... | 3/5 resources compliant, 2 unverified. | Verified: Trail is Secure (Multi-Region, Validated, KMS-Encrypted, Global Events) [organization trail; CloudWatch Logs integrated \u2192 arn:aws:[redacted]; delivery role arn:aws:[redacted]; Trail logging rate 100% (1/1 trails actively logging).; S3 access-logging rate 100% (11 buckets covered). | Verdict: Required operational metric(s) not measured this run: alb_access_log_metrics (collector error: Command timeout (30s exceeded))",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "A Security Information and Event Management (SIEM) or similar system(s) is used and persistently reviewed for centralized, tamper-resistant logging of events, activities, and changes.",
+      "score_at_failure": 100
+    },
+    "KSI-PIY-GIV": {
+      "ksi_id": "KSI-PIY-GIV",
+      "failed_at": "2026-11-12T16:45:57.462276+00:00",
+      "failed_commit": "5785a3b2f9d930bcee0b7ec439426898b175c5f5",
+      "reason": "Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording all supported resource types.; SSM inventory: 1 managed instance(s) reporting OS/software data. | Verdict: Required operational metric(s) not measured this run: inventory_metrics (collector error: Command timeout (30s exceeded))",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "Authoritative sources are used to automatically generate real-time inventories of all information resources when needed.",
+      "score_at_failure": 100
     }
   },
   "failure_history": [
@@ -7140,6 +7157,152 @@
       "remediated_at": "2026-10-25T00:58:11.146726+00:00",
       "remediation_commit": "e9e5c2374a44b21d4a6b512043a8f4de6819a653",
       "duration_hours": 4.3
+    },
+    {
+      "ksi_id": "KSI-PIY-GIV",
+      "failed_at": "2026-10-29T12:33:27.486719+00:00",
+      "failed_commit": "afd8901aecc57d7f1baf5edd6f9c5ba689d53e9f",
+      "reason": "Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording all supported resource types.; SSM inventory: 1 managed instance(s) reporting OS/software data. | Verdict: Required operational metric(s) not measured this run: inventory_metrics (collector error: aws: [ERROR]: An error occurred (ThrottlingException) when calling the GetDiscoveredResourceCounts operation (reached max retries: 2): Rate exceeded)",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "Authoritative sources are used to automatically generate real-time inventories of all information resources when needed.",
+      "score_at_failure": 100,
+      "remediated_at": "2026-10-29T16:38:08.305157+00:00",
+      "remediation_commit": "aa9287c844313af4a0845b3a06f53cb7d8cc90ee",
+      "duration_hours": 4.08
+    },
+    {
+      "ksi_id": "KSI-PIY-GIV",
+      "failed_at": "2026-10-31T12:35:24.565839+00:00",
+      "failed_commit": "c30b83cbf6ebbb56e0c66acc90b20f123b4907e4",
+      "reason": "Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording all supported resource types.; SSM inventory: 1 managed instance(s) reporting OS/software data. | Verdict: Required operational metric(s) not measured this run: inventory_metrics (collector error: aws: [ERROR]: An error occurred (ThrottlingException) when calling the GetDiscoveredResourceCounts operation (reached max retries: 2): Rate exceeded)",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "Authoritative sources are used to automatically generate real-time inventories of all information resources when needed.",
+      "score_at_failure": 100,
+      "remediated_at": "2026-10-31T16:28:02.433810+00:00",
+      "remediation_commit": "ffc5c4112834a24a165f3b8f55a7c131cdd1a98d",
+      "duration_hours": 3.88
+    },
+    {
+      "ksi_id": "KSI-PIY-GIV",
+      "failed_at": "2026-11-01T12:33:14.593640+00:00",
+      "failed_commit": "3d8b6ecbea7bddae938d5a4fadcdc5e37d2810eb",
+      "reason": "Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording all supported resource types.; SSM inventory: 1 managed instance(s) reporting OS/software data. | Verdict: Required operational metric(s) not measured this run: inventory_metrics (collector error: aws: [ERROR]: An error occurred (ThrottlingException) when calling the GetDiscoveredResourceCounts operation (reached max retries: 2): Rate exceeded)",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "Authoritative sources are used to automatically generate real-time inventories of all information resources when needed.",
+      "score_at_failure": 100,
+      "remediated_at": "2026-11-01T16:38:20.172993+00:00",
+      "remediation_commit": "f8a73dac6c3cacd963b8e9c3a9b856e1d3321da6",
+      "duration_hours": 4.08
+    },
+    {
+      "ksi_id": "KSI-PIY-GIV",
+      "failed_at": "2026-11-01T20:37:44.724339+00:00",
+      "failed_commit": "1150dca7498ca8bd870843580c231c529b127f72",
+      "reason": "Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording all supported resource types.; SSM inventory: 1 managed instance(s) reporting OS/software data. | Verdict: Required operational metric(s) not measured this run: inventory_metrics (collector error: aws: [ERROR]: An error occurred (ThrottlingException) when calling the GetDiscoveredResourceCounts operation (reached max retries: 2): Rate exceeded)",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "Authoritative sources are used to automatically generate real-time inventories of all information resources when needed.",
+      "score_at_failure": 100,
+      "remediated_at": "2026-11-02T00:50:12.242445+00:00",
+      "remediation_commit": "9fe2726b97472e88736c82ba887f87dd2bb2ac06",
+      "duration_hours": 4.21
+    },
+    {
+      "ksi_id": "KSI-PIY-GIV",
+      "failed_at": "2026-11-02T02:21:36.769125+00:00",
+      "failed_commit": "b28fdce6c1c028e848640ba4a66cbf912dc90666",
+      "reason": "Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording all supported resource types.; SSM inventory: 1 managed instance(s) reporting OS/software data. | Verdict: Required operational metric(s) not measured this run: inventory_metrics (collector error: aws: [ERROR]: An error occurred (ThrottlingException) when calling the GetDiscoveredResourceCounts operation (reached max retries: 2): Rate exceeded)",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "Authoritative sources are used to automatically generate real-time inventories of all information resources when needed.",
+      "score_at_failure": 100,
+      "remediated_at": "2026-11-02T09:42:28.980436+00:00",
+      "remediation_commit": "88fee53f83b1206fac9b29ad39c1e4b18ad05653",
+      "duration_hours": 7.35
+    },
+    {
+      "ksi_id": "KSI-CNA-IBP",
+      "failed_at": "2026-07-07T21:07:19.254229+00:00",
+      "failed_commit": "9bc22ff864eb75a0204e6d0aedfc405a11f90d0d",
+      "reason": "Insufficient (95%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 42/44 resources compliant. | Verified: Verified: Active & Compliant; Verified: Asset Active (tags not captured in this evidence; tag governance validated under the inventory KSI). | Warnings: Asset Active but inventory-governance gap: tagged (Name) yet missing required ['[resource]', '[resource]']. Add ownership/environment tags to evidence a governed inventory (FRR-MAS/CNA-IBP).; Asset Active but inventory-governance gap: tagged (Name) yet missing required ['[resource]', '[resource]']. Add ownership/environment tags to evidence a governed inventory (FRR-MAS/CNA-IBP). | Verdict: Score 95% below threshold 100% (42 pass / 0 fail / 2 warning / 0 unverified).",
+      "score": 95,
+      "resources_failed": 2,
+      "requirement": "The use and configuration of third-party machine-based information resources is persistently compared against the original provider's best practices and guidance.",
+      "score_at_failure": 95,
+      "remediated_at": "2026-11-02T17:33:34.063387+00:00",
+      "remediation_commit": "4084fb8b85eb9596c2f2a216656d14b4528faf25",
+      "duration_hours": 2828.44
+    },
+    {
+      "ksi_id": "KSI-PIY-GIV",
+      "failed_at": "2026-11-02T12:42:39.269329+00:00",
+      "failed_commit": "14b68044acdd70996b312c2d28909d6f2e1a0a32",
+      "reason": "Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording all supported resource types.; SSM inventory: 1 managed instance(s) reporting OS/software data. | Verdict: Required operational metric(s) not measured this run: inventory_metrics (collector error: aws: [ERROR]: An error occurred (ThrottlingException) when calling the GetDiscoveredResourceCounts operation (reached max retries: 2): Rate exceeded)",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "Authoritative sources are used to automatically generate real-time inventories of all information resources when needed.",
+      "score_at_failure": 100,
+      "remediated_at": "2026-11-02T17:33:34.063387+00:00",
+      "remediation_commit": "4084fb8b85eb9596c2f2a216656d14b4528faf25",
+      "duration_hours": 4.85
+    },
+    {
+      "ksi_id": "KSI-PIY-GIV",
+      "failed_at": "2026-11-09T16:33:19.976940+00:00",
+      "failed_commit": "e48837a09d1c5a4dc16524ea5f6964d6a2811c17",
+      "reason": "Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording all supported resource types.; SSM inventory: 1 managed instance(s) reporting OS/software data. | Verdict: Required operational metric(s) not measured this run: inventory_metrics (collector error: aws: [ERROR]: An error occurred (ThrottlingException) when calling the GetDiscoveredResourceCounts operation (reached max retries: 2): Rate exceeded)",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "Authoritative sources are used to automatically generate real-time inventories of all information resources when needed.",
+      "score_at_failure": 100,
+      "remediated_at": "2026-11-09T20:35:28.856101+00:00",
+      "remediation_commit": "5dc8a9658a7c6ce2fbb6525f9eb9b4822afa0e2c",
+      "duration_hours": 4.04
+    },
+    {
+      "ksi_id": "KSI-PIY-GIV",
+      "failed_at": "2026-11-10T20:34:32.895446+00:00",
+      "failed_commit": "fee069ffc13b513af516c7f09716c524da029a0a",
+      "reason": "Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording all supported resource types.; SSM inventory: 1 managed instance(s) reporting OS/software data. | Verdict: Required operational metric(s) not measured this run: inventory_metrics (collector error: aws: [ERROR]: An error occurred (ThrottlingException) when calling the GetDiscoveredResourceCounts operation (reached max retries: 2): Rate exceeded)",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "Authoritative sources are used to automatically generate real-time inventories of all information resources when needed.",
+      "score_at_failure": 100,
+      "remediated_at": "2026-11-11T00:48:10.004586+00:00",
+      "remediation_commit": "c1a49877386048011854c3f6c2131ab8c8c72066",
+      "duration_hours": 4.23
+    },
+    {
+      "ksi_id": "KSI-PIY-GIV",
+      "failed_at": "2026-11-12T02:19:44.619303+00:00",
+      "failed_commit": "76f5f47f4440ccc0ad9be088ff91ff07b51abd70",
+      "reason": "Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording all supported resource types.; SSM inventory: 1 managed instance(s) reporting OS/software data. | Verdict: Required operational metric(s) not measured this run: inventory_metrics (collector error: aws: [ERROR]: An error occurred (ThrottlingException) when calling the GetDiscoveredResourceCounts operation (reached max retries: 2): Rate exceeded)",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "Authoritative sources are used to automatically generate real-time inventories of all information resources when needed.",
+      "score_at_failure": 100,
+      "remediated_at": "2026-11-12T04:42:57.842729+00:00",
+      "remediation_commit": "e4bb5d21d0b3dfb4dc657b72ed910deab942bce2",
+      "duration_hours": 2.39
+    },
+    {
+      "ksi_id": "KSI-CNA-DFP",
+      "failed_at": "2026-05-11T23:48:15.169562+00:00",
+      "failed_commit": "7c45425353c738d0b9076222ff2a03bccb244011",
+      "reason": "Insufficient (98%): The functionality and privileges for infrastructure and services are strictly defined. | 82/84 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes, 4 sections).; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs [4 scoped internal-CIDR rule(s); egress restricted].; RBAC Active: 1 role(s); all 1 parsed trust policies scope assumption to specific principals (no open wildcard trust). | Warnings: SG '[resource]' allows all-protocol/all-port traffic from broad internal CIDRs ([internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All)). FedRAMP best practice: scope these to specific ports or use [security-group] references.; SG '[resource]' allows all-protocol/all-port traffic from broad internal CIDRs ([internal-cidr] (-1 All-All)). FedRAMP best practice: scope these to specific ports or use [security-group] references. | Verdict: Score 98% below threshold 100% (82 pass / 0 fail / 1 warning / 0 unverified).",
+      "score": 98,
+      "resources_failed": 1,
+      "requirement": "The functionality and privileges for infrastructure and services are strictly defined.",
+      "score_at_failure": 98,
+      "legacy_ksi_id": [
+        "KSI-CNA-04"
+      ],
+      "remediated_at": "2026-11-12T16:45:57.462276+00:00",
+      "remediation_commit": "5785a3b2f9d930bcee0b7ec439426898b175c5f5",
+      "duration_hours": 4432.96
     }
   ],
   "ksi_stats": {
@@ -7151,10 +7314,10 @@
     },
     "KSI-CNA-DFP": {
       "total_failures": 14,
-      "total_remediations": 0,
-      "mttr_hours": 18.63,
+      "total_remediations": 1,
+      "mttr_hours": 358.2,
       "last_failure": "2026-07-06T17:51:14.723954+00:00",
-      "longest_outage_hours": 81.05,
+      "longest_outage_hours": 4432.96,
       "shortest_outage_hours": 0.19,
       "legacy_ksi_id": [
         "KSI-CNA-04"
@@ -7205,10 +7368,10 @@
       ]
     },
     "KSI-MLA-OSM": {
-      "total_failures": 14,
+      "total_failures": 15,
       "total_remediations": 1,
       "mttr_hours": 239.74,
-      "last_failure": "2026-07-06T17:51:14.723954+00:00",
+      "last_failure": "2026-11-12T16:45:57.462276+00:00",
       "longest_outage_hours": 2687.63,
       "shortest_outage_hours": 0.29,
       "legacy_ksi_id": [
@@ -7239,10 +7402,10 @@
     },
     "KSI-CNA-IBP": {
       "total_failures": 10,
-      "total_remediations": 0,
-      "mttr_hours": 70.98,
+      "total_remediations": 1,
+      "mttr_hours": 346.73,
       "last_failure": "2026-07-07T21:07:19.254229+00:00",
-      "longest_outage_hours": 326.93,
+      "longest_outage_hours": 2828.44,
       "shortest_outage_hours": 1.12,
       "legacy_ksi_id": [
         "KSI-CNA-07"
@@ -7304,10 +7467,10 @@
       ]
     },
     "KSI-PIY-GIV": {
-      "total_failures": 23,
-      "total_remediations": 23,
-      "mttr_hours": 10.99,
-      "last_failure": "2026-10-24T02:18:02.053654+00:00",
+      "total_failures": 33,
+      "total_remediations": 32,
+      "mttr_hours": 9.12,
+      "last_failure": "2026-11-12T16:45:57.462276+00:00",
       "longest_outage_hours": 70.21,
       "shortest_outage_hours": 0.42,
       "legacy_ksi_id": [
@@ -7480,10 +7643,10 @@
       ]
     },
     "KSI-RPL-TRC": {
-      "total_failures": 17,
+      "total_failures": 18,
       "total_remediations": 17,
       "mttr_hours": 16.44,
-      "last_failure": "2026-06-15T21:32:05.248293+00:00",
+      "last_failure": "2026-11-06T16:39:49.320641+00:00",
       "longest_outage_hours": 178.22,
       "shortest_outage_hours": 0.19,
       "legacy_ksi_id": [
@@ -7557,10 +7720,10 @@
       ]
     },
     "KSI-RPL-ABO": {
-      "total_failures": 19,
+      "total_failures": 20,
       "total_remediations": 19,
       "mttr_hours": 14.12,
-      "last_failure": "2026-06-15T21:32:05.248293+00:00",
+      "last_failure": "2026-11-06T16:39:49.320641+00:00",
       "longest_outage_hours": 178.22,
       "shortest_outage_hours": 0.29,
       "legacy_ksi_id": [

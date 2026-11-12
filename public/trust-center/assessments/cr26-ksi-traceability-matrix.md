@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-10-26T14:10:29.044082+00:00 (37 pass / 9 fail of 46)  
-**Generated:** 2026-10-26 15:07 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-11-12T12:31:21.617204+00:00 (36 pass / 10 fail of 46)  
+**Generated:** 2026-11-12 13:00 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -109,7 +109,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-04
 - **NIST 800-53 controls:** cm-2, si-3
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (98%): The functionality and privileges for infrastructure and services are strictly defined. | 93/95 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes,…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (98%): The functionality and privileges for infrastructure and services are strictly defined. | 94/96 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes,…
 - **Measures (validation objectives):**
   - IMMUTABILITY: Validate the documented immutable-infrastructure methodology — all production changes via version-controlled Terraform (state in S3 with versioning + DynamoDB state locking, PR-reviewed plan/apply, change tracked in git history). The Terraform state itself lives in the mks-states bucket in a SEPARATE AWS account (cross-account, not readable by the validation role); the immutable-IaC methodology is evidenced as code in governance/. [Policy-as-code home: governance/ in this git repository; validated via GitHub contents API.]
   - FUNCTIONALITY: Check for Security Groups allowing 'All Traffic' (-1). Absence of these proves strictly defined network functionality.
@@ -140,7 +140,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-07
 - **NIST 800-53 controls:** ac-17.3, cm-2, pl-10
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (97%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 43/44 resources compliant. | Verified: Verified: Active & Compliant; Verifi…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 44/44 resources compliant. | Verified: Verified: Active & Compliant; Verified…
 - **Measures (validation objectives):**
   - BASELINE: Measure legacy compute footprint (Denominator) to compare against managed service adoption.
   - ACCELERATOR: Validate adoption of serverless compute (High Impact).
@@ -238,7 +238,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-IAM-07
 - **NIST 800-53 controls:** ac-2.2, ac-2.3, ac-2.13, ac-6.7, ia-4.4, ia-12, ia-12.2, ia-12.3, ia-12.5
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (0%): The lifecycle and privileges of all accounts, roles, and groups are securely managed using automation. | 0/2 resources compliant, 1 unverified. | Failures: IAM credential report (2 users): 1 access k…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (0%): The lifecycle and privileges of all accounts, roles, and groups are securely managed using automation. | 0/2 resources compliant, 2 unverified. | Verdict: No verified evidence: 2 unverified, 0 accept…
 - **Measures (validation objectives):**
   - PRIMARY: Retrieve the full Credential Report to analyze password and key rotation ages.
   - AUDIT: Identify potential 'Zombie Roles' that are older than a specific threshold (adjust date as needed).
@@ -305,7 +305,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-IAM-03
 - **NIST 800-53 controls:** ac-2, ac-2.2, ac-4, ac-6.5, ia-3, ia-5.2, ra-5.5
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Appropriately secure authentication methods are used and persistently reviewed for non-user accounts and services. | 91/93 resources compliant, 1 unverified. | Verified: RBAC Active: 1 role(s); all 1 …
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Appropriately secure authentication methods are used and persistently reviewed for non-user accounts and services. | 92/94 resources compliant, 1 unverified. | Verified: RBAC Active: 1 role(s); all 1 …
 - **Measures (validation objectives):**
   - Validate Trust Policies for CUSTOMER managed roles only.
   - Validate Service Accounts (Bots) that do not have console access (should rely on keys/roles).
@@ -382,7 +382,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-MLA-08
 - **NIST 800-53 controls:** si-11
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): A least-privileged, role and attribute-based, and just-in-time access authorization model is used and persistently re... | 13/13 resources compliant. | Verified: Audit/compliance bucket present: '[res…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): A least-privileged, role and attribute-based, and just-in-time access authorization model is used and persistently re... | 14/14 resources compliant. | Verified: Audit/compliance bucket present: '[res…
 - **Measures (validation objectives):**
   - VAULT: Validate existence of compliance/security buckets.
   - LOCK: Validate existence of encryption keys.
@@ -398,7 +398,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-MLA-05
 - **NIST 800-53 controls:** ca-7, cm-2, cm-6, si-7.7
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources, especially infrastructure as code, is persistently evaluate... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 142 resource(s):…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources, especially infrastructure as code, is persistently evaluate... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 147 resource(s):…
 - **Measures (validation objectives):**
   - EVALUATION/TESTING: Validate the live Checkov IaC scan summary — Checkov (policy-as-code static analysis) scans the Terraform in meridian-aws-resources every run and records resources scanned + checks passed/failed. This is direct proof that infrastructure-as-code configuration is persistently evaluated and tested. Regenerated each run by the IaC Checkov Scan workflow. [Live artifact home: dashboard-data/ in this git repository; validated via GitHub contents API.]
   - PROCESS: Validate the SDLC policy mandating IaC review and automated security testing (SAST/DAST/CI-CD gates), the documented basis for persistently evaluating and testing infrastructure configuration. [Policy-as-code home: governance/ in this git repository; validated via GitHub contents API.]
@@ -538,7 +538,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-RPL-03
 - **NIST 800-53 controls:** cm-2.3, cp-6, cp-9, cp-10, cp-10.2, si-12
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: backup_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The alignment of machine-based information resource backups with defined recovery objectives is persistently reviewed. | 3/3 resources compliant. | Verified: Restore success rate 100% (3 restore jobs)…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (33%): The alignment of machine-based information resource backups with defined recovery objectives is persistently reviewed. | 1/3 resources compliant. | Verified: Verified: Governance artifact '[resource…
 - **Measures (validation objectives):**
   - TECHNICAL: Validate that Restore Jobs have been successfully executed (Proof of Testing).
   - Governance document inventory: governance/manifest.json (machine-readable; path, size, sha256 per document; regenerated by the migration workflow). Replaces CodeCommit get-folder listing. DR test report artifacts inventoried in manifest; restore success rate is the primary Mode 2 evidence.
@@ -582,7 +582,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-RPL-04
 - **NIST 800-53 controls:** cp-2.1, cp-2.3, cp-4, cp-4.1, cp-6, cp-6.1, cp-9.1, cp-10, ir-3, ir-3.2
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: backup_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The capability to recover from incidents and contingencies aligned with defined recovery objectives is persistently t... | 3/3 resources compliant. | Verified: Verified: Governance artifact '[resource…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (33%): The capability to recover from incidents and contingencies aligned with defined recovery objectives is persistently t... | 1/3 resources compliant. | Verified: Verified: Governance artifact '[resour…
 - **Measures (validation objectives):**
   - Governance document inventory: governance/manifest.json (machine-readable; path, size, sha256 per document; regenerated by the migration workflow). Replaces CodeCommit get-folder listing. IR/DR exercise artifacts inventoried in manifest; cross-region restore jobs are the primary Mode 2 evidence.
   - TECHNICAL: Validate that Restore Jobs have been executed (Proof of recovery capability).
@@ -636,7 +636,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-04
 - **NIST 800-53 controls:** ac-2.4, cm-2, cm-2.2, cm-2.3, cm-6, cm-7.1, pl-9, pl-10, sa-5, si-5, sr-10
 - **Evaluation policy:** mode `capability`, pass threshold 80%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources is managed using automation and persistently reviewed for dr... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 142 resource(s):…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The configuration of machine-based information resources is managed using automation and persistently reviewed for dr... | 2/2 resources compliant. | Verified: Checkov IaC scan ran on 147 resource(s):…
 - **Measures (validation objectives):**
   - IAC AUTOMATION: Validate the live policy-as-code (Checkov) scan summary — proof that infrastructure is Terraform-managed and continuously scanned for configuration drift. [The Terraform state backend lives in the cross-account mks-states S3 bucket, not visible to list-buckets in the validation account; the proof of automation is the IaC + its policy gate, validated git-natively via the GitHub contents API.]
   - GOVERNANCE: Validate the Configuration Management Policy document. [Policy-as-code home: governance/ in this git repository — machine-readable markdown, change requires a commit; validated via GitHub contents API.]
@@ -650,7 +650,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-06
 - **NIST 800-53 controls:** ac-17.2, ia-5.2, ia-5.6, sc-12, sc-17
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: kms_rotation_metrics, cert_expiry_metrics, secret_rotation_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (66%): Management, protection, and regular rotation of digital keys, certificates, and other secrets is automated and persis... | 6/26 resources compliant, 10 unverified. | Verified: Secret '[resource]' ha…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (70%): Management, protection, and regular rotation of digital keys, certificates, and other secrets is automated and persis... | 7/27 resources compliant, 10 unverified. | Verified: Secret '[resource]' ha…
 - **Measures (validation objectives):**
   - KEYS: Validate existence of KMS Customer Managed Keys (CMKs) for centralized management.
   - ROTATION: Validate Secrets Manager entries (Look for 'RotationEnabled': true in the output).
@@ -714,7 +714,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-02
 - **NIST 800-53 controls:** ac-1, ac-17.2, cp-9.8, sc-8, sc-8.1, sc-13, sc-20, sc-21, sc-22, sc-23, sc-28, sc-28.1
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: tls_listener_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information is encrypted or otherwise secured from unwanted access or modification. | 8/8 resources compliant. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; Load balancer '[resource…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Information is encrypted or otherwise secured from unwanted access or modification. | 10/10 resources compliant. | Verified: ACM certificate for '*.[internal-domain]' (ISSUED).; ACM certificate for '[…
 - **Measures (validation objectives):**
   - KEYS: Validate existence of active, issued TLS certificates.
   - GATEKEEPERS: per-load-balancer TLS enforcement. Correlates each LB with its listeners so every LB row is evaluable (_eval_lb_tls: FAIL on any non-TLS listener, unverified when dormant). Replaces the bare name/scheme rows that fell to the 'no evaluator mapped' unverified fallback - 4 of SVC-SIN's 5 unverified rows. Aggregate TLS rate is still measured by tls_listener_metrics; this adds per-resource depth. Wording here deliberately avoids evaluator note-routing keywords.
@@ -731,7 +731,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-09
 - **NIST 800-53 controls:** sc-23, si-7.1
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The authenticity and integrity of communications between machine-based information resources is persistently validate... | 10/14 resources compliant, 4 unverified. | Verified: Listener 'arn:aws:[redac…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The authenticity and integrity of communications between machine-based information resources is persistently validate... | 11/15 resources compliant, 4 unverified. | Verified: Listener 'arn:aws:[redac…
 - **Measures (validation objectives):**
   - ENFORCERS: Identify active Load Balancers handling traffic.
   - VALIDATION: Verify that listeners are enforcing HTTPS/TLS with specific SSL Policies (authenticity/integrity checks).
