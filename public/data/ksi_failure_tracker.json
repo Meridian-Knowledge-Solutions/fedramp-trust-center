@@ -1,9 +1,9 @@
 {
   "metadata": {
     "created_at": "2026-01-17T07:22:37.324152+00:00",
-    "last_updated": "2026-11-12T16:45:57.924485+00:00",
+    "last_updated": "2026-11-12T20:33:50.399148+00:00",
     "schema_version": "1.0.0",
-    "total_runs_processed": 3277,
+    "total_runs_processed": 3278,
     "backfill_complete": true,
     "backfill_since": "all time",
     "backfill_commits": 1256
@@ -114,25 +114,15 @@
       "requirement": "The capability to recover from incidents and contingencies aligned with defined recovery objectives is persistently tested.",
       "score_at_failure": 33
     },
-    "KSI-MLA-OSM": {
-      "ksi_id": "KSI-MLA-OSM",
-      "failed_at": "2026-11-12T16:45:57.462276+00:00",
-      "failed_commit": "5785a3b2f9d930bcee0b7ec439426898b175c5f5",
-      "reason": "Insufficient (100%): A Security Information and Event Management (SIEM) or similar system(s) is used and persistently reviewed for central... | 3/5 resources compliant, 2 unverified. | Verified: Trail is Secure (Multi-Region, Validated, KMS-Encrypted, Global Events) [organization trail; CloudWatch Logs integrated \u2192 arn:aws:[redacted]; delivery role arn:aws:[redacted]; Trail logging rate 100% (1/1 trails actively logging).; S3 access-logging rate 100% (11 buckets covered). | Verdict: Required operational metric(s) not measured this run: alb_access_log_metrics (collector error: Command timeout (30s exceeded))",
-      "score": 100,
-      "resources_failed": 0,
-      "requirement": "A Security Information and Event Management (SIEM) or similar system(s) is used and persistently reviewed for centralized, tamper-resistant logging of events, activities, and changes.",
-      "score_at_failure": 100
-    },
-    "KSI-PIY-GIV": {
-      "ksi_id": "KSI-PIY-GIV",
-      "failed_at": "2026-11-12T16:45:57.462276+00:00",
-      "failed_commit": "5785a3b2f9d930bcee0b7ec439426898b175c5f5",
-      "reason": "Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording all supported resource types.; SSM inventory: 1 managed instance(s) reporting OS/software data. | Verdict: Required operational metric(s) not measured this run: inventory_metrics (collector error: Command timeout (30s exceeded))",
-      "score": 100,
-      "resources_failed": 0,
-      "requirement": "Authoritative sources are used to automatically generate real-time inventories of all information resources when needed.",
-      "score_at_failure": 100
+    "KSI-CNA-DFP": {
+      "ksi_id": "KSI-CNA-DFP",
+      "failed_at": "2026-11-12T20:33:49.936264+00:00",
+      "failed_commit": "8c1b456f3a97551bebc380d92349babd1a42d7d3",
+      "reason": "Insufficient (98%): The functionality and privileges for infrastructure and services are strictly defined. | 94/96 resources compliant. | Verified: Verified: Governance document '[resource]' is substantive (1070 bytes, 4 sections).; SG '[resource]' properly limits traffic \u2014 no world exposure, no broad CIDRs [4 scoped internal-CIDR rule(s); egress restricted].; RBAC Active: 1 role(s); all 1 parsed trust policies scope assumption to specific principals (no open wildcard trust). | Warnings: SG '[resource]' allows all-protocol/all-port traffic from broad internal CIDRs ([internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All), [internal-cidr] (-1 All-All)). FedRAMP best practice: scope these to specific ports or use [security-group] references.; SG '[resource]' allows all-protocol/all-port traffic from broad internal CIDRs ([internal-cidr] ([protocol-ports]), [internal-cidr] (-1 All-All)). FedRAMP best practice: scope these to specific ports or use [security-group] references. | Verdict: Score 98% below threshold 100% (94 pass / 0 fail / 1 warning / 0 unverified). The shortfall is 1 WARNING finding(s) with no FAILs: WARNING is a verified not-clean result and counts against the 100% threshold exactly as a FAIL does.",
+      "score": 98,
+      "resources_failed": 1,
+      "requirement": "The functionality and privileges for infrastructure and services are strictly defined.",
+      "score_at_failure": 98
     }
   },
   "failure_history": [
@@ -7303,6 +7293,32 @@
       "remediated_at": "2026-11-12T16:45:57.462276+00:00",
       "remediation_commit": "5785a3b2f9d930bcee0b7ec439426898b175c5f5",
       "duration_hours": 4432.96
+    },
+    {
+      "ksi_id": "KSI-MLA-OSM",
+      "failed_at": "2026-11-12T16:45:57.462276+00:00",
+      "failed_commit": "5785a3b2f9d930bcee0b7ec439426898b175c5f5",
+      "reason": "Insufficient (100%): A Security Information and Event Management (SIEM) or similar system(s) is used and persistently reviewed for central... | 3/5 resources compliant, 2 unverified. | Verified: Trail is Secure (Multi-Region, Validated, KMS-Encrypted, Global Events) [organization trail; CloudWatch Logs integrated \u2192 arn:aws:[redacted]; delivery role arn:aws:[redacted]; Trail logging rate 100% (1/1 trails actively logging).; S3 access-logging rate 100% (11 buckets covered). | Verdict: Required operational metric(s) not measured this run: alb_access_log_metrics (collector error: Command timeout (30s exceeded))",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "A Security Information and Event Management (SIEM) or similar system(s) is used and persistently reviewed for centralized, tamper-resistant logging of events, activities, and changes.",
+      "score_at_failure": 100,
+      "remediated_at": "2026-11-12T20:33:49.936264+00:00",
+      "remediation_commit": "8c1b456f3a97551bebc380d92349babd1a42d7d3",
+      "duration_hours": 3.8
+    },
+    {
+      "ksi_id": "KSI-PIY-GIV",
+      "failed_at": "2026-11-12T16:45:57.462276+00:00",
+      "failed_commit": "5785a3b2f9d930bcee0b7ec439426898b175c5f5",
+      "reason": "Insufficient (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 156/157 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording all supported resource types.; SSM inventory: 1 managed instance(s) reporting OS/software data. | Verdict: Required operational metric(s) not measured this run: inventory_metrics (collector error: Command timeout (30s exceeded))",
+      "score": 100,
+      "resources_failed": 0,
+      "requirement": "Authoritative sources are used to automatically generate real-time inventories of all information resources when needed.",
+      "score_at_failure": 100,
+      "remediated_at": "2026-11-12T20:33:49.936264+00:00",
+      "remediation_commit": "8c1b456f3a97551bebc380d92349babd1a42d7d3",
+      "duration_hours": 3.8
     }
   ],
   "ksi_stats": {
@@ -7313,10 +7329,10 @@
       "last_failure": "2025-06-06T03:48:06.017208Z"
     },
     "KSI-CNA-DFP": {
-      "total_failures": 14,
+      "total_failures": 15,
       "total_remediations": 1,
       "mttr_hours": 358.2,
-      "last_failure": "2026-07-06T17:51:14.723954+00:00",
+      "last_failure": "2026-11-12T20:33:49.936264+00:00",
       "longest_outage_hours": 4432.96,
       "shortest_outage_hours": 0.19,
       "legacy_ksi_id": [
@@ -7369,8 +7385,8 @@
     },
     "KSI-MLA-OSM": {
       "total_failures": 15,
-      "total_remediations": 1,
-      "mttr_hours": 239.74,
+      "total_remediations": 2,
+      "mttr_hours": 222.89,
       "last_failure": "2026-11-12T16:45:57.462276+00:00",
       "longest_outage_hours": 2687.63,
       "shortest_outage_hours": 0.29,
@@ -7468,8 +7484,8 @@
     },
     "KSI-PIY-GIV": {
       "total_failures": 33,
-      "total_remediations": 32,
-      "mttr_hours": 9.12,
+      "total_remediations": 33,
+      "mttr_hours": 8.96,
       "last_failure": "2026-11-12T16:45:57.462276+00:00",
       "longest_outage_hours": 70.21,
       "shortest_outage_hours": 0.42,
