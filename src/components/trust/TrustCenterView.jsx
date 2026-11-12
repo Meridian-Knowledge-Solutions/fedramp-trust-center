@@ -22,7 +22,7 @@ const NAV = [
 const NAV_IDS = new Set(NAV.map(n => n[0]));
 
 const FRAMEWORKS = [
-    ['FedRAMP 20x', '20X PILOT'], ['NIST 800-53 R5', 'MODERATE'], ['FedRAMP KSI', 'MAPPED'],
+    ['FedRAMP 20x', '20X PILOT'], ['NIST 800-53 R5', 'MODERATE · MAPPED'], ['FedRAMP KSI', 'MAPPED'],
     ['CMMC 2.0 L2', 'CROSS-REF'], ['CUI · DoDI 5200.48', 'ATTESTED'], ['OMB A-130', 'ALIGNED'],
 ];
 

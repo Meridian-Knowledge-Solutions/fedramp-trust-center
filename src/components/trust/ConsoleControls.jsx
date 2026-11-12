@@ -140,6 +140,14 @@ export default function ConsoleControls() {
                 </a>
             </div>
 
+            {/* what this matrix is */}
+            <p style={{ fontSize: 12, lineHeight: 1.55, color: '#8A97A6', margin: 0 }}>
+                Meridian LMS is certified under <strong>FedRAMP 20x</strong> (KSI-based assessment). This Controls
+                Responsibility Matrix maps our KSI coverage to the NIST SP 800-53 Rev 5 Moderate baseline and
+                CMMC 2.0 Level 2 so teams working in Rev5, DFARS, or CMMC terms can see the alignment — it is an
+                alignment crosswalk, not a separate Rev5 authorization.
+            </p>
+
             {/* framework figures */}
             <div className="console-grid panel">
                 {[['s', summary?.total ?? '—', 'NIST 800-53 R5'], ['i', summary?.by_applicability?.['KSI-Mapped'] ?? '—', 'FedRAMP 20x KSI'], ['', data.cmmc_cui?.family_coverage?.length ?? 14, 'CMMC 2.0 L2'], ['', data.cmmc_cui?.cui_handling?.length ?? 7, 'CUI · DoDI']].map(([cls, v, l], i) => (
