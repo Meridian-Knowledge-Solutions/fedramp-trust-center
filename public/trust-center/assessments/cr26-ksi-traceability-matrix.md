@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-11-13T12:35:19.659326+00:00 (36 pass / 10 fail of 46)  
-**Generated:** 2026-11-13 13:21 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-11-13T20:39:27.680746+00:00 (37 pass / 9 fail of 46)  
+**Generated:** 2026-11-13 21:37 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -140,7 +140,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-07
 - **NIST 800-53 controls:** ac-17.3, cm-2, pl-10
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 44/44 resources compliant. | Verified: Verified: Active & Compliant; Verified…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The use and configuration of third-party machine-based information resources is persistently compared against the ori... | 45/45 resources compliant. | Verified: Verified: Active & Compliant; Verified…
 - **Measures (validation objectives):**
   - BASELINE: Measure legacy compute footprint (Denominator) to compare against managed service adoption.
   - ACCELERATOR: Validate adoption of serverless compute (High Impact).
@@ -158,7 +158,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-02
 - **NIST 800-53 controls:** ac-17.3, ac-18.1, ac-18.3, ac-20.1, ca-9, sc-7.3, sc-7.4, sc-7.5, sc-7.8, sc-8, sc-10, si-10, si-11, si-16
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **FAIL** — ❌ Insufficient (95%): Machine-based information resources are persistently reviewed to ensure they have a minimal attack surface and that l... | 22/24 resources compliant. | Verified: Private Subnet: '[resource]' has pub…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (95%): Machine-based information resources are persistently reviewed to ensure they have a minimal attack surface and that l... | 23/25 resources compliant. | Verified: Private Subnet: '[resource]' has pub…
 - **Measures (validation objectives):**
   - ATTACK SURFACE: Validate the existence of Private Subnets (where Public IP mapping is disabled).
   - LATERAL MOVEMENT: Validate Security Groups that allow access ONLY from other specific Security Groups (Tiered Security), rather than broad IP ranges.
@@ -173,7 +173,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CNA-06
 - **NIST 800-53 controls:** —
 - **Evaluation policy:** mode `capability`, pass threshold 100%
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Machine-based information resources are persistently reviewed to ensure they are appropriately optimized for high ava... | 7/7 resources compliant. | Verified: Load Balancer '[resource]' spans 2 AZs.;…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Machine-based information resources are persistently reviewed to ensure they are appropriately optimized for high ava... | 8/8 resources compliant. | Verified: Load Balancer '[resource]' spans 2 AZs.;…
 - **Measures (validation objectives):**
   - NETWORK HA: Validate that Load Balancers are configured across multiple Availability Zones.
   - DATABASE HA: Validate that critical RDS instances have Multi-AZ enabled for automatic failover.
@@ -412,7 +412,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-MLA-07
 - **NIST 800-53 controls:** ac-2.4, ac-6.9, ac-17.1, ac-20.1, au-2, au-7.1, au-12, si-4.4, si-4.5, si-7.7
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: rds_audit_log_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): A list of information resources and event types that will be logged, monitored, and audited is maintained and persist... | 12/12 resources compliant. | Verified: AWS Config recorder '[resource]' confi…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (91%): A list of information resources and event types that will be logged, monitored, and audited is maintained and persist... | 11/12 resources compliant. | Verified: AWS Config recorder '[resource]' con…
 - **Measures (validation objectives):**
   - INVENTORY: Validate that AWS Config is recording the 'List of Information Resources'.
   - EVENTS: Validate that CloudTrail is defining the 'Event Types' to be logged.
@@ -538,7 +538,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-RPL-03
 - **NIST 800-53 controls:** cm-2.3, cp-6, cp-9, cp-10, cp-10.2, si-12
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: backup_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (33%): The alignment of machine-based information resource backups with defined recovery objectives is persistently reviewed. | 1/3 resources compliant. | Verified: Verified: Governance artifact '[resource…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The alignment of machine-based information resource backups with defined recovery objectives is persistently reviewed. | 3/3 resources compliant. | Verified: Restore success rate 100% (1 restore jobs)…
 - **Measures (validation objectives):**
   - TECHNICAL: Validate that Restore Jobs have been successfully executed (Proof of Testing).
   - Governance document inventory: governance/manifest.json (machine-readable; path, size, sha256 per document; regenerated by the migration workflow). Replaces CodeCommit get-folder listing. DR test report artifacts inventoried in manifest; restore success rate is the primary Mode 2 evidence.
@@ -582,7 +582,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-RPL-04
 - **NIST 800-53 controls:** cp-2.1, cp-2.3, cp-4, cp-4.1, cp-6, cp-6.1, cp-9.1, cp-10, ir-3, ir-3.2
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: backup_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (33%): The capability to recover from incidents and contingencies aligned with defined recovery objectives is persistently t... | 1/3 resources compliant. | Verified: Verified: Governance artifact '[resour…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): The capability to recover from incidents and contingencies aligned with defined recovery objectives is persistently t... | 3/3 resources compliant. | Verified: Verified: Governance artifact '[resource…
 - **Measures (validation objectives):**
   - Governance document inventory: governance/manifest.json (machine-readable; path, size, sha256 per document; regenerated by the migration workflow). Replaces CodeCommit get-folder listing. IR/DR exercise artifacts inventoried in manifest; cross-region restore jobs are the primary Mode 2 evidence.
   - TECHNICAL: Validate that Restore Jobs have been executed (Proof of recovery capability).
@@ -650,7 +650,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-06
 - **NIST 800-53 controls:** ac-17.2, ia-5.2, ia-5.6, sc-12, sc-17
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: kms_rotation_metrics, cert_expiry_metrics, secret_rotation_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (70%): Management, protection, and regular rotation of digital keys, certificates, and other secrets is automated and persis... | 7/27 resources compliant, 10 unverified. | Verified: Secret '[resource]' ha…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (72%): Management, protection, and regular rotation of digital keys, certificates, and other secrets is automated and persis... | 8/28 resources compliant, 10 unverified. | Verified: Secret '[resource]' ha…
 - **Measures (validation objectives):**
   - KEYS: Validate existence of KMS Customer Managed Keys (CMKs) for centralized management.
   - ROTATION: Validate Secrets Manager entries (Look for 'RotationEnabled': true in the output).
