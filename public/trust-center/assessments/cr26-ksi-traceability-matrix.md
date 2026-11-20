@@ -2,8 +2,8 @@
 
 **Rules baseline:** FedRAMP Consolidated Rules for 2026, v2026.09.13.02  
 **Certification Profile:** 20x · Program · Class C  
-**Latest automated validation run:** 2026-11-20T04:39:48.683754+00:00 (37 pass / 9 fail of 46)  
-**Generated:** 2026-11-20 05:38 UTC by `scripts/generate_ksi_traceability.py`
+**Latest automated validation run:** 2026-11-20T12:42:24.783051+00:00 (37 pass / 9 fail of 46)  
+**Generated:** 2026-11-20 13:40 UTC by `scripts/generate_ksi_traceability.py`
 
 Each entry traces the verbatim CR26 indicator statement to the measures that
 demonstrate it (curated CLI validations and their objectives), the evidence
@@ -90,7 +90,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-CMT-03
 - **NIST 800-53 controls:** cm-3, cm-3.2, cm-4.2, si-2
 - **Evaluation policy:** mode `output`, pass threshold 100%, required operational metrics: change_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (100%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant, 1 unverified. | Verified: AWS Config recorder '[resource]' configured, recording a scoped…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (87%): Persistent testing and validation of changes throughout deployment is automated. | 7/8 resources compliant. | Verified: AWS Config recorder '[resource]' configured, recording a scoped resource set.;…
 - **Measures (validation objectives):**
   - MONITOR: Validate that the Configuration Recorder is recording (The engine for persistent validation).
   - VALIDATION: Validate existence of active Config Rules that enforce security policies on live resources.
@@ -463,7 +463,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-PIY-01
 - **NIST 800-53 controls:** cm-2.2, cm-7.5, cm-8, cm-8.1, cm-12, cm-12.1, cp-2.8
 - **Evaluation policy:** mode `output`, pass threshold 80%, required operational metrics: inventory_metrics
-- **Latest verdict:** **PASS** — ✅ Excellent (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 157/157 resources compliant. | Verified: AWS Config recorder '[resource]' con…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Authoritative sources are used to automatically generate real-time inventories of all information resources when needed. | 139/139 resources compliant. | Verified: AWS Config recorder '[resource]' con…
 - **Measures (validation objectives):**
   - PRIMARY: Validate that the Configuration Recorder is active (The 'Authoritative Source').
   - STORAGE: Validate that the inventory data is being delivered to a central S3 bucket.
@@ -615,7 +615,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-TPR-04
 - **NIST 800-53 controls:** ac-20, ca-3, ir-6.3, ps-7, ra-5, sa-9, si-5, sr-5, sr-6, sr-8
 - **Evaluation policy:** mode `output`, pass threshold 80%, required operational metrics: vulnerability_metrics
-- **Latest verdict:** **FAIL** — ❌ Insufficient (81%): Third party software information resources are automatically monitored for upstream vulnerabilities using mechanisms ... | 9/14 resources compliant, 3 unverified. | Verified: Inspector actively scan…
+- **Latest verdict:** **FAIL** — ❌ Insufficient (90%): Third party software information resources are automatically monitored for upstream vulnerabilities using mechanisms ... | 9/13 resources compliant, 3 unverified. | Verified: Inspector actively scan…
 - **Measures (validation objectives):**
   - Check Inspector configuration for vulnerability scanning
   - Validate OS vulnerability findings from Inspector
@@ -747,7 +747,7 @@ pre-CR26 assessment history.
 - **Legacy source(s):** KSI-SVC-05
 - **NIST 800-53 controls:** cm-2.2, cm-8.3, sc-13, sc-23, si-7, si-7.1, sr-10
 - **Evaluation policy:** mode `capability`, pass threshold 80%
-- **Latest verdict:** **PASS** — ✅ Excellent (90%): Use cryptographic methods to validate the integrity of machine-based information resources. | 10/11 resources compliant. | Verified: Trail is Secure (Multi-Region, Validated, KMS-Encrypted, Global Even…
+- **Latest verdict:** **PASS** — ✅ Excellent (100%): Use cryptographic methods to validate the integrity of machine-based information resources. | 10/10 resources compliant. | Verified: Trail is Secure (Multi-Region, Validated, KMS-Encrypted, Global Eve…
 - **Measures (validation objectives):**
   - LOGS: Validate that CloudTrail Log File Validation is enabled (Cryptographic hashing of audit trails). Uses describe-trails to enumerate trail ARNs (including shadow entries for organization trails owned by other accounts), then calls get-trail per ARN — get-trail returns the FULL Trail object including LogFileValidationEnabled even for shadow trails, where describe-trails strips that field from the home-account-controlled view on member-account responses. Required when the boundary delegates audit logging to an org trail in a separate management account.
   - STORAGE: Validate that the Audit/Artifact bucket has Versioning enabled (Prevents overwrite tampering).
